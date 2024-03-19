@@ -6,7 +6,6 @@
  * const kinkLevel = KinkLevel.Like;
  */
 export enum KinkLevel {
-	Blank = -1,
 	NotEntered = 0,
 	Favorite = 1,
 	Like = 2,

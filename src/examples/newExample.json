@@ -2,7 +2,28 @@
 	"name": "Kink List",
 	"categories": [
 		{
-			"name": "Bondage",
+			"name": "Clothing",
+			"kinks": [
+				{
+					"name": "Clothed sex",
+					"description": "",
+					"level": 0
+				},
+				{
+					"name": "Lingerie",
+					"description": "",
+					"level": 0
+				},
+				{
+					"name": "Stockings",
+					"description": "",
+					"level": 0
+				}
+			],
+			"multirow": false
+		},
+		{
+			"name": "Toys",
 			"kinks": [
 				{
 					"name": "Rope",
@@ -13,8 +34,8 @@
 			],
 			"multirow": true,
 			"rowTitles": {
-				"first": "Bunny",
-				"second": "Rigger"
+				"first": "Self",
+				"second": "Partner"
 			}	
 		}
 	]
