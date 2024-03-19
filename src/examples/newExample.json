@@ -1,0 +1,21 @@
+{
+	"name": "Kink List",
+	"categories": [
+		{
+			"name": "Bondage",
+			"kinks": [
+				{
+					"name": "Rope",
+					"description": "Being tied up with rope",
+					"level": 3,
+					"seccondaryLevel": 2
+				}
+			],
+			"multirow": true,
+			"rowTitles": {
+				"first": "Bunny",
+				"second": "Rigger"
+			}	
+		}
+	]
+}

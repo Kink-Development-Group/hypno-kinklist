@@ -1,6 +1,7 @@
 {
 	"name": "neo-kinklist",
 	"version": "0.0.1",
+	"description": "Based on https://github.com/Goctionni/KinkList, but a complete rewrite in SvelteKit",
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
