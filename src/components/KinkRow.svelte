@@ -1,15 +1,19 @@
 <script lang="ts">
-	import type { KinkLevel } from '$lib/enums/Kink.enum';
-	import type { Kink } from '$lib/models/Kink.model';
+	import { KinkLevel } from '$lib/enums/Kink.enum';
 	import KinkChoice from './KinkChoice.svelte';
 
-	export let kink: Kink;
-	export let kinkLevel: KinkLevel[]; // Auswahlmöglichkeiten für den Kink
+	export let selection: KinkLevel;
+	export let toggle: boolean;
+
+	$: selection = selection;
+	$: toggle = toggle;
 </script>
 
-<tr class="kinkRow">
-	{#each kinkLevel as level}
-		<KinkChoice level={level} />
-	{/each}
-	<td>{kink.name}</td>
-</tr>
+<div>
+	<KinkChoice level={KinkLevel.NotEntered} toggle={(level) => selection = level} />
+	<KinkChoice level={KinkLevel.Favorite} toggle={(level) => selection = level} />
+	<KinkChoice level={KinkLevel.Like} toggle={(level) => selection = level} />
+	<KinkChoice level={KinkLevel.Okay} toggle={(level) => selection = level} />
+	<KinkChoice level={KinkLevel.Maybe} toggle={(level) => selection = level} />
+	<KinkChoice level={KinkLevel.No} toggle={(level) => selection = level} />
+</div>
