@@ -10,10 +10,10 @@
 </script>
 
 <div>
-	<KinkChoice level={KinkLevel.NotEntered} toggle={(level) => selection = level} />
-	<KinkChoice level={KinkLevel.Favorite} toggle={(level) => selection = level} />
-	<KinkChoice level={KinkLevel.Like} toggle={(level) => selection = level} />
-	<KinkChoice level={KinkLevel.Okay} toggle={(level) => selection = level} />
-	<KinkChoice level={KinkLevel.Maybe} toggle={(level) => selection = level} />
-	<KinkChoice level={KinkLevel.No} toggle={(level) => selection = level} />
+	<KinkChoice level={KinkLevel.NotEntered} toggle={(level) => (selection = level)} />
+	<KinkChoice level={KinkLevel.Favorite} toggle={(level) => (selection = level)} />
+	<KinkChoice level={KinkLevel.Like} toggle={(level) => (selection = level)} />
+	<KinkChoice level={KinkLevel.Okay} toggle={(level) => (selection = level)} />
+	<KinkChoice level={KinkLevel.Maybe} toggle={(level) => (selection = level)} />
+	<KinkChoice level={KinkLevel.No} toggle={(level) => (selection = level)} />
 </div>

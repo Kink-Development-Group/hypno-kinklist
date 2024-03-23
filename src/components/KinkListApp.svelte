@@ -9,11 +9,9 @@
 	onMount(() => {
 		// Hier könnten die Daten geladen werden
 		categories = [];
-
-
 	});
 </script>
 
 {#each categories as category}
-	<KinkCategory {category}/>
+	<KinkCategory {category} />
 {/each}

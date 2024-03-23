@@ -1,13 +1,12 @@
 /**
  * A class to handle encoding and decoding of selection hashes
  */
-export class HashHandler {
-
+export class LegacyHashHandler {
 	/**
 	 * Encode a selection into a hash
 	 * @param selection The selection to encode
 	 * @returns The encoded hash
-	 * 
+	 *
 	 * @example
 	 * const selection = [1, 2, 3, 4, 5];
 	 * const hash = HashHandler.encodeSelection(selection);
@@ -46,7 +45,7 @@ export class HashHandler {
 	 * Decode a hash into a selection
 	 * @param hash The hash to decode
 	 * @returns The decoded selection
-	 * 
+	 *
 	 * @example
 	 * const hash = "aBcDeF";
 	 * const selection = HashHandler.decodeSelection(hash);
