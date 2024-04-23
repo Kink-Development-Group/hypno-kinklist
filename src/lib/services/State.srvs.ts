@@ -9,7 +9,9 @@ export class AppState {
 	private kinkList: KinkListModel = new KinkListModel('Kink List', []);
 	private saveKey = 'kinkList';
 
-	private constructor() {}
+	private constructor() {
+		this.loadModel();
+	}
 
 	public static getInstance(): AppState {
 		if (!AppState._instance) {
@@ -20,6 +22,12 @@ export class AppState {
 	}
 
 	private init(): void {
+
+		if (localStorage.getItem(this.saveKey) !== null) {
+			this.loadModel();
+			return;
+		}
+
 		this.kinkList.name = initConfig.name;
 		this.kinkList.categories = initConfig.categories.map((category) => {
 			const kinks = category.kinks.map((kink: Kink) => {
@@ -43,9 +51,9 @@ export class AppState {
 				kinks,
 				category.multirow,
 				{
-					first: category.rowTitles?.first ?? '',
-					second: category.rowTitles?.second ?? ''
-				} ?? undefined
+					first: category.rowTitles?.first || '',
+					second: category.rowTitles?.second || ''
+				} || undefined
 			);
 		});
 	}

@@ -2,12 +2,17 @@
 	import { KinkCategoryModel } from '$lib/models/KinkCategory.model';
 	import { onMount } from 'svelte';
 	import KinkCategory from '../components/KinkCategory.svelte';
-	import * as initConfig from '$lib/config/initHypno.json';
+	import * as initConfig from '$lib/config/init.json';
 	import type { KinkList } from '$lib/types/KinkList.type';
+	import { AppState } from '$lib/services/State.srvs';
 
 	const init: KinkList = initConfig as any as KinkList;
 
 	let categories: KinkCategoryModel[] = init.categories;
+
+	onMount(() => {
+		AppState.getInstance();
+	});
 </script>
 
 <header>
@@ -88,9 +93,11 @@ header
 
 .categories
 	display: flex
-	flex-direction: column
+	flex-direction: row
 	align-items: flex-start
+	justify-content: space-between
 	flex-wrap: wrap
+	width: 100%
 
 h1
 	font-family: 'Roboto', sans-serif
