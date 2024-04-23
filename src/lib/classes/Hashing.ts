@@ -1,5 +1,5 @@
 /**
- * A class to handle encoding and decoding of selection hashes
+ * A class for encoding and decoding selections into hashes
  */
 export class LegacyHashHandler {
 	/**

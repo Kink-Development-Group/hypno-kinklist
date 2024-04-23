@@ -6,6 +6,11 @@ import type { KinkList } from '$lib/types/KinkList.type';
  * Format handler
  */
 export class FormatHandler {
+	/**
+	 * Transform a kink list to the old format
+	 * @param data The kink list to transform
+	 * @returns The kink list in the old format
+	 */
 	static transformToOldList(data: KinkList): string {
 		let result = `#${data.name}\n\n`;
 
@@ -25,6 +30,11 @@ export class FormatHandler {
 		return result.trim();
 	}
 
+	/**
+	 * Transform a string to a kink list
+	 * @param input The string to transform
+	 * @returns The kink list
+	 */
 	static transformToNewList(input: string): KinkList {
 		const lines: string[] = input.split('\n').filter((line) => line.trim() !== '');
 		const categories: KinkCategoryModel[] = [];

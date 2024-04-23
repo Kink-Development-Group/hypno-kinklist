@@ -11,7 +11,7 @@ export class AppState {
 
 	private constructor() {}
 
-	public static get instance(): AppState {
+	public static getInstance(): AppState {
 		if (!AppState._instance) {
 			AppState._instance = new AppState();
 			AppState._instance.init();
@@ -62,18 +62,35 @@ export class AppState {
 	}
 
 	public getKinkList(): KinkListModel {
+		this.loadModel();
 		return this.kinkList;
 	}
 
+	public updateKink(kink: Kink) {
+		const category = this.kinkList.categories.find((category) =>
+			category.kinks.find((k) => k.name === kink.name)
+		);
+		if (category) {
+			const kinkIndex = category.kinks.findIndex((k) => k.name === kink.name);
+			category.kinks[kinkIndex] = kink;
+			this.saveModel();
+		}
+	}
+
 	public setKinkList(kinkList: KinkListModel): void {
+		this.loadModel();
 		this.kinkList = kinkList;
+		this.saveModel();
 	}
 
 	public getKinkCategory(name: string): KinkCategoryModel | undefined {
+		this.loadModel();
 		return this.kinkList.categories.find((category) => category.name === name);
 	}
 
 	public addKinkCategory(category: KinkCategoryModel): void {
+		this.loadModel();
 		this.kinkList.categories.push(category);
+		this.saveModel();
 	}
 }
