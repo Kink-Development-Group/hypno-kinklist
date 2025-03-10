@@ -1,0 +1,66 @@
+@import 'variables';
+@import 'layout';
+
+/* Global styles */
+body {
+  font-family: Verdana, Arial, sans-serif;
+  font-size: 14px;
+  margin: 0;
+  padding: 20px;
+  background-color: #f5f5f5;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.kink-category {
+  margin-bottom: 30px;
+  background-color: #fff;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+.kink-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.kink-table th,
+.kink-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.choice {
+  padding: 5px 10px;
+  border: 1px solid #aaa;
+  background-color: #eaeaea;
+  cursor: pointer;
+}
+
+.choice.selected {
+  border: 2px solid #333;
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.legend div {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+#export-btn {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  font-size: 16px;
+}

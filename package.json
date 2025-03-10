@@ -1,36 +1,27 @@
 {
-	"name": "neo-kinklist",
-	"version": "0.0.1",
-	"description": "Based on https://github.com/Goctionni/KinkList, but a complete rewrite in SvelteKit",
-	"private": true,
+	"name": "kinklist-ts",
+	"version": "1.0.0",
+	"description": "Kinklist project reworked in TypeScript with Sass",
+	"main": "public/bundle.js",
 	"scripts": {
-		"dev": "vite dev",
-		"build": "vite build",
-		"preview": "vite preview",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"lint": "prettier --check . && eslint .",
-		"format": "prettier --write ."
+		"start": "webpack serve --mode development",
+		"build": "webpack --mode production"
+	},
+	"author": "",
+	"license": "MIT",
+	"dependencies": {
+		"jquery": "^3.6.0"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-auto": "^3.0.0",
-		"@sveltejs/adapter-static": "^3.0.1",
-		"@sveltejs/kit": "^2.0.0",
-		"@sveltejs/vite-plugin-svelte": "^3.0.0",
-		"@types/eslint": "^8.56.0",
-		"@typescript-eslint/eslint-plugin": "^7.0.0",
-		"@typescript-eslint/parser": "^7.0.0",
-		"eslint": "^8.56.0",
-		"eslint-config-prettier": "^9.1.0",
-		"eslint-plugin-svelte": "^2.35.1",
-		"prettier": "^3.1.1",
-		"prettier-plugin-svelte": "^3.1.2",
-		"sass": "^1.72.0",
-		"svelte": "^4.2.7",
-		"svelte-check": "^3.6.0",
-		"tslib": "^2.4.1",
-		"typescript": "^5.0.0",
-		"vite": "^5.0.3"
-	},
-	"type": "module"
+		"@types/jquery": "^3.5.14",
+		"css-loader": "^6.7.1",
+		"sass": "^1.54.9",
+		"sass-loader": "^13.0.2",
+		"style-loader": "^3.3.1",
+		"ts-loader": "^9.4.2",
+		"typescript": "^4.7.4",
+		"webpack": "^5.72.0",
+		"webpack-cli": "^4.9.2",
+		"webpack-dev-server": "^4.9.0"
+	}
 }
