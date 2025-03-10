@@ -25,6 +25,6 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./public/
+          local-dir: ./dist/
           server-dir: neo-kinklist-dev/
           protocol: ftps
