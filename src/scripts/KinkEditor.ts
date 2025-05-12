@@ -9,32 +9,27 @@ export interface KinkCategory {
 export class KinkEditor {
 	private container: HTMLElement;
 	private categories: KinkCategory[] = [];
+	private editOverlay!: HTMLDivElement; // neues Overlay
 
 	constructor(container: HTMLElement) {
 		this.container = container;
-		// Initialize with default data; in a complete implementation, this could be loaded externally.
+		// Initialize with default data; in a complete implementation, this could be loaded from an external source or user input.
 		this.categories = this.getDefaultCategories();
 	}
 
 	public init(): void {
 		this.render();
 		this.bindEvents();
-		this.restoreFromHash();
 	}
 
 	private render(): void {
+		// Container leeren
 		this.container.innerHTML = "";
 
 		// Header rendern
 		const header = document.createElement("h1");
 		header.textContent = "Kinklist";
 		this.container.appendChild(header);
-
-		// Neuen Edit-Button einfügen
-		const editBtn = document.createElement("button");
-		editBtn.id = "edit-btn";
-		editBtn.textContent = "Edit";
-		this.container.appendChild(editBtn);
 
 		// Legende rendern
 		const legend = this.createLegend();
@@ -80,10 +75,9 @@ export class KinkEditor {
 					const button = document.createElement("button");
 					button.classList.add("choice");
 					button.textContent = field;
-					// Toggle der Auswahl bei Klick und Hash-Updating
+					// Toggle der Auswahl bei Klick
 					button.addEventListener("click", () => {
 						button.classList.toggle("selected");
-						this.updateHash();
 					});
 					td.appendChild(button);
 					row.appendChild(td);
@@ -105,21 +99,73 @@ export class KinkEditor {
 		exportBtn.id = "export-btn";
 		exportBtn.textContent = "Export";
 		this.container.appendChild(exportBtn);
+
+		// Edit-Button hinzufügen
+		const editBtn = document.createElement("button");
+		editBtn.id = "edit-btn";
+		editBtn.textContent = "Edit";
+		this.container.appendChild(editBtn);
+
+		// Overlay für das Editieren einfügen
+		this.editOverlay = document.createElement("div");
+		this.editOverlay.id = "edit-overlay";
+		this.editOverlay.style.position = "fixed";
+		this.editOverlay.style.top = "0";
+		this.editOverlay.style.left = "0";
+		this.editOverlay.style.right = "0";
+		this.editOverlay.style.bottom = "0";
+		this.editOverlay.style.backgroundColor = "rgba(0,0,0,0.8)";
+		this.editOverlay.style.display = "none";
+		const overlayContent = document.createElement("div");
+		overlayContent.style.position = "absolute";
+		overlayContent.style.top = "50%";
+		overlayContent.style.left = "50%";
+		overlayContent.style.transform = "translate(-50%, -50%)";
+		overlayContent.style.backgroundColor = "#fff";
+		overlayContent.style.padding = "20px";
+		const textarea = document.createElement("textarea");
+		textarea.id = "kinks-text";
+		textarea.style.width = "500px";
+		textarea.style.height = "300px";
+		textarea.value = this.getKinksText();
+		overlayContent.appendChild(textarea);
+		const acceptBtn = document.createElement("button");
+		acceptBtn.id = "accept-btn";
+		acceptBtn.textContent = "Accept";
+		overlayContent.appendChild(acceptBtn);
+		this.editOverlay.appendChild(overlayContent);
+		document.body.appendChild(this.editOverlay);
 	}
 
 	private bindEvents(): void {
-		// Bindung des Export-Buttons
+		// Beispielhafte Event-Bindung für den Export-Button
 		const exportBtn = document.getElementById("export-btn");
 		if (exportBtn) {
-			exportBtn.addEventListener("click", () => {
-				this.exportKinklist();
-			});
+			exportBtn.addEventListener("click", () => this.exportKinkList());
 		}
-		// Bindung des Edit-Buttons
+
+		// Edit-Button Event
 		const editBtn = document.getElementById("edit-btn");
 		if (editBtn) {
 			editBtn.addEventListener("click", () => {
-				this.showEditOverlay();
+				const textarea = document.getElementById("kinks-text") as HTMLTextAreaElement;
+				if (textarea) {
+					textarea.value = this.getKinksText();
+				}
+				this.editOverlay.style.display = "block";
+			});
+		}
+
+		// Accept im Overlay Event
+		const acceptBtn = document.getElementById("accept-btn");
+		if (acceptBtn) {
+			acceptBtn.addEventListener("click", () => {
+				const textarea = document.getElementById("kinks-text") as HTMLTextAreaElement;
+				if (textarea) {
+					this.categories = this.parseKinksText(textarea.value);
+					this.render();
+				}
+				this.editOverlay.style.display = "none";
 			});
 		}
 	}
@@ -154,188 +200,119 @@ export class KinkEditor {
 		return legend;
 	}
 
-	// Aktualisiert den URL-Hash basierend auf dem Status aller .choice-Buttons (1 = ausgewählt, 0 = nicht)
-	private updateHash(): void {
-		const choices = Array.from(document.querySelectorAll("button.choice"));
-		const state = choices.map(btn => btn.classList.contains("selected") ? "1" : "0").join("");
-		window.location.hash = state;
-	}
-
-	// Liest den Hash und setzt den Status der Choice-Buttons entsprechend, falls die Länge übereinstimmt.
-	private restoreFromHash(): void {
-		const hash = window.location.hash.substring(1);
-		const choices = Array.from(document.querySelectorAll("button.choice"));
-		if (hash.length === choices.length) {
-			choices.forEach((btn, idx) => {
-				if (hash[idx] === "1") btn.classList.add("selected");
-				else btn.classList.remove("selected");
-			});
-		}
-	}
-
-	// Export-Funktion: Erzeugt eine Leinwand, zeichnet Header, Legend und Listeneinträge, lädt per Imgur hoch
-	private exportKinklist(): void {
-		// Leinwand erstellen
+	private exportKinkList(): void {
+		const username = prompt("Please enter your name") || "";
+		if (!username) return;
+		// Canvas erstellen
 		const canvas = document.createElement("canvas");
 		canvas.width = 800;
 		canvas.height = 600;
-		const ctx = canvas.getContext("2d");
-		if (!ctx) return;
-
-		// Hintergrund
-		ctx.fillStyle = "#ffffff";
-		ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-		ctx.fillStyle = "#000000";
-		ctx.font = "bold 24px Arial";
-		ctx.fillText("Kinklist", 20, 40);
-
+		const context = canvas.getContext("2d");
+		if (!context) return;
+		// Hintergrund & Header zeichnen
+		context.fillStyle = "#ffffff";
+		context.fillRect(0, 0, canvas.width, canvas.height);
+		context.fillStyle = "#000000";
+		context.font = "24px Arial";
+		context.fillText(`Kinklist (${username})`, 20, 40);
 		// Legende zeichnen
-		ctx.font = "16px Arial";
 		const levels = ["Not Entered", "Favorite", "Like", "Okay", "Maybe", "No"];
-		const colors = ["#FFFFFF", "#6DB5FE", "#23FD22", "#FDFD6B", "#DB6C00", "#920000"];
-		levels.forEach((level, index) => {
-			const x = 20 + index * 120;
-			ctx.fillStyle = colors[index];
-			ctx.beginPath();
-			ctx.arc(x, 70, 8, 0, 2 * Math.PI);
-			ctx.fill();
-			ctx.strokeStyle = "#000000"; 
-			ctx.stroke();
-			ctx.fillStyle = "#000000";
-			ctx.fillText(level, x - 20, 100);
+		const colors = [
+			"#FFFFFF",
+			"#6DB5FE",
+			"#23FD22",
+			"#FDFD6B",
+			"#DB6C00",
+			"#920000",
+		];
+		levels.forEach((lvl, i) => {
+			context.fillStyle = colors[i];
+			context.beginPath();
+			context.arc(100 + i * 100, 80, 10, 0, 2 * Math.PI);
+			context.fill();
+			context.fillStyle = "#000000";
+			context.fillText(lvl, 90 + i * 100, 110);
 		});
-
-		// Liste der Kategorien und Kinks zeichnen
-		let y = 130;
+		// Kategorien und Kinks zeichnen
+		let yPos = 140;
 		this.categories.forEach(category => {
-			ctx.font = "bold 18px Arial";
-			ctx.fillText(category.name, 20, y);
-			y += 25;
+			context.font = "20px Arial";
+			context.fillText(category.name, 20, yPos);
+			yPos += 30;
 			category.kinks.forEach(kink => {
-				ctx.font = "14px Arial";
-				ctx.fillText("- " + kink, 40, y);
-				y += 20;
+				context.font = "16px Arial";
+				context.fillText(`- ${kink}`, 40, yPos);
+				yPos += 25;
 			});
-			y += 15;
+			yPos += 20;
 		});
+		// Bilddaten extrahieren
+		const dataURL = canvas.toDataURL("image/png");
 
-		// Hochladen zu Imgur
-		const imgurClientId = '9db53e5936cd02f';
-		const base64Image = canvas.toDataURL().split(",")[1];
+		// Bild zu Imgur hochladen
+		const clientId = "9db53e5936cd02f"; // Imgur Client ID
 		fetch("https://api.imgur.com/3/image", {
 			method: "POST",
 			headers: {
-				Authorization: "Client-ID " + imgurClientId,
-				Accept: "application/json",
-				"Content-Type": "application/json"
+				Authorization: `Client-ID ${clientId}`,
+				Accept: "application/json"
 			},
-			body: JSON.stringify({ image: base64Image, type: "base64" })
-		}).then(response => response.json())
-		.then(result => {
-			if (result.success) {
-				alert("Exportiert! Bild URL: " + "https://i.imgur.com/" + result.data.id + ".png");
-			} else {
-				alert("Export fehlgeschlagen!");
-			}
-		}).catch(() => {
-			alert("Export fehlgeschlagen!");
-		});
-	}
-
-	// Zeigt ein Bearbeitungs-Overlay, um den Kink-Text zu editieren.
-	private showEditOverlay(): void {
-		let overlay = document.getElementById("edit-overlay");
-		if (!overlay) {
-			overlay = document.createElement("div");
-			overlay.id = "edit-overlay";
-			overlay.style.position = "fixed";
-			overlay.style.top = "0";
-			overlay.style.left = "0";
-			overlay.style.right = "0";
-			overlay.style.bottom = "0";
-			overlay.style.backgroundColor = "rgba(0,0,0,0.8)";
-			overlay.style.display = "flex";
-			overlay.style.alignItems = "center";
-			overlay.style.justifyContent = "center";
-
-			const modal = document.createElement("div");
-			modal.style.backgroundColor = "#fff";
-			modal.style.padding = "20px";
-			modal.style.width = "80%";
-			modal.style.maxWidth = "600px";
-
-			const textarea = document.createElement("textarea");
-			textarea.id = "edit-textarea";
-			textarea.style.width = "100%";
-			textarea.style.height = "300px";
-			textarea.value = this.categoriesToText();
-			modal.appendChild(textarea);
-
-			const btnAccept = document.createElement("button");
-			btnAccept.textContent = "Accept";
-			btnAccept.addEventListener("click", () => {
-				const newText = (document.getElementById("edit-textarea") as HTMLTextAreaElement).value;
-				const newCats = this.parseCategoriesText(newText);
-				if (newCats) {
-					this.categories = newCats;
-					this.render();
-					this.bindEvents();
-					this.restoreFromHash();
-					overlay!.style.display = "none";
+			body: new URLSearchParams({
+				image: dataURL.split(",")[1],
+				type: "base64"
+			})
+		})
+			.then(response => response.json())
+			.then(result => {
+				if (result && result.data && result.data.id) {
+					const url = `https://i.imgur.com/${result.data.id}.png`;
+					alert(`Image URL: ${url}`);
 				} else {
-					alert("Fehler beim Parsen des Textes.");
+					alert("Upload failed");
 				}
+			})
+			.catch(() => {
+				alert("Upload failed - could not connect");
 			});
-			modal.appendChild(btnAccept);
-
-			const btnCancel = document.createElement("button");
-			btnCancel.textContent = "Cancel";
-			btnCancel.addEventListener("click", () => {
-				overlay!.style.display = "none";
-			});
-			modal.appendChild(btnCancel);
-
-			overlay.appendChild(modal);
-			document.body.appendChild(overlay);
-		} else {
-			(overlay.querySelector("#edit-textarea") as HTMLTextAreaElement).value = this.categoriesToText();
-			overlay.style.display = "flex";
-		}
 	}
 
-	// Wandelt die aktuellen Kategorien in einen editierbaren Text um.
-	private categoriesToText(): string {
+	// Serialisiert die Kink-Daten in einen Text (ähnlich der ursprünglichen Textdatei)
+	private getKinksText(): string {
 		let text = "";
-		this.categories.forEach(cat => {
-			text += "#" + cat.name + "\n";
-			text += "(" + cat.fields.join(", ") + ")\n";
-			cat.kinks.forEach(kink => { text += "* " + kink + "\n"; });
+		this.categories.forEach(category => {
+			text += `#${category.name}\n`;
+			text += `(${category.fields.join(", ")})\n`;
+			category.kinks.forEach(kink => {
+				text += `* ${kink}\n`;
+			});
 			text += "\n";
 		});
 		return text;
 	}
 
-	// Parst den textbasierten Kink-Input und gibt ein Array von KinkCategory zurück.
-	private parseCategoriesText(text: string): KinkCategory[] | null {
+	// Parst den Text in ein Array von KinkCategory
+	private parseKinksText(text: string): KinkCategory[] {
 		const lines = text.replace(/\r/g, "").split("\n");
 		const categories: KinkCategory[] = [];
-		let currentCat: KinkCategory | null = null;
+		let currentCategory: Partial<KinkCategory> = {};
 		lines.forEach(line => {
-			line = line.trim();
-			if (!line) return;
+			if (!line.trim()) return;
 			if (line.startsWith("#")) {
-				if (currentCat) categories.push(currentCat);
-				currentCat = { name: line.substring(1).trim(), fields: [], kinks: [] };
-			} else if (line.startsWith("(") && currentCat) {
-				const fields = line.substring(1, line.length - 1).split(",");
-				currentCat.fields = fields.map(f => f.trim());
-			} else if (line.startsWith("*") && currentCat) {
-				currentCat.kinks.push(line.substring(1).trim());
+				if (currentCategory.name) {
+					categories.push(currentCategory as KinkCategory);
+				}
+				currentCategory = { name: line.substring(1).trim(), fields: [], kinks: [] };
+			} else if (line.startsWith("(")) {
+				const fieldsStr = line.substring(1, line.length - 1);
+				currentCategory.fields = fieldsStr.split(",").map(s => s.trim());
+			} else if (line.startsWith("*")) {
+				currentCategory.kinks?.push(line.substring(1).trim());
 			}
 		});
-		if (currentCat) categories.push(currentCat);
-		return (categories.length > 0 ? categories : null);
+		if (currentCategory.name) {
+			categories.push(currentCategory as KinkCategory);
+		}
+		return categories;
 	}
 
 	private getDefaultCategories(): KinkCategory[] {
