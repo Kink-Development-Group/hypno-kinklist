@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
+import { sveltekit } from '@sveltejs/kit/vite';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -54,9 +55,7 @@ export default defineConfig(({ mode }) => {
         }
       },
       devSourcemap: true
-    },
-
-    // Plugins
-    plugins: [svelte()]
+    },    // Plugins
+    plugins: [sveltekit(), svelte()]
   };
 });
