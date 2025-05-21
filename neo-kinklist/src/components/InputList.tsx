@@ -39,10 +39,7 @@ const InputList: React.FC = () => {
     Object.entries(kinks).forEach(([catName, category]) => {
       // Estimated height = table header + kinks * row height + some margin
       categoryEstimates[catName] = 40 + (category.kinks.length * 30) + 20;
-    });    // Calculate total estimated height
-    const totalHeight = Object.values(categoryEstimates).reduce((acc, val) => acc + val, 0);
-
-    // Distribute categories into columns
+    });    // Distribute categories into columns
     const newColumns: string[][] = Array(columnCount).fill(null).map(() => []);
     const columnHeights: number[] = Array(columnCount).fill(0);
     

@@ -44,30 +44,31 @@ npm install
 
 ## Entwicklung
 
-```
+```bash
 npm start
 ```
 
+Startet den Entwicklungsserver auf [http://localhost:3000](http://localhost:3000).
+
 ## Build für Produktion
 
-```
+```bash
 npm run build
 ```
 
-## Build mit Bundle-Analyse
+## Tests ausführen
 
-```
-npm run build:analyze
+```bash
+npm test
 ```
 
 ## Technologie-Stack
 
-- React 19
+- React 18
 - TypeScript 4
 - SASS für Styling
 - Axios für HTTP-Anfragen
 - html2canvas für Bilderfassung
-- Craco für erweiterte Webpack-Konfiguration
 
 ## Verbesserungen gegenüber dem Original
 
