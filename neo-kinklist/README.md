@@ -1,18 +1,89 @@
-# Getting Started with Create React App
+# Neo-Kinklist
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Eine moderne React/TypeScript-Implementierung der ursprünglichen Kinklist-Anwendung, mit verbesserter Codebasis und erweiterter Funktionalität.
 
-## Available Scripts
+## Übersicht
 
-In the project directory, you can run:
+Dieses Projekt ist eine 1:1-Übersetzung des ursprünglichen jQuery-basierten Kinklist zu einer modernen React/TypeScript-Anwendung. Es behält alle ursprünglichen Funktionen bei, während es moderne Web-Entwicklungspraktiken einsetzt.
 
-### `npm start`
+## Funktionen
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- Vollständig typisiert mit TypeScript
+- Reaktive Komponenten mit React
+- State-Management mit React Context API
+- Styling mit SASS
+- Performanceoptimierung mit Code-Splitting und Tree-Shaking
+- Export-Funktionalität mit Imgur-Integration
+- Hash-basierte URL-Freigabe von Selektionen
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Projektstruktur
+
+- `src/components/`: React-Komponenten
+  - `Choice.tsx`: Auswahloption für einen Kink
+  - `EditOverlay.tsx`: Overlay zum Bearbeiten der Kink-Liste
+  - `Export.tsx`: Exportfunktionalität für die Kink-Liste
+  - `InputList.tsx`: Hauptkomponente zur Anzeige der Kategorien und Kinks
+  - `InputOverlay.tsx`: Overlay zur sequentiellen Navigation durch Kinks
+  - `KinkCategory.tsx`: Komponente zur Darstellung einer Kink-Kategorie
+  - `KinkRow.tsx`: Komponente zur Darstellung einer Kink-Zeile
+  - `Legend.tsx`: Legende für die Auswahl-Level
+- `src/context/`: React Context für State-Management
+  - `KinklistContext.tsx`: Zentraler State und Logik
+- `src/styles/`: SASS-Styling
+  - `main.scss`: Hauptstildatei
+- `src/types/`: TypeScript-Typdefinitionen
+  - `index.ts`: Typen für Kinks, Kategorien und Auswahloptionen
+- `src/utils/`: Hilfsfunktionen
+  - `index.ts`: Utilities für Parsing, Hash-Kodierung/Dekodierung und Export
+
+## Installation
+
+```
+npm install
+```
+
+## Entwicklung
+
+```
+npm start
+```
+
+## Build für Produktion
+
+```
+npm run build
+```
+
+## Build mit Bundle-Analyse
+
+```
+npm run build:analyze
+```
+
+## Technologie-Stack
+
+- React 19
+- TypeScript 4
+- SASS für Styling
+- Axios für HTTP-Anfragen
+- html2canvas für Bilderfassung
+- Craco für erweiterte Webpack-Konfiguration
+
+## Verbesserungen gegenüber dem Original
+
+1. **Bessere Wartbarkeit**: Durch die Verwendung von React-Komponenten und TypeScript ist der Code modular und typsicher.
+2. **Verbesserte Performance**: Moderne Webpack-Optimierungen und Code-Splitting.
+3. **Bessere Benutzerfreundlichkeit**: Verbesserte Tastaturnavigation und Zugänglichkeit.
+4. **Robustere Fehlerbehandlung**: Erweiterte Validierung und Fehlerberichterstattung.
+5. **Responsive Design**: Bessere Unterstützung für verschiedene Bildschirmgrößen.
+
+## Zukünftige Erweiterungen
+
+- Integration von i18n für mehrsprachige Unterstützung
+- Speichern von Konfigurationen in LocalStorage/IndexedDB
+- Alternative Export-Optionen (PDF, JSON)
+- Theme-Unterstützung mit wechselbaren Farbschemen
+- Progressive Web App (PWA) Funktionalität
 
 ### `npm test`
 

@@ -196,14 +196,14 @@ const AppContent: React.FC<{ imgurClientId: string }> = ({ imgurClientId }) => {
 
   return (
     <div className="widthWrapper">
-      <button id="Edit" onClick={handleEditClick}></button>
+      <button type='button' title='edit' id="Edit" onClick={handleEditClick}></button>
       <h1>Kink list</h1>
       
       <Legend />
       
       <Export imgurClientId={imgurClientId} />
       
-      <button id="StartBtn" onClick={handleStartClick}></button>
+      <button type='button' title='start' id="StartBtn" onClick={handleStartClick}></button>
       
       <InputList />
       

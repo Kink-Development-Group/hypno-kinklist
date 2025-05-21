@@ -43,16 +43,19 @@ export const KinklistProvider: React.FC<{ children: React.ReactNode, initialKink
   const [originalKinksText, setOriginalKinksText] = useState<string>(initialKinksText);
   const [isEditOverlayOpen, setIsEditOverlayOpen] = useState<boolean>(false);
   const [isInputOverlayOpen, setIsInputOverlayOpen] = useState<boolean>(false);
-  const [popupIndex, setPopupIndex] = useState<number>(0);
-  // Parse initial kinks
+  const [popupIndex, setPopupIndex] = useState<number>(0);  // Parse initial kinks
   useEffect(() => {
     try {
       const parsedKinks = parseKinksText(originalKinksText);
       if (parsedKinks) {
         setKinks(parsedKinks);
+      } else {
+        console.error("Failed to parse kinks text");
+        alert("Es gab ein Problem beim Parsen des Kink-Textes. Bitte überprüfen Sie das Format.");
       }
     } catch (e) {
       console.error("Error parsing kinks text:", e);
+      alert(`Fehler beim Parsen des Kink-Textes: ${e instanceof Error ? e.message : String(e)}`);
     }
   }, [originalKinksText]);
 
@@ -67,11 +70,11 @@ export const KinklistProvider: React.FC<{ children: React.ReactNode, initialKink
       } else {
         // If no hash, initialize with default selection
         setSelection(getAllKinks(kinks, levels));
-      }
-    } catch (e) {
+      }    } catch (e) {
       console.error("Error parsing hash:", e);
       // Initialize with default selection on error
       setSelection(getAllKinks(kinks, levels));
+      alert(`Fehler beim Laden des URL-Hashes: ${e instanceof Error ? e.message : String(e)}`);
     }
   }, [kinks, levels]);
 

@@ -1,8 +1,5 @@
 import { KinksData, LevelsData, Selection } from '../types';
 import axios from 'axios';
-import html2canvas from 'html2canvas';ort { KinksData, LevelsData, Selection } from '../types';
-import axios from 'axios';
-import html2canvas from 'html2canvas';
 
 export const strToClass = (str: string): string => {
   let className = "";

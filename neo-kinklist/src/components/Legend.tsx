@@ -7,11 +7,9 @@ const Legend: React.FC = () => {
   return (
     <div className="legend">
       {Object.entries(levels).map(([levelName, level]) => (
-        <div key={levelName}>
-          <span 
+        <div key={levelName}>          <span 
             data-color={level.color} 
             className={`choice ${level.class}`} 
-            style={{ backgroundColor: level.color }}
           />
           <span className="legend-text">{levelName}</span>
         </div>

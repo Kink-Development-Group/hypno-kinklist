@@ -1,107 +1,64 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, memo } from 'react';
 import KinkCategory from './KinkCategory';
 import { useKinklist } from '../context/KinklistContext';
 
 const InputList: React.FC = () => {
   const { kinks } = useKinklist();
-  const [columnCount, setColumnCount] = useState<number>(0);
-  const [categories, setCategories] = useState<React.ReactNode[]>([]);
-  const [columns, setColumns] = useState<React.ReactNode[][]>([]);
+  const [columnCount, setColumnCount] = useState<number>(1);
+  const [columns, setColumns] = useState<string[][]>([]);
 
-  // Create category components
-  useEffect(() => {
-    if (Object.keys(kinks).length === 0) return;
-
-    const catComponents = Object.entries(kinks).map(([catName, category]) => (
-      <KinkCategory 
-        key={catName}
-        name={catName}
-        fields={category.fields}
-        kinks={category.kinks}
-      />
-    ));
-
-    setCategories(catComponents);
-  }, [kinks]);
-
-  // Handle window resize and calculate columns
+  // Calculate column count based on screen width
   useEffect(() => {
     const calculateColumns = () => {
-      const numCols = Math.floor((document.body.scrollWidth - 20) / 400);
-      return Math.min(Math.max(numCols, 1), 4);
+      const numCols = Math.floor((window.innerWidth - 20) / 400);
+      return Math.min(Math.max(numCols, 1), 4); // Zwischen 1 und 4 Spalten
     };
 
-    const onResize = () => {
+    const handleResize = () => {
       setColumnCount(calculateColumns());
     };
 
     // Initial calculation
-    onResize();
+    handleResize();
 
-    // Add event listener
-    window.addEventListener('resize', onResize);
-
-    // Cleanup
+    // Add resize event listener
+    window.addEventListener('resize', handleResize);
+    
     return () => {
-      window.removeEventListener('resize', onResize);
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
-  // Distribute categories into columns
-  useEffect(() => {
-    if (columnCount === 0 || categories.length === 0) return;
+  // Distributor for categories into columns - more React way
+  // This avoids direct DOM manipulation
+  useMemo(() => {
+    if (Object.keys(kinks).length === 0 || columnCount <= 0) return;
 
-    // Create empty columns
-    const newColumns: React.ReactNode[][] = Array.from({ length: columnCount }, () => []);
+    // Estimate heights of categories based on number of rows
+    const categoryEstimates: Record<string, number> = {};
+    Object.entries(kinks).forEach(([catName, category]) => {
+      // Estimated height = table header + kinks * row height + some margin
+      categoryEstimates[catName] = 40 + (category.kinks.length * 30) + 20;
+    });    // Calculate total estimated height
+    const totalHeight = Object.values(categoryEstimates).reduce((acc, val) => acc + val, 0);
 
-    // Function to calculate total height of components
-    const calculateTotalHeight = () => {
-      const categoryElements = document.querySelectorAll('.kinkCategory');
-      let totalHeight = 0;
+    // Distribute categories into columns
+    const newColumns: string[][] = Array(columnCount).fill(null).map(() => []);
+    const columnHeights: number[] = Array(columnCount).fill(0);
+    
+    Object.keys(kinks).forEach((catName) => {
+      // Find column with minimum height
+      const minHeightColIndex = columnHeights.indexOf(Math.min(...columnHeights));
       
-      categoryElements.forEach(element => {
-        totalHeight += element.clientHeight;
-      });
+      // Add category to that column
+      newColumns[minHeightColIndex].push(catName);
       
-      return totalHeight;
-    };
+      // Update column height
+      columnHeights[minHeightColIndex] += categoryEstimates[catName];
+    });
 
-    // Function to get current height of a column
-    const getColumnHeight = (colIndex: number) => {
-      const column = document.querySelector(`.col.col${getColClass(columnCount)}:nth-child(${colIndex + 1})`);
-      return column ? column.clientHeight : 0;
-    };
-
-    // Wait for elements to be rendered to calculate heights
-    setTimeout(() => {
-      const totalHeight = calculateTotalHeight();
-      const targetHeight = totalHeight / columnCount;
-      
-      // Place categories in columns to balance height
-      let colIndex = 0;
-      
-      for (let i = 0; i < categories.length; i++) {
-        const tempDiv = document.createElement('div');
-        document.body.appendChild(tempDiv);
-        
-        // Create a temporary container to measure height
-        const categoryClass = (categories[i] as any).props.className;
-        tempDiv.className = categoryClass;
-        const catHeight = tempDiv.offsetHeight;
-        document.body.removeChild(tempDiv);
-        
-        const currentHeight = getColumnHeight(colIndex);
-        
-        if (currentHeight + (catHeight / 2) > targetHeight && colIndex < columnCount - 1) {
-          colIndex++;
-        }
-        
-        newColumns[colIndex].push(categories[i]);
-      }
-      
-      setColumns(newColumns);
-    }, 10);
-  }, [columnCount, categories]);
+    setColumns(newColumns);
+  }, [kinks, columnCount]);
 
   // Helper function to get column class based on number of columns
   const getColClass = (cols: number): string => {
@@ -117,13 +74,25 @@ const InputList: React.FC = () => {
 
   return (
     <div id="InputList">
-      {columns.map((column, index) => (
-        <div key={index} className={`col col${getColClass(columnCount)}`}>
-          {column}
+      {columns.map((columnCategories, index) => (
+        <div 
+          key={index} 
+          className={`col col${getColClass(columnCount)}`}
+          role="region"
+          aria-label={`Spalte ${index + 1} von ${columnCount}`}
+        >
+          {columnCategories.map(catName => (
+            <KinkCategory 
+              key={catName}
+              name={catName}
+              fields={kinks[catName].fields}
+              kinks={kinks[catName].kinks}
+            />
+          ))}
         </div>
       ))}
     </div>
   );
 };
 
-export default InputList;
+export default memo(InputList);

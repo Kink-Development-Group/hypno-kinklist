@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import KinkRow from './KinkRow';
 import { strToClass } from '../utils';
 
@@ -10,15 +10,23 @@ interface KinkCategoryProps {
 
 const KinkCategory: React.FC<KinkCategoryProps> = ({ name, fields, kinks }) => {
   return (
-    <div className={`kinkCategory cat-${strToClass(name)}`} data-category={name}>
-      <h2>{name}</h2>
-      <table className="kinkGroup" data-fields={fields.join(',')}>
+    <div 
+      className={`kinkCategory cat-${strToClass(name)}`} 
+      data-category={name}
+      aria-labelledby={`category-heading-${strToClass(name)}`}
+    >
+      <h2 id={`category-heading-${strToClass(name)}`}>{name}</h2>
+      <table 
+        className="kinkGroup" 
+        data-fields={fields.join(',')}
+        aria-label={`Kinks in der Kategorie ${name}`}
+      >
         <thead>
           <tr>
             {fields.map(field => (
-              <th key={field} className="choicesCol">{field}</th>
+              <th key={field} className="choicesCol" scope="col">{field}</th>
             ))}
-            <th></th>
+            <th scope="col">Kink</th>
           </tr>
         </thead>
         <tbody>
@@ -36,4 +44,4 @@ const KinkCategory: React.FC<KinkCategoryProps> = ({ name, fields, kinks }) => {
   );
 };
 
-export default KinkCategory;
+export default memo(KinkCategory);

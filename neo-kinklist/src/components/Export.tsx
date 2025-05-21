@@ -7,18 +7,6 @@ interface ExportProps {
 }
 
 const Export: React.FC<ExportProps> = ({ imgurClientId }) => {
-  const { kinks, levels } = useKinklist();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [exportUrl, setExportUrl] = useState<string>('');
-import React, { useState } from 'react';
-import { useKinklist } from '../context/KinklistContext';
-import { exportToImgur, setupCanvas } from '../utils';
-
-interface ExportProps {
-  imgurClientId: string;
-}
-
-const Export: React.FC<ExportProps> = ({ imgurClientId }) => {
   const { kinks, levels, selection } = useKinklist();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [exportUrl, setExportUrl] = useState<string>('');
@@ -117,8 +105,8 @@ const Export: React.FC<ExportProps> = ({ imgurClientId }) => {
             y: column.height, 
             type: 'kinkRow', 
             data: {
-              choices: [],
-              colors: {},
+              choices: [] as string[],
+              colors: {} as Record<string, string>,
               text: kinkName
             }
           };
@@ -216,9 +204,12 @@ const Export: React.FC<ExportProps> = ({ imgurClientId }) => {
           const drawCall = drawStack[j];
           drawCall.x = drawX;
           drawCall.y += offsets.top;
-          
-          if (drawCallHandlers[drawCall.type]) {
-            drawCallHandlers[drawCall.type](context, drawCall);
+
+          type DrawCallType = 'simpleTitle' | 'titleSubtitle' | 'kinkRow';
+          const drawCallType = drawCall.type as DrawCallType;
+
+          if (drawCallHandlers[drawCallType]) {
+            drawCallHandlers[drawCallType](context, drawCall);
           }
         }
       }
@@ -233,12 +224,20 @@ const Export: React.FC<ExportProps> = ({ imgurClientId }) => {
       setIsLoading(false);
     }
   };
-
   return (
     <div id="ExportWrapper">
-      <input type="text" id="URL" value={exportUrl} readOnly onClick={(e) => (e.target as HTMLInputElement).select()} style={{ display: exportUrl ? 'block' : 'none' }} />
+      <input 
+        type="text" 
+        id="URL" 
+        value={exportUrl} 
+        readOnly 
+        onClick={(e) => (e.target as HTMLInputElement).select()} 
+        className={exportUrl ? 'visible' : ''} 
+        aria-label="Export URL"
+        placeholder="Export URL"
+      />
       <button id="Export" onClick={handleExport}>Exportieren</button>
-      <div id="Loading" style={{ display: isLoading ? 'block' : 'none' }}>Lädt</div>
+      <div id="Loading" className={isLoading ? 'visible' : ''}>Lädt</div>
     </div>
   );
 };
