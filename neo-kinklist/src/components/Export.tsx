@@ -1,24 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useKinklist } from '../context/KinklistContext';
-import { exportToImgur, setupCanvas } from '../utils';
+import { downloadImage, setupCanvas } from '../utils';
 
-interface ExportProps {
-  imgurClientId: string;
-}
+interface ExportProps {}
 
-const Export: React.FC<ExportProps> = ({ imgurClientId }) => {
+const Export: React.FC<ExportProps> = () => {
   const { kinks, levels, selection } = useKinklist();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [exportUrl, setExportUrl] = useState<string>('');
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
 
-  const handleExport = async () => {
+  const handleExport = useCallback(async () => {
     const username = prompt("Bitte geben Sie Ihren Namen ein");
     if (typeof username !== 'string') return;
     
     let displayName = username.length ? `(${username})` : '';
     
     setIsLoading(true);
-    setExportUrl('');
+    setIsSuccess(false);
 
     try {
       // Constants
@@ -214,30 +212,32 @@ const Export: React.FC<ExportProps> = ({ imgurClientId }) => {
         }
       }
 
-      // Send canvas to imgur
-      const url = await exportToImgur(canvas, imgurClientId);
-      setExportUrl(url);
+      // Download the image
+      downloadImage(canvas, username);
+      setIsSuccess(true);
+      setTimeout(() => setIsSuccess(false), 3000); // Hide success message after 3 seconds
     } catch (error) {
-      console.error("Error during export:", error);
-      alert('Fehler beim Hochladen zu Imgur.');
+      console.error("Fehler beim Exportieren:", error);
+      alert('Fehler beim Exportieren des Bildes.');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [kinks, levels, selection]);
+
   return (
     <div id="ExportWrapper">
-      <input 
-        type="text" 
-        id="URL" 
-        value={exportUrl} 
-        readOnly 
-        onClick={(e) => (e.target as HTMLInputElement).select()} 
-        className={exportUrl ? 'visible' : ''} 
-        aria-label="Export URL"
-        placeholder="Export URL"
-      />
-      <button id="Export" onClick={handleExport}>Exportieren</button>
-      <div id="Loading" className={isLoading ? 'visible' : ''}>Lädt</div>
+      <div id="SuccessMessage" className={isSuccess ? 'visible' : ''} aria-live="polite">
+        Bild erfolgreich heruntergeladen!
+      </div>
+      <button 
+        id="Export" 
+        onClick={handleExport} 
+        disabled={isLoading}
+        aria-busy={isLoading}
+      >
+        Exportieren
+      </button>
+      <div id="Loading" className={isLoading ? 'visible' : ''} aria-live="polite">Lädt</div>
     </div>
   );
 };

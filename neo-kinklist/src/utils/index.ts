@@ -289,26 +289,25 @@ export const getAllKinks = (kinks: KinksData, levels: LevelsData, existingSelect
   return list;
 };
 
-// Export to Imgur function
-export const exportToImgur = async (canvas: HTMLCanvasElement, imgurClientId: string): Promise<string> => {
+// Download image function
+export const downloadImage = (canvas: HTMLCanvasElement, username: string): void => {
   try {
-    const response = await axios.post(
-      'https://api.imgur.com/3/image',
-      {
-        image: canvas.toDataURL().split(',')[1],
-        type: 'base64'
-      },
-      {
-        headers: {
-          Authorization: `Client-ID ${imgurClientId}`,
-          Accept: 'application/json'
-        }
-      }
-    );
+    const filename = `kinklist_${username ? username.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'export'}_${new Date().toISOString().slice(0, 10)}.png`;
     
-    return `https://i.imgur.com/${response.data.data.id}.png`;
+    // Create a temporary link element to trigger the download
+    const link = document.createElement('a');
+    link.download = filename;
+    link.href = canvas.toDataURL('image/png');
+    document.body.appendChild(link);
+    link.click();
+    
+    // Clean up
+    setTimeout(() => {
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(link.href);
+    }, 100);
   } catch (error) {
-    console.error('Error uploading to Imgur:', error);
+    console.error('Error downloading image:', error);
     throw error;
   }
 };

@@ -141,6 +141,26 @@ table {
   margin: 15px 0;
   position: relative;
 
+  #SuccessMessage {
+    display: none;
+    position: absolute;
+    top: 3px;
+    left: 0;
+    padding: 5px 10px;
+    background-color: #4caf50;
+    color: white;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    transition: opacity 0.3s ease-in-out;
+    
+    &.visible {
+      display: block;
+      animation: fadeInOut 3s ease-in-out;
+    }
+  }
+
   #URL {
     display: none;
     position: absolute;
@@ -609,6 +629,13 @@ table {
   0%, 100% { content: '.'; }
   33% { content: '..'; }
   66% { content: '...'; }
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 // Media queries
