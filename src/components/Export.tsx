@@ -206,6 +206,19 @@ const Export: React.FC<ExportProps> = () => {
               }
             }
           }
+
+          // Hinweis unten rechts einfügen
+          context.save();
+          const footerText = "Created with https://kink.hypnose-stammtisch.de";
+          context.font = "italic 13px Arial";
+          context.fillStyle = "#444";
+          const textMetrics = context.measureText(footerText);
+          const padding = 8;
+          const x = canvasWidth - textMetrics.width - padding;
+          const y = canvasHeight - padding;
+          context.fillText(footerText, x, y);
+          context.restore();
+
           downloadImage(canvas, pendingExportName);
           setIsSuccess(true);
           setTimeout(() => setIsSuccess(false), 3000);

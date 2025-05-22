@@ -109,12 +109,16 @@ export const kinksToText = (kinks: KinksData): string => {
     const catName = kinkCats[i];
     const catFields = kinks[catName].fields;
     const catKinks = kinks[catName].kinks;
+    const catDescriptions = kinks[catName].descriptions || [];
 
     kinksText += "#" + catName + "\r\n";
     kinksText += "(" + catFields.join(", ") + ")\r\n";
 
     for (let j = 0; j < catKinks.length; j++) {
       kinksText += "* " + catKinks[j] + "\r\n";
+      if (catDescriptions[j] && catDescriptions[j].trim().length > 0) {
+        kinksText += "? " + catDescriptions[j].trim() + "\r\n";
+      }
     }
 
     kinksText += "\r\n";

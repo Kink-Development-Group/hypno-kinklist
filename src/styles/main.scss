@@ -1209,7 +1209,9 @@ table {
   background: var(--popup-bg-color);
   color: var(--text-color);
   border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), var(--popup-shadow);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.18),
+    var(--popup-shadow);
   min-width: 180px;
   max-width: 320px;
   padding: 12px 16px;
@@ -1220,7 +1222,9 @@ table {
   border: 1px solid var(--border-color);
   z-index: 99999;
   opacity: 1;
-  transition: opacity 0.18s cubic-bezier(0.4, 1.4, 0.6, 1), visibility 0.18s;
+  transition:
+    opacity 0.18s cubic-bezier(0.4, 1.4, 0.6, 1),
+    visibility 0.18s;
 }
 
 .kink-tooltip-text.left {
