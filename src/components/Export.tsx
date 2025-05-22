@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { useKinklist } from "../context/KinklistContext";
 import { downloadImage, setupCanvas } from "../utils";
+import { useErrorHandler } from "../utils/useErrorHandler";
 
 interface ExportProps {}
 
@@ -8,6 +9,7 @@ const Export: React.FC<ExportProps> = () => {
   const { kinks, levels, selection } = useKinklist();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
+  const errorHandler = useErrorHandler();
 
   const handleExport = useCallback(async () => {
     const username = prompt("Bitte geben Sie Ihren Namen ein");
@@ -231,13 +233,13 @@ const Export: React.FC<ExportProps> = () => {
       downloadImage(canvas, username);
       setIsSuccess(true);
       setTimeout(() => setIsSuccess(false), 3000); // Hide success message after 3 seconds
-    } catch (error) {
-      console.error("Export error:", error);
-      alert("Error exporting image.");
+    } catch (e) {
+      setIsLoading(false);
+      errorHandler("Error exporting image.", e);
     } finally {
       setIsLoading(false);
     }
-  }, [kinks, levels, selection]);
+  }, [kinks, levels, selection, errorHandler]);
 
   return (
     <div id="ExportWrapper">

@@ -6,6 +6,7 @@ import {
   updateHash,
   parseHash,
 } from "../utils/index";
+import { useErrorHandler } from "../utils/useErrorHandler";
 
 interface KinklistContextType {
   kinks: KinksData;
@@ -51,7 +52,10 @@ export const KinklistProvider: React.FC<{
     useState<string>(initialKinksText);
   const [isEditOverlayOpen, setIsEditOverlayOpen] = useState<boolean>(false);
   const [isInputOverlayOpen, setIsInputOverlayOpen] = useState<boolean>(false);
-  const [popupIndex, setPopupIndex] = useState<number>(0); // Parse initial kinks
+  const [popupIndex, setPopupIndex] = useState<number>(0);
+  const errorHandler = useErrorHandler();
+
+  // Parse initial kinks
   useEffect(() => {
     try {
       const parsedKinks = parseKinksText(originalKinksText);
@@ -59,17 +63,18 @@ export const KinklistProvider: React.FC<{
         setKinks(parsedKinks);
       } else {
         console.error("Failed to parse kinks text");
-        alert(
+        errorHandler(
           "Es gab ein Problem beim Parsen des Kink-Textes. Bitte überprüfen Sie das Format.",
         );
       }
     } catch (e) {
       console.error("Error parsing kinks text:", e);
-      alert(
+      errorHandler(
         `Fehler beim Parsen des Kink-Textes: ${e instanceof Error ? e.message : String(e)}`,
+        e,
       );
     }
-  }, [originalKinksText]);
+  }, [originalKinksText, errorHandler]);
 
   // Parse hash from URL
   useEffect(() => {
@@ -85,13 +90,14 @@ export const KinklistProvider: React.FC<{
       }
     } catch (e) {
       console.error("Error parsing hash:", e);
+      errorHandler(
+        `Fehler beim Laden des URL-Hashes: ${e instanceof Error ? e.message : String(e)}`,
+        e,
+      );
       // Initialize with default selection on error
       setSelection(getAllKinks(kinks, levels));
-      alert(
-        `Fehler beim Laden des URL-Hashes: ${e instanceof Error ? e.message : String(e)}`,
-      );
     }
-  }, [kinks, levels]);
+  }, [kinks, levels, errorHandler]);
 
   // Update hash when selection changes
   useEffect(() => {

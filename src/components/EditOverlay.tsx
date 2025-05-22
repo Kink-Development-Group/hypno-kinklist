@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, memo, useRef } from "react";
 import { useKinklist } from "../context/KinklistContext";
 import { parseKinksText, kinksToText, getAllKinks } from "../utils";
+import { useErrorHandler } from "../utils/useErrorHandler";
 
 const EditOverlay: React.FC = () => {
   const {
@@ -17,6 +18,7 @@ const EditOverlay: React.FC = () => {
 
   const [kinksText, setKinksText] = useState<string>(originalKinksText);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const errorHandler = useErrorHandler();
 
   // Focus management
   useEffect(() => {
@@ -40,9 +42,10 @@ const EditOverlay: React.FC = () => {
         setOriginalKinksText(kinksText);
         setSelection(newSelection);
       }
-    } catch (e) {
-      alert(
+    } catch (error) {
+      errorHandler(
         "Ein Fehler ist beim Versuch, den eingegebenen Text zu analysieren, aufgetreten. Bitte korrigieren Sie ihn und versuchen Sie es erneut.",
+        error,
       );
       return;
     }
@@ -56,6 +59,7 @@ const EditOverlay: React.FC = () => {
     setOriginalKinksText,
     setSelection,
     setIsEditOverlayOpen,
+    errorHandler,
   ]);
 
   const handleOverlayClick = useCallback(

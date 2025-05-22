@@ -995,8 +995,10 @@ table {
   background: var(--button-bg-color);
   color: var(--button-text-color);
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-  transition: background 0.2s, transform 0.1s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  transition:
+    background 0.2s,
+    transform 0.1s;
 }
 .edit-overlay-actions button:hover,
 .edit-overlay-actions button:focus {
