@@ -231,7 +231,6 @@ const AppContent: React.FC = () => {
   const handleStartClick = () => {
     setIsInputOverlayOpen(true);
   };
-
   return (
     <div className="container">
       <div className="header-controls">
@@ -240,13 +239,9 @@ const AppContent: React.FC = () => {
         <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
       </div>
       
+      <Legend />
+      
       <div className="grid-container">
-        <div className="grid-row">
-          <div className="grid-col-12">
-            <Legend />
-          </div>
-        </div>
-        
         <div className="grid-row">
           <div className="grid-col-12">
             <Export />
