@@ -1,40 +1,40 @@
 # Neo-Kinklist
 
-Eine moderne React/TypeScript-Implementierung der ursprünglichen Kinklist-Anwendung, mit verbesserter Codebasis und erweiterter Funktionalität.
+A modern React/TypeScript implementation of the original Kinklist application, with an improved codebase and enhanced functionality.
 
-## Übersicht
+## Overview
 
-Dieses Projekt ist eine 1:1-Übersetzung des ursprünglichen jQuery-basierten Kinklist zu einer modernen React/TypeScript-Anwendung. Es behält alle ursprünglichen Funktionen bei, während es moderne Web-Entwicklungspraktiken einsetzt.
+This project is a 1:1 translation of the original jQuery-based Kinklist to a modern React/TypeScript application. It retains all of the original features while utilizing modern web development practices.
 
-## Funktionen
+## Features
 
-- Vollständig typisiert mit TypeScript
-- Reaktive Komponenten mit React
-- State-Management mit React Context API
-- Styling mit SASS
-- Performanceoptimierung mit Code-Splitting und Tree-Shaking
-- Export-Funktionalität mit Imgur-Integration
-- Hash-basierte URL-Freigabe von Selektionen
+- Fully typed with TypeScript
+- Reactive components with React
+- State management with React Context API
+- Styling with SASS
+- Performance optimization with code splitting and tree shaking
+- Export functionality with Imgur integration
+- Hash-based URL sharing of selections
 
-## Projektstruktur
+## Project Structure
 
-- `src/components/`: React-Komponenten
-  - `Choice.tsx`: Auswahloption für einen Kink
-  - `EditOverlay.tsx`: Overlay zum Bearbeiten der Kink-Liste
-  - `Export.tsx`: Exportfunktionalität für die Kink-Liste
-  - `InputList.tsx`: Hauptkomponente zur Anzeige der Kategorien und Kinks
-  - `InputOverlay.tsx`: Overlay zur sequentiellen Navigation durch Kinks
-  - `KinkCategory.tsx`: Komponente zur Darstellung einer Kink-Kategorie
-  - `KinkRow.tsx`: Komponente zur Darstellung einer Kink-Zeile
-  - `Legend.tsx`: Legende für die Auswahl-Level
-- `src/context/`: React Context für State-Management
-  - `KinklistContext.tsx`: Zentraler State und Logik
-- `src/styles/`: SASS-Styling
-  - `main.scss`: Hauptstildatei
-- `src/types/`: TypeScript-Typdefinitionen
-  - `index.ts`: Typen für Kinks, Kategorien und Auswahloptionen
-- `src/utils/`: Hilfsfunktionen
-  - `index.ts`: Utilities für Parsing, Hash-Kodierung/Dekodierung und Export
+- `src/components/`: React components
+  - `Choice.tsx`: Choice option for a kink
+  - `EditOverlay.tsx`: Overlay for editing the kink list
+  - `Export.tsx`: Export functionality for the kink list
+  - `InputList.tsx`: Main component for displaying categories and kinks
+  - `InputOverlay.tsx`: Overlay for sequential navigation through kinks
+  - `KinkCategory.tsx`: Component for displaying a kink category
+  - `KinkRow.tsx`: Component for displaying a kink row
+  - `Legend.tsx`: Legend for the selection levels
+- `src/context/`: React Context for state management
+  - `KinklistContext.tsx`: Central state and logic
+- `src/styles/`: SASS styling
+  - `main.scss`: Main style file
+- `src/types/`: TypeScript type definitions
+  - `index.ts`: Types for kinks, categories, and selection options
+- `src/utils/`: Utility functions
+  - `index.ts`: Utilities for parsing, hash encoding/decoding, and export
 
 ## Installation
 
@@ -42,49 +42,49 @@ Dieses Projekt ist eine 1:1-Übersetzung des ursprünglichen jQuery-basierten Ki
 npm install
 ```
 
-## Entwicklung
+## Development
 
 ```bash
 npm start
 ```
 
-Startet den Entwicklungsserver auf [http://localhost:3000](http://localhost:3000).
+Starts the development server at [http://localhost:3000](http://localhost:3000).
 
-## Build für Produktion
+## Build for Production
 
 ```bash
 npm run build
 ```
 
-## Tests ausführen
+## Run Tests
 
 ```bash
 npm test
 ```
 
-## Technologie-Stack
+## Technology Stack
 
 - React 18
 - TypeScript 4
-- SASS für Styling
-- Axios für HTTP-Anfragen
-- html2canvas für Bilderfassung
+- SASS for styling
+- Axios for HTTP requests
+- html2canvas for image capturing
 
-## Verbesserungen gegenüber dem Original
+## Improvements over the Original
 
-1. **Bessere Wartbarkeit**: Durch die Verwendung von React-Komponenten und TypeScript ist der Code modular und typsicher.
-2. **Verbesserte Performance**: Moderne Webpack-Optimierungen und Code-Splitting.
-3. **Bessere Benutzerfreundlichkeit**: Verbesserte Tastaturnavigation und Zugänglichkeit.
+1. **Better Maintainability**: By using React components and TypeScript, the code is modular and type-safe.
+2. **Improved Performance**: Modern Webpack optimizations and code splitting.
+3. **Better Usability**: Enhanced keyboard navigation and accessibility.
 4. **Robustere Fehlerbehandlung**: Erweiterte Validierung und Fehlerberichterstattung.
-5. **Responsive Design**: Bessere Unterstützung für verschiedene Bildschirmgrößen.
+5. **Responsive Design**: Better support for different screen sizes.
 
-## Zukünftige Erweiterungen
+## Future Enhancements
 
-- Integration von i18n für mehrsprachige Unterstützung
-- Speichern von Konfigurationen in LocalStorage/IndexedDB
-- Alternative Export-Optionen (PDF, JSON)
-- Theme-Unterstützung mit wechselbaren Farbschemen
-- Progressive Web App (PWA) Funktionalität
+- Integration of i18n for multilingual support
+- Storing configurations in LocalStorage/IndexedDB
+- Alternative export options (PDF, JSON)
+- Theme support with switchable color schemes
+- Progressive Web App (PWA) functionality
 
 ### `npm test`
 
