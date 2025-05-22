@@ -1168,6 +1168,48 @@ table {
   }
 }
 
+// Tooltip für InputOverlay auf oberster Ebene
+.input-kink-with-tooltip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  z-index: 20; // Sicherstellen, dass die Zeile über anderen Inhalten liegt
+}
+
+.kink-tooltip-overlay {
+  position: relative;
+  z-index: 30; // Über der Zeile
+}
+
+.kink-tooltip-text-overlay {
+  z-index: 9999 !important; // Maximale Priorität
+  position: absolute !important;
+  left: 100% !important;
+  top: 50% !important;
+  transform: translateY(-50%) translateX(16px) !important;
+  min-width: 180px;
+  max-width: 320px;
+  pointer-events: auto;
+  background: var(--popup-bg-color);
+  color: var(--text-color);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), var(--popup-shadow);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.98em;
+  font-weight: 400;
+  line-height: 1.5;
+  opacity: 1 !important;
+  @media (max-width: 600px) {
+    min-width: 120px;
+    max-width: 90vw;
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
+    top: 110% !important;
+  }
+}
+
 @keyframes fadeIn {
   0% {
     opacity: 0;

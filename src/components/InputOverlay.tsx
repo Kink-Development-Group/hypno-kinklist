@@ -268,12 +268,11 @@ const InputOverlay: React.FC = () => {
         </div>
         <div id="InputCurrent" aria-live="polite">
           <h2 id="InputCategory">{currentKink.category}</h2>
-          <h3 id="InputField">
+          <h3 id="InputField" className="input-kink-with-tooltip">
             {currentKink.showField ? `(${currentKink.field}) ` : ""}
-            {currentKink.kink}
+            <span>{currentKink.kink}</span>
             {/* Tooltip für Beschreibung, falls vorhanden */}
             {(() => {
-              // Hole die Beschreibung aus dem Kontext (kinks)
               const cat = kinks[currentKink.category];
               const kinkIdx = cat?.kinks?.indexOf(currentKink.kink);
               const description =
@@ -286,7 +285,7 @@ const InputOverlay: React.FC = () => {
                   : undefined;
               if (description) {
                 return (
-                  <span className="kink-tooltip">
+                  <span className="kink-tooltip kink-tooltip-overlay">
                     <span
                       className="kink-tooltip-icon"
                       tabIndex={0}
@@ -294,7 +293,10 @@ const InputOverlay: React.FC = () => {
                     >
                       ?
                     </span>
-                    <span className="kink-tooltip-text" tabIndex={-1}>
+                    <span
+                      className="kink-tooltip-text kink-tooltip-text-overlay"
+                      tabIndex={-1}
+                    >
                       {description}
                     </span>
                   </span>
