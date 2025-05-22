@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface ThemeToggleProps {
   theme: string;
@@ -7,14 +7,18 @@ interface ThemeToggleProps {
 
 const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, toggleTheme }) => {
   return (
-    <button 
+    <button
       type="button"
       id="ThemeToggle"
       onClick={toggleTheme}
-      title={theme === 'light' ? 'Zum Dark Mode wechseln' : 'Zum Light Mode wechseln'}
-      aria-label={theme === 'light' ? 'Zum Dark Mode wechseln' : 'Zum Light Mode wechseln'}
+      title={
+        theme === "light" ? "Zum Dark Mode wechseln" : "Zum Light Mode wechseln"
+      }
+      aria-label={
+        theme === "light" ? "Zum Dark Mode wechseln" : "Zum Light Mode wechseln"
+      }
     >
-      {theme === 'light' ? '🌙' : '☀️'}
+      {theme === "light" ? "🌙" : "☀️"}
     </button>
   );
 };

@@ -11,10 +11,12 @@
   backdrop-filter: blur(3px);
   visibility: hidden;
   opacity: 0;
-  transition: visibility 0.3s ease, opacity 0.3s ease;
+  transition:
+    visibility 0.3s ease,
+    opacity 0.3s ease;
   transform: translateY(-10px);
   pointer-events: none;
-  
+
   &.visible {
     visibility: visible;
     opacity: 1;

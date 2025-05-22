@@ -1,6 +1,11 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { KinksData, LevelsData, Selection } from '../types';
-import { parseKinksText, getAllKinks, updateHash, parseHash } from '../utils/index';
+import React, { createContext, useState, useEffect, useContext } from "react";
+import { KinksData, LevelsData, Selection } from "../types";
+import {
+  parseKinksText,
+  getAllKinks,
+  updateHash,
+  parseHash,
+} from "../utils/index";
 
 interface KinklistContextType {
   kinks: KinksData;
@@ -23,27 +28,30 @@ interface KinklistContextType {
 
 const initialLevels: LevelsData = {
   "Not Entered": { name: "Not Entered", color: "#FFFFFF", class: "notEntered" },
-  "Favorite": { name: "Favorite", color: "#6DB5FE", class: "favorite" },
-  "Like": { name: "Like", color: "#23FD22", class: "like" },
-  "Okay": { name: "Okay", color: "#FDFD6B", class: "okay" },
-  "Maybe": { name: "Maybe", color: "#DB6C00", class: "maybe" },
-  "No": { name: "No", color: "#920000", class: "no" }
+  Favorite: { name: "Favorite", color: "#6DB5FE", class: "favorite" },
+  Like: { name: "Like", color: "#23FD22", class: "like" },
+  Okay: { name: "Okay", color: "#FDFD6B", class: "okay" },
+  Maybe: { name: "Maybe", color: "#DB6C00", class: "maybe" },
+  No: { name: "No", color: "#920000", class: "no" },
 };
 
-export const KinklistContext = createContext<KinklistContextType | undefined>(undefined);
+export const KinklistContext = createContext<KinklistContextType | undefined>(
+  undefined,
+);
 
-export const KinklistProvider: React.FC<{ children: React.ReactNode, initialKinksText: string }> = ({ 
-  children,
-  initialKinksText
-}) => {
+export const KinklistProvider: React.FC<{
+  children: React.ReactNode;
+  initialKinksText: string;
+}> = ({ children, initialKinksText }) => {
   const [kinks, setKinks] = useState<KinksData>({});
   const [levels, setLevels] = useState<LevelsData>(initialLevels);
   const [selection, setSelection] = useState<Selection[]>([]);
   const [selectedKink, setSelectedKink] = useState<Selection | null>(null);
-  const [originalKinksText, setOriginalKinksText] = useState<string>(initialKinksText);
+  const [originalKinksText, setOriginalKinksText] =
+    useState<string>(initialKinksText);
   const [isEditOverlayOpen, setIsEditOverlayOpen] = useState<boolean>(false);
   const [isInputOverlayOpen, setIsInputOverlayOpen] = useState<boolean>(false);
-  const [popupIndex, setPopupIndex] = useState<number>(0);  // Parse initial kinks
+  const [popupIndex, setPopupIndex] = useState<number>(0); // Parse initial kinks
   useEffect(() => {
     try {
       const parsedKinks = parseKinksText(originalKinksText);
@@ -51,18 +59,22 @@ export const KinklistProvider: React.FC<{ children: React.ReactNode, initialKink
         setKinks(parsedKinks);
       } else {
         console.error("Failed to parse kinks text");
-        alert("Es gab ein Problem beim Parsen des Kink-Textes. Bitte überprüfen Sie das Format.");
+        alert(
+          "Es gab ein Problem beim Parsen des Kink-Textes. Bitte überprüfen Sie das Format.",
+        );
       }
     } catch (e) {
       console.error("Error parsing kinks text:", e);
-      alert(`Fehler beim Parsen des Kink-Textes: ${e instanceof Error ? e.message : String(e)}`);
+      alert(
+        `Fehler beim Parsen des Kink-Textes: ${e instanceof Error ? e.message : String(e)}`,
+      );
     }
   }, [originalKinksText]);
 
   // Parse hash from URL
   useEffect(() => {
     if (Object.keys(kinks).length === 0) return;
-    
+
     try {
       const hashSelection = parseHash(levels, kinks);
       if (hashSelection) {
@@ -70,11 +82,14 @@ export const KinklistProvider: React.FC<{ children: React.ReactNode, initialKink
       } else {
         // If no hash, initialize with default selection
         setSelection(getAllKinks(kinks, levels));
-      }    } catch (e) {
+      }
+    } catch (e) {
       console.error("Error parsing hash:", e);
       // Initialize with default selection on error
       setSelection(getAllKinks(kinks, levels));
-      alert(`Fehler beim Laden des URL-Hashes: ${e instanceof Error ? e.message : String(e)}`);
+      alert(
+        `Fehler beim Laden des URL-Hashes: ${e instanceof Error ? e.message : String(e)}`,
+      );
     }
   }, [kinks, levels]);
 
@@ -90,24 +105,26 @@ export const KinklistProvider: React.FC<{ children: React.ReactNode, initialKink
   }, [selection, levels]);
 
   return (
-    <KinklistContext.Provider value={{
-      kinks,
-      setKinks,
-      levels,
-      setLevels,
-      selection,
-      setSelection,
-      selectedKink,
-      setSelectedKink,
-      originalKinksText,
-      setOriginalKinksText,
-      isEditOverlayOpen,
-      setIsEditOverlayOpen,
-      isInputOverlayOpen,
-      setIsInputOverlayOpen,
-      popupIndex,
-      setPopupIndex
-    }}>
+    <KinklistContext.Provider
+      value={{
+        kinks,
+        setKinks,
+        levels,
+        setLevels,
+        selection,
+        setSelection,
+        selectedKink,
+        setSelectedKink,
+        originalKinksText,
+        setOriginalKinksText,
+        isEditOverlayOpen,
+        setIsEditOverlayOpen,
+        isInputOverlayOpen,
+        setIsInputOverlayOpen,
+        popupIndex,
+        setPopupIndex,
+      }}
+    >
       {children}
     </KinklistContext.Provider>
   );
@@ -116,7 +133,7 @@ export const KinklistProvider: React.FC<{ children: React.ReactNode, initialKink
 export const useKinklist = () => {
   const context = useContext(KinklistContext);
   if (context === undefined) {
-    throw new Error('useKinklist must be used within a KinklistProvider');
+    throw new Error("useKinklist must be used within a KinklistProvider");
   }
   return context;
 };

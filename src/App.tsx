@@ -1,13 +1,13 @@
-import React from 'react';
-import { KinklistProvider, useKinklist } from './context/KinklistContext';
-import { ThemeProvider, useTheme } from './context/ThemeContext';
-import Legend from './components/Legend';
-import Export from './components/Export';
-import InputList from './components/InputList';
-import EditOverlay from './components/EditOverlay';
-import InputOverlay from './components/InputOverlay';
-import ThemeToggle from './components/ThemeToggle';
-import './styles/main.scss';
+import React from "react";
+import { KinklistProvider, useKinklist } from "./context/KinklistContext";
+import { ThemeProvider, useTheme } from "./context/ThemeContext";
+import Legend from "./components/Legend";
+import Export from "./components/Export";
+import InputList from "./components/InputList";
+import EditOverlay from "./components/EditOverlay";
+import InputOverlay from "./components/InputOverlay";
+import ThemeToggle from "./components/ThemeToggle";
+import "./styles/main.scss";
 
 // Default kinks text
 const defaultKinksText = `#Basics
@@ -234,21 +234,28 @@ const AppContent: React.FC = () => {
   return (
     <div className="container">
       <div className="header-controls">
-        <button type='button' title='edit' id="Edit" onClick={handleEditClick} aria-label="Bearbeiten"></button>
+        <button
+          type="button"
+          title="edit"
+          id="Edit"
+          onClick={handleEditClick}
+          aria-label="Bearbeiten"
+        ></button>
         <h1>Hypno Kink List</h1>
-        <ThemeToggle theme={theme} toggleTheme={toggleTheme} />      </div>
-      
+        <ThemeToggle theme={theme} toggleTheme={toggleTheme} />{" "}
+      </div>
+
       <Legend />
-      
+
       <div className="action-buttons-container">
         <div className="export-container">
           <Export />
         </div>
-        
-        <button 
-          type='button' 
-          title='start' 
-          id="StartBtn" 
+
+        <button
+          type="button"
+          title="start"
+          id="StartBtn"
           onClick={handleStartClick}
           aria-label="Starten"
           className="start-button"
@@ -256,7 +263,7 @@ const AppContent: React.FC = () => {
           <span className="button-label">Starten</span>
         </button>
       </div>
-      
+
       <div className="grid-container">
         <div className="grid-row">
           <div className="grid-col-12">
@@ -264,7 +271,7 @@ const AppContent: React.FC = () => {
           </div>
         </div>
       </div>
-        <EditOverlay />
+      <EditOverlay />
       <InputOverlay />
     </div>
   );
