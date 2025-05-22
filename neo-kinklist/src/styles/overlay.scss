@@ -1,0 +1,32 @@
+// CSS-Klassengenerator für alle Overlay-Animationen und Styles
+.overlay-common {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.85);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0.3s ease, opacity 0.3s ease;
+  transform: translateY(-10px);
+  pointer-events: none;
+  
+  &.visible {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+// Überschreibt die bestehende Overlay-Klasse mit den gemeinsamen Eigenschaften
+.overlay {
+  @extend .overlay-common;
+}
