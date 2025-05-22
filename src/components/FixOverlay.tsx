@@ -1,18 +1,20 @@
 import React, { useCallback } from "react";
 import { useKinklist } from "../context/KinklistContext";
+import { useErrorHandler } from "../utils/useErrorHandler";
 
 const FixOverlay: React.FC = () => {
   const { setIsInputOverlayOpen } = useKinklist();
+  const errorHandler = useErrorHandler();
 
   const handleFixOverlay = useCallback(() => {
     // Setze den Modal-Status zurück
     setIsInputOverlayOpen(false);
 
     // Zeige Erfolgsmeldung
-    alert(
+    errorHandler(
       "Der Modal-Status wurde erfolgreich zurückgesetzt. Sie können das Start-Modal jetzt wieder normal verwenden.",
     );
-  }, [setIsInputOverlayOpen]);
+  }, [setIsInputOverlayOpen, errorHandler]);
 
   return (
     <div className="fix-overlay">

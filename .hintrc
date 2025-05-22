@@ -6,7 +6,8 @@
     "axe/aria": [
       "default",
       {
-        "aria-valid-attr-value": "off"
+        "aria-valid-attr-value": "off",
+        "empty-table-header": "off"
       }
     ],
     "compat-api/html": [
@@ -16,7 +17,8 @@
           "meta[name=theme-color]"
         ]
       }
-    ]
+    ],
+    "no-inline-styles": "off"
   },
   "browserslist": [
     "defaults",

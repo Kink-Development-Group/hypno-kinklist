@@ -11,12 +11,16 @@ const InputOverlay: React.FC = () => {
     setIsInputOverlayOpen,
     popupIndex,
     setPopupIndex,
+    kinks,
   } = useKinklist();
 
   const [previousKinks, setPreviousKinks] = useState<React.ReactNode[]>([]);
   const [nextKinks, setNextKinks] = useState<React.ReactNode[]>([]);
   const [currentKink, setCurrentKink] = useState<Selection | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+
+  // State für Tooltip-Anzeige im Modal
+  const [showTooltip, setShowTooltip] = useState(false);
 
   // Number of kinks to show in previous/next sections
   const numPrev = 3;
@@ -267,9 +271,48 @@ const InputOverlay: React.FC = () => {
         </div>
         <div id="InputCurrent" aria-live="polite">
           <h2 id="InputCategory">{currentKink.category}</h2>
-          <h3 id="InputField">
+          <h3 id="InputField" className="input-kink-with-tooltip">
             {currentKink.showField ? `(${currentKink.field}) ` : ""}
-            {currentKink.kink}
+            <span>{currentKink.kink}</span>
+            {/* Tooltip für Beschreibung, falls vorhanden */}
+            {(() => {
+              const cat = kinks[currentKink.category];
+              const kinkIdx = cat?.kinks?.indexOf(currentKink.kink);
+              const description =
+                cat &&
+                kinkIdx !== undefined &&
+                kinkIdx >= 0 &&
+                cat.descriptions &&
+                cat.descriptions[kinkIdx]
+                  ? cat.descriptions[kinkIdx]
+                  : undefined;
+              if (description) {
+                return (
+                  <span className="kink-tooltip kink-tooltip-overlay">
+                    <span
+                      className="kink-tooltip-icon"
+                      tabIndex={0}
+                      aria-label="Beschreibung anzeigen"
+                      onMouseEnter={() => setShowTooltip(true)}
+                      onFocus={() => setShowTooltip(true)}
+                      onMouseLeave={() => setShowTooltip(false)}
+                      onBlur={() => setShowTooltip(false)}
+                    >
+                      ?
+                    </span>
+                    {showTooltip && (
+                      <span
+                        className="kink-tooltip-text kink-tooltip-text-overlay"
+                        tabIndex={-1}
+                      >
+                        {description}
+                      </span>
+                    )}
+                  </span>
+                );
+              }
+              return null;
+            })()}
           </h3>
           <button
             className="closePopup"

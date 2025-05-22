@@ -27,31 +27,36 @@ export const log = (val: number, base: number): number => {
   return Math.log(val) / Math.log(base);
 };
 
-export const parseKinksText = (kinksText: string): KinksData | null => {
+export const parseKinksText = (
+  text: string,
+  errorHandler: (msg: string) => void = (msg) => window.alert(msg),
+): KinksData | null => {
   const newKinks: KinksData = {};
-  const lines = kinksText.replace(/\r/g, "").split("\n");
+  const lines = text.replace(/\r/g, "").split("\n");
 
-  let cat: Partial<KinksData[string]> | null = null;
+  let cat: (Partial<KinksData[string]> & { descriptions?: string[] }) | null =
+    null;
   let catName: string | null = null;
+  let lastKinkIdx: number | null = null;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (!line.length) continue;
 
     if (line[0] === "#") {
-      if (catName && cat) {
-        if (!Array.isArray(cat.fields) || cat.fields.length < 1) {
-          alert(catName + " does not have any fields defined!");
-          return null;
-        }
-        if (!Array.isArray(cat.kinks) || cat.kinks.length < 1) {
-          alert(catName + " does not have any kinks listed!");
-          return null;
-        }
-        newKinks[catName] = cat as KinksData[string];
+      if (
+        catName &&
+        cat &&
+        Array.isArray(cat.fields) &&
+        cat.fields.length > 0 &&
+        Array.isArray(cat.kinks) &&
+        cat.kinks.length > 0
+      ) {
+        newKinks[catName] = { ...cat, name: catName } as KinksData[string];
       }
       catName = line.substring(1).trim();
-      cat = { kinks: [] };
+      cat = { kinks: [], descriptions: [] };
+      lastKinkIdx = null;
     }
 
     if (!catName) continue;
@@ -64,26 +69,33 @@ export const parseKinksText = (kinksText: string): KinksData | null => {
           .split(",")
           .map((field) => field.trim());
       }
-    }
-
-    if (line[0] === "*") {
+    } else if (line[0] === "*") {
       const kink = line.substring(1).trim();
-      if (cat && Array.isArray(cat.kinks)) {
+      if (cat && Array.isArray(cat.kinks) && Array.isArray(cat.descriptions)) {
         cat.kinks.push(kink);
+        cat.descriptions.push(""); // Platzhalter für Beschreibung
+        lastKinkIdx = cat.kinks.length - 1;
       }
+    } else if (
+      line[0] === "?" &&
+      cat &&
+      Array.isArray(cat.descriptions) &&
+      lastKinkIdx !== null
+    ) {
+      // Beschreibung für den letzten Kink
+      cat.descriptions[lastKinkIdx] = line.substring(1).trim();
     }
   }
 
-  if (catName && !newKinks[catName] && cat) {
-    if (!Array.isArray(cat.fields) || cat.fields.length < 1) {
-      alert(catName + " does not have any fields defined!");
-      return null;
-    }
-    if (!Array.isArray(cat.kinks) || cat.kinks.length < 1) {
-      alert(catName + " does not have any kinks listed!");
-      return null;
-    }
-    newKinks[catName] = cat as KinksData[string];
+  if (
+    catName &&
+    cat &&
+    Array.isArray(cat.fields) &&
+    cat.fields.length > 0 &&
+    Array.isArray(cat.kinks) &&
+    cat.kinks.length > 0
+  ) {
+    newKinks[catName] = { ...cat, name: catName } as KinksData[string];
   }
 
   return newKinks;
@@ -97,12 +109,16 @@ export const kinksToText = (kinks: KinksData): string => {
     const catName = kinkCats[i];
     const catFields = kinks[catName].fields;
     const catKinks = kinks[catName].kinks;
+    const catDescriptions = kinks[catName].descriptions || [];
 
     kinksText += "#" + catName + "\r\n";
     kinksText += "(" + catFields.join(", ") + ")\r\n";
 
     for (let j = 0; j < catKinks.length; j++) {
       kinksText += "* " + catKinks[j] + "\r\n";
+      if (catDescriptions[j] && catDescriptions[j].trim().length > 0) {
+        kinksText += "? " + catDescriptions[j].trim() + "\r\n";
+      }
     }
 
     kinksText += "\r\n";
