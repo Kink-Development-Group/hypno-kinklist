@@ -1183,33 +1183,26 @@ table {
 }
 
 .kink-tooltip-text-overlay {
-  z-index: 99999 !important; // Maximale Priorität
-  position: fixed !important; // Fixiert relativ zum Viewport
-  left: auto !important;
-  right: 24px !important; // Standard: rechtsbündig im Viewport
-  top: 50% !important;
-  transform: translateY(-50%) !important;
+  z-index: 99999 !important;
+  position: absolute !important; // Relativ zum Icon
+  left: 110%; // Direkt rechts neben dem Icon, ggf. anpassen
+  top: 50%;
+  transform: translateY(-50%);
   min-width: 180px;
   max-width: 320px;
   pointer-events: auto;
   background: var(--popup-bg-color);
   color: var(--text-color);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), var(--popup-shadow);
   border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
   padding: 12px 16px;
-  font-size: 0.98em;
-  font-weight: 400;
-  line-height: 1.5;
-  opacity: 1 !important;
-  visibility: visible !important;
-  @media (max-width: 600px) {
-    left: 50% !important;
-    right: auto !important;
-    top: auto !important;
-    bottom: 24px !important;
-    transform: translateX(-50%) !important;
-    max-width: 95vw;
-  }
+  font-size: 1rem;
+  line-height: 1.4;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.18s cubic-bezier(0.4, 1.4, 0.6, 1);
+  outline: none;
+  white-space: pre-line;
 }
 
 .kink-tooltip-portal {

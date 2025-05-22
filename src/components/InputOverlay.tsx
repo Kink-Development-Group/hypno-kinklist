@@ -19,6 +19,9 @@ const InputOverlay: React.FC = () => {
   const [currentKink, setCurrentKink] = useState<Selection | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
+  // State für Tooltip-Anzeige im Modal
+  const [showTooltip, setShowTooltip] = useState(false);
+
   // Number of kinks to show in previous/next sections
   const numPrev = 3;
   const numNext = 3;
@@ -284,22 +287,27 @@ const InputOverlay: React.FC = () => {
                   ? cat.descriptions[kinkIdx]
                   : undefined;
               if (description) {
-                // Tooltip im Modal immer inline anzeigen
                 return (
                   <span className="kink-tooltip kink-tooltip-overlay">
                     <span
                       className="kink-tooltip-icon"
                       tabIndex={0}
                       aria-label="Beschreibung anzeigen"
+                      onMouseEnter={() => setShowTooltip(true)}
+                      onFocus={() => setShowTooltip(true)}
+                      onMouseLeave={() => setShowTooltip(false)}
+                      onBlur={() => setShowTooltip(false)}
                     >
                       ?
                     </span>
-                    <span
-                      className="kink-tooltip-text kink-tooltip-text-overlay"
-                      tabIndex={-1}
-                    >
-                      {description}
-                    </span>
+                    {showTooltip && (
+                      <span
+                        className="kink-tooltip-text kink-tooltip-text-overlay"
+                        tabIndex={-1}
+                      >
+                        {description}
+                      </span>
+                    )}
                   </span>
                 );
               }
