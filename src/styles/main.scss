@@ -886,16 +886,17 @@ table {
     background-color: var(--input-bg-color);
     color: var(--text-color);
     width: 100%;
-    max-width: 500px;
-    height: calc(100vh - 120px);
-    max-height: 600px;
+    min-width: 0;
+    max-width: 100%;
+    height: 60vh;
+    min-height: 320px;
     padding: 16px;
     margin-bottom: 16px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
-    resize: none;
+    resize: vertical;
     font-family: "Courier New", monospace;
-    font-size: 14px;
+    font-size: 1.08rem;
     line-height: 1.5;
     box-shadow: var(--popup-shadow);
     transition: all 0.3s ease;
@@ -936,18 +937,35 @@ table {
 
 // EditOverlay Modal Styles
 .edit-overlay-content {
-  min-width: 420px;
-  max-width: 90vw;
-  min-height: 340px;
   background: var(--popup-bg-color);
-  box-shadow: var(--popup-shadow);
+  width: 98%;
+  max-width: 1000px;
+  min-width: 320px;
+  padding: 36px 32px 28px 32px;
   border-radius: 18px;
-  padding: 2.5rem 2rem 1.5rem 2rem;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.18),
+    var(--popup-shadow);
+  text-align: left;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 1.5rem;
-  position: relative;
+  gap: 18px;
+  animation: fadeIn 0.3s cubic-bezier(0.4, 1.4, 0.6, 1);
+}
+
+@media (max-width: 1100px) {
+  .edit-overlay-content {
+    max-width: 95vw;
+  }
+}
+
+@media (max-width: 700px) {
+  .edit-overlay-content {
+    max-width: 99vw;
+    padding: 16px 4vw 16px 4vw;
+  }
 }
 
 .edit-overlay-content h2 {
@@ -959,22 +977,28 @@ table {
 }
 
 .edit-overlay-content textarea {
-  min-height: 180px;
-  resize: vertical;
   width: 100%;
-  padding: 1rem;
-  font-size: 1.1rem;
-  border-radius: 10px;
-  border: 1.5px solid var(--border-color);
-  background: var(--input-bg-color);
-  color: var(--text-color);
+  min-width: 0;
+  max-width: 100%;
+  min-height: 320px;
+  height: 60vh;
+  font-family: monospace;
+  font-size: 1.08rem;
+  padding: 14px 12px;
+  border-radius: 8px;
+  border: 1px solid #bbb;
+  resize: vertical;
   box-sizing: border-box;
-  margin-bottom: 0.5rem;
-  transition: border-color 0.2s;
+  background: var(--input-bg-color, #fff);
+  color: var(--text-color, #222);
 }
-.edit-overlay-content textarea:focus {
-  outline: none;
-  border-color: var(--header-bg-color);
+
+@media (max-width: 700px) {
+  .edit-overlay-content textarea {
+    min-width: 0;
+    font-size: 0.98rem;
+    padding: 10px 4px;
+  }
 }
 
 .edit-overlay-actions {
