@@ -11,10 +11,12 @@
   backdrop-filter: blur(3px);
   visibility: hidden;
   opacity: 0;
-  transition: visibility 0.3s ease, opacity 0.3s ease;
+  transition:
+    visibility 0.3s ease,
+    opacity 0.3s ease;
   transform: translateY(-10px);
   pointer-events: none;
-  
+
   &.visible {
     visibility: visible;
     opacity: 1;
@@ -29,4 +31,100 @@
 // Überschreibt die bestehende Overlay-Klasse mit den gemeinsamen Eigenschaften
 .overlay {
   @extend .overlay-common;
+}
+
+.modal-content {
+  background: var(--popup-bg-color);
+  color: var(--text-color);
+  border-radius: 10px;
+  box-shadow: var(--popup-shadow);
+  padding: 32px 24px 24px 24px;
+  min-width: 280px;
+  max-width: 90vw;
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  h2 {
+    margin-top: 0;
+    color: var(--error-color);
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+  }
+  p {
+    margin-bottom: 20px;
+    font-size: 1rem;
+  }
+  .btn {
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+    padding: 8px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition:
+      background 0.2s,
+      transform 0.1s;
+    &:hover {
+      background: var(--button-hover-color);
+      transform: translateY(-2px) scale(1.04);
+    }
+  }
+}
+
+// Modal für Fehler
+.error-modal {
+  h2 {
+    color: var(--error-color);
+  }
+  .btn-primary {
+    background: var(--error-color);
+    color: #fff;
+    &:hover {
+      background: #c62828;
+    }
+  }
+}
+
+// Modal für Name-Eingabe
+.name-modal {
+  h2 {
+    color: var(--button-bg-color);
+    margin-bottom: 18px;
+  }
+  .modal-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    outline: none;
+    transition: border 0.2s;
+    background: var(--input-bg-color);
+    color: var(--text-color);
+    box-sizing: border-box;
+    &:focus {
+      border-color: var(--button-bg-color);
+      box-shadow: 0 0 0 2px rgba(73, 128, 174, 0.15);
+    }
+  }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    width: 100%;
+    margin-top: 8px;
+  }
+  .btn-primary {
+    background: var(--button-bg-color);
+    color: #fff;
+    &:hover {
+      background: var(--button-hover-color);
+    }
+  }
 }

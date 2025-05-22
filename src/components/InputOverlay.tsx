@@ -11,12 +11,16 @@ const InputOverlay: React.FC = () => {
     setIsInputOverlayOpen,
     popupIndex,
     setPopupIndex,
+    kinks,
   } = useKinklist();
 
   const [previousKinks, setPreviousKinks] = useState<React.ReactNode[]>([]);
   const [nextKinks, setNextKinks] = useState<React.ReactNode[]>([]);
   const [currentKink, setCurrentKink] = useState<Selection | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+
+  // State für Tooltip-Anzeige im Modal
+  const [showTooltip, setShowTooltip] = useState(false);
 
   // Number of kinks to show in previous/next sections
   const numPrev = 3;
@@ -35,118 +39,135 @@ const InputOverlay: React.FC = () => {
   }, [isInputOverlayOpen]);
 
   // Handle showing previous kink
-  const handleShowPrev = useCallback((skip = 1) => {
-    let newIndex = (popupIndex - skip + selection.length) % selection.length;
-    setPopupIndex(newIndex);
-  }, [popupIndex, selection.length, setPopupIndex]);
+  const handleShowPrev = useCallback(
+    (skip = 1) => {
+      let newIndex = (popupIndex - skip + selection.length) % selection.length;
+      setPopupIndex(newIndex);
+    },
+    [popupIndex, selection.length, setPopupIndex],
+  );
 
   // Handle showing next kink
-  const handleShowNext = useCallback((skip = 1) => {
-    let newIndex = (popupIndex + skip) % selection.length;
-    setPopupIndex(newIndex);
-  }, [popupIndex, selection.length, setPopupIndex]);
+  const handleShowNext = useCallback(
+    (skip = 1) => {
+      let newIndex = (popupIndex + skip) % selection.length;
+      setPopupIndex(newIndex);
+    },
+    [popupIndex, selection.length, setPopupIndex],
+  );
 
   // Handle level change for current kink
-  const handleLevelChange = useCallback((levelName: string) => {
-    // Update the kink value
-    if (currentKink) {
-      // Update the selection in the context
-      const updatedSelection = selection.map(item => {
-        if (
-          item.category === currentKink.category && 
-          item.kink === currentKink.kink && 
-          item.field === currentKink.field
-        ) {
-          return { ...item, value: levelName };
-        }
-        return item;
-      });
-      
-      // Update current kink
-      setCurrentKink({
-        ...currentKink,
-        value: levelName
-      });
-      
-      // Update global selection
-      setSelection(updatedSelection);
-      
-      // Move to next kink
-      setPopupIndex((current) => (current + 1) % selection.length);
-    }
-  }, [currentKink, selection, setSelection, setPopupIndex]);
+  const handleLevelChange = useCallback(
+    (levelName: string) => {
+      // Update the kink value
+      if (currentKink) {
+        // Update the selection in the context
+        const updatedSelection = selection.map((item) => {
+          if (
+            item.category === currentKink.category &&
+            item.kink === currentKink.kink &&
+            item.field === currentKink.field
+          ) {
+            return { ...item, value: levelName };
+          }
+          return item;
+        });
+
+        // Update current kink
+        setCurrentKink({
+          ...currentKink,
+          value: levelName,
+        });
+
+        // Update global selection
+        setSelection(updatedSelection);
+
+        // Move to next kink
+        setPopupIndex((current) => (current + 1) % selection.length);
+      }
+    },
+    [currentKink, selection, setSelection, setPopupIndex],
+  );
 
   // Create a kink element for the primary view
-  const generatePrimary = useCallback((kink: Selection) => {
-    if (!kink) return null;
-    
-    return (
-      <div 
-        key={`${kink.category}-${kink.kink}-${kink.field}`}
-        role="radiogroup"
-        aria-label={`Auswahloptionen für ${kink.kink}`}
-      >
-        {Object.entries(levels).map(([levelName, level], index) => {
-          const isSelected = kink.value === levelName;
-          
-          return (
-            <div 
-              key={levelName}
-              className={`big-choice ${isSelected ? "selected" : ""}`}
-              onClick={() => handleLevelChange(levelName)}
-              role="radio"
-              aria-checked={isSelected ? "true" : "false"}
-              tabIndex={isSelected ? 0 : -1}
-            >
-              <span 
-                className={`choice ${level.class}`} 
-                aria-hidden="true"
-              />
-              {levelName}
-              <span className="btn-num-text" aria-hidden="true">{index}</span>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }, [levels, handleLevelChange]);
+  const generatePrimary = useCallback(
+    (kink: Selection) => {
+      if (!kink) return null;
+
+      return (
+        <div
+          key={`${kink.category}-${kink.kink}-${kink.field}`}
+          role="radiogroup"
+          aria-label={`Auswahloptionen für ${kink.kink}`}
+        >
+          {Object.entries(levels).map(([levelName, level], index) => {
+            const isSelected = kink.value === levelName;
+
+            return (
+              <div
+                key={levelName}
+                className={`big-choice ${isSelected ? "selected" : ""}`}
+                onClick={() => handleLevelChange(levelName)}
+                role="radio"
+                aria-checked={isSelected ? "true" : "false"}
+                tabIndex={isSelected ? 0 : -1}
+              >
+                <span className={`choice ${level.class}`} aria-hidden="true" />
+                {levelName}
+                <span className="btn-num-text" aria-hidden="true">
+                  {index}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      );
+    },
+    [levels, handleLevelChange],
+  );
 
   // Create a kink element for the secondary (previous/next) view
-  const generateSecondary = useCallback((kink: Selection, index: number, onClick: () => void) => {
-    if (!kink) return null;
-    
-    return (
-      <div 
-        key={`${kink.category}-${kink.kink}-${kink.field}-${index}`}
-        className="kink-simple"
-        onClick={onClick}
-        role="button"
-        tabIndex={0}
-        aria-label={`Zu Kink ${kink.kink} gehen`}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            onClick();
-          }
-        }}
-      >
-        <span 
-          className={`choice ${levels[kink.value]?.class}`} 
-          aria-hidden="true"
-        />
-        <span className="txt-category">{kink.category}</span>
-        {kink.showField && <span className="txt-field">{kink.field}</span>}
-        <span className="txt-kink">{kink.kink}</span>
-      </div>
-    );
-  }, [levels]);
+  const generateSecondary = useCallback(
+    (kink: Selection, index: number, onClick: () => void) => {
+      if (!kink) return null;
+
+      return (
+        <div
+          key={`${kink.category}-${kink.kink}-${kink.field}-${index}`}
+          className="kink-simple"
+          onClick={onClick}
+          role="button"
+          tabIndex={0}
+          aria-label={`Zu Kink ${kink.kink} gehen`}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onClick();
+            }
+          }}
+        >
+          <span
+            className={`choice ${levels[kink.value]?.class}`}
+            aria-hidden="true"
+          />
+          <span className="txt-category">{kink.category}</span>
+          {kink.showField && <span className="txt-field">{kink.field}</span>}
+          <span className="txt-kink">{kink.kink}</span>
+        </div>
+      );
+    },
+    [levels],
+  );
 
   // Close when clicking on the overlay background
-  const handleOverlayClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      handleClose();
-    }
-  }, [handleClose]);
+  const handleOverlayClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (e.target === e.currentTarget) {
+        handleClose();
+      }
+    },
+    [handleClose],
+  );
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -185,7 +206,14 @@ const InputOverlay: React.FC = () => {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isInputOverlayOpen, levels, handleShowPrev, handleShowNext, handleLevelChange, handleClose]);
+  }, [
+    isInputOverlayOpen,
+    levels,
+    handleShowPrev,
+    handleShowNext,
+    handleLevelChange,
+    handleClose,
+  ]);
 
   // Update content when popup index changes
   useEffect(() => {
@@ -200,14 +228,8 @@ const InputOverlay: React.FC = () => {
     for (let i = numPrev; i > 0; i--) {
       const prevIndex = (popupIndex - i + selection.length) % selection.length;
       const prevKink = selection[prevIndex];
-      
-      prev.push(
-        generateSecondary(
-          prevKink, 
-          i, 
-          () => handleShowPrev(i)
-        )
-      );
+
+      prev.push(generateSecondary(prevKink, i, () => handleShowPrev(i)));
     }
     setPreviousKinks(prev);
 
@@ -216,23 +238,25 @@ const InputOverlay: React.FC = () => {
     for (let i = 1; i <= numNext; i++) {
       const nextIndex = (popupIndex + i) % selection.length;
       const nextKink = selection[nextIndex];
-      
-      next.push(
-        generateSecondary(
-          nextKink, 
-          i, 
-          () => handleShowNext(i)
-        )
-      );
+
+      next.push(generateSecondary(nextKink, i, () => handleShowNext(i)));
     }
     setNextKinks(next);
-  }, [popupIndex, selection, numPrev, numNext, generateSecondary, handleShowPrev, handleShowNext]);
+  }, [
+    popupIndex,
+    selection,
+    numPrev,
+    numNext,
+    generateSecondary,
+    handleShowPrev,
+    handleShowNext,
+  ]);
 
   if (!currentKink) return null;
 
   return (
-    <div 
-      id="InputOverlay" 
+    <div
+      id="InputOverlay"
       className={`overlay ${isInputOverlayOpen ? "visible" : ""}`}
       onClick={handleOverlayClick}
       ref={overlayRef}
@@ -247,20 +271,57 @@ const InputOverlay: React.FC = () => {
         </div>
         <div id="InputCurrent" aria-live="polite">
           <h2 id="InputCategory">{currentKink.category}</h2>
-          <h3 id="InputField">
+          <h3 id="InputField" className="input-kink-with-tooltip">
             {currentKink.showField ? `(${currentKink.field}) ` : ""}
-            {currentKink.kink}
+            <span>{currentKink.kink}</span>
+            {/* Tooltip für Beschreibung, falls vorhanden */}
+            {(() => {
+              const cat = kinks[currentKink.category];
+              const kinkIdx = cat?.kinks?.indexOf(currentKink.kink);
+              const description =
+                cat &&
+                kinkIdx !== undefined &&
+                kinkIdx >= 0 &&
+                cat.descriptions &&
+                cat.descriptions[kinkIdx]
+                  ? cat.descriptions[kinkIdx]
+                  : undefined;
+              if (description) {
+                return (
+                  <span className="kink-tooltip kink-tooltip-overlay">
+                    <span
+                      className="kink-tooltip-icon"
+                      tabIndex={0}
+                      aria-label="Beschreibung anzeigen"
+                      onMouseEnter={() => setShowTooltip(true)}
+                      onFocus={() => setShowTooltip(true)}
+                      onMouseLeave={() => setShowTooltip(false)}
+                      onBlur={() => setShowTooltip(false)}
+                    >
+                      ?
+                    </span>
+                    {showTooltip && (
+                      <span
+                        className="kink-tooltip-text kink-tooltip-text-overlay"
+                        tabIndex={-1}
+                      >
+                        {description}
+                      </span>
+                    )}
+                  </span>
+                );
+              }
+              return null;
+            })()}
           </h3>
-          <button 
-            className="closePopup" 
+          <button
+            className="closePopup"
             onClick={handleClose}
             aria-label="Schließen"
           >
             &times;
           </button>
-          <div id="InputValues">
-            {generatePrimary(currentKink)}
-          </div>
+          <div id="InputValues">{generatePrimary(currentKink)}</div>
         </div>
         <div id="InputNext" aria-label="Nächste Kinks">
           {nextKinks}
