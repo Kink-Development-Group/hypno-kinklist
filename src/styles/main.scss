@@ -211,7 +211,7 @@ table {
     border-bottom: solid var(--border-color) 1px;
     border-right: solid var(--border-color) 1px;
     margin: 0;
-    padding: 10px 15px; // Konsistentes Padding
+    padding: 10px 10px; // Konsistentes Padding
     background-color: var(--table-row-even);
     transition: background-color 0.2s ease;
     word-wrap: break-word; // Erlaubt Wortumbrüche bei Bedarf

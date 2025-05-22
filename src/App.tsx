@@ -123,7 +123,7 @@ const defaultKinksText = `#Basics
 ? I like the sensation or appearance of my eyes rolling back during hypnosis.
 * Being submissive
 ? I enjoy taking a submissive role, following instructions and surrendering control.
-* Receiving Dominance
+* Subject Dominance
 ? I like when the hypnotist takes charge, asserting authority and guiding the session.
 * Talking while under
 ? I am comfortable or enjoy speaking, answering questions, or roleplaying while in trance.
@@ -162,7 +162,7 @@ const defaultKinksText = `#Basics
 ? Gestures or hand signals used to direct attention or signal suggestions.
 
 #Inductions
-(General)
+(Hypnotist, Subject)
 * With slow speaking
 ? Inductions delivered in a slow, calming voice to promote relaxation.
 * With faster speech
@@ -199,7 +199,7 @@ const defaultKinksText = `#Basics
 ? Rapid techniques that trigger trance almost immediately, often with a single cue.
 
 #Emotion Play
-(I enjoy feeling or making someone feel…)
+(Hypnotist, Subject)
 * Beautiful and sensuous
 ? Feeling attractive, desired, and deeply in touch with sensuality during trance.
 * Emotionless and empty
@@ -249,7 +249,7 @@ const defaultKinksText = `#Basics
 ? Responding to direct verbal instructions to return to full consciousness.
 
 #Suggestions 1
-(General)
+(Hypnotist, Subject)
 * Post hypnotic suggestions
 ? Instructions given during trance that take effect after the session ends.
 * Catalepsy
@@ -314,7 +314,7 @@ const defaultKinksText = `#Basics
 ? Achieving orgasm solely through hypnotic suggestion, without physical stimulation.
 
 #Suggestions 2
-(General)
+(Hypnotist, Subject)
 * Feminization
 ? Experiencing or adopting feminine traits, behaviors, or identity in trance.
 * Masculinization

@@ -31,7 +31,7 @@ const KinkCategory: React.FC<
                 {field}
               </th>
             ))}
-            <th scope="col">Kink</th>
+            <th scope="col"></th>
           </tr>
         </thead>
         <tbody>
