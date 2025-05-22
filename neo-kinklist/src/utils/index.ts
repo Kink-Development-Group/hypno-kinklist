@@ -1,5 +1,4 @@
 import { KinksData, LevelsData, Selection } from '../types';
-import axios from 'axios';
 
 export const strToClass = (str: string): string => {
   let className = "";

@@ -56,38 +56,39 @@ const InputList: React.FC = () => {
 
     setColumns(newColumns);
   }, [kinks, columnCount]);
-
   // Helper function to get column class based on number of columns
   const getColClass = (cols: number): string => {
     const colClasses: Record<number, string> = {
-      1: '100',
-      2: '50',
-      3: '33',
-      4: '25'
+      1: 'grid-col-12',
+      2: 'grid-col-6', 
+      3: 'grid-col-4',
+      4: 'grid-col-3'
     };
     
-    return colClasses[cols] || '100';
+    return colClasses[cols] || 'grid-col-12';
   };
 
   return (
-    <div id="InputList">
-      {columns.map((columnCategories, index) => (
-        <div 
-          key={index} 
-          className={`col col${getColClass(columnCount)}`}
-          role="region"
-          aria-label={`Spalte ${index + 1} von ${columnCount}`}
-        >
-          {columnCategories.map(catName => (
-            <KinkCategory 
-              key={catName}
-              name={catName}
-              fields={kinks[catName].fields}
-              kinks={kinks[catName].kinks}
-            />
-          ))}
-        </div>
-      ))}
+    <div id="InputList" className="grid-container">
+      <div className="grid-row">
+        {columns.map((columnCategories, index) => (
+          <div 
+            key={index} 
+            className={getColClass(columnCount)}
+            role="region"
+            aria-label={`Spalte ${index + 1} von ${columnCount}`}
+          >
+            {columnCategories.map(catName => (
+              <KinkCategory 
+                key={catName}
+                name={catName}
+                fields={kinks[catName].fields}
+                kinks={kinks[catName].kinks}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

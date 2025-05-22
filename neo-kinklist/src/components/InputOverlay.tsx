@@ -1,23 +1,23 @@
-import React, { useState, useEffect, useCallback, memo, useRef } from 'react';
-import { useKinklist } from '../context/KinklistContext';
-import { Selection } from '../types';
+import React, { useState, useEffect, useCallback, memo, useRef } from "react";
+import { useKinklist } from "../context/KinklistContext";
+import { Selection } from "../types";
 
 const InputOverlay: React.FC = () => {
-  const { 
-    selection, 
+  const {
+    selection,
     setSelection,
-    levels, 
-    isInputOverlayOpen, 
-    setIsInputOverlayOpen, 
-    popupIndex, 
-    setPopupIndex 
+    levels,
+    isInputOverlayOpen,
+    setIsInputOverlayOpen,
+    popupIndex,
+    setPopupIndex,
   } = useKinklist();
-  
+
   const [previousKinks, setPreviousKinks] = useState<React.ReactNode[]>([]);
   const [nextKinks, setNextKinks] = useState<React.ReactNode[]>([]);
   const [currentKink, setCurrentKink] = useState<Selection | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
-  
+
   // Number of kinks to show in previous/next sections
   const numPrev = 3;
   const numNext = 3;
@@ -92,8 +92,9 @@ const InputOverlay: React.FC = () => {
           return (
             <div 
               key={levelName}
-              className={`big-choice ${isSelected ? 'selected' : ''}`}
-              onClick={() => handleLevelChange(levelName)}              role="radio"
+              className={`big-choice ${isSelected ? "selected" : ""}`}
+              onClick={() => handleLevelChange(levelName)}
+              role="radio"
               aria-checked={isSelected ? "true" : "false"}
               tabIndex={isSelected ? 0 : -1}
             >
@@ -123,7 +124,7 @@ const InputOverlay: React.FC = () => {
         tabIndex={0}
         aria-label={`Zu Kink ${kink.kink} gehen`}
         onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
+          if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             onClick();
           }
@@ -154,13 +155,13 @@ const InputOverlay: React.FC = () => {
       if (e.altKey || e.shiftKey || e.ctrlKey) return;
 
       // Up arrow - previous
-      if (e.key === 'ArrowUp') {
+      if (e.key === "ArrowUp") {
         handleShowPrev();
         e.preventDefault();
       }
 
       // Down arrow - next
-      if (e.key === 'ArrowDown') {
+      if (e.key === "ArrowDown") {
         handleShowNext();
         e.preventDefault();
       }
@@ -175,14 +176,14 @@ const InputOverlay: React.FC = () => {
       }
 
       // Escape key to close the overlay
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         handleClose();
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isInputOverlayOpen, levels, handleShowPrev, handleShowNext, handleLevelChange, handleClose]);
 
@@ -232,7 +233,7 @@ const InputOverlay: React.FC = () => {
   return (
     <div 
       id="InputOverlay" 
-      className={`overlay ${isInputOverlayOpen ? 'visible' : ''}`}
+      className={`overlay ${isInputOverlayOpen ? "visible" : ""}`}
       onClick={handleOverlayClick}
       ref={overlayRef}
       role="dialog"
@@ -247,7 +248,7 @@ const InputOverlay: React.FC = () => {
         <div id="InputCurrent" aria-live="polite">
           <h2 id="InputCategory">{currentKink.category}</h2>
           <h3 id="InputField">
-            {currentKink.showField ? `(${currentKink.field}) ` : ''}
+            {currentKink.showField ? `(${currentKink.field}) ` : ""}
             {currentKink.kink}
           </h3>
           <button 

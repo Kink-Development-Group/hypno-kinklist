@@ -1,10 +1,12 @@
 import React from 'react';
 import { KinklistProvider, useKinklist } from './context/KinklistContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import Legend from './components/Legend';
 import Export from './components/Export';
 import InputList from './components/InputList';
 import EditOverlay from './components/EditOverlay';
 import InputOverlay from './components/InputOverlay';
+import ThemeToggle from './components/ThemeToggle';
 import './styles/main.scss';
 
 // Default kinks text
@@ -209,15 +211,18 @@ const defaultKinksText = `#Basics
 
 const App: React.FC = () => {
   return (
-    <KinklistProvider initialKinksText={defaultKinksText}>
-      <AppContent />
-    </KinklistProvider>
+    <ThemeProvider>
+      <KinklistProvider initialKinksText={defaultKinksText}>
+        <AppContent />
+      </KinklistProvider>
+    </ThemeProvider>
   );
 };
 
 // Separate component to use context
 const AppContent: React.FC = () => {
   const { setIsEditOverlayOpen, setIsInputOverlayOpen } = useKinklist();
+  const { theme, toggleTheme } = useTheme();
 
   const handleEditClick = () => {
     setIsEditOverlayOpen(true);
@@ -228,20 +233,41 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="widthWrapper">
-      <button type='button' title='edit' id="Edit" onClick={handleEditClick}></button>
-      <h1>Hypno Kink list</h1>
+    <div className="container">
+      <div className="header-controls">
+        <button type='button' title='edit' id="Edit" onClick={handleEditClick} aria-label="Bearbeiten"></button>
+        <h1>Hypno Kink List</h1>
+        <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+      </div>
       
-      <Legend />
-      
-      <Export />
-      
-      <button type='button' title='start' id="StartBtn" onClick={handleStartClick}></button>
-      
-      <InputList />
-      
-      <EditOverlay />
-      
+      <div className="grid-container">
+        <div className="grid-row">
+          <div className="grid-col-12">
+            <Legend />
+          </div>
+        </div>
+        
+        <div className="grid-row">
+          <div className="grid-col-12">
+            <Export />
+          </div>
+        </div>
+        
+        <button 
+          type='button' 
+          title='start' 
+          id="StartBtn" 
+          onClick={handleStartClick}
+          aria-label="Starten"
+        ></button>
+        
+        <div className="grid-row">
+          <div className="grid-col-12">
+            <InputList />
+          </div>
+        </div>
+      </div>
+        <EditOverlay />
       <InputOverlay />
     </div>
   );
