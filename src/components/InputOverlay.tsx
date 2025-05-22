@@ -11,6 +11,7 @@ const InputOverlay: React.FC = () => {
     setIsInputOverlayOpen,
     popupIndex,
     setPopupIndex,
+    kinks,
   } = useKinklist();
 
   const [previousKinks, setPreviousKinks] = useState<React.ReactNode[]>([]);
@@ -270,6 +271,37 @@ const InputOverlay: React.FC = () => {
           <h3 id="InputField">
             {currentKink.showField ? `(${currentKink.field}) ` : ""}
             {currentKink.kink}
+            {/* Tooltip für Beschreibung, falls vorhanden */}
+            {(() => {
+              // Hole die Beschreibung aus dem Kontext (kinks)
+              const cat = kinks[currentKink.category];
+              const kinkIdx = cat?.kinks?.indexOf(currentKink.kink);
+              const description =
+                cat &&
+                kinkIdx !== undefined &&
+                kinkIdx >= 0 &&
+                cat.descriptions &&
+                cat.descriptions[kinkIdx]
+                  ? cat.descriptions[kinkIdx]
+                  : undefined;
+              if (description) {
+                return (
+                  <span className="kink-tooltip">
+                    <span
+                      className="kink-tooltip-icon"
+                      tabIndex={0}
+                      aria-label="Beschreibung anzeigen"
+                    >
+                      ?
+                    </span>
+                    <span className="kink-tooltip-text" tabIndex={-1}>
+                      {description}
+                    </span>
+                  </span>
+                );
+              }
+              return null;
+            })()}
           </h3>
           <button
             className="closePopup"

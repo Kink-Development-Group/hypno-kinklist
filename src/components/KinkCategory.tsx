@@ -6,9 +6,12 @@ interface KinkCategoryProps {
   name: string;
   fields: string[];
   kinks: string[];
+  descriptions?: string[];
 }
 
-const KinkCategory: React.FC<KinkCategoryProps> = ({ name, fields, kinks }) => {
+const KinkCategory: React.FC<
+  KinkCategoryProps & { descriptions?: string[] }
+> = ({ name, fields, kinks, descriptions }) => {
   return (
     <div
       className={`kinkCategory cat-${strToClass(name)}`}
@@ -32,12 +35,17 @@ const KinkCategory: React.FC<KinkCategoryProps> = ({ name, fields, kinks }) => {
           </tr>
         </thead>
         <tbody>
-          {kinks.map((kink) => (
+          {kinks.map((kink, idx) => (
             <KinkRow
               key={kink}
               categoryName={name}
               kinkName={kink}
               fields={fields}
+              description={
+                descriptions && descriptions[idx]
+                  ? descriptions[idx]
+                  : undefined
+              }
             />
           ))}
         </tbody>

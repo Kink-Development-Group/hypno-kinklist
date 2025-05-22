@@ -96,6 +96,7 @@ const InputList: React.FC = () => {
                   name={catName}
                   fields={cat.fields}
                   kinks={cat.kinks}
+                  descriptions={cat.descriptions}
                 />
               );
             })}
