@@ -284,6 +284,7 @@ const InputOverlay: React.FC = () => {
                   ? cat.descriptions[kinkIdx]
                   : undefined;
               if (description) {
+                // Tooltip im Modal immer inline anzeigen
                 return (
                   <span className="kink-tooltip kink-tooltip-overlay">
                     <span

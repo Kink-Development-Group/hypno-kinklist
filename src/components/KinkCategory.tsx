@@ -46,6 +46,7 @@ const KinkCategory: React.FC<
                   ? descriptions[idx]
                   : undefined
               }
+              forceInlineTooltip={false}
             />
           ))}
         </tbody>
