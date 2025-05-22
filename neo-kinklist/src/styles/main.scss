@@ -165,7 +165,8 @@ table {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-
+  table-layout: fixed; // Sorgt für konsistente Spaltenbreiten über alle Tabellen
+  max-width: 100%; // Verhindert, dass Tabellen breiter als ihr Container werden
   th {
     border: solid var(--border-color) 1px;
     border-right: none;
@@ -175,49 +176,61 @@ table {
     color: var(--table-header-text);
     font-weight: 600;
     text-align: left;
-
+    white-space: normal; // Erlaubt Textumbruch in Überschriften wenn nötig
+    
     &.choicesCol {
       box-sizing: border-box;
-      width: 140px;
+      width: 150px;
+      min-width: 150px; // Konsistente Breite für alle Auswahlspalten
+      max-width: 150px;
     }
 
     & + th {
       border-left: none;
     }
-
+    
     &:last-child {
       border-right: solid var(--border-color) 1px;
+      width: auto; // Letzte Spalte nimmt verfügbaren Platz ein
+      min-width: 120px;
     }
   }
-
+  
   td {
     border-left: solid var(--border-color) 1px;
     border-bottom: solid var(--border-color) 1px;
     border-right: solid var(--border-color) 1px;
     margin: 0;
-    padding: 10px 15px;
+    padding: 10px 15px; // Konsistentes Padding
     background-color: var(--table-row-even);
     transition: background-color 0.2s ease;
+    word-wrap: break-word; // Erlaubt Wortumbrüche bei Bedarf
+    overflow-wrap: break-word; // Moderne Alternative zu word-wrap
+    white-space: normal; // Verhindert nowrap-Verhalten
 
     & + td {
       border-left-style: none;
     }
   }
-
+  
+  td.kink-name {
+    width: auto; // Passt sich dem verfügbaren Platz an
+    min-width: 120px; // Sorgt für eine Mindestbreite
+  }
   tr {
-    &:first-child, &:first-of-type {
-      td {
-        white-space: nowrap; // Verhindert Umbrüche in der ersten Zeile
-      }
+    &:hover td {
+      background-color: rgba(73, 128, 174, 0.05);
     }
+  }
+
+  tr:first-child td,
+  tr:first-of-type td {
+    padding-top: 15px;
+    padding-bottom: 15px;
   }
 
   tr:nth-child(odd) td {
     background-color: var(--table-row-odd);
-  }
-
-  tr:hover td {
-    background-color: rgba(73, 128, 174, 0.05);
   }
 }
 
@@ -226,6 +239,8 @@ table {
   box-sizing: border-box;
   width: 18px;
   height: 18px;
+  min-width: 18px; // Verhindert Zusammendrücken
+  min-height: 18px; // Verhindert Zusammendrücken
   opacity: 0.35;
   overflow: hidden;
   text-indent: 100px;
@@ -239,13 +254,10 @@ table {
   padding: 0;
   transition: all 0.2s ease-in-out;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-
+  flex-shrink: 0; // Wichtig: Verhindert, dass die Kreise zusammengedrückt werden
+  
   .choices & {
     transition: all 0.3s ease-in-out;
-  }
-
-  & + .choice {
-    margin-left: 5px;
   }
 
   .choices &:hover {
@@ -260,13 +272,16 @@ table {
   }
 }
 
-// Style für choices container - Sorgt dafür, dass die Auswahlkreise horizontal angezeigt werden
+// Style für choices container
 .choices {
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  min-width: 120px; // Mindestbreite, um sicherzustellen, dass Platz für alle Kreise vorhanden ist
-  white-space: nowrap; // Verhindert Umbrüche innerhalb der Auswahlkreise
+  min-width: 120px;
+  max-width: 150px; // Begrenzt die maximale Breite für Konsistenz
+  width: 100%; // Füllt die Zelle aus
+  gap: 4px; // Konsistenter Abstand zwischen allen Auswahlkreisen
+  justify-content: flex-start; // Links ausrichten
 }
 
 // Choice color styles
@@ -434,14 +449,18 @@ table {
     display: flex;
     align-items: center;
     margin: 6px 12px;
-    white-space: nowrap;
+    
+    .choice {
+      min-width: 18px;
+      min-height: 18px;
+      flex-shrink: 0; // Verhindert Zusammendrücken
+    }
   }
   
   .legend-text {
-    margin-left: 5px;
+    margin-left: 8px; // Konsistent mit anderen Abständen
     font-size: 14px;
     color: var(--text-color);
-    white-space: nowrap;
   }
   
   // Responsive Anpassungen
@@ -910,9 +929,7 @@ table {
         margin-top: 3px;
         margin-bottom: 0;
         font-size: 14px;
-      }
-
-      #InputValues .big-choice {
+      }      #InputValues .big-choice {
         padding: 10px;
         background-color: var(--popup-bg-color);
         border-radius: 4px;
@@ -931,7 +948,9 @@ table {
           padding: 8px;
           border: solid var(--border-color) 2px;
           background-color: rgba(255, 255, 255, 1);
-        }        .btn-num-text {
+        }
+        
+        .btn-num-text {
           margin-left: auto; // Ersetzt float:right mit einem flexbox-freundlichen Ansatz
           display: inline-block;
           border: solid var(--border-color) 1px;
@@ -958,12 +977,15 @@ table {
 .kink-simple {
   display: flex;
   align-items: center;
-  padding: 5px;
+  padding: 8px; // Konsistentes Padding
   margin-bottom: 5px;
   cursor: pointer;
   
   .choice {
     margin-right: 10px;
+    min-width: 18px;
+    min-height: 18px;
+    flex-shrink: 0; // Wichtig: Verhindert Kompression
   }
   
   .txt-category, .txt-field {
@@ -1000,7 +1022,10 @@ table {
   .choice {
     width: 24px;
     height: 24px;
+    min-width: 24px; // Verhindert Verzerrung
+    min-height: 24px; // Verhindert Verzerrung
     margin-right: 15px;
+    flex-shrink: 0; // Verhindert, dass der Kreis zusammengedrückt wird
   }
   
   .btn-num-text {
