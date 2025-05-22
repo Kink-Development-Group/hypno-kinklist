@@ -1,0 +1,135 @@
+// Media Queries für die Responsive-Anpassungen
+// Größere Bildschirme
+@media (min-width: 1700px) {
+  .legend-container {
+    margin-top: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .legend {
+    max-width: 80%;
+    padding: 15px;
+  }
+  
+  .action-buttons-container {
+    margin-top: 25px;
+  }
+  
+  h1 {
+    margin-bottom: 10px;
+  }
+}
+
+// Mittlere Größen
+@media (max-width: 1699px) and (min-width: 800px) {
+  .legend-container {
+    margin-top: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .legend {
+    padding: 10px 15px;
+  }
+  
+  .action-buttons-container {
+    margin-top: 20px;
+  }
+}
+
+// Tablets
+@media (max-width: 799px) and (min-width: 600px) {
+  .legend-container {
+    margin-top: 5px;
+    margin-bottom: 15px;
+  }
+  
+  .legend {
+    padding: 8px 10px;
+  }
+  
+  .action-buttons-container {
+    margin-top: 15px;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .export-container {
+    margin-bottom: 15px;
+    width: 100%;
+    max-width: 460px;
+  }
+  
+  #Export {
+    width: 100%;
+  }
+  
+  .start-button {
+    width: 100%;
+    max-width: 460px;
+  }
+}
+
+// Mobilgeräte
+@media (max-width: 599px) {
+  body {
+    font-size: 14px;
+  }
+
+  .header-controls {
+    flex-wrap: wrap;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  table {
+    min-width: 100%;
+    font-size: 13px;
+  }
+
+  table th, 
+  table td {
+    padding: 8px;
+  }
+  
+  .legend-container {
+    margin-top: 5px;
+    margin-bottom: 15px;
+  }
+  
+  .legend {
+    padding: 8px;
+    max-width: 100%;
+  }
+  
+  .action-buttons-container {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .export-container {
+    width: 100%;
+  }
+  
+  #ExportWrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  #URL {
+    width: 100%;
+    max-width: 100%;
+    font-size: 12px;
+  }
+
+  #Export {
+    width: 100%;
+  }
+  
+  .start-button {
+    width: 100%;
+  }
+}

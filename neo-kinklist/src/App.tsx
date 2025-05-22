@@ -236,16 +236,13 @@ const AppContent: React.FC = () => {
       <div className="header-controls">
         <button type='button' title='edit' id="Edit" onClick={handleEditClick} aria-label="Bearbeiten"></button>
         <h1>Hypno Kink List</h1>
-        <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-      </div>
+        <ThemeToggle theme={theme} toggleTheme={toggleTheme} />      </div>
       
       <Legend />
       
-      <div className="grid-container">
-        <div className="grid-row">
-          <div className="grid-col-12">
-            <Export />
-          </div>
+      <div className="action-buttons-container">
+        <div className="export-container">
+          <Export />
         </div>
         
         <button 
@@ -254,8 +251,13 @@ const AppContent: React.FC = () => {
           id="StartBtn" 
           onClick={handleStartClick}
           aria-label="Starten"
-        ></button>
-        
+          className="start-button"
+        >
+          <span className="button-label">Starten</span>
+        </button>
+      </div>
+      
+      <div className="grid-container">
         <div className="grid-row">
           <div className="grid-col-12">
             <InputList />
