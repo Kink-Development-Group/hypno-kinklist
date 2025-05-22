@@ -38,7 +38,7 @@ Dieses Projekt ist eine 1:1-Übersetzung des ursprünglichen jQuery-basierten Ki
 
 ## Installation
 
-```
+```bash
 npm install
 ```
 

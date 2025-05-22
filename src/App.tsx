@@ -257,10 +257,10 @@ const AppContent: React.FC = () => {
           title="start"
           id="StartBtn"
           onClick={handleStartClick}
-          aria-label="Starten"
+          aria-label="Start"
           className="start-button"
         >
-          <span className="button-label">Starten</span>
+          <span className="button-label">Start</span>
         </button>
       </div>
 

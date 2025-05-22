@@ -232,8 +232,8 @@ const Export: React.FC<ExportProps> = () => {
       setIsSuccess(true);
       setTimeout(() => setIsSuccess(false), 3000); // Hide success message after 3 seconds
     } catch (error) {
-      console.error("Fehler beim Exportieren:", error);
-      alert("Fehler beim Exportieren des Bildes.");
+      console.error("Export error:", error);
+      alert("Error exporting image.");
     } finally {
       setIsLoading(false);
     }
@@ -254,7 +254,7 @@ const Export: React.FC<ExportProps> = () => {
         disabled={isLoading}
         aria-busy={isLoading}
       >
-        Exportieren
+        Export
       </button>
       <div
         id="Loading"

@@ -101,8 +101,8 @@ const EditOverlay: React.FC = () => {
       aria-labelledby="edit-overlay-title"
     >
       <div role="document" className="edit-overlay-content">
-        <h2 id="edit-overlay-title" className="sr-only">
-          Kink Liste Bearbeiten
+        <h2 id="edit-overlay-title" className="sr-only edit-overlay-title">
+          Edit Kink List
         </h2>
         <textarea
           id="Kinks"

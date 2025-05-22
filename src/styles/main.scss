@@ -885,7 +885,7 @@ table {
     box-sizing: border-box;
     background-color: var(--input-bg-color);
     color: var(--text-color);
-    width: 90%;
+    width: 100%;
     max-width: 500px;
     height: calc(100vh - 120px);
     max-height: 600px;
@@ -932,6 +932,85 @@ table {
       transform: translateY(0);
     }
   }
+}
+
+// EditOverlay Modal Styles
+.edit-overlay-content {
+  min-width: 420px;
+  max-width: 90vw;
+  min-height: 340px;
+  background: var(--popup-bg-color);
+  box-shadow: var(--popup-shadow);
+  border-radius: 18px;
+  padding: 2.5rem 2rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1.5rem;
+  position: relative;
+}
+
+.edit-overlay-content h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  color: var(--header-bg-color);
+  text-align: center;
+}
+
+.edit-overlay-content textarea {
+  min-height: 180px;
+  resize: vertical;
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.1rem;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-color);
+  background: var(--input-bg-color);
+  color: var(--text-color);
+  box-sizing: border-box;
+  margin-bottom: 0.5rem;
+  transition: border-color 0.2s;
+}
+.edit-overlay-content textarea:focus {
+  outline: none;
+  border-color: var(--header-bg-color);
+}
+
+.edit-overlay-actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 1.2rem;
+  margin-top: 0.5rem;
+}
+
+.edit-overlay-actions button {
+  min-width: 120px;
+  padding: 0.7rem 1.2rem;
+  font-size: 1.08rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  background: var(--button-bg-color);
+  color: var(--button-text-color);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  transition: background 0.2s, transform 0.1s;
+}
+.edit-overlay-actions button:hover,
+.edit-overlay-actions button:focus {
+  background: var(--button-hover-color);
+  transform: translateY(-2px) scale(1.04);
+}
+
+.edit-overlay-actions button:last-child {
+  background: var(--error-color);
+  color: #fff;
+}
+.edit-overlay-actions button:last-child:hover,
+.edit-overlay-actions button:last-child:focus {
+  background: #c62828;
 }
 
 // Input overlay styles
