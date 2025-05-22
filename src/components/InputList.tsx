@@ -82,14 +82,23 @@ const InputList: React.FC = () => {
             role="region"
             aria-label={`Spalte ${index + 1} von ${columnCount}`}
           >
-            {columnCategories.map((catName) => (
-              <KinkCategory
-                key={catName}
-                name={catName}
-                fields={kinks[catName].fields}
-                kinks={kinks[catName].kinks}
-              />
-            ))}
+            {columnCategories.map((catName) => {
+              const cat = kinks[catName];
+              if (
+                !cat ||
+                !Array.isArray(cat.fields) ||
+                !Array.isArray(cat.kinks)
+              )
+                return null;
+              return (
+                <KinkCategory
+                  key={catName}
+                  name={catName}
+                  fields={cat.fields}
+                  kinks={cat.kinks}
+                />
+              );
+            })}
           </div>
         ))}
       </div>

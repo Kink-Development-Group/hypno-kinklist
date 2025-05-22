@@ -34,27 +34,29 @@ export const parseKinksText = (
   const newKinks: KinksData = {};
   const lines = text.replace(/\r/g, "").split("\n");
 
-  let cat: Partial<KinksData[string]> | null = null;
+  let cat: (Partial<KinksData[string]> & { descriptions?: string[] }) | null =
+    null;
   let catName: string | null = null;
+  let lastKinkIdx: number | null = null;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (!line.length) continue;
 
     if (line[0] === "#") {
-      if (catName && cat) {
-        if (!Array.isArray(cat.fields) || cat.fields.length < 1) {
-          errorHandler(catName + " does not have any fields defined!");
-          return null;
-        }
-        if (!Array.isArray(cat.kinks) || cat.kinks.length < 1) {
-          errorHandler(catName + " does not have any kinks listed!");
-          return null;
-        }
-        newKinks[catName] = cat as KinksData[string];
+      if (
+        catName &&
+        cat &&
+        Array.isArray(cat.fields) &&
+        cat.fields.length > 0 &&
+        Array.isArray(cat.kinks) &&
+        cat.kinks.length > 0
+      ) {
+        newKinks[catName] = { ...cat, name: catName } as KinksData[string];
       }
       catName = line.substring(1).trim();
-      cat = { kinks: [] };
+      cat = { kinks: [], descriptions: [] };
+      lastKinkIdx = null;
     }
 
     if (!catName) continue;
@@ -67,26 +69,33 @@ export const parseKinksText = (
           .split(",")
           .map((field) => field.trim());
       }
-    }
-
-    if (line[0] === "*") {
+    } else if (line[0] === "*") {
       const kink = line.substring(1).trim();
-      if (cat && Array.isArray(cat.kinks)) {
+      if (cat && Array.isArray(cat.kinks) && Array.isArray(cat.descriptions)) {
         cat.kinks.push(kink);
+        cat.descriptions.push(""); // Platzhalter für Beschreibung
+        lastKinkIdx = cat.kinks.length - 1;
       }
+    } else if (
+      line[0] === "?" &&
+      cat &&
+      Array.isArray(cat.descriptions) &&
+      lastKinkIdx !== null
+    ) {
+      // Beschreibung für den letzten Kink
+      cat.descriptions[lastKinkIdx] = line.substring(1).trim();
     }
   }
 
-  if (catName && cat) {
-    if (!Array.isArray(cat.fields) || cat.fields.length < 1) {
-      errorHandler(catName + " does not have any fields defined!");
-      return null;
-    }
-    if (!Array.isArray(cat.kinks) || cat.kinks.length < 1) {
-      errorHandler(catName + " does not have any kinks listed!");
-      return null;
-    }
-    newKinks[catName] = cat as KinksData[string];
+  if (
+    catName &&
+    cat &&
+    Array.isArray(cat.fields) &&
+    cat.fields.length > 0 &&
+    Array.isArray(cat.kinks) &&
+    cat.kinks.length > 0
+  ) {
+    newKinks[catName] = { ...cat, name: catName } as KinksData[string];
   }
 
   return newKinks;

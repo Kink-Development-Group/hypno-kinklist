@@ -7,6 +7,7 @@ export interface KinkCategory {
   name: string;
   fields: string[];
   kinks: string[];
+  descriptions?: string[]; // Optional: Beschreibung pro Kink (gleiche Reihenfolge wie kinks)
 }
 
 export interface LevelDefinition {
