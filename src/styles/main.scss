@@ -1021,30 +1021,39 @@ table {
   justify-content: center;
   align-items: center;
   text-align: center;
+  min-height: 100vh;
+  background: rgba(0, 0, 0, 0.70);
+  z-index: 1000;
 
   .widthWrapper {
-    background-color: var(--popup-bg-color);
-    width: 90%;
-    max-width: 600px;
-    padding: 24px;
-    border-radius: 12px;
-    box-shadow: var(--popup-shadow);
+    background: var(--popup-bg-color);
+    width: 95%;
+    max-width: 520px;
+    padding: 36px 32px 28px 32px;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), var(--popup-shadow);
     text-align: left;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+    animation: fadeIn 0.3s cubic-bezier(.4, 1.4, .6, 1);
 
     #InputCurrent {
       position: relative;
+      padding: 0 0 8px 0;
 
       .closePopup {
         position: absolute;
         top: 0;
         right: 5px;
-        border-style: none;
-        background-color: transparent;
-        font-size: 30px;
+        border: none;
+        background: transparent;
+        font-size: 32px;
         cursor: pointer;
-        outline-style: none !important;
         opacity: 0.65;
+        transition: opacity 0.2s;
 
         &:hover {
           opacity: 1;
@@ -1053,46 +1062,115 @@ table {
 
       h2 {
         text-transform: uppercase;
-        opacity: 0.6;
-        margin: 0;
+        opacity: 0.8;
+        margin: 0 0 10px 0;
+        font-size: 1.4rem;
+        letter-spacing: 1px;
+        color: var(--button-bg-color);
       }
 
       h3 {
         margin-top: 3px;
         margin-bottom: 0;
-        font-size: 14px;
+        font-size: 1rem;
+        color: var(--text-color);
+        opacity: 0.7;
       }
-      #InputValues .big-choice {
-        padding: 10px;
-        background-color: var(--popup-bg-color);
-        border-radius: 4px;
-        margin-top: 5px;
-        cursor: pointer;
 
-        &.selected {
-          font-weight: bold;
+      #InputValues {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 10px;
 
-          .choice {
-            opacity: 1;
+        .big-choice {
+          padding: 14px 18px;
+          background: var(--input-bg-color);
+          border-radius: 8px;
+          margin-top: 0;
+          cursor: pointer;
+          font-size: 1.08rem;
+          border: 1.5px solid transparent;
+          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          transition: background 0.2s, border 0.2s, box-shadow 0.2s;
+
+          &.selected {
+            font-weight: bold;
+            border: 1.5px solid var(--button-bg-color);
+            background: rgba(73, 128, 174, 0.08);
+
+            .choice {
+              opacity: 1;
+            }
+          }
+
+          &:hover {
+            border: 1.5px solid var(--button-bg-color);
+            background: rgba(73, 128, 174, 0.12);
+            box-shadow: 0 2px 8px rgba(73, 128, 174, 0.08);
+          }
+
+          .btn-num-text {
+            margin-left: auto;
+            display: inline-block;
+            border: solid var(--border-color) 1px;
+            text-align: center;
+            width: 16px;
+            border-radius: 3px;
+            background: #fff;
+            color: var(--button-bg-color);
+            font-size: 0.95em;
+            font-weight: 600;
+          }
+        }
+      }
+
+      .input-overlay-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 18px;
+
+        .btn {
+          min-width: 110px;
+          padding: 10px 0;
+          font-size: 1.08rem;
+          border-radius: 6px;
+        }
+
+        .btn-primary {
+          background: var(--button-bg-color);
+          color: #fff;
+
+          &:hover {
+            background: var(--button-hover-color);
           }
         }
 
-        &:hover {
-          padding: 8px;
-          border: solid var(--border-color) 2px;
-          background-color: rgba(255, 255, 255, 1);
-        }
+        .btn-cancel {
+          background: #e0e0e0;
+          color: #333;
 
-        .btn-num-text {
-          margin-left: auto; // Ersetzt float:right mit einem flexbox-freundlichen Ansatz
-          display: inline-block;
-          border: solid var(--border-color) 1px;
-          text-align: center;
-          width: 16px;
-          border-radius: 3px;
+          &:hover {
+            background: #bdbdbd;
+          }
         }
       }
     }
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
