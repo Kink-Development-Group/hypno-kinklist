@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "HypnoKinkList",
+  "name": "A Hypno Kink List",
+  "description": "A Hypno Kink List is a list of kinks and fetishes related to hypnosis, mind control, and trance.",
   "icons": [
     {
       "src": "favicon.ico",
