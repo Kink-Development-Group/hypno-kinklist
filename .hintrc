@@ -8,6 +8,21 @@
       {
         "aria-valid-attr-value": "off"
       }
+    ],
+    "compat-api/html": [
+      "default",
+      {
+        "ignore": [
+          "meta[name=theme-color]"
+        ]
+      }
     ]
-  }
+  },
+  "browserslist": [
+    "defaults",
+    "not ie 11",
+    "not and_ff <= 137",
+    "not firefox <= 136",
+    "not opera <= 117"
+  ]
 }
