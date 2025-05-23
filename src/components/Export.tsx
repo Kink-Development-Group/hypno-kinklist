@@ -104,6 +104,8 @@ const Export: React.FC<ExportProps> = () => {
                   choices: [] as string[],
                   colors: {} as Record<string, string>,
                   text: kinkName,
+                  hasComment: false,
+                  comment: "", // Hinzugefügt für die Kommentartext-Speicherung
                 },
               };
               column.drawStack.push(drawCall);
@@ -117,6 +119,12 @@ const Export: React.FC<ExportProps> = () => {
                 );
                 const value = selItem ? selItem.value : Object.keys(levels)[0];
                 drawCall.data.choices.push(value);
+
+                // Prüfe, ob für diesen Kink ein Kommentar existiert und speichere ihn
+                if (selItem?.comment && selItem.comment.trim() !== "") {
+                  drawCall.data.hasComment = true;
+                  drawCall.data.comment = selItem.comment; // Speichere den Kommentartext
+                }
               });
               Object.entries(levels).forEach(([name, level]) => {
                 drawCall.data.colors[name] = level.color;
@@ -176,6 +184,34 @@ const Export: React.FC<ExportProps> = () => {
               const x = drawCall.x + 5 + drawCall.data.choices.length * 20;
               const y = drawCall.y - 6;
               context.fillText(drawCall.data.text, x, y);
+
+              // Zeige Kommentar-Indikator und -Text, wenn ein Kommentar existiert
+              const hasComment = drawCall.data.hasComment;
+              if (hasComment) {
+                const commentX =
+                  x + context.measureText(drawCall.data.text).width + 10;
+
+                // Zeige Kommentar-Icon
+                context.font = "bold 12px Arial";
+                context.fillText("💬", commentX, y);
+
+                // Zeige den tatsächlichen Kommentar-Text unter dem Kink-Namen
+                if (drawCall.data.comment) {
+                  const commentY = y + 15; // Unter dem Kink-Namen
+                  context.font = "italic 10px Arial";
+                  context.fillStyle = "#666666";
+
+                  // Kürze langen Kommentar mit Ellipsis
+                  let commentText = drawCall.data.comment;
+                  if (commentText.length > 50) {
+                    commentText = commentText.substring(0, 47) + "...";
+                  }
+
+                  context.fillText(`"${commentText}"`, x + 5, commentY);
+                  context.fillStyle = "#000000"; // Zurück zur ursprünglichen Farbe
+                }
+              }
+
               for (let i = 0; i < drawCall.data.choices.length; i++) {
                 const choice = drawCall.data.choices[i];
                 const color = drawCall.data.colors[choice];

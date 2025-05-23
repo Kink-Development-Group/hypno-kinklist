@@ -23,6 +23,8 @@ interface KinklistContextType {
   setIsEditOverlayOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isInputOverlayOpen: boolean;
   setIsInputOverlayOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isCommentOverlayOpen: boolean;
+  setIsCommentOverlayOpen: React.Dispatch<React.SetStateAction<boolean>>;
   popupIndex: number;
   setPopupIndex: React.Dispatch<React.SetStateAction<number>>;
 }
@@ -52,6 +54,8 @@ export const KinklistProvider: React.FC<{
     useState<string>(initialKinksText);
   const [isEditOverlayOpen, setIsEditOverlayOpen] = useState<boolean>(false);
   const [isInputOverlayOpen, setIsInputOverlayOpen] = useState<boolean>(false);
+  const [isCommentOverlayOpen, setIsCommentOverlayOpen] =
+    useState<boolean>(false);
   const [popupIndex, setPopupIndex] = useState<number>(0);
   const errorHandler = useErrorHandler();
 
@@ -127,6 +131,8 @@ export const KinklistProvider: React.FC<{
         setIsEditOverlayOpen,
         isInputOverlayOpen,
         setIsInputOverlayOpen,
+        isCommentOverlayOpen,
+        setIsCommentOverlayOpen,
         popupIndex,
         setPopupIndex,
       }}

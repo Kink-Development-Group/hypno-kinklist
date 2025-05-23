@@ -12,6 +12,8 @@ const InputOverlay: React.FC = () => {
     popupIndex,
     setPopupIndex,
     kinks,
+    setIsCommentOverlayOpen,
+    setSelectedKink,
   } = useKinklist();
 
   const [previousKinks, setPreviousKinks] = useState<React.ReactNode[]>([]);
@@ -30,6 +32,14 @@ const InputOverlay: React.FC = () => {
   const handleClose = useCallback(() => {
     setIsInputOverlayOpen(false);
   }, [setIsInputOverlayOpen]);
+
+  // Handle opening comment overlay
+  const handleOpenComment = useCallback(() => {
+    if (currentKink) {
+      setSelectedKink(currentKink);
+      setIsCommentOverlayOpen(true);
+    }
+  }, [currentKink, setSelectedKink, setIsCommentOverlayOpen]);
 
   // Focus management - focus the overlay when it opens
   useEffect(() => {
@@ -274,6 +284,26 @@ const InputOverlay: React.FC = () => {
           <h3 id="InputField" className="input-kink-with-tooltip">
             {currentKink.showField ? `(${currentKink.field}) ` : ""}
             <span>{currentKink.kink}</span>
+
+            {/* Kommentar-Button */}
+            {(() => {
+              const hasComment =
+                currentKink.comment && currentKink.comment.trim().length > 0;
+              return (
+                <button
+                  className={`comment-button-small modal-comment-button ${hasComment ? "has-comment" : ""}`}
+                  onClick={handleOpenComment}
+                  aria-label={`Kommentar für ${currentKink.kink} ${hasComment ? "bearbeiten" : "hinzufügen"}`}
+                  title={
+                    hasComment ? "Kommentar bearbeiten" : "Kommentar hinzufügen"
+                  }
+                  type="button"
+                >
+                  💬
+                </button>
+              );
+            })()}
+
             {/* Tooltip für Beschreibung, falls vorhanden */}
             {(() => {
               const cat = kinks[currentKink.category];

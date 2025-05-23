@@ -234,16 +234,42 @@ export const updateHash = (
   levels: LevelsData,
 ): string => {
   const hashValues: number[] = [];
+  const comments: string[] = [];
+  let hasComments = false;
 
-  // Get all choices from the selection
+  // Erfasse alle Auswahloptionen und Kommentare
   selection.forEach((item) => {
-    // Find the level index
+    // Finde den Level-Index
     const levelNames = Object.keys(levels);
     const levelIndex = levelNames.indexOf(item.value);
     hashValues.push(levelIndex >= 0 ? levelIndex : 0);
+
+    // Sammle Kommentare, leere Strings für Einträge ohne Kommentar
+    const itemComment = item.comment?.trim() || "";
+    comments.push(itemComment);
+
+    // Prüfe, ob es mindestens einen nicht-leeren Kommentar gibt
+    if (itemComment !== "") {
+      hasComments = true;
+    }
   });
 
-  const hash = encode(Object.keys(levels).length, hashValues);
+  // Generiere den Hash für die Auswahlen
+  let hash = encode(Object.keys(levels).length, hashValues);
+
+  // Füge die Kommentare zum Hash hinzu, wenn welche vorhanden sind
+  if (hasComments) {
+    // Kodiere die Kommentare mit URL-sicherer Base64
+    try {
+      const commentsJson = JSON.stringify(comments);
+      // Verwende encodeURIComponent, um Sonderzeichen für URLs sicher zu machen
+      const encodedComments = btoa(encodeURIComponent(commentsJson));
+      hash += "|" + encodedComments;
+    } catch (error) {
+      console.error("Fehler beim Kodieren der Kommentare:", error);
+    }
+  }
+
   window.location.hash = hash;
   return hash;
 };
@@ -252,13 +278,29 @@ export const parseHash = (
   levels: LevelsData,
   kinks: KinksData,
 ): Selection[] | null => {
-  const hash = window.location.hash.substring(1);
-  if (hash.length < 10) return null;
+  const fullHash = window.location.hash.substring(1);
+  if (fullHash.length < 10) return null;
+
+  // Trenne die Kommentare von den Auswahlen
+  const parts = fullHash.split("|");
+  const hash = parts[0];
+  let comments: string[] = [];
+
+  // Dekodiere die Kommentare, falls vorhanden
+  if (parts.length > 1) {
+    try {
+      const decodedComments = decodeURIComponent(atob(parts[1]));
+      comments = JSON.parse(decodedComments);
+    } catch (e) {
+      console.error("Fehler beim Dekodieren der Kommentare:", e);
+      comments = [];
+    }
+  }
 
   const levelCount = Object.keys(levels).length;
   const levelValues = decode(levelCount, hash);
 
-  // Convert level values (indexes) to full Selection objects
+  // Konvertiere Level-Werte (Indizes) in vollständige Selection-Objekte
   const allKinks = getAllKinks(kinks, levels);
   const updatedSelection: Selection[] = [];
 
@@ -270,6 +312,7 @@ export const parseHash = (
     updatedSelection.push({
       ...allKinks[i],
       value: levelName,
+      comment: comments[i] || undefined,
     });
   }
 

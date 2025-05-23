@@ -1,0 +1,23 @@
+// Spezieller Stil für den Kommentar-Button im Input-Modal
+.modal-comment-button {
+  position: relative;
+  margin-left: 10px;
+  top: -2px;
+  font-size: 16px;
+  padding: 3px 7px;
+  opacity: 0.8; // Immer sichtbar, aber dezent
+
+  &.has-comment {
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+    opacity: 1;
+  }
+}
+
+// Aktionssymbole in der Kink-Spalte
+.kink-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+}
