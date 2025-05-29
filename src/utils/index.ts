@@ -400,14 +400,28 @@ export const setupCanvas = (
   canvas.height = height;
 
   const context = canvas.getContext("2d")!;
-  context.fillStyle = "#FFFFFF";
+  // Klarer, neutraler Hintergrund
+  context.fillStyle = "#ffffff";
   context.fillRect(0, 0, canvas.width, canvas.height);
 
-  context.font = "bold 24px Arial";
-  context.fillStyle = "#000000";
-  context.fillText("Kinklist " + username, 5, 25);
+  // Subtile Randlinie für bessere Abgrenzung
+  context.strokeStyle = "#e0e0e0";
+  context.lineWidth = 1;
+  context.strokeRect(0, 0, canvas.width, canvas.height);
 
-  drawLegend(context, levels);
+  // Eleganter Header
+  context.font = "bold 16px Arial, sans-serif";
+  context.fillStyle = "#333333";
+  context.fillText("Kinklist " + username, 12, 28);
+
+  // Dezente Header-Trennlinie
+  context.beginPath();
+  context.moveTo(10, 36);
+  context.lineTo(Math.min(width - 20, 350), 36);
+  context.strokeStyle = "#cccccc";
+  context.lineWidth = 1;
+  context.stroke();
+
   return canvas;
 };
 
@@ -415,8 +429,9 @@ export const drawLegend = (
   context: CanvasRenderingContext2D,
   levels: LevelsData,
 ): void => {
-  context.font = "bold 13px Arial";
-  context.fillStyle = "#000000";
+  // Diese Funktion wird nicht mehr verwendet, da die Legende direkt in Export.tsx gezeichnet wird
+  context.font = "12px Arial";
+  context.fillStyle = "#555555";
 
   const levelNames = Object.keys(levels);
   const x = context.canvas.width - 15 - 120 * levelNames.length;
