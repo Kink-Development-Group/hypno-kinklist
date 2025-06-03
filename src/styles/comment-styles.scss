@@ -21,27 +21,28 @@
   flex-wrap: wrap; // Erlaubt Umbruch bei vielen Kommentarbuttons
   gap: 6px; // Etwas kleinerer Abstand
   margin-left: 10px;
+  visibility: visible !important; // Erzwingt Sichtbarkeit
 }
 
 // Kleinerer Kommentarbutton für Tabellenzeilen
 .comment-button-small {
-  font-size: 12px;
-  padding: 2px 4px;
+  font-size: 16px; // Größere Schriftgröße für bessere Sichtbarkeit
+  padding: 2px;
   background: none;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border: none; // Kein Rahmen
   cursor: pointer;
-  opacity: 0.6;
+  opacity: 1; // Immer vollständig sichtbar
   transition: all 0.2s ease;
+  display: inline-block !important; // Erzwingt Anzeige
+  visibility: visible !important; // Erzwingt Sichtbarkeit
+  color: var(--text-color); // Setzt Textfarbe explizit
 
   &:hover {
-    opacity: 0.9;
-    background-color: rgba(0, 0, 0, 0.05);
+    transform: scale(1.2); // Leichte Vergrößerung beim Hover
   }
-
+  
   &.has-comment {
-    opacity: 1;
-    background-color: rgba(73, 128, 174, 0.15);
-    border-color: var(--button-bg-color);
+    color: var(--button-bg-color); // Farblicher Hinweis auf vorhandenen Kommentar
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.2); // Leichter Schatten für bessere Sichtbarkeit
   }
 }

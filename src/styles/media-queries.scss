@@ -188,11 +188,14 @@
     .kink-actions {
       gap: 4px;
       margin-left: 8px;
+      display: inline-flex !important; // Erzwingt die Anzeige
+      visibility: visible !important; // Erzwingt die Sichtbarkeit
     }
 
     .comment-button-small {
-      font-size: 11px;
-      padding: 1px 3px;
+      font-size: 14px; // Angepasste Schriftgröße für mobile Geräte
+      display: inline-block !important; // Erzwingt die Anzeige
+      visibility: visible !important; // Erzwingt die Sichtbarkeit
     }
   }
 }
