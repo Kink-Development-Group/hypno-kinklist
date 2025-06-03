@@ -1,0 +1,10 @@
+# Example configuration for the Labeler workflow
+pull_request_labels:
+  - "bug"
+  - "feature"
+  - "documentation"
+
+issue_labels:
+  - "help wanted"
+  - "good first issue"
+  - "question"
