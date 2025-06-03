@@ -381,7 +381,13 @@ table {
 
   @media (max-width: 768px) {
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
+    padding: 0 10px;
+  }
+
+  @media (max-width: 479px) {
+    padding: 0 5px;
+    gap: 8px;
   }
 }
 
@@ -395,7 +401,12 @@ table {
 
   @media (max-width: 768px) {
     width: 100%;
+    max-width: 100%;
     margin-bottom: 10px;
+  }
+
+  @media (max-width: 479px) {
+    margin-bottom: 8px;
   }
 }
 
@@ -452,7 +463,16 @@ table {
 
   @media (max-width: 768px) {
     width: 100%;
+    max-width: 100%;
     justify-content: center;
+    font-size: 16px;
+    padding: 8px 20px;
+  }
+
+  @media (max-width: 479px) {
+    font-size: 14px;
+    padding: 6px 15px;
+    height: 38px;
   }
 }
 
@@ -634,8 +654,19 @@ table {
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    @media (max-width: 520px) {
+    @media (max-width: 768px) {
       width: 100%;
+      max-width: 100%;
+      font-size: 14px;
+      padding: 0 20px;
+      min-width: auto;
+      height: 42px;
+    }
+
+    @media (max-width: 479px) {
+      font-size: 13px;
+      padding: 0 15px;
+      height: 38px;
     }
   }
 
