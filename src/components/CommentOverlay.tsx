@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, memo, useRef } from "react";
 import { useKinklist } from "../context/KinklistContext";
-import { Selection } from "../types";
+// import { Selection } from "../types";s
 
 const CommentOverlay: React.FC = () => {
   const {
