@@ -40,9 +40,11 @@
   &:hover {
     transform: scale(1.2); // Leichte Vergrößerung beim Hover
   }
-  
+
   &.has-comment {
-    color: var(--button-bg-color); // Farblicher Hinweis auf vorhandenen Kommentar
+    color: var(
+      --button-bg-color
+    ); // Farblicher Hinweis auf vorhandenen Kommentar
     text-shadow: 0 0 2px rgba(0, 0, 0, 0.2); // Leichter Schatten für bessere Sichtbarkeit
   }
 }
