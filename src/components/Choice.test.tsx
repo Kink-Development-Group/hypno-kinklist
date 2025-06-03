@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import Choice from "./Choice";
 import { KinklistProvider } from "../context/KinklistContext";
@@ -19,7 +18,7 @@ describe("Choice Component", () => {
     );
 
     // Überprüft, ob mindestens ein Button gerendert wird
-    const buttons = screen.getAllByRole("button");
+    const buttons = screen.getAllByRole("radio");
     expect(buttons.length).toBeGreaterThan(0);
 
     // Der erste Button sollte standardmäßig die 'notEntered'-Klasse haben
@@ -34,7 +33,7 @@ describe("Choice Component", () => {
     );
 
     // Hole alle Buttons
-    const buttons = screen.getAllByRole("button");
+    const buttons = screen.getAllByRole("radio");
 
     // Klickt auf den zweiten Button (z.B. "favorite")
     fireEvent.click(buttons[1]);

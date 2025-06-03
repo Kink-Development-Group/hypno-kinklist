@@ -1,10 +1,59 @@
 # Neo-Kinklist
 
-A modern React/TypeScript implementation of the original Kinklist application, with an improved codebase and enhanced functionality.
+A modern React/TypeScript implementation of the original Kinklist application, powered by Vite for lightning-fast development.
 
 ## Overview
 
-This project is a 1:1 translation of the original jQuery-based Kinklist to a modern React/TypeScript application. It retains all of the original features while utilizing modern web development practices.
+This project is a modern implementation of the Kinklist application using state-of-the-art web technologies. It features an improved codebase and enhanced functionality while maintaining all original features.
+
+## Technologies
+
+- ⚡ **Vite** - Ultra-fast build tool and dev server
+- ⚛️ **React 18** - Latest React with concurrent features
+- 🏷️ **TypeScript** - Full type safety
+- 🎨 **SASS** - Advanced CSS preprocessing  
+- 🧪 **Vitest** - Fast unit testing with Vite
+- 🔧 **ESLint + Prettier** - Code quality and formatting
+- 📦 **Modern ES Modules** - Native module support
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+
+### Installation
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd neo-kinklist
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## Available Scripts
+
+- `npm run dev` - Start Vite development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run test` - Run tests with Vitest
+- `npm run test:ui` - Run tests with UI
+- `npm run test:coverage` - Run tests with coverage
+- `npm run lint` - Run ESLint
+- `npm run lint:fix` - Fix ESLint issues
+- `npm run format` - Format code with Prettier
 
 ## Features
 
@@ -12,9 +61,10 @@ This project is a 1:1 translation of the original jQuery-based Kinklist to a mod
 - Reactive components with React
 - State management with React Context API
 - Styling with SASS
-- Performance optimization with code splitting and tree shaking
-- Export functionality with Imgur integration
+- Performance optimization with Vite's fast builds
+- Export functionality with image generation
 - Hash-based URL sharing of selections
+- Modern testing setup with Vitest
 
 ## Project Structure
 
@@ -36,7 +86,7 @@ This project is a 1:1 translation of the original jQuery-based Kinklist to a mod
 - `src/utils/`: Utility functions
   - `index.ts`: Utilities for parsing, hash encoding/decoding, and export
 
-## Installation
+## Installation - npm
 
 ```bash
 npm install

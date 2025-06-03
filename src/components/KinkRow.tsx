@@ -45,7 +45,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
   };
 
   // Tooltip-Portal-Logik
-  const handleTooltipShow = (e: React.MouseEvent | React.FocusEvent) => {
+  const handleTooltipShow = (_e: React.MouseEvent | React.FocusEvent) => {
     if (!tooltipRef.current) return;
     const rect = tooltipRef.current.getBoundingClientRect();
     setTooltipPos({
@@ -97,7 +97,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
         role="row"
         aria-labelledby={kinkNameId}
       >
-        {fields.map((field, index) => {
+        {fields.map((field) => {
           // Check if comment exists for this field
           // const kinkSelection = selection.find(
           //   (s) =>

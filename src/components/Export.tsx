@@ -90,7 +90,7 @@ const Export: React.FC<ExportProps> = () => {
             const catDescriptions = category.descriptions || [];
 
             // Filtere Kinks: Nur solche mit mindestens einer Auswahl ≠ 'Not Entered' ODER Kommentar
-            const filteredKinks = catKinks.filter((kinkName, kinkIdx) => {
+            const filteredKinks = catKinks.filter((kinkName) => {
               let hasNonDefault = false;
               let hasComment = false;
               fields.forEach((field) => {
