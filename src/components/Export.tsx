@@ -179,7 +179,7 @@ const Export: React.FC<ExportProps> = () => {
                   colors: {} as Record<string, string>,
                   text: kinkName,
                   hasComment: false,
-                  comment: "",
+                  comments: [] as { field: string; text: string }[], // Array für mehrere Kommentare
                   description: catDescriptions[kinkIdx] || "",
                   extraHeight: 0, // Speichert zusätzliche Höhe durch mehrzeiligen Text
                 },
@@ -206,7 +206,7 @@ const Export: React.FC<ExportProps> = () => {
               );
 
               // Kommentarzeilen finden
-              let commentLines = 0;
+              let totalCommentLines = 0;
 
               fields.forEach((field) => {
                 const selItem = selection.find(
@@ -220,21 +220,25 @@ const Export: React.FC<ExportProps> = () => {
 
                 if (selItem?.comment && selItem.comment.trim() !== "") {
                   drawCall.data.hasComment = true;
-                  drawCall.data.comment = selItem.comment;
+                  drawCall.data.comments.push({
+                    field: field,
+                    text: selItem.comment,
+                  });
 
                   // Kommentarzeilen berechnen
-                  commentLines = calculateTextLines(
+                  const commentLinesForField = calculateTextLines(
                     selItem.comment,
                     descMaxWidth,
                     tempCtx,
                   );
+                  totalCommentLines += commentLinesForField;
                 }
               });
 
               // Extra Höhe basierend auf der Anzahl der Zeilen berechnen
               // Erste Zeile ist schon in rowHeight berücksichtigt
               const extraDescLines = Math.max(0, descLines - 1);
-              const extraCommentLines = commentLines;
+              const extraCommentLines = totalCommentLines;
 
               // Extra Höhe zur Gesamthöhe hinzufügen
               const extraHeight =
@@ -431,7 +435,10 @@ const Export: React.FC<ExportProps> = () => {
               }
 
               // Kommentare mit effizienterem Zeilenumbruch
-              if (drawCall.data.hasComment) {
+              if (
+                drawCall.data.hasComment &&
+                drawCall.data.comments.length > 0
+              ) {
                 // Kommentarsymbol neben dem Haupttext
                 const commentX =
                   x + context.measureText(drawCall.data.text).width + 12;
@@ -441,38 +448,59 @@ const Export: React.FC<ExportProps> = () => {
                 context.fillStyle = "#0277bd";
                 context.fillText("💬", commentX, y);
 
-                // Kommentartext mit Zeilenumbruch
-                if (drawCall.data.comment) {
-                  // Subtiler visueller Trenner
-                  context.fillStyle = "#0277bd";
-                  context.fillRect(x, descY - 6, 3, 3);
+                // Alle Kommentare nacheinander rendern
+                let currentCommentY = descY;
+                drawCall.data.comments.forEach(
+                  (
+                    commentItem: { field: string; text: string },
+                    index: number,
+                  ) => {
+                    // Subtiler visueller Trenner für jeden Kommentar
+                    context.fillStyle = "#0277bd";
+                    context.fillRect(x, currentCommentY - 6, 3, 3);
 
-                  const commentY = descY + 2;
-                  context.font = "italic 10px Arial, sans-serif";
-                  context.fillStyle = "#0277bd";
-
-                  // Zeilenumbruch für Kommentare - optimiert für Platzersparnis
-                  const maxWidth = columnWidth - 50;
-                  const commentWords = drawCall.data.comment.split(" ");
-                  let commentLine = "";
-                  let commentTestLine = "";
-                  let currentY = commentY;
-
-                  // Wörter durchgehen und Zeilen umbrechen
-                  for (let n = 0; n < commentWords.length; n++) {
-                    commentTestLine = commentLine + commentWords[n] + " ";
-                    const metrics = context.measureText(commentTestLine);
-                    if (metrics.width > maxWidth && n > 0) {
-                      context.fillText(commentLine, x + 12, currentY);
-                      commentLine = commentWords[n] + " ";
-                      currentY += textLineHeight;
-                    } else {
-                      commentLine = commentTestLine;
+                    // Wenn mehrere Kommentare, zeige das Field
+                    if (drawCall.data.comments.length > 1) {
+                      context.font = "bold 9px Arial, sans-serif";
+                      context.fillStyle = "#0277bd";
+                      context.fillText(
+                        `${commentItem.field}:`,
+                        x + 12,
+                        currentCommentY,
+                      );
+                      currentCommentY += textLineHeight - 2;
                     }
-                  }
-                  // Letzte Zeile zeichnen
-                  context.fillText(commentLine, x + 12, currentY);
-                }
+
+                    context.font = "italic 10px Arial, sans-serif";
+                    context.fillStyle = "#0277bd";
+
+                    // Zeilenumbruch für Kommentare - optimiert für Platzersparnis
+                    const maxWidth = columnWidth - 50;
+                    const commentWords = commentItem.text.split(" ");
+                    let commentLine = "";
+                    let commentTestLine = "";
+
+                    // Wörter durchgehen und Zeilen umbrechen
+                    for (let n = 0; n < commentWords.length; n++) {
+                      commentTestLine = commentLine + commentWords[n] + " ";
+                      const metrics = context.measureText(commentTestLine);
+                      if (metrics.width > maxWidth && n > 0) {
+                        context.fillText(commentLine, x + 12, currentCommentY);
+                        commentLine = commentWords[n] + " ";
+                        currentCommentY += textLineHeight;
+                      } else {
+                        commentLine = commentTestLine;
+                      }
+                    }
+                    // Letzte Zeile zeichnen
+                    context.fillText(commentLine, x + 12, currentCommentY);
+
+                    // Zusätzlicher Abstand zwischen verschiedenen Kommentaren
+                    if (index < drawCall.data.comments.length - 1) {
+                      currentCommentY += textLineHeight + 3;
+                    }
+                  },
+                );
               }
               // Kompaktere, aber klar erkennbare Auswahlkreise
               for (let i = 0; i < drawCall.data.choices.length; i++) {
