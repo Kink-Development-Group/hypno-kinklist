@@ -37,44 +37,42 @@ const Export: React.FC<ExportProps> = () => {
           // Dynamische Bestimmung der Spaltenanzahl basierend auf der Datenmenge
           // Vorberechnung der Kategorien und Kinks
           const categories = Object.keys(kinks);
-          const numCats = categories.length;
-          const dualCats = categories.filter(
-            (cat) => kinks[cat].fields.length > 1,
-          ).length;
-          const simpleCats = numCats - dualCats;
           let numKinks = 0;
           categories.forEach((cat) => {
             numKinks += kinks[cat].kinks.length;
           });
 
-          // Dynamische Spaltenberechnung
+          // Dynamische Spaltenberechnung - erweitert auf bis zu 6 Spalten
           let numCols = 4; // Standard: 4 Spalten
 
-          // Bei vielen Einträgen auf 5 Spalten erhöhen
-          if (numKinks > 80) {
-            numCols = 5;
+          // Spaltenanzahl basierend auf der Datenmenge
+          if (numKinks > 120) {
+            numCols = 6; // Bei sehr vielen Einträgen 6 Spalten
+          } else if (numKinks > 80) {
+            numCols = 5; // Bei vielen Einträgen 5 Spalten
           } else if (numKinks < 40) {
-            // Bei wenigen Einträgen bei 4 Spalten bleiben
-            numCols = 4;
+            numCols = 4; // Bei wenigen Einträgen 4 Spalten
+          } else {
+            numCols = 4; // Standard bleibt 4 Spalten
           }
 
           // Layout-Parameter für optimale Darstellung mit dynamischer Spaltenanzahl
-          const columnWidth = numCols === 5 ? 220 : 250; // Schmalere Spalten bei 5 Spalten
+          const columnWidth =
+            numCols === 6
+              ? 280 // Breitere Spalten bei 6 Spalten für lange Namen
+              : numCols === 5
+                ? 320 // Breitere Spalten bei 5 Spalten für lange Namen
+                : 380; // Breitere Standard-Spaltenbreite bei 4 Spalten
           const simpleTitleHeight = 60; // Erhöhte Höhe für Überschriften
           const titleSubtitleHeight = 60; // Erhöhte Höhe für Titel mit Untertitel
           const rowHeight = 45; // Optimierte Höhe für Balance
           const textLineHeight = 15; // Kompakte Zeilenhöhe
-          const maxLineWidth = columnWidth - 30; // Angepasste Breite für Textumbruch
           const offsets = {
             left: 25,
             right: 25,
             top: 70, // Kompakte Legende
             bottom: 35,
           };
-          const totalHeight =
-            numKinks * rowHeight +
-            dualCats * titleSubtitleHeight +
-            simpleCats * simpleTitleHeight;
           interface Column {
             height: number;
             drawStack: any[];
@@ -401,7 +399,7 @@ const Export: React.FC<ExportProps> = () => {
                 context.fillStyle = "#666666";
 
                 // Implementierung von Zeilenumbruch für längere Texte
-                const maxWidth = columnWidth - 45; // Optimiert für schmalere Spaltenbreite
+                const maxWidth = columnWidth - 60; // Mehr Platz für Text bei breiteren Spalten
                 const words = description.split(" ");
                 let line = "";
                 let testLine = "";
@@ -474,8 +472,8 @@ const Export: React.FC<ExportProps> = () => {
                     context.font = "italic 10px Arial, sans-serif";
                     context.fillStyle = "#0277bd";
 
-                    // Zeilenumbruch für Kommentare - optimiert für Platzersparnis
-                    const maxWidth = columnWidth - 50;
+                    // Zeilenumbruch für Kommentare - optimiert mit mehr Platz
+                    const maxWidth = columnWidth - 70;
                     const commentWords = commentItem.text.split(" ");
                     let commentLine = "";
                     let commentTestLine = "";
