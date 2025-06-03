@@ -577,7 +577,7 @@ const Export: React.FC<ExportProps> = () => {
     const levelNames = Object.keys(levels);
 
     // Optimierte Breite für die Legende
-    const legendTitleWidth = 55;
+    const legendTitleWidth = 85; // Mehr Abstand zwischen "Legende:" und Farbkreisen
     const itemWidth = 70; // Kompakter aber lesbar
     const totalLegendWidth = legendTitleWidth + levelNames.length * itemWidth;
 
