@@ -411,7 +411,7 @@ const AppContent: React.FC = () => {
           onClick={handleEditClick}
           aria-label="Bearbeiten"
         ></button>
-        <h1>Hypno Kink List</h1>
+        <h1>Hypno Kink List - BETA</h1>
         <ThemeToggle theme={theme} toggleTheme={toggleTheme} />{" "}
       </div>
 

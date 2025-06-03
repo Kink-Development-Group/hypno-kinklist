@@ -34,20 +34,8 @@ const Export: React.FC<ExportProps> = () => {
         setIsLoading(true);
         setIsSuccess(false);
         try {
-          // Verbesserte Layout-Parameter für bessere Verteilung
-          const numCols = 2; // Balance zwischen Platz und Verteilung
-          const columnWidth = 380; // Optimal für Lesbarkeit
-          const simpleTitleHeight = 50; // Mehr Abstand zur Überschrift
-          const titleSubtitleHeight = 60; // Mehr Abstand für Titel mit Untertitel
-          const rowHeight = 60; // Genug Platz für mehrzeiligen Text
-          const textLineHeight = 18; // Zeilenhöhe für Text
-          const maxLineWidth = 320; // Maximale Breite für Textumbruch
-          const offsets = {
-            left: 40,
-            right: 40,
-            top: 100, // Mehr Platz für Legende
-            bottom: 50,
-          };
+          // Dynamische Bestimmung der Spaltenanzahl basierend auf der Datenmenge
+          // Vorberechnung der Kategorien und Kinks
           const categories = Object.keys(kinks);
           const numCats = categories.length;
           const dualCats = categories.filter(
@@ -58,6 +46,31 @@ const Export: React.FC<ExportProps> = () => {
           categories.forEach((cat) => {
             numKinks += kinks[cat].kinks.length;
           });
+
+          // Dynamische Spaltenberechnung
+          let numCols = 4; // Standard: 4 Spalten
+
+          // Bei vielen Einträgen auf 5 Spalten erhöhen
+          if (numKinks > 80) {
+            numCols = 5;
+          } else if (numKinks < 40) {
+            // Bei wenigen Einträgen bei 4 Spalten bleiben
+            numCols = 4;
+          }
+
+          // Layout-Parameter für optimale Darstellung mit dynamischer Spaltenanzahl
+          const columnWidth = numCols === 5 ? 220 : 250; // Schmalere Spalten bei 5 Spalten
+          const simpleTitleHeight = 60; // Erhöhte Höhe für Überschriften
+          const titleSubtitleHeight = 60; // Erhöhte Höhe für Titel mit Untertitel
+          const rowHeight = 45; // Optimierte Höhe für Balance
+          const textLineHeight = 15; // Kompakte Zeilenhöhe
+          const maxLineWidth = columnWidth - 30; // Angepasste Breite für Textumbruch
+          const offsets = {
+            left: 25,
+            right: 25,
+            top: 70, // Kompakte Legende
+            bottom: 35,
+          };
           const totalHeight =
             numKinks * rowHeight +
             dualCats * titleSubtitleHeight +
@@ -70,7 +83,7 @@ const Export: React.FC<ExportProps> = () => {
           for (let i = 0; i < numCols; i++) {
             columns.push({ height: 0, drawStack: [] });
           }
-          const avgColHeight = totalHeight / numCols;
+          // Spalten vorbereiten
           let columnIndex = 0;
           categories.forEach((catName) => {
             const category = kinks[catName];
@@ -100,11 +113,6 @@ const Export: React.FC<ExportProps> = () => {
             });
 
             if (filteredKinks.length === 0) return; // Keine Kinks in dieser Kategorie zum Export
-
-            // Berechnung der Höhe für die Kategorie
-            let catHeight = 0;
-            catHeight +=
-              fields.length === 1 ? simpleTitleHeight : titleSubtitleHeight;
 
             // Verteilung auf Spalten verbessert - weniger Elemente pro Spalte für bessere Navigation
             // Finde die Spalte mit der geringsten Höhe für bessere Balance
@@ -279,25 +287,25 @@ const Export: React.FC<ExportProps> = () => {
               context.fillRect(
                 drawCall.x,
                 drawCall.y,
-                columnWidth - 20,
-                simpleTitleHeight - 20,
+                columnWidth - 12,
+                simpleTitleHeight - 10,
               );
 
-              // Deutlichere Trennlinie für Kategorien
+              // Schlankere Trennlinie
               context.beginPath();
-              context.moveTo(drawCall.x, drawCall.y + simpleTitleHeight - 15);
+              context.moveTo(drawCall.x, drawCall.y + simpleTitleHeight - 22);
               context.lineTo(
-                drawCall.x + columnWidth - 40,
-                drawCall.y + simpleTitleHeight - 15,
+                drawCall.x + columnWidth - 15,
+                drawCall.y + simpleTitleHeight - 22,
               );
-              context.strokeStyle = "#3f51b5"; // Konsistente Farbe
-              context.lineWidth = 2;
+              context.strokeStyle = "#3f51b5";
+              context.lineWidth = 1.5;
               context.stroke();
 
-              // Größere, klare Überschrift mit mehr Abstand
-              context.font = "bold 16px Arial, sans-serif";
-              context.fillStyle = "#3f51b5"; // Konsistente Farbe
-              context.fillText(drawCall.data, drawCall.x + 10, drawCall.y + 20);
+              // Überschrift - kompakter aber gut lesbar
+              context.font = "bold 13px Arial, sans-serif";
+              context.fillStyle = "#3f51b5";
+              context.fillText(drawCall.data, drawCall.x + 6, drawCall.y + 18);
               context.restore();
             },
             titleSubtitle: (
@@ -311,32 +319,32 @@ const Export: React.FC<ExportProps> = () => {
               context.fillRect(
                 drawCall.x,
                 drawCall.y,
-                columnWidth - 20,
-                titleSubtitleHeight - 25,
+                columnWidth - 12,
+                titleSubtitleHeight - 15,
               );
 
-              // Deutlichere Trennlinie
+              // Schlankere Trennlinie
               context.beginPath();
-              context.moveTo(drawCall.x, drawCall.y + 35); // Mehr Abstand
-              context.lineTo(drawCall.x + columnWidth - 40, drawCall.y + 35);
+              context.moveTo(drawCall.x, drawCall.y + 38);
+              context.lineTo(drawCall.x + columnWidth - 15, drawCall.y + 38);
               context.strokeStyle = "#3f51b5";
-              context.lineWidth = 2;
+              context.lineWidth = 1.5;
               context.stroke();
 
-              // Größere, klare Überschrift und gut lesbarer Untertitel
-              context.font = "bold 16px Arial, sans-serif";
+              // Kompaktere aber klare Titel
+              context.font = "bold 13px Arial, sans-serif";
               context.fillStyle = "#3f51b5";
               context.fillText(
                 drawCall.data.category,
-                drawCall.x + 10,
-                drawCall.y + 22, // Bessere Position
+                drawCall.x + 6,
+                drawCall.y + 18,
               );
-              context.font = "italic 12px Arial, sans-serif";
+              context.font = "italic 10px Arial, sans-serif";
               context.fillStyle = "#666666";
               context.fillText(
                 drawCall.data.fields.join(", "),
-                drawCall.x + 10,
-                drawCall.y + 44, // Mehr Abstand zum Titel
+                drawCall.x + 8,
+                drawCall.y + 30,
               );
               context.restore();
             },
@@ -352,88 +360,99 @@ const Export: React.FC<ExportProps> = () => {
 
               // Standardhöhe plus zusätzliche Höhe für mehrzeiligen Text
               const itemHeight =
-                (drawCall.data.extraHeight || 0) + rowHeight + 5;
+                (drawCall.data.extraHeight || 0) + rowHeight + 2; // Kompaktere Höhe
 
-              // Jede Zeile bekommt einen Hintergrund, abwechselnd heller/dunkler
+              // Optimierte Zeilenhintergründe für besseres 4-Spalten-Layout
               context.fillStyle = isEven
-                ? "rgba(240, 240, 250, 0.5)"
-                : "rgba(248, 248, 255, 0.3)";
+                ? "rgba(240, 240, 250, 0.4)"
+                : "rgba(248, 248, 255, 0.2)";
               context.fillRect(
                 drawCall.x,
-                bgY - 18, // Mehr Platz nach oben
-                columnWidth - 20,
-                itemHeight, // Dynamische Höhe basierend auf Textmenge
+                bgY - 12, // Erhöhter Abstand nach oben
+                columnWidth - 8, // Mehr horizontaler Platz
+                itemHeight, // Dynamische Höhe mit minimaler Erweiterung
               );
 
-              // Kink-Name - besser positioniert
-              const circleSize = 7; // Etwas größere Kreise für bessere Sichtbarkeit
-              const circleSpacing = 16; // Mehr Platz zwischen Kreisen
+              // Kink-Name - optimiert für kompakteres 4-Spalten-Layout
+              const circleSize = 5; // Kleinere Größe für Kreise im 4-Spalten-Layout
+              const circleSpacing = 12; // Reduzierter Abstand zwischen Kreisen
 
               const circleOffsetX =
                 drawCall.data.choices.length * circleSpacing;
-              const x = drawCall.x + circleOffsetX;
-              const y = drawCall.y;
+              const x = drawCall.x + circleOffsetX + 4; // Optimierter Abstand
+              const y = drawCall.y + 1; // Erhöhte vertikale Position für mehr Abstand
 
-              context.font = "13px Arial, sans-serif";
+              context.font = "11px Arial, sans-serif"; // Kompaktere Schrift für 4-Spalten
               context.fillStyle = "#333333";
-              context.fillText(drawCall.data.text, x + 8, y);
+              context.fillText(drawCall.data.text, x + 6, y);
 
-              // Beschreibung mit Zeilenumbruch
-              let descY = y + 22; // Mehr Abstand zum Haupttext
+              // Beschreibung mit optimiertem Zeilenumbruch
+              let descY = y + 20; // Effizienter Abstand
               if (
                 drawCall.data.description &&
                 drawCall.data.description.trim() !== ""
               ) {
                 const description = drawCall.data.description;
-                context.font = "italic 11px Arial, sans-serif";
+                context.font = "italic 10px Arial, sans-serif"; // Kleinere Schrift
                 context.fillStyle = "#666666";
 
                 // Implementierung von Zeilenumbruch für längere Texte
-                const maxWidth = columnWidth - 70; // Maximale Textbreite
+                const maxWidth = columnWidth - 45; // Optimiert für schmalere Spaltenbreite
                 const words = description.split(" ");
                 let line = "";
                 let testLine = "";
                 let lineHeight = textLineHeight;
                 let currentY = descY;
 
+                // Subtiler Indikator
+                context.fillStyle = "#8c9eff";
+                context.fillRect(x, descY - 8, 3, 3); // Kompakter Trenner
+
+                // Text Styling wiederherstellen
+                context.fillStyle = "#666666";
+
                 // Wörter durchgehen und Zeilen umbrechen
                 for (let n = 0; n < words.length; n++) {
                   testLine = line + words[n] + " ";
                   const metrics = context.measureText(testLine);
                   if (metrics.width > maxWidth && n > 0) {
-                    context.fillText(line, x + 8, currentY);
+                    context.fillText(line, x + 12, currentY); // Optimale Einrückung
                     line = words[n] + " ";
-                    currentY += lineHeight;
+                    currentY += lineHeight; // Standard-Zeilenabstand
                   } else {
                     line = testLine;
                   }
                 }
                 // Letzte Zeile zeichnen
-                context.fillText(line, x + 8, currentY);
+                context.fillText(line, x + 12, currentY);
 
                 // Aktualisiere descY für mögliche Kommentare
-                descY = currentY + lineHeight;
+                descY = currentY + lineHeight + 2;
               }
 
-              // Kommentare mit Zeilenumbruch anzeigen
+              // Kommentare mit effizienterem Zeilenumbruch
               if (drawCall.data.hasComment) {
                 // Kommentarsymbol neben dem Haupttext
                 const commentX =
-                  x + context.measureText(drawCall.data.text).width + 10;
+                  x + context.measureText(drawCall.data.text).width + 12;
 
-                // Symbol
-                context.font = "bold 11px Arial";
+                // Kompakteres Symbol
+                context.font = "bold 10px Arial";
                 context.fillStyle = "#0277bd";
                 context.fillText("💬", commentX, y);
 
                 // Kommentartext mit Zeilenumbruch
                 if (drawCall.data.comment) {
-                  const commentY = descY;
-                  context.font = "italic 11px Arial, sans-serif";
+                  // Subtiler visueller Trenner
+                  context.fillStyle = "#0277bd";
+                  context.fillRect(x, descY - 6, 3, 3);
+
+                  const commentY = descY + 2;
+                  context.font = "italic 10px Arial, sans-serif";
                   context.fillStyle = "#0277bd";
 
-                  // Zeilenumbruch für Kommentare
-                  const maxWidth = columnWidth - 70; // Maximale Textbreite
+                  // Zeilenumbruch für Kommentare - optimiert für Platzersparnis
+                  const maxWidth = columnWidth - 50;
                   const commentWords = drawCall.data.comment.split(" ");
                   let commentLine = "";
                   let commentTestLine = "";
@@ -444,7 +463,7 @@ const Export: React.FC<ExportProps> = () => {
                     commentTestLine = commentLine + commentWords[n] + " ";
                     const metrics = context.measureText(commentTestLine);
                     if (metrics.width > maxWidth && n > 0) {
-                      context.fillText(commentLine, x + 8, currentY);
+                      context.fillText(commentLine, x + 12, currentY);
                       commentLine = commentWords[n] + " ";
                       currentY += textLineHeight;
                     } else {
@@ -452,22 +471,25 @@ const Export: React.FC<ExportProps> = () => {
                     }
                   }
                   // Letzte Zeile zeichnen
-                  context.fillText(commentLine, x + 8, currentY);
+                  context.fillText(commentLine, x + 12, currentY);
                 }
               }
-              // Deutlicher sichtbare Auswahlkreise
+              // Kompaktere, aber klar erkennbare Auswahlkreise
               for (let i = 0; i < drawCall.data.choices.length; i++) {
                 const choice = drawCall.data.choices[i];
                 const color = drawCall.data.colors[choice];
-                const cx = drawCall.x + 8 + i * circleSpacing;
-                const cy = drawCall.y - 4;
+                const cx = drawCall.x + 6 + i * circleSpacing;
+                const cy = drawCall.y - 3;
 
+                // Optimierte, aber klar definierte Kreise
                 context.beginPath();
                 context.arc(cx, cy, circleSize, 0, 2 * Math.PI, false);
                 context.fillStyle = color;
                 context.fill();
-                context.lineWidth = 1;
-                context.strokeStyle = "rgba(0, 0, 0, 0.5)";
+
+                // Dünnerer aber sichtbarer Rand
+                context.lineWidth = 0.5;
+                context.strokeStyle = "rgba(0, 0, 0, 0.7)";
                 context.stroke();
               }
               context.restore();
@@ -525,54 +547,54 @@ const Export: React.FC<ExportProps> = () => {
   ) => {
     context.save();
 
-    const legendY = 30; // Mehr Platz von oben
+    const legendY = 30; // Optimale Höhe
     const levelNames = Object.keys(levels);
 
-    // Gesamtbreite für die Legende berechnen
-    const legendTitleWidth = 70;
-    const itemWidth = 90; // Mehr Platz pro Element
+    // Optimierte Breite für die Legende
+    const legendTitleWidth = 55;
+    const itemWidth = 70; // Kompakter aber lesbar
     const totalLegendWidth = legendTitleWidth + levelNames.length * itemWidth;
 
-    // Zentrierte Position mit genug Platz
+    // Zentrierte Position
     const legendX = (canvasWidth - totalLegendWidth) / 2;
 
+    // Dezenter Legendenhintergrund
+    context.fillStyle = "rgba(245, 245, 245, 0.5)";
+    context.fillRect(legendX - 10, legendY - 20, totalLegendWidth + 20, 50);
+
     // Legendentitel
-    context.font = "bold 14px Arial";
-    context.fillStyle = "#3f51b5"; // Konsistente Farbe mit Überschriften
+    context.font = "bold 12px Arial";
+    context.fillStyle = "#3f51b5";
     context.fillText("Legende:", legendX, legendY);
 
-    // Legendenhintergrund (dezent)
-    context.fillStyle = "rgba(245, 245, 245, 0.5)";
-    context.fillRect(legendX - 10, legendY - 25, totalLegendWidth + 20, 60);
-
-    // Circles und Labels
+    // Kompakte aber klare Circles und Labels
     let currentX = legendX + legendTitleWidth;
     levelNames.forEach((levelName) => {
       const color = levels[levelName].color;
 
-      // Circle
+      // Circle für die Bewertung
       context.beginPath();
-      context.arc(currentX, legendY, 8, 0, 2 * Math.PI); // Größere Kreise
+      context.arc(currentX, legendY, 5, 0, 2 * Math.PI);
       context.fillStyle = color;
       context.fill();
-      context.lineWidth = 1;
-      context.strokeStyle = "rgba(0, 0, 0, 0.5)";
+      context.lineWidth = 0.5;
+      context.strokeStyle = "rgba(0, 0, 0, 0.7)";
       context.stroke();
 
       // Label
-      context.font = "12px Arial"; // Größere Schrift
+      context.font = "10px Arial";
       context.fillStyle = "#333333";
-      context.fillText(levelName, currentX + 12, legendY + 4); // Bessere Positionierung
+      context.fillText(levelName, currentX + 8, legendY + 4);
 
       currentX += itemWidth;
     });
 
-    // Deutlichere Trennlinie unter der Legende
+    // Dezente Trennlinie
     context.beginPath();
-    context.moveTo(legendX - 10, legendY + 25);
-    context.lineTo(legendX + totalLegendWidth + 10, legendY + 25);
-    context.strokeStyle = "#3f51b5"; // Konsistente Farbe
-    context.lineWidth = 2;
+    context.moveTo(legendX - 10, legendY + 20);
+    context.lineTo(legendX + totalLegendWidth + 10, legendY + 20);
+    context.strokeStyle = "#3f51b5";
+    context.lineWidth = 1;
     context.stroke();
 
     context.restore();

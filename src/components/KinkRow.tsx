@@ -138,7 +138,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
               return (
                 <button
                   key={`comment-${field}`}
-                  className={`comment-button-small ${hasComment ? "has-comment" : ""}`}
+                  className={`comment-button-small${hasComment ? " has-comment" : ""}`}
                   onClick={() => handleOpenComment(field)}
                   aria-label={`Kommentar für ${kinkName} - ${field} ${hasComment ? "bearbeiten" : "hinzufügen"}`}
                   title={
