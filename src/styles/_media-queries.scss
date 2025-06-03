@@ -108,10 +108,13 @@
     align-items: center;
     margin-top: 15px;
     margin-bottom: 20px;
+    padding: 0 10px;
+    gap: 10px;
   }
 
   .export-container {
     width: 100%;
+    max-width: 100%;
   }
 
   #ExportWrapper {
@@ -123,14 +126,90 @@
     width: 100%;
     max-width: 100%;
     font-size: 12px;
+    padding: 8px 12px;
   }
 
   #Export {
     width: 100%;
+    padding: 0 20px;
+    font-size: 14px;
+    min-width: auto;
+    height: 42px;
   }
 
   .start-button {
     width: 100%;
+    max-width: 100%;
+    padding: 8px 20px;
+    font-size: 14px;
+    height: 42px;
+  }
+}
+
+// Sehr kleine Mobilgeräte (unter 480px)
+@media (max-width: 479px) {
+  .container {
+    padding: 0 8px;
+  }
+
+  .action-buttons-container {
+    padding: 0 5px;
+    gap: 8px;
+  }
+
+  #Export {
+    font-size: 13px;
+    padding: 0 15px;
+    height: 38px;
+  }
+
+  .start-button {
+    font-size: 13px;
+    padding: 6px 15px;
+    height: 38px;
+  }
+
+  #URL {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  .export-container {
+    margin-bottom: 8px;
+  }
+}
+
+// Zusätzliche Sicherheit für sehr kleine Bildschirme
+@media (max-width: 320px) {
+  .action-buttons-container {
+    padding: 0 3px;
+    gap: 6px;
+  }
+
+  #Export {
+    font-size: 12px;
+    padding: 0 12px;
+    height: 36px;
+    min-width: auto;
+  }
+
+  .start-button {
+    font-size: 12px;
+    padding: 4px 12px;
+    height: 36px;
+  }
+
+  #URL {
+    font-size: 10px;
+    padding: 5px 8px;
+  }
+
+  .export-container {
+    margin-bottom: 6px;
+  }
+
+  .container {
+    padding: 0 5px;
   }
 }
 

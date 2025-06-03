@@ -29,7 +29,7 @@ export const log = (val: number, base: number): number => {
 
 export const parseKinksText = (
   text: string,
-  errorHandler: (msg: string) => void = (msg) => window.alert(msg),
+  _errorHandler: (msg: string) => void = (msg) => window.alert(msg),
 ): KinksData | null => {
   const newKinks: KinksData = {};
   const lines = text.replace(/\r/g, "").split("\n");
@@ -393,7 +393,7 @@ export const setupCanvas = (
   width: number,
   height: number,
   username: string,
-  levels: LevelsData,
+  _levels: LevelsData,
 ): HTMLCanvasElement => {
   const canvas = document.createElement("canvas");
   canvas.width = width;
