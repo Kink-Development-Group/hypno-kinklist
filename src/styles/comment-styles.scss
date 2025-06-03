@@ -18,6 +18,30 @@
 .kink-actions {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-left: 12px;
+  flex-wrap: wrap; // Erlaubt Umbruch bei vielen Kommentarbuttons
+  gap: 6px; // Etwas kleinerer Abstand
+  margin-left: 10px;
+}
+
+// Kleinerer Kommentarbutton für Tabellenzeilen
+.comment-button-small {
+  font-size: 12px;
+  padding: 2px 4px;
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+
+  &:hover {
+    opacity: 0.9;
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  &.has-comment {
+    opacity: 1;
+    background-color: rgba(73, 128, 174, 0.15);
+    border-color: var(--button-bg-color);
+  }
 }

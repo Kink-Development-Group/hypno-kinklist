@@ -133,3 +133,66 @@
     width: 100%;
   }
 }
+
+// Medienabfragen für optimierte Tabellenansicht bei mehreren Auswahlmöglichkeiten
+@media (max-width: 1200px) {
+  // Für Bildschirme bis 1200px Breite
+  table {
+    th.choicesCol {
+      width: 110px;
+      min-width: 100px;
+      max-width: 110px;
+      padding: 10px 8px;
+    }
+
+    .choices {
+      min-width: 90px;
+      max-width: 110px;
+      gap: 3px;
+    }
+
+    td.kink-name {
+      min-width: 140px;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  // Für Tablets und kleinere Bildschirme
+  table {
+    th.choicesCol {
+      width: 100px;
+      min-width: 90px;
+      max-width: 100px;
+      padding: 8px 6px;
+      font-size: 13px;
+    }
+
+    .choices {
+      min-width: 80px;
+      max-width: 100px;
+      gap: 2px;
+    }
+
+    .choice {
+      width: 16px;
+      height: 16px;
+      min-width: 16px;
+      min-height: 16px;
+    }
+
+    td.kink-name {
+      min-width: 120px;
+    }
+
+    .kink-actions {
+      gap: 4px;
+      margin-left: 8px;
+    }
+
+    .comment-button-small {
+      font-size: 11px;
+      padding: 1px 3px;
+    }
+  }
+}
