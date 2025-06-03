@@ -1,0 +1,48 @@
+// Spezieller Stil für den Kommentar-Button im Input-Modal
+.modal-comment-button {
+  position: relative;
+  margin-left: 10px;
+  top: -2px;
+  font-size: 16px;
+  padding: 3px 7px;
+  opacity: 0.8; // Immer sichtbar, aber dezent
+
+  &.has-comment {
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+    opacity: 1;
+  }
+}
+
+// Aktionssymbole in der Kink-Spalte
+.kink-actions {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap; // Erlaubt Umbruch bei vielen Kommentarbuttons
+  gap: 6px; // Etwas kleinerer Abstand
+  margin-left: 10px;
+  visibility: visible !important; // Erzwingt Sichtbarkeit
+}
+
+// Kleinerer Kommentarbutton für Tabellenzeilen
+.comment-button-small {
+  font-size: 16px; // Größere Schriftgröße für bessere Sichtbarkeit
+  padding: 2px;
+  background: none;
+  border: none; // Kein Rahmen
+  cursor: pointer;
+  opacity: 1; // Immer vollständig sichtbar
+  transition: all 0.2s ease;
+  display: inline-block !important; // Erzwingt Anzeige
+  visibility: visible !important; // Erzwingt Sichtbarkeit
+  color: var(--text-color); // Setzt Textfarbe explizit
+
+  &:hover {
+    transform: scale(1.2); // Leichte Vergrößerung beim Hover
+  }
+  
+  &.has-comment {
+    color: var(--button-bg-color); // Farblicher Hinweis auf vorhandenen Kommentar
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.2); // Leichter Schatten für bessere Sichtbarkeit
+  }
+}
