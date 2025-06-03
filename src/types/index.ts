@@ -26,4 +26,5 @@ export interface Selection {
   value: string;
   $choices?: any;
   showField: boolean;
+  comment?: string; // Optional comment for each selection
 }

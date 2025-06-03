@@ -2,6 +2,7 @@ import React, { memo, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import Choice from "./Choice";
 import { strToClass } from "../utils";
+import { useKinklist } from "../context/KinklistContext";
 
 interface KinkRowProps {
   categoryName: string;
@@ -18,6 +19,8 @@ const KinkRow: React.FC<KinkRowProps> = ({
   description,
   forceInlineTooltip = false,
 }) => {
+  const { selection, setIsCommentOverlayOpen, setSelectedKink } = useKinklist();
+
   const rowId = `kink-row-${strToClass(categoryName)}-${strToClass(kinkName)}`;
   const kinkNameId = `kink-name-${strToClass(kinkName)}`;
   const tooltipRef = useRef<HTMLSpanElement>(null);
@@ -28,6 +31,18 @@ const KinkRow: React.FC<KinkRowProps> = ({
     width: number;
     height: number;
   }>();
+
+  // Handle opening comment overlay
+  const handleOpenComment = (field: string) => {
+    const kinkSelection = selection.find(
+      (s) =>
+        s.category === categoryName && s.kink === kinkName && s.field === field,
+    );
+    if (kinkSelection) {
+      setSelectedKink(kinkSelection);
+      setIsCommentOverlayOpen(true);
+    }
+  };
 
   // Tooltip-Portal-Logik
   const handleTooltipShow = (e: React.MouseEvent | React.FocusEvent) => {
@@ -82,39 +97,82 @@ const KinkRow: React.FC<KinkRowProps> = ({
         role="row"
         aria-labelledby={kinkNameId}
       >
-        {fields.map((field, index) => (
-          <td key={field} role="cell" aria-label={`${field} für ${kinkName}`}>
-            <Choice
-              field={field}
-              categoryName={categoryName}
-              kinkName={kinkName}
-            />
-          </td>
-        ))}
+        {fields.map((field, index) => {
+          // Check if comment exists for this field
+          const kinkSelection = selection.find(
+            (s) =>
+              s.category === categoryName &&
+              s.kink === kinkName &&
+              s.field === field,
+          );
+          const hasComment =
+            kinkSelection?.comment && kinkSelection.comment.trim().length > 0;
+
+          return (
+            <td key={field} role="cell" aria-label={`${field} für ${kinkName}`}>
+              <div className="choice-container">
+                <Choice
+                  field={field}
+                  categoryName={categoryName}
+                  kinkName={kinkName}
+                />
+              </div>
+            </td>
+          );
+        })}
         <td id={kinkNameId} className="kink-name" role="cell">
           {kinkName}
-          {description && (
-            <span className="kink-tooltip">
-              <span
-                className="kink-tooltip-icon"
-                tabIndex={0}
-                aria-label="Beschreibung anzeigen"
-                onKeyDown={handleTooltipKeyDown}
-                ref={tooltipRef}
-                onMouseEnter={handleTooltipShow}
-                onFocus={handleTooltipShow}
-                onMouseLeave={handleTooltipHide}
-                onBlur={handleTooltipHide}
-              >
-                ?
-              </span>
-              {forceInlineTooltip && (
-                <span className="kink-tooltip-text" tabIndex={-1}>
-                  {description}
+          <div className="kink-actions">
+            {fields.map((field) => {
+              // Check if comment exists for this field
+              const kinkSelection = selection.find(
+                (s) =>
+                  s.category === categoryName &&
+                  s.kink === kinkName &&
+                  s.field === field,
+              );
+              const hasComment =
+                kinkSelection?.comment &&
+                kinkSelection.comment.trim().length > 0;
+
+              return (
+                <button
+                  key={`comment-${field}`}
+                  className={`comment-button-small${hasComment ? " has-comment" : ""}`}
+                  onClick={() => handleOpenComment(field)}
+                  aria-label={`Kommentar für ${kinkName} - ${field} ${hasComment ? "bearbeiten" : "hinzufügen"}`}
+                  title={
+                    hasComment ? "Kommentar bearbeiten" : "Kommentar hinzufügen"
+                  }
+                  type="button"
+                >
+                  💬
+                </button>
+              );
+            })}
+            {description && (
+              <span className="kink-tooltip">
+                <span
+                  className="kink-tooltip-icon"
+                  tabIndex={0}
+                  aria-label="Beschreibung anzeigen"
+                  onKeyDown={handleTooltipKeyDown}
+                  ref={tooltipRef}
+                  onMouseEnter={handleTooltipShow}
+                  onFocus={handleTooltipShow}
+                  onMouseLeave={handleTooltipHide}
+                  onBlur={handleTooltipHide}
+                >
+                  ?
                 </span>
-              )}
-            </span>
-          )}
+                {forceInlineTooltip && (
+                  <span className="kink-tooltip-text" tabIndex={-1}>
+                    {description}
+                  </span>
+                )}
+              </span>
+            )}
+          </div>
         </td>
       </tr>
     </>

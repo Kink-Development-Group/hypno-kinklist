@@ -6,6 +6,7 @@ import Export from "./components/Export";
 import InputList from "./components/InputList";
 import EditOverlay from "./components/EditOverlay";
 import InputOverlay from "./components/InputOverlay";
+import CommentOverlay from "./components/CommentOverlay";
 import ThemeToggle from "./components/ThemeToggle";
 import "./styles/main.scss";
 
@@ -410,7 +411,7 @@ const AppContent: React.FC = () => {
           onClick={handleEditClick}
           aria-label="Bearbeiten"
         ></button>
-        <h1>Hypno Kink List</h1>
+        <h1>Hypno Kink List - BETA</h1>
         <ThemeToggle theme={theme} toggleTheme={toggleTheme} />{" "}
       </div>
 
@@ -442,6 +443,7 @@ const AppContent: React.FC = () => {
       </div>
       <EditOverlay />
       <InputOverlay />
+      <CommentOverlay />
     </div>
   );
 };

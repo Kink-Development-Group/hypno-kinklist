@@ -8,6 +8,7 @@ $text-font-size: 14px;
 // Import custom overlay styles
 @import "./overlay.scss";
 @import "./media-queries.scss";
+@import "./comment-styles.scss";
 
 // CSS Variables for theming
 :root {
@@ -191,7 +192,7 @@ table {
     &.choicesCol {
       box-sizing: border-box;
       width: 150px;
-      min-width: 150px; // Konsistente Breite für alle Auswahlspalten
+      min-width: 120px; // Kleinere Mindestbreite für Auswahlspalten
       max-width: 150px;
     }
 
@@ -225,7 +226,7 @@ table {
 
   td.kink-name {
     width: auto; // Passt sich dem verfügbaren Platz an
-    min-width: 120px; // Sorgt für eine Mindestbreite
+    min-width: 150px; // Erhöhte Mindestbreite für die Spalte mit dem Kink-Namen und Kommentaren
   }
   tr {
     &:hover td {
@@ -241,6 +242,17 @@ table {
 
   tr:nth-child(odd) td {
     background-color: var(--table-row-odd);
+  }
+}
+
+// Wrapper für die Tabellen, um horizontales Scrollen zu ermöglichen
+.kinkCategory {
+  overflow-x: auto; // Ermöglicht horizontales Scrollen
+  max-width: 100%;
+
+  // Tabelle behält ihre Größe, selbst wenn der Container zu klein ist
+  table.kinkGroup {
+    min-width: max-content;
   }
 }
 
@@ -288,8 +300,8 @@ table {
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  min-width: 120px;
-  max-width: 150px; // Begrenzt die maximale Breite für Konsistenz
+  min-width: 100px; // Reduzierte Mindestbreite
+  max-width: 140px; // Reduzierte maximale Breite für mehrere Auswahlmöglichkeiten
   width: 100%; // Füllt die Zelle aus
   gap: 4px; // Konsistenter Abstand zwischen allen Auswahlkreisen
   justify-content: flex-start; // Links ausrichten
@@ -980,17 +992,6 @@ table {
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  min-height: 320px;
-  height: 60vh;
-  font-family: monospace;
-  font-size: 1.08rem;
-  padding: 14px 12px;
-  border-radius: 8px;
-  border: 1px solid #bbb;
-  resize: vertical;
-  box-sizing: border-box;
-  background: var(--input-bg-color, #fff);
-  color: var(--text-color, #222);
 }
 
 @media (max-width: 700px) {
@@ -1426,84 +1427,42 @@ table {
   }
 }
 
-// Animations
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(-360deg);
-  }
-}
+// Comment button styles for KinkRow
 
-@keyframes loading-dots {
-  0%,
-  100% {
-    content: ".";
+.comment-button-small {
+  background-color: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 0;
+  opacity: 1; // Immer sichtbar
+  transition: transform 0.2s;
+  color: var(--text-color);
+  font-weight: normal;
+  text-transform: none;
+  box-shadow: none;
+  display: inline-block;
+  min-width: auto;
+  min-height: initial;
+  background-color: transparent;
+  &:hover {
+    transform: scale(1.2);
   }
-  33% {
-    content: "..";
+  &:active {
+    transform: scale(0.95);
   }
-  66% {
-    content: "...";
+  &:focus {
+    outline: none;
   }
-}
-
-@keyframes fadeInOut {
-  0% {
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  80% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
-// Media queries für die Ausblendungen bei niedrigen Bildschirmhöhen
-@media (max-height: 500px) {
-  #InputPrevious,
-  #InputNext {
-    display: none;
-  }
-}
-
-// Fix Overlay styles
-.fix-overlay {
-  margin: 20px auto;
-  padding: 15px;
-  background-color: var(--input-bg-color);
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  max-width: 500px;
-  text-align: center;
-
-  h2 {
-    margin-top: 0;
+  
+  &.has-comment {
     color: var(--button-bg-color);
   }
-
-  p {
-    margin-bottom: 15px;
-    line-height: 1.5;
-  }
-
-  .btn {
-    background-color: var(--button-bg-color);
-    color: var(--button-text-color);
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-
-    &:hover {
-      background-color: var(--button-hover-color);
-      transform: translateY(-2px);
-    }
-  }
+}
+// Zusätzliche Stile für den deaktivierten Zustand
+.comment-button-small:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
