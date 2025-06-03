@@ -99,14 +99,14 @@ const KinkRow: React.FC<KinkRowProps> = ({
       >
         {fields.map((field, index) => {
           // Check if comment exists for this field
-          const kinkSelection = selection.find(
-            (s) =>
-              s.category === categoryName &&
-              s.kink === kinkName &&
-              s.field === field,
-          );
-          const hasComment =
-            kinkSelection?.comment && kinkSelection.comment.trim().length > 0;
+          // const kinkSelection = selection.find(
+          //   (s) =>
+          //     s.category === categoryName &&
+          //     s.kink === kinkName &&s
+          //     s.field === field,s
+          // );
+          // const hasComment =
+          //   kinkSelection?.comment && kinkSelection.comment.trim().length > 0;
 
           return (
             <td key={field} role="cell" aria-label={`${field} für ${kinkName}`}>
