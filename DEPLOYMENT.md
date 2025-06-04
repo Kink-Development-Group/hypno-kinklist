@@ -17,8 +17,8 @@ Bitte fügen Sie folgende Secrets in den GitHub Repository Settings hinzu:
 
 ### Neue Secrets (müssen hinzugefügt werden)
 
-- `SFTP_REMOTE_DIR_PROD` - Produktions-Verzeichnis (z.B. `/var/www/html/kinklist`)
-- `SFTP_REMOTE_DIR_DEV` - Development-Verzeichnis (z.B. `/var/www/html/kinklist-dev`)
+- `SFTP_REMOTE_DIR_PROD` - Produktions-Verzeichnis (z.B. `/var/www/html/kinklist_hypno`)
+- `SFTP_REMOTE_DIR_DEV` - Development-Verzeichnis (z.B. `/var/www/html/kinklist_hypno_dev`)
 
 ## Deployment-Environments
 

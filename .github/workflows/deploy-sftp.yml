@@ -28,14 +28,20 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Prepare deployment
+      - name: Validate build artifacts
         run: |
-          chmod +x ./scripts/deploy.sh
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            ./scripts/deploy.sh prod
-          elif [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
-            ./scripts/deploy.sh dev
+          echo "🔍 Validating build artifacts..."
+          if [ ! -d "./build" ]; then
+            echo "❌ Build directory not found!"
+            exit 1
           fi
+          if [ ! -f "./build/index.html" ]; then
+            echo "❌ index.html not found in build directory!"
+            exit 1
+          fi
+          echo "✅ Build artifacts validated successfully"
+          echo "📋 Build contents:"
+          ls -la ./build/
 
       - name: Set deployment target based on branch
         id: deployment
@@ -84,3 +90,20 @@ jobs:
             find ${{ steps.deployment.outputs.target_dir }} -type f -name "*.js" -exec chmod 644 {} \;
             find ${{ steps.deployment.outputs.target_dir }} -type f -name "*.css" -exec chmod 644 {} \;
             find ${{ steps.deployment.outputs.target_dir }} -type d -exec chmod 755 {} \;
+
+      - name: Verify deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USER }}
+          password: ${{ secrets.SFTP_PASS }}
+          port: ${{ secrets.SFTP_PORT }}
+          script: |
+            echo "🔍 Verifying deployment in: ${{ steps.deployment.outputs.target_dir }}"
+            ls -la "${{ steps.deployment.outputs.target_dir }}"
+            if [ -f "${{ steps.deployment.outputs.target_dir }}/index.html" ]; then
+              echo "✅ Deployment successful - index.html found"
+            else
+              echo "❌ Deployment failed - index.html not found"
+              exit 1
+            fi
