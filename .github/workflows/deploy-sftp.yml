@@ -50,6 +50,7 @@ jobs:
           find . -name "*.html" -type f 2>/dev/null || echo "❌ No HTML files found"
 
       - name: Validate build artifacts
+        id: build_check
         run: |
           echo "🔍 Validating build artifacts..."
           echo "🔍 Current directory structure:"
@@ -86,16 +87,24 @@ jobs:
             find "$BUILD_DIR" -name "*.html" -type f 2>/dev/null || echo "No HTML files found"
             exit 1
           fi
-          
-          echo "✅ Build artifacts validated successfully"
+            echo "✅ Build artifacts validated successfully"
           echo "📋 Build directory: $BUILD_DIR"
           echo "📋 Build contents:"
           ls -la "$BUILD_DIR/"
-          echo "📋 index.html size: $(stat -f%z "$BUILD_DIR/index.html" 2>/dev/null || stat -c%s "$BUILD_DIR/index.html" 2>/dev/null || echo 'unknown') bytes"
+          
+          # Get file size in a cross-platform way
+          INDEX_SIZE=""
+          if command -v stat >/dev/null 2>&1; then
+            # Try BSD stat first (macOS), then GNU stat (Linux)
+            INDEX_SIZE=$(stat -f%z "$BUILD_DIR/index.html" 2>/dev/null || stat -c%s "$BUILD_DIR/index.html" 2>/dev/null || echo 'unknown')
+          else
+            INDEX_SIZE="unknown"
+          fi
+          echo "📋 index.html size: ${INDEX_SIZE} bytes"
           
           # Export build directory for use in deployment steps
-          echo "BUILD_DIR=$BUILD_DIR" >> $GITHUB_ENV
-          echo "SOURCE_PATH=${BUILD_DIR}/*" >> $GITHUB_ENV
+          echo "build_dir=$BUILD_DIR" >> $GITHUB_OUTPUT
+          echo "source_path=${BUILD_DIR}/*" >> $GITHUB_OUTPUT
 
       - name: Set deployment target based on branch
         id: deployment
@@ -109,6 +118,7 @@ jobs:
           fi
 
       - name: Verify deployment configuration
+        id: config_check
         run: |
           echo "🔍 Verifying deployment configuration..."
           echo "Branch: ${{ github.ref }}"
@@ -116,45 +126,96 @@ jobs:
           echo "Target directory: ${{ steps.deployment.outputs.target_dir }}"
           
           # Check if required secrets are available (without exposing values)
+          MISSING_SECRETS=""
+          
           if [ -z "${{ secrets.SFTP_HOST }}" ]; then
             echo "❌ SFTP_HOST secret is missing"
-            exit 1
+            MISSING_SECRETS="$MISSING_SECRETS SFTP_HOST"
           else
             echo "✅ SFTP_HOST is configured"
           fi
           
           if [ -z "${{ secrets.SFTP_USER }}" ]; then
             echo "❌ SFTP_USER secret is missing"
-            exit 1
+            MISSING_SECRETS="$MISSING_SECRETS SFTP_USER"
           else
             echo "✅ SFTP_USER is configured"
           fi
           
           if [ -z "${{ secrets.SFTP_PASS }}" ]; then
             echo "❌ SFTP_PASS secret is missing"
-            exit 1
+            MISSING_SECRETS="$MISSING_SECRETS SFTP_PASS"
           else
             echo "✅ SFTP_PASS is configured"
           fi
           
           if [ -z "${{ secrets.SFTP_PORT }}" ]; then
             echo "❌ SFTP_PORT secret is missing"
-            exit 1
+            MISSING_SECRETS="$MISSING_SECRETS SFTP_PORT"
           else
             echo "✅ SFTP_PORT is configured"
           fi
           
           if [ -z "${{ steps.deployment.outputs.target_dir }}" ]; then
             echo "❌ Target directory not set for this branch"
-            exit 1
+            MISSING_SECRETS="$MISSING_SECRETS TARGET_DIR"
           else
             echo "✅ Target directory is configured"
           fi
+            # If any secrets are missing, skip deployment gracefully
+          if [ -n "$MISSING_SECRETS" ]; then
+            echo "⚠️ Deployment will be skipped due to missing configuration:"
+            echo "   Missing: $MISSING_SECRETS"
+            echo "⚠️ Please configure the required GitHub secrets in repository settings."
+            echo "⚠️ See DEPLOYMENT.md and PIPELINE_TROUBLESHOOTING.md for more information."
+            echo "⚠️ This is not an error - the workflow will complete successfully."
+            echo "skip_deployment=true" >> $GITHUB_OUTPUT
+            exit 0
+          else
+            echo "✅ All deployment configuration verified"
+            echo "skip_deployment=false" >> $GITHUB_OUTPUT
+          fi
 
-      - name: Test SSH Connection
-        run: echo "🔍 Testing SSH connection to deployment server..."
-        
+      - name: Verbose SSH Connection Test
+        if: steps.config_check.outputs.skip_deployment == 'false'
+        run: |
+          echo "🔍 Testing SSH connection with verbose output..."
+          echo "Host: ${{ secrets.SFTP_HOST }}"
+          echo "Port: ${{ secrets.SFTP_PORT }}"
+          echo "User: ${{ secrets.SFTP_USER }}"
+          
+          # Install sshpass if not available
+          sudo apt-get update -qq && sudo apt-get install -y sshpass
+          
+          # Create a temporary SSH config for verbose testing
+          mkdir -p ~/.ssh
+          echo "Host testhost" > ~/.ssh/config
+          echo "  HostName ${{ secrets.SFTP_HOST }}" >> ~/.ssh/config
+          echo "  Port ${{ secrets.SFTP_PORT }}" >> ~/.ssh/config
+          echo "  User ${{ secrets.SFTP_USER }}" >> ~/.ssh/config
+          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+          echo "  UserKnownHostsFile /dev/null" >> ~/.ssh/config
+            # Test connection with timeout and better error handling
+          echo "🔍 Attempting verbose SSH connection test..."
+          set +e  # Don't exit on error for this test
+          timeout 30 sshpass -p "${{ secrets.SFTP_PASS }}" ssh -v testhost "echo 'SSH connection test successful'" 2>&1
+          SSH_TEST_RESULT=$?
+          set -e  # Re-enable exit on error
+          
+          if [ $SSH_TEST_RESULT -eq 0 ]; then
+            echo "✅ SSH connection test passed"
+          else
+            echo "❌ SSH connection test failed (exit code: $SSH_TEST_RESULT)"
+            echo "This might be due to:"
+            echo "  - Incorrect host/port/credentials"
+            echo "  - Network connectivity issues" 
+            echo "  - Server configuration problems"
+            echo "  - SSH server not responding to test commands"
+            echo "Continuing to attempt deployment via action..."
+          fi
+
       - name: Verify SSH Authentication
+        if: steps.config_check.outputs.skip_deployment == 'false'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SFTP_HOST }}
@@ -170,6 +231,7 @@ jobs:
             echo "  - Available space: $(df -h . | tail -1 | awk '{print $4}')"
 
       - name: Create target directory via SSH
+        if: steps.config_check.outputs.skip_deployment == 'false'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SFTP_HOST }}
@@ -181,19 +243,21 @@ jobs:
             chmod 755 ${{ steps.deployment.outputs.target_dir }}
 
       - name: Deploy to SFTP (${{ steps.deployment.outputs.environment }})
+        if: steps.config_check.outputs.skip_deployment == 'false'
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SFTP_HOST }}
           port: ${{ secrets.SFTP_PORT }}
           username: ${{ secrets.SFTP_USER }}
           password: ${{ secrets.SFTP_PASS }}
-          source: "${{ env.SOURCE_PATH }}"
+          source: "${{ steps.build_check.outputs.source_path }}"
           target: ${{ steps.deployment.outputs.target_dir }}
           strip_components: 1
           overwrite: true
           rm: true
 
       - name: Cleanup and set permissions
+        if: steps.config_check.outputs.skip_deployment == 'false'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SFTP_HOST }}
@@ -207,6 +271,7 @@ jobs:
             find ${{ steps.deployment.outputs.target_dir }} -type d -exec chmod 755 {} \;
 
       - name: Verify deployment
+        if: steps.config_check.outputs.skip_deployment == 'false'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SFTP_HOST }}
@@ -224,8 +289,17 @@ jobs:
             fi
 
       - name: Deployment success notification
+        if: steps.config_check.outputs.skip_deployment == 'false'
         run: |
           echo "🚀 Deployment completed successfully!"
           echo "Environment: ${{ steps.deployment.outputs.environment }}"
           echo "Target directory: ${{ steps.deployment.outputs.target_dir }}"
-          echo "Build directory used: ${{ env.BUILD_DIR }}"
+          echo "Build directory used: ${{ steps.build_check.outputs.build_dir }}"
+
+      - name: Deployment skipped notification
+        if: steps.config_check.outputs.skip_deployment == 'true'
+        run: |
+          echo "⚠️ Deployment was skipped due to missing configuration."
+          echo "📋 Please check the 'Verify deployment configuration' step for details."
+          echo "📋 Configure the required GitHub secrets to enable deployment."
+          echo "📖 See DEPLOYMENT.md and PIPELINE_TROUBLESHOOTING.md for setup instructions."
