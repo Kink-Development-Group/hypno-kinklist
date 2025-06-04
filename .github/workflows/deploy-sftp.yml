@@ -1,9 +1,10 @@
-name: Build and Deploy to SFTP
+name: Build and Deploy
 
 on:
   push:
     branches:
       - main
+      - dev
 
 jobs:
   build-and-deploy:
@@ -16,14 +17,49 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Run tests
+        run: npm test -- --run
+
       - name: Build project
         run: npm run build
 
-      - name: Deploy to SFTP
+      - name: Prepare deployment
+        run: |
+          chmod +x ./scripts/deploy.sh
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            ./scripts/deploy.sh prod
+          elif [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
+            ./scripts/deploy.sh dev
+          fi
+
+      - name: Set deployment target based on branch
+        id: deployment
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "target_dir=${{ secrets.SFTP_REMOTE_DIR_PROD }}" >> $GITHUB_OUTPUT
+            echo "environment=production" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
+            echo "target_dir=${{ secrets.SFTP_REMOTE_DIR_DEV }}" >> $GITHUB_OUTPUT
+            echo "environment=development" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create target directory via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USER }}
+          password: ${{ secrets.SFTP_PASS }}
+          port: ${{ secrets.SFTP_PORT }}
+          script: |
+            mkdir -p ${{ steps.deployment.outputs.target_dir }}
+            chmod 755 ${{ steps.deployment.outputs.target_dir }}
+
+      - name: Deploy to SFTP (${{ steps.deployment.outputs.environment }})
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SFTP_HOST }}
@@ -31,4 +67,20 @@ jobs:
           username: ${{ secrets.SFTP_USER }}
           password: ${{ secrets.SFTP_PASS }}
           source: "./build/*"
-          target: ${{ secrets.SFTP_REMOTE_DIR }}
+          target: ${{ steps.deployment.outputs.target_dir }}
+          strip_components: 1
+          overwrite: true
+          rm: true
+
+      - name: Cleanup and set permissions
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USER }}
+          password: ${{ secrets.SFTP_PASS }}
+          port: ${{ secrets.SFTP_PORT }}
+          script: |
+            find ${{ steps.deployment.outputs.target_dir }} -type f -name "*.html" -exec chmod 644 {} \;
+            find ${{ steps.deployment.outputs.target_dir }} -type f -name "*.js" -exec chmod 644 {} \;
+            find ${{ steps.deployment.outputs.target_dir }} -type f -name "*.css" -exec chmod 644 {} \;
+            find ${{ steps.deployment.outputs.target_dir }} -type d -exec chmod 755 {} \;
