@@ -43,7 +43,8 @@ jobs:
             else
               echo "❌ ./$dir directory does not exist"
             fi
-          done          echo "🔍 Searching for index.html files:"
+          done
+          echo "🔍 Searching for index.html files:"
           find . -name "index.html" -type f 2>/dev/null || echo "❌ No index.html files found"
           echo "🔍 Searching for any HTML files:"
           find . -name "*.html" -type f 2>/dev/null || echo "❌ No HTML files found"
