@@ -60,6 +60,14 @@ jobs:
           sudo apt-get update -qq && sudo apt-get install -y sshpass
           sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST -p $SSH_PORT "mkdir -p $REMOTE_DIR || echo '❌ Permission denied to create directory.'"
 
+      - name: Debug SFTP Connection
+        run: |
+          echo "Host: ${{ secrets.SFTP_HOST }}"
+          echo "Port: ${{ secrets.SFTP_PORT || 22 }}"
+          echo "User: ${{ secrets.SFTP_USER }}"
+          echo "Testing SFTP connection..."
+          lftp -u "${{ secrets.SFTP_USER }},${{ secrets.SFTP_PASS }}" -e "exit" -p ${{ secrets.SFTP_PORT || 22 }} sftp://${{ secrets.SFTP_HOST }} || echo "❌ Invalid SFTP credentials or port unreachable"
+
       - name: Set Default Ports
         run: |
           if [[ -z "${{ secrets.SFTP_PORT }}" ]]; then
