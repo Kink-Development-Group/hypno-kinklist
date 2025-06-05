@@ -40,6 +40,26 @@ jobs:
             echo "env=development" >> $GITHUB_OUTPUT
           fi
 
+      - name: Install lftp
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lftp
+
+      - name: Validate SFTP Connection
+        run: |
+          lftp -u "${{ secrets.SFTP_USER }},${{ secrets.SFTP_PASS }}" -e "exit" -p ${{ secrets.SFTP_PORT || 22 }} sftp://${{ secrets.SFTP_HOST }} || echo "❌ Invalid SFTP credentials or port unreachable"
+
+      - name: Test Directory Permissions
+        env:
+          SSH_USER: ${{ secrets.SFTP_USER }}
+          SSH_PASSWORD: ${{ secrets.SFTP_PASS }}
+          SSH_HOST: ${{ secrets.SFTP_HOST }}
+          SSH_PORT: ${{ secrets.SFTP_PORT || 22 }}
+          REMOTE_DIR: ${{ steps.target.outputs.dir }}
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y sshpass
+          sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST -p $SSH_PORT "mkdir -p $REMOTE_DIR || echo '❌ Permission denied to create directory.'"
+
       - name: Set Default Ports
         run: |
           if [[ -z "${{ secrets.SFTP_PORT }}" ]]; then
