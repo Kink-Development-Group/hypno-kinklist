@@ -1,8 +1,8 @@
-import React from "react";
+import React from 'react'
 
 interface ErrorModalProps {
-  message: string;
-  onClose: () => void;
+  message: string
+  onClose: () => void
 }
 
 const ErrorModal: React.FC<ErrorModalProps> = ({ message, onClose }) => {
@@ -18,7 +18,7 @@ const ErrorModal: React.FC<ErrorModalProps> = ({ message, onClose }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ErrorModal;
+export default ErrorModal

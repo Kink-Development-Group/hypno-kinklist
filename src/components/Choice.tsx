@@ -4,20 +4,20 @@ import React, {
   useCallback,
   memo,
   KeyboardEvent,
-} from "react";
-import { useKinklist } from "../context/KinklistContext";
+} from 'react'
+import { useKinklist } from '../context/KinklistContext'
 
 interface ChoiceProps {
-  field: string;
-  categoryName: string;
-  kinkName: string;
+  field: string
+  categoryName: string
+  kinkName: string
 }
 
 const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
-  const { levels, selection, setSelection } = useKinklist();
+  const { levels, selection, setSelection } = useKinklist()
   const [selectedLevel, setSelectedLevel] = useState<string>(
-    Object.keys(levels)[0],
-  );
+    Object.keys(levels)[0]
+  )
 
   // Find the current selection for this choice
   useEffect(() => {
@@ -25,17 +25,17 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
       (item) =>
         item.category === categoryName &&
         item.kink === kinkName &&
-        item.field === field,
-    );
+        item.field === field
+    )
 
     if (currentSelection) {
-      setSelectedLevel(currentSelection.value);
+      setSelectedLevel(currentSelection.value)
     }
-  }, [selection, categoryName, kinkName, field]);
+  }, [selection, categoryName, kinkName, field])
 
   const handleClick = useCallback(
     (levelName: string) => {
-      setSelectedLevel(levelName);
+      setSelectedLevel(levelName)
 
       // Update the global selection state
       const updatedSelection = selection.map((item) => {
@@ -44,40 +44,40 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
           item.kink === kinkName &&
           item.field === field
         ) {
-          return { ...item, value: levelName };
+          return { ...item, value: levelName }
         }
-        return item;
-      });
+        return item
+      })
 
-      setSelection(updatedSelection);
+      setSelection(updatedSelection)
     },
-    [categoryName, kinkName, field, selection, setSelection],
-  );
+    [categoryName, kinkName, field, selection, setSelection]
+  )
 
   // Handled keyboard events for accessibility
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLButtonElement>, levelName: string) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        handleClick(levelName);
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault()
+        handleClick(levelName)
       }
     },
-    [handleClick],
-  );
+    [handleClick]
+  )
 
   return (
     <div
-      className={`choices choice-${field.toLowerCase().replace(/\s+/g, "")}`}
+      className={`choices choice-${field.toLowerCase().replace(/\s+/g, '')}`}
       data-field={field}
       role="radiogroup"
       aria-label={`Auswahl für ${kinkName} (${field})`}
     >
       {Object.entries(levels).map(([levelName, level], index) => {
-        const isSelected = selectedLevel === levelName;
+        const isSelected = selectedLevel === levelName
         return (
           <button
             key={levelName}
-            className={`choice ${level.class} ${isSelected ? "selected" : ""}`}
+            className={`choice ${level.class} ${isSelected ? 'selected' : ''}`}
             data-level={levelName}
             data-level-int={index}
             title={`${levelName} für ${kinkName} (${field})`}
@@ -89,10 +89,10 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
             aria-label={`${levelName} für ${kinkName} (${field})`}
             tabIndex={isSelected ? 0 : -1}
           />
-        );
+        )
       })}
     </div>
-  );
-};
+  )
+}
 
-export default memo(Choice);
+export default memo(Choice)

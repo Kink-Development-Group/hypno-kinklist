@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, memo, useRef } from "react";
-import { useKinklist } from "../context/KinklistContext";
+import React, { useState, useEffect, useCallback, memo, useRef } from 'react'
+import { useKinklist } from '../context/KinklistContext'
 // import { Selection } from "../types";s
 
 const CommentOverlay: React.FC = () => {
@@ -10,17 +10,17 @@ const CommentOverlay: React.FC = () => {
     setIsCommentOverlayOpen,
     selectedKink,
     setSelectedKink,
-  } = useKinklist();
+  } = useKinklist()
 
-  const [comment, setComment] = useState<string>("");
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [comment, setComment] = useState<string>('')
+  const overlayRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // Close the overlay
   const handleClose = useCallback(() => {
-    setIsCommentOverlayOpen(false);
-    setSelectedKink(null);
-  }, [setIsCommentOverlayOpen, setSelectedKink]);
+    setIsCommentOverlayOpen(false)
+    setSelectedKink(null)
+  }, [setIsCommentOverlayOpen, setSelectedKink])
 
   // Save comment
   const handleSave = useCallback(() => {
@@ -31,73 +31,73 @@ const CommentOverlay: React.FC = () => {
           item.kink === selectedKink.kink &&
           item.field === selectedKink.field
         ) {
-          return { ...item, comment: comment.trim() || undefined };
+          return { ...item, comment: comment.trim() || undefined }
         }
-        return item;
-      });
+        return item
+      })
 
-      setSelection(updatedSelection);
-      handleClose();
+      setSelection(updatedSelection)
+      handleClose()
     }
-  }, [selectedKink, selection, setSelection, comment, handleClose]);
+  }, [selectedKink, selection, setSelection, comment, handleClose])
 
   // Initialize comment when selectedKink changes
   useEffect(() => {
     if (selectedKink) {
-      setComment(selectedKink.comment || "");
+      setComment(selectedKink.comment || '')
     }
-  }, [selectedKink]);
+  }, [selectedKink])
 
   // Focus management
   useEffect(() => {
     if (isCommentOverlayOpen && textareaRef.current) {
       // Small delay to ensure the overlay is fully rendered
       setTimeout(() => {
-        textareaRef.current?.focus();
-      }, 100);
+        textareaRef.current?.focus()
+      }, 100)
     }
-  }, [isCommentOverlayOpen]);
+  }, [isCommentOverlayOpen])
 
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isCommentOverlayOpen) return;
+      if (!isCommentOverlayOpen) return
 
       // Escape key to close
-      if (e.key === "Escape") {
-        handleClose();
-        e.preventDefault();
+      if (e.key === 'Escape') {
+        handleClose()
+        e.preventDefault()
       }
 
       // Ctrl+Enter to save
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-        handleSave();
-        e.preventDefault();
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        handleSave()
+        e.preventDefault()
       }
-    };
+    }
 
-    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown)
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isCommentOverlayOpen, handleClose, handleSave]);
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isCommentOverlayOpen, handleClose, handleSave])
 
   // Close when clicking on the overlay background
   const handleOverlayClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (e.target === e.currentTarget) {
-        handleClose();
+        handleClose()
       }
     },
-    [handleClose],
-  );
+    [handleClose]
+  )
 
-  if (!selectedKink) return null;
+  if (!selectedKink) return null
 
   return (
     <div
       id="CommentOverlay"
-      className={`overlay ${isCommentOverlayOpen ? "visible" : ""}`}
+      className={`overlay ${isCommentOverlayOpen ? 'visible' : ''}`}
       onClick={handleOverlayClick}
       ref={overlayRef}
       role="dialog"
@@ -178,7 +178,7 @@ const CommentOverlay: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default memo(CommentOverlay);
+export default memo(CommentOverlay)

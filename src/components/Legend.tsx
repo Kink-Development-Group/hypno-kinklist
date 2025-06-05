@@ -1,8 +1,8 @@
-import React from "react";
-import { useKinklist } from "../context/KinklistContext";
+import React from 'react'
+import { useKinklist } from '../context/KinklistContext'
 
 const Legend: React.FC = () => {
-  const { levels } = useKinklist();
+  const { levels } = useKinklist()
 
   return (
     <div className="legend-container">
@@ -18,7 +18,7 @@ const Legend: React.FC = () => {
         ))}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Legend;
+export default Legend

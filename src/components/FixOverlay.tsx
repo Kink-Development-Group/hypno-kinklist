@@ -1,20 +1,20 @@
-import React, { useCallback } from "react";
-import { useKinklist } from "../context/KinklistContext";
-import { useErrorHandler } from "../utils/useErrorHandler";
+import React, { useCallback } from 'react'
+import { useKinklist } from '../context/KinklistContext'
+import { useErrorHandler } from '../utils/useErrorHandler'
 
 const FixOverlay: React.FC = () => {
-  const { setIsInputOverlayOpen } = useKinklist();
-  const errorHandler = useErrorHandler();
+  const { setIsInputOverlayOpen } = useKinklist()
+  const errorHandler = useErrorHandler()
 
   const handleFixOverlay = useCallback(() => {
     // Setze den Modal-Status zurück
-    setIsInputOverlayOpen(false);
+    setIsInputOverlayOpen(false)
 
     // Zeige Erfolgsmeldung
     errorHandler(
-      "Der Modal-Status wurde erfolgreich zurückgesetzt. Sie können das Start-Modal jetzt wieder normal verwenden.",
-    );
-  }, [setIsInputOverlayOpen, errorHandler]);
+      'Der Modal-Status wurde erfolgreich zurückgesetzt. Sie können das Start-Modal jetzt wieder normal verwenden.'
+    )
+  }, [setIsInputOverlayOpen, errorHandler])
 
   return (
     <div className="fix-overlay">
@@ -22,12 +22,12 @@ const FixOverlay: React.FC = () => {
       <p>
         Falls das Start-Modal (Kink-Auswahl) nicht richtig schließt oder nicht
         angezeigt wird, können Sie mit diesem Button den Status zurücksetzen:
-      </p>{" "}
+      </p>{' '}
       <button className="btn" onClick={handleFixOverlay}>
         Modal-Status zurücksetzen
       </button>
     </div>
-  );
-};
+  )
+}
 
-export default FixOverlay;
+export default FixOverlay

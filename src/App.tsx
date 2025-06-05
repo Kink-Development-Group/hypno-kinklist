@@ -1,14 +1,14 @@
-import React from "react";
-import { KinklistProvider, useKinklist } from "./context/KinklistContext";
-import { ThemeProvider, useTheme } from "./context/ThemeContext";
-import Legend from "./components/Legend";
-import Export from "./components/Export";
-import InputList from "./components/InputList";
-import EditOverlay from "./components/EditOverlay";
-import InputOverlay from "./components/InputOverlay";
-import CommentOverlay from "./components/CommentOverlay";
-import ThemeToggle from "./components/ThemeToggle";
-import "./styles/main.scss";
+import React from 'react'
+import { KinklistProvider, useKinklist } from './context/KinklistContext'
+import { ThemeProvider, useTheme } from './context/ThemeContext'
+import Legend from './components/Legend'
+import Export from './components/Export'
+import InputList from './components/InputList'
+import EditOverlay from './components/EditOverlay'
+import InputOverlay from './components/InputOverlay'
+import CommentOverlay from './components/CommentOverlay'
+import ThemeToggle from './components/ThemeToggle'
+import './styles/main.scss'
 
 // Default kinks text with comprehensive English descriptions for all kinks
 const defaultKinksText = `#Basics
@@ -377,7 +377,7 @@ const defaultKinksText = `#Basics
 * Being ordered to masturbate
 ? Following hypnotic suggestions to touch oneself, within agreed boundaries.
 * Being forced to do something
-? Experiencing the sensation of being compelled to act, even against one's will, in a safe, consensual context.`;
+? Experiencing the sensation of being compelled to act, even against one's will, in a safe, consensual context.`
 
 const App: React.FC = () => {
   return (
@@ -386,21 +386,21 @@ const App: React.FC = () => {
         <AppContent />
       </KinklistProvider>
     </ThemeProvider>
-  );
-};
+  )
+}
 
 // Separate component to use context
 const AppContent: React.FC = () => {
-  const { setIsEditOverlayOpen, setIsInputOverlayOpen } = useKinklist();
-  const { theme, toggleTheme } = useTheme();
+  const { setIsEditOverlayOpen, setIsInputOverlayOpen } = useKinklist()
+  const { theme, toggleTheme } = useTheme()
 
   const handleEditClick = () => {
-    setIsEditOverlayOpen(true);
-  };
+    setIsEditOverlayOpen(true)
+  }
 
   const handleStartClick = () => {
-    setIsInputOverlayOpen(true);
-  };
+    setIsInputOverlayOpen(true)
+  }
   return (
     <div className="container">
       <div className="header-controls">
@@ -412,7 +412,7 @@ const AppContent: React.FC = () => {
           aria-label="Bearbeiten"
         ></button>
         <h1>Hypno Kink List - BETA</h1>
-        <ThemeToggle theme={theme} toggleTheme={toggleTheme} />{" "}
+        <ThemeToggle theme={theme} toggleTheme={toggleTheme} />{' '}
       </div>
 
       <Legend />
@@ -445,7 +445,7 @@ const AppContent: React.FC = () => {
       <InputOverlay />
       <CommentOverlay />
     </div>
-  );
-};
+  )
+}
 
-export default App;
+export default App

@@ -1,15 +1,15 @@
-import React, { memo, useRef, useState } from "react";
-import ReactDOM from "react-dom";
-import Choice from "./Choice";
-import { strToClass } from "../utils";
-import { useKinklist } from "../context/KinklistContext";
+import React, { memo, useRef, useState } from 'react'
+import ReactDOM from 'react-dom'
+import Choice from './Choice'
+import { strToClass } from '../utils'
+import { useKinklist } from '../context/KinklistContext'
 
 interface KinkRowProps {
-  categoryName: string;
-  kinkName: string;
-  fields: string[];
-  description?: string;
-  forceInlineTooltip?: boolean; // Neu: für Modals/Overlays
+  categoryName: string
+  kinkName: string
+  fields: string[]
+  description?: string
+  forceInlineTooltip?: boolean // Neu: für Modals/Overlays
 }
 
 const KinkRow: React.FC<KinkRowProps> = ({
@@ -19,52 +19,52 @@ const KinkRow: React.FC<KinkRowProps> = ({
   description,
   forceInlineTooltip = false,
 }) => {
-  const { selection, setIsCommentOverlayOpen, setSelectedKink } = useKinklist();
+  const { selection, setIsCommentOverlayOpen, setSelectedKink } = useKinklist()
 
-  const rowId = `kink-row-${strToClass(categoryName)}-${strToClass(kinkName)}`;
-  const kinkNameId = `kink-name-${strToClass(kinkName)}`;
-  const tooltipRef = useRef<HTMLSpanElement>(null);
-  const [showTooltip, setShowTooltip] = useState(false);
+  const rowId = `kink-row-${strToClass(categoryName)}-${strToClass(kinkName)}`
+  const kinkNameId = `kink-name-${strToClass(kinkName)}`
+  const tooltipRef = useRef<HTMLSpanElement>(null)
+  const [showTooltip, setShowTooltip] = useState(false)
   const [tooltipPos, setTooltipPos] = useState<{
-    top: number;
-    left: number;
-    width: number;
-    height: number;
-  }>();
+    top: number
+    left: number
+    width: number
+    height: number
+  }>()
 
   // Handle opening comment overlay
   const handleOpenComment = (field: string) => {
     const kinkSelection = selection.find(
       (s) =>
-        s.category === categoryName && s.kink === kinkName && s.field === field,
-    );
+        s.category === categoryName && s.kink === kinkName && s.field === field
+    )
     if (kinkSelection) {
-      setSelectedKink(kinkSelection);
-      setIsCommentOverlayOpen(true);
+      setSelectedKink(kinkSelection)
+      setIsCommentOverlayOpen(true)
     }
-  };
+  }
 
   // Tooltip-Portal-Logik
   const handleTooltipShow = (_e: React.MouseEvent | React.FocusEvent) => {
-    if (!tooltipRef.current) return;
-    const rect = tooltipRef.current.getBoundingClientRect();
+    if (!tooltipRef.current) return
+    const rect = tooltipRef.current.getBoundingClientRect()
     setTooltipPos({
       top: rect.bottom + 6, // etwas Abstand nach unten
       left: rect.left,
       width: rect.width,
       height: rect.height,
-    });
-    setShowTooltip(true);
-  };
-  const handleTooltipHide = () => setShowTooltip(false);
+    })
+    setShowTooltip(true)
+  }
+  const handleTooltipHide = () => setShowTooltip(false)
 
   // Accessibility: Tooltip per ESC schließen
   const handleTooltipKeyDown = (e: React.KeyboardEvent<HTMLSpanElement>) => {
-    if (e.key === "Escape") {
-      (e.target as HTMLElement).blur();
-      setShowTooltip(false);
+    if (e.key === 'Escape') {
+      ;(e.target as HTMLElement).blur()
+      setShowTooltip(false)
     }
-  };
+  }
 
   // Tooltip-Element als Portal oder Inline
   const tooltipNode =
@@ -73,7 +73,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
           <div
             className="kink-tooltip-text kink-tooltip-portal"
             style={{
-              position: "fixed" as const,
+              position: 'fixed' as const,
               top: tooltipPos.top,
               left: tooltipPos.left,
               zIndex: 99999 as const,
@@ -83,9 +83,9 @@ const KinkRow: React.FC<KinkRowProps> = ({
           >
             {description}
           </div>,
-          document.body,
+          document.body
         )
-      : null;
+      : null
 
   return (
     <>
@@ -118,7 +118,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
                 />
               </div>
             </td>
-          );
+          )
         })}
         <td id={kinkNameId} className="kink-name" role="cell">
           {kinkName}
@@ -129,26 +129,26 @@ const KinkRow: React.FC<KinkRowProps> = ({
                 (s) =>
                   s.category === categoryName &&
                   s.kink === kinkName &&
-                  s.field === field,
-              );
+                  s.field === field
+              )
               const hasComment =
                 kinkSelection?.comment &&
-                kinkSelection.comment.trim().length > 0;
+                kinkSelection.comment.trim().length > 0
 
               return (
                 <button
                   key={`comment-${field}`}
-                  className={`comment-button-small${hasComment ? " has-comment" : ""}`}
+                  className={`comment-button-small${hasComment ? ' has-comment' : ''}`}
                   onClick={() => handleOpenComment(field)}
-                  aria-label={`Kommentar für ${kinkName} - ${field} ${hasComment ? "bearbeiten" : "hinzufügen"}`}
+                  aria-label={`Kommentar für ${kinkName} - ${field} ${hasComment ? 'bearbeiten' : 'hinzufügen'}`}
                   title={
-                    hasComment ? "Kommentar bearbeiten" : "Kommentar hinzufügen"
+                    hasComment ? 'Kommentar bearbeiten' : 'Kommentar hinzufügen'
                   }
                   type="button"
                 >
                   💬
                 </button>
-              );
+              )
             })}
             {description && (
               <span className="kink-tooltip">
@@ -176,7 +176,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
         </td>
       </tr>
     </>
-  );
-};
+  )
+}
 
-export default memo(KinkRow);
+export default memo(KinkRow)

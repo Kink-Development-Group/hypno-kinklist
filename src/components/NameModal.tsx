@@ -1,28 +1,28 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect } from 'react'
 
 interface NameModalProps {
-  open: boolean;
-  onSubmit: (name: string) => void;
-  onClose: () => void;
+  open: boolean
+  onSubmit: (name: string) => void
+  onClose: () => void
 }
 
 const NameModal: React.FC<NameModalProps> = ({ open, onSubmit, onClose }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (open && inputRef.current) {
-      inputRef.current.focus();
+      inputRef.current.focus()
     }
-  }, [open]);
+  }, [open])
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (inputRef.current) {
-      onSubmit(inputRef.current.value);
+      onSubmit(inputRef.current.value)
     }
-  };
+  }
 
-  if (!open) return null;
+  if (!open) return null
 
   return (
     <div className="overlay visible" role="dialog" aria-modal="true">
@@ -49,7 +49,7 @@ const NameModal: React.FC<NameModalProps> = ({ open, onSubmit, onClose }) => {
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default NameModal;
+export default NameModal

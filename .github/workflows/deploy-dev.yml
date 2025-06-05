@@ -1,0 +1,58 @@
+name: Build and Deploy Development
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build-and-deploy-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test -- --run
+
+      - name: Build project
+        run: npm run build
+
+      - name: Install lftp
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lftp
+
+      - name: Deploy via FTPS (Development)
+        run: |
+          echo "🔄 Attempting FTPS deployment to development with lftp..."
+          cat > deploy_ftps.lftp << 'EOF'
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ftp:ssl-protect-list true
+          set ssl:verify-certificate no
+          set net:timeout 30
+          set net:max-retries 3
+          set cmd:fail-exit yes
+          open -u ${{ secrets.FTP_USER_DEV }},${{ secrets.FTP_PASS_DEV }} ftps://${{ secrets.FTP_HOST }}:21
+          cd ./
+          rm -rf *
+          mirror -R --delete --verbose ./dist/ .
+          bye
+          EOF
+          lftp -f deploy_ftps.lftp
+
+      - name: Deployment result
+        run: |
+          echo "🚀 Deployment erfolgreich via FTPS (Development)!"
+          echo "📁 Deployed to: kinklist_hypno_dev"
+          echo "🌍 Environment: development"

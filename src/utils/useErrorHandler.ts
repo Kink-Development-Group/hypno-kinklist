@@ -1,6 +1,6 @@
-import { useCallback } from "react";
+import { useCallback } from 'react'
 
-export type ErrorHandler = (message: string, error?: unknown) => void;
+export type ErrorHandler = (message: string, error?: unknown) => void
 
 export function useErrorHandler(): ErrorHandler {
   return useCallback((message: string, error?: unknown) => {
@@ -8,8 +8,8 @@ export function useErrorHandler(): ErrorHandler {
     // window.alert ist Fallback
     if (error) {
       // eslint-disable-next-line no-console
-      console.error(message, error);
+      console.error(message, error)
     }
-    window.alert(message);
-  }, []);
+    window.alert(message)
+  }, [])
 }

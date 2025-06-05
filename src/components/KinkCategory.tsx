@@ -1,12 +1,12 @@
-import React, { memo } from "react";
-import KinkRow from "./KinkRow";
-import { strToClass } from "../utils";
+import React, { memo } from 'react'
+import KinkRow from './KinkRow'
+import { strToClass } from '../utils'
 
 interface KinkCategoryProps {
-  name: string;
-  fields: string[];
-  kinks: string[];
-  descriptions?: string[];
+  name: string
+  fields: string[]
+  kinks: string[]
+  descriptions?: string[]
 }
 
 const KinkCategory: React.FC<
@@ -21,7 +21,7 @@ const KinkCategory: React.FC<
       <h2 id={`category-heading-${strToClass(name)}`}>{name}</h2>
       <table
         className="kinkGroup"
-        data-fields={fields.join(",")}
+        data-fields={fields.join(',')}
         aria-label={`Kinks in der Kategorie ${name}`}
       >
         <thead>
@@ -52,7 +52,7 @@ const KinkCategory: React.FC<
         </tbody>
       </table>
     </div>
-  );
-};
+  )
+}
 
-export default memo(KinkCategory);
+export default memo(KinkCategory)

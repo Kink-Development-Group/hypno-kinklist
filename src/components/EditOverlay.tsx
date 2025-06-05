@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback, memo, useRef } from "react";
-import { useKinklist } from "../context/KinklistContext";
-import { parseKinksText, kinksToText, getAllKinks } from "../utils";
-import { useErrorHandler } from "../utils/useErrorHandler";
+import React, { useState, useEffect, useCallback, memo, useRef } from 'react'
+import { useKinklist } from '../context/KinklistContext'
+import { parseKinksText, kinksToText, getAllKinks } from '../utils'
+import { useErrorHandler } from '../utils/useErrorHandler'
 
 const EditOverlay: React.FC = () => {
   const {
@@ -14,43 +14,43 @@ const EditOverlay: React.FC = () => {
     setOriginalKinksText,
     isEditOverlayOpen,
     setIsEditOverlayOpen,
-  } = useKinklist();
+  } = useKinklist()
 
-  const [kinksText, setKinksText] = useState<string>(originalKinksText);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const errorHandler = useErrorHandler();
+  const [kinksText, setKinksText] = useState<string>(originalKinksText)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const errorHandler = useErrorHandler()
 
   // Focus management
   useEffect(() => {
     if (isEditOverlayOpen && textareaRef.current) {
-      textareaRef.current.focus();
+      textareaRef.current.focus()
     }
-  }, [isEditOverlayOpen]);
+  }, [isEditOverlayOpen])
 
   const handleClose = useCallback(() => {
-    setIsEditOverlayOpen(false);
-  }, [setIsEditOverlayOpen]);
+    setIsEditOverlayOpen(false)
+  }, [setIsEditOverlayOpen])
 
   const handleAccept = useCallback(() => {
     try {
-      const parsedKinks = parseKinksText(kinksText);
+      const parsedKinks = parseKinksText(kinksText)
       if (parsedKinks) {
         // Create a new selection based on the updated kink structure
-        const newSelection = getAllKinks(parsedKinks, levels, selection);
+        const newSelection = getAllKinks(parsedKinks, levels, selection)
 
-        setKinks(parsedKinks);
-        setOriginalKinksText(kinksText);
-        setSelection(newSelection);
+        setKinks(parsedKinks)
+        setOriginalKinksText(kinksText)
+        setSelection(newSelection)
       }
     } catch (error) {
       errorHandler(
-        "Ein Fehler ist beim Versuch, den eingegebenen Text zu analysieren, aufgetreten. Bitte korrigieren Sie ihn und versuchen Sie es erneut.",
-        error,
-      );
-      return;
+        'Ein Fehler ist beim Versuch, den eingegebenen Text zu analysieren, aufgetreten. Bitte korrigieren Sie ihn und versuchen Sie es erneut.',
+        error
+      )
+      return
     }
 
-    setIsEditOverlayOpen(false);
+    setIsEditOverlayOpen(false)
   }, [
     kinksText,
     levels,
@@ -60,44 +60,44 @@ const EditOverlay: React.FC = () => {
     setSelection,
     setIsEditOverlayOpen,
     errorHandler,
-  ]);
+  ])
 
   const handleOverlayClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (e.target === e.currentTarget) {
-        handleClose();
+        handleClose()
       }
     },
-    [handleClose],
-  );
+    [handleClose]
+  )
 
   // Keyboard event handlers
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       // Escape key to close overlay
-      if (e.key === "Escape") {
-        handleClose();
+      if (e.key === 'Escape') {
+        handleClose()
       }
 
       // Ctrl+Enter to accept changes
-      if (e.key === "Enter" && e.ctrlKey) {
-        handleAccept();
+      if (e.key === 'Enter' && e.ctrlKey) {
+        handleAccept()
       }
     },
-    [handleClose, handleAccept],
-  );
+    [handleClose, handleAccept]
+  )
 
   // Ensure the textarea has the current kinksText when opened
   useEffect(() => {
     if (isEditOverlayOpen) {
-      setKinksText(kinksToText(kinks));
+      setKinksText(kinksToText(kinks))
     }
-  }, [isEditOverlayOpen, kinks]);
+  }, [isEditOverlayOpen, kinks])
 
   return (
     <div
       id="EditOverlay"
-      className={`overlay ${isEditOverlayOpen ? "visible" : ""}`}
+      className={`overlay ${isEditOverlayOpen ? 'visible' : ''}`}
       onClick={handleOverlayClick}
       onKeyDown={handleKeyDown}
       role="dialog"
@@ -135,7 +135,7 @@ const EditOverlay: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default memo(EditOverlay);
+export default memo(EditOverlay)
