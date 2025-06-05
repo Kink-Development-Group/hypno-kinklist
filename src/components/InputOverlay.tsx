@@ -234,7 +234,7 @@ const InputOverlay: React.FC = () => {
     setCurrentKink(current)
 
     // Get previous kinks
-    const prev = []
+    const prev: (React.ReactNode | null)[] = []
     for (let i = numPrev; i > 0; i--) {
       const prevIndex = (popupIndex - i + selection.length) % selection.length
       const prevKink = selection[prevIndex]
@@ -244,7 +244,7 @@ const InputOverlay: React.FC = () => {
     setPreviousKinks(prev)
 
     // Get next kinks
-    const next = []
+    const next: (React.ReactNode | null)[] = []
     for (let i = 1; i <= numNext; i++) {
       const nextIndex = (popupIndex + i) % selection.length
       const nextKink = selection[nextIndex]
