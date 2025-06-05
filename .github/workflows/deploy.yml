@@ -1,0 +1,146 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test -- --run
+
+      - name: Build project
+        run: npm run build
+
+      - name: Set deployment target
+        id: target
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "dir=${{ secrets.SFTP_REMOTE_DIR_PROD }}" >> $GITHUB_OUTPUT
+            echo "env=production" >> $GITHUB_OUTPUT
+          else
+            echo "dir=${{ secrets.SFTP_REMOTE_DIR_DEV }}" >> $GITHUB_OUTPUT
+            echo "env=development" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Test server connectivity
+        run: |
+          echo "🔍 Testing server connectivity..."
+          echo "Host: ${{ secrets.SFTP_HOST }}"
+          
+          # Test different ports
+          echo "Testing FTP (port 21)..."
+          timeout 10 nc -z ${{ secrets.SFTP_HOST }} 21 && echo "✅ FTP port 21 is open" || echo "❌ FTP port 21 is closed"
+          
+          echo "Testing SFTP/SSH (port ${{ secrets.SFTP_PORT || 22 }})..."
+          timeout 10 nc -z ${{ secrets.SFTP_HOST }} ${{ secrets.SFTP_PORT || 22 }} && echo "✅ SFTP/SSH port is open" || echo "❌ SFTP/SSH port is closed"
+
+      - name: Deploy via SFTP
+        id: sftp_deploy
+        continue-on-error: true
+        run: |
+          echo "🔄 Attempting SFTP deployment with lftp..."
+          
+          # Install lftp
+          sudo apt-get update -qq && sudo apt-get install -y lftp
+          
+          # Create lftp script
+          cat > deploy_script.lftp << 'EOF'
+          set sftp:auto-confirm yes
+          set ssl:verify-certificate no
+          set net:timeout 30
+          set net:max-retries 3
+          set cmd:fail-exit yes
+          
+          open sftp://${{ secrets.SFTP_USER }}:${{ secrets.SFTP_PASS }}@${{ secrets.SFTP_HOST }}:${{ secrets.SFTP_PORT || 22 }}
+          
+          # Create target directory if it doesn't exist
+          mkdir -p ${{ steps.target.outputs.dir }}
+          cd ${{ steps.target.outputs.dir }}
+          
+          # Clear existing files
+          rm -rf *
+          
+          # Upload new files
+          mirror -R --verbose ./dist/ .
+          
+          bye
+          EOF
+          
+          # Execute deployment
+          lftp -f deploy_script.lftp
+
+      - name: Deploy via FTP (fallback)
+        if: steps.sftp_deploy.outcome == 'failure'
+        id: ftp_deploy
+        continue-on-error: true
+        run: |
+          echo "🔄 SFTP failed, trying FTP..."
+          
+          # Create FTP script
+          cat > deploy_ftp.lftp << 'EOF'
+          set ssl:verify-certificate no
+          set ftp:ssl-allow no
+          set net:timeout 30
+          set net:max-retries 3
+          set cmd:fail-exit yes
+          
+          open ftp://${{ secrets.SFTP_USER }}:${{ secrets.SFTP_PASS }}@${{ secrets.SFTP_HOST }}:21
+          
+          # Create target directory if it doesn't exist
+          mkdir -p ${{ steps.target.outputs.dir }}
+          cd ${{ steps.target.outputs.dir }}
+          
+          # Clear existing files
+          rm -rf *
+          
+          # Upload new files
+          mirror -R --verbose ./dist/ .
+          
+          bye
+          EOF
+          
+          # Execute FTP deployment
+          lftp -f deploy_ftp.lftp
+
+      - name: Deploy via rsync (final fallback)
+        if: steps.sftp_deploy.outcome == 'failure' && steps.ftp_deploy.outcome == 'failure'
+        run: |
+          echo "🔄 FTP also failed, trying rsync over SSH..."
+          
+          # Install sshpass
+          sudo apt-get install -y sshpass rsync
+          
+          # Deploy using rsync
+          sshpass -p "${{ secrets.SFTP_PASS }}" rsync -avz --delete \
+            -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p ${{ secrets.SFTP_PORT || 22 }}" \
+            ./dist/ ${{ secrets.SFTP_USER }}@${{ secrets.SFTP_HOST }}:${{ steps.target.outputs.dir }}/
+
+      - name: Deployment result
+        run: |
+          if [[ "${{ steps.sftp_deploy.outcome }}" == "success" ]]; then
+            echo "🚀 Deployment successful via SFTP!"
+          elif [[ "${{ steps.ftp_deploy.outcome }}" == "success" ]]; then
+            echo "🚀 Deployment successful via FTP!"
+          else
+            echo "🚀 Deployment completed via rsync!"
+          fi
+          echo "📁 Deployed to: ${{ steps.target.outputs.dir }}"
+          echo "🌍 Environment: ${{ steps.target.outputs.env }}"
