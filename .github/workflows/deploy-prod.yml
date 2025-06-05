@@ -61,7 +61,7 @@ jobs:
           set net:timeout 30
           set net:max-retries 3
           set cmd:fail-exit yes
-          set debug 10
+          set cmd:debug 10
           open -u $FTP_USER_PROD,$FTP_PASS_PROD ftps://$FTP_HOST:21
           rm -rf *
           mirror -R --delete --verbose ./dist/ .
