@@ -8,6 +8,7 @@ on:
 jobs:
   build-and-deploy-dev:
     runs-on: ubuntu-latest
+    environment: Dev
     env:
       FTP_USER_DEV: ${{ secrets.FTP_USER_DEV }}
       FTP_PASS_DEV: ${{ secrets.FTP_PASS_DEV }}
