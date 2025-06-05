@@ -45,6 +45,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y lftp
 
+
       - name: Deploy via FTPS (Production)
         shell: bash
         run: |
@@ -53,20 +54,31 @@ jobs:
           echo "FTP_PASS_PROD=$FTP_PASS_PROD"
           echo "FTP_HOST=$FTP_HOST"
           cat > deploy_ftps.lftp << EOF
-          set ftp:ssl-force true
+          debug -o debug_log.txt 9 # Behalte das Debugging für den ersten Test bei
+          set ftp:ssl-auth TLS      # Wichtig: Fordere explizites TLS an
+          set ftp:ssl-allow yes     # Erlaube SSL/TLS generell
+          # set ftp:ssl-force true  # Diese Option ist bei explizitem TLS oft nicht nötig oder kontraproduktiv
           set ftp:ssl-protect-data true
           set ftp:ssl-protect-list true
-          set ssl:verify-certificate no
+          set ssl:verify-certificate no # Behalte dies für den Test bei, um Zertifikatsprobleme auszuschließen
           set ftp:passive-mode yes
-          set net:timeout 30
+          set net:timeout 60          # Etwas längerer Timeout kann nicht schaden
           set net:max-retries 3
           set cmd:fail-exit yes
-          open -u $FTP_USER_PROD,$FTP_PASS_PROD ftps://$FTP_HOST:21
+          # WICHTIG: Verwende ftp:// für explizites TLS auf Port 21
+          open -u "$FTP_USER_PROD","$FTP_PASS_PROD" ftp://$FTP_HOST:21
           rm -rf *
           mirror -R --delete --verbose ./dist/ .
           bye
           EOF
           lftp -f deploy_ftps.lftp
+
+      - name: Upload lftp debug log
+        uses: actions/upload-artifact@v4
+        if: always() # Damit der Log auch bei einem Fehler hochgeladen wird
+        with:
+          name: lftp-debug-log
+          path: debug_log.txt
 
       - name: Deployment result
         run: |
