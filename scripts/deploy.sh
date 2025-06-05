@@ -6,7 +6,7 @@
 set -e
 
 ENVIRONMENT=${1:-dev}
-BUILD_DIR="./build"
+BUILD_DIR="./dist"
 
 echo "🚀 Starting deployment to $ENVIRONMENT environment..."
 
@@ -26,10 +26,10 @@ echo "✅ Build artifacts validated"
 
 # Set target directory based on environment
 if [ "$ENVIRONMENT" = "prod" ]; then
-    TARGET_DIR="${SFTP_REMOTE_DIR_PROD:-/var/www/html/kinklist}"
+    TARGET_DIR="${SFTP_REMOTE_DIR_PROD:-/var/www/html/kinklist_hypno}"
     echo "📦 Deploying to production: $TARGET_DIR"
 elif [ "$ENVIRONMENT" = "dev" ]; then
-    TARGET_DIR="${SFTP_REMOTE_DIR_DEV:-/var/www/html/kinklist-dev}"
+    TARGET_DIR="${SFTP_REMOTE_DIR_DEV:-/var/www/html/kinklist_hypno_dev}"
     echo "📦 Deploying to development: $TARGET_DIR"
 else
     echo "❌ Invalid environment. Use 'dev' or 'prod'"

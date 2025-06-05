@@ -64,19 +64,19 @@ fi
 # Test 5: Build validation
 echo ""
 echo "5️⃣ Validating build artifacts..."
-if [ ! -d "./build" ]; then
+if [ ! -d "./dist" ]; then
     echo "❌ Build directory not found!"
     exit 1
 fi
 
-if [ ! -f "./build/index.html" ]; then
+if [ ! -f "./dist/index.html" ]; then
     echo "❌ index.html not found in build directory!"
     exit 1
 fi
 
 echo "✅ Build artifacts validated"
 echo "📋 Build contents:"
-ls -la ./build/
+ls -la ./dist/
 
 # Test 6: Environment variables check
 echo ""
@@ -99,23 +99,23 @@ echo "📁 Target directory: $TARGET_DIR"
 # Test 7: Create deployment manifest (simulate)
 echo ""
 echo "7️⃣ Creating deployment manifest..."
-cat > "./build/deployment-info.json" << EOF
+cat > "./dist/deployment-info.json" << EOF
 {
   "deployment": {
     "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
     "environment": "$ENVIRONMENT",
     "branch": "$(git branch --show-current 2>/dev/null || echo 'unknown')",
     "commit": "$(git rev-parse HEAD 2>/dev/null || echo 'unknown')",
-    "build_dir": "./build",
+    "build_dir": "./dist",
     "target_dir": "$TARGET_DIR",
     "test_run": true
   }
 }
 EOF
 
-if [ -f "./build/deployment-info.json" ]; then
+if [ -f "./dist/deployment-info.json" ]; then
     echo "✅ Deployment manifest created"
-    cat "./build/deployment-info.json"
+    cat "./dist/deployment-info.json"
 else
     echo "❌ Failed to create deployment manifest"
     exit 1
@@ -140,6 +140,6 @@ echo "🚀 Ready for deployment!"
 read -p "🗑️  Delete build directory? (y/N): " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-    rm -rf ./build
+    rm -rf ./dist
     echo "✅ Build directory cleaned up"
 fi
