@@ -56,7 +56,7 @@ jobs:
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ftp:ssl-protect-list true
-          set ssl:verify-certificate yes
+          set ssl:verify-certificate no
           set ftp:passive-mode yes
           set net:timeout 30
           set net:max-retries 3
