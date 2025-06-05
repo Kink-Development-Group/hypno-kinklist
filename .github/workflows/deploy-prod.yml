@@ -8,9 +8,22 @@ on:
 jobs:
   build-and-deploy-prod:
     runs-on: ubuntu-latest
+    environment: Prod
+    env:
+      FTP_USER_PROD: ${{ secrets.FTP_USER_PROD }}
+      FTP_PASS_PROD: ${{ secrets.FTP_PASS_PROD }}
+      FTP_HOST: ${{ secrets.FTP_HOST }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Verify secrets are available
+        shell: bash
+        run: |
+          if [ -z "$FTP_USER_PROD" ] || [ -z "$FTP_PASS_PROD" ] || [ -z "$FTP_HOST" ]; then
+            echo "❌ Missing required secrets!"
+            exit 1
+          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -33,9 +46,13 @@ jobs:
           sudo apt-get install -y lftp
 
       - name: Deploy via FTPS (Production)
+        shell: bash
         run: |
           echo "🔄 Attempting FTPS deployment to production with lftp..."
-          cat > deploy_ftps.lftp << 'EOF'
+          echo "FTP_USER_PROD=$FTP_USER_PROD"
+          echo "FTP_PASS_PROD=$FTP_PASS_PROD"
+          echo "FTP_HOST=$FTP_HOST"
+          cat > deploy_ftps.lftp << EOF
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ftp:ssl-protect-list true
@@ -45,8 +62,7 @@ jobs:
           set net:max-retries 3
           set cmd:fail-exit yes
           set debug 10
-          open -u ${{ secrets.FTP_USER_PROD }},${{ secrets.FTP_PASS_PROD }} ftps://${{ secrets.FTP_HOST }}:21
-          # Wir befinden uns nach Login bereits im Zielverzeichnis
+          open -u $FTP_USER_PROD,$FTP_PASS_PROD ftps://$FTP_HOST:21
           rm -rf *
           mirror -R --delete --verbose ./dist/ .
           bye
