@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react'
 import { getSnippets, getHelpText, EditorSnippet } from './EditorUtils'
-import type { KinkListEditorRef } from './KinkListEditor'
+import type { CodeMirrorKinkListEditorRef } from './CodeMirrorKinkListEditor'
 
 export interface EditorToolbarProps {
-  editorRef: React.RefObject<KinkListEditorRef>
+  editorRef: React.RefObject<CodeMirrorKinkListEditorRef>
   onInsertSnippet?: (snippet: string) => void
   showValidation?: boolean
   validationErrors?: string[]

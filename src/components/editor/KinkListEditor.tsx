@@ -7,11 +7,8 @@ import {
 } from 'react'
 import Editor, { BeforeMount, OnMount } from '@monaco-editor/react'
 import * as monaco from 'monaco-editor'
-import {
-  registerKinkListLanguage,
-  registerKinkListThemes,
-} from './KinkListLanguage'
 import { getSnippets, formatKinkListText } from './EditorUtils'
+import { createSimpleKinkListLanguage } from './SimpleKinkListLanguage'
 
 export interface KinkListEditorProps {
   value: string
@@ -125,70 +122,99 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
     }, [onValidationChange])
 
     // Before editor mount - register language and themes
-    const handleBeforeMount: BeforeMount = useCallback((monaco) => {
-      if (!isInitializedRef.current) {
-        // Register the custom language first
-        console.log('Before mount: Registering language and themes...')
-        registerKinkListLanguage()
+    const handleBeforeMount: BeforeMount = useCallback(
+      (monaco) => {
+        if (!isInitializedRef.current) {
+          console.log('=== MONACO EDITOR INITIALIZATION ===')
 
-        // Register themes separately
-        registerKinkListThemes()
+          // Register the simple custom language
+          console.log('1. Registering simple language...')
+          const languageId = createSimpleKinkListLanguage()
+          console.log('Language registered:', languageId)
 
-        // Register completion provider for snippets
-        monaco.languages.registerCompletionItemProvider('kinklist', {
-          provideCompletionItems: (_model, position) => {
-            const range = {
-              startLineNumber: position.lineNumber,
-              endLineNumber: position.lineNumber,
-              startColumn: 1,
-              endColumn: position.column,
-            }
+          // Force theme setting immediately after registration
+          const currentTheme =
+            theme === 'dark' ? 'kinklist-simple-dark' : 'kinklist-simple-light'
+          if (theme === 'auto') {
+            const prefersDark = window.matchMedia(
+              '(prefers-color-scheme: dark)'
+            ).matches
+            monaco.editor.setTheme(
+              prefersDark ? 'kinklist-simple-dark' : 'kinklist-simple-light'
+            )
+          } else {
+            monaco.editor.setTheme(currentTheme)
+          }
+          console.log('2. Theme set to:', currentTheme)
 
-            const suggestions = getSnippets().map((snippet, index) => ({
-              label: snippet.label,
-              kind: monaco.languages.CompletionItemKind.Snippet,
-              insertText: snippet.insertText,
-              insertTextRules:
-                monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-              range,
-              detail: snippet.detail,
-              documentation: snippet.documentation,
-              sortText: `z_${index.toString().padStart(3, '0')}`,
-            }))
+          // Verify language is registered
+          const languages = monaco.languages.getLanguages()
+          console.log(
+            '3. Available languages:',
+            languages.map((l) => l.id)
+          )
+          console.log(
+            'KinkList simple language found:',
+            languages.find((l) => l.id === languageId)
+          )
 
-            return { suggestions }
-          },
-        })
+          // Register completion provider for snippets
+          monaco.languages.registerCompletionItemProvider(languageId, {
+            provideCompletionItems: (_model, position) => {
+              const range = {
+                startLineNumber: position.lineNumber,
+                endLineNumber: position.lineNumber,
+                startColumn: 1,
+                endColumn: position.column,
+              }
 
-        // Register code action provider for formatting
-        monaco.languages.registerCodeActionProvider('kinklist', {
-          provideCodeActions: (model) => {
-            const actions: monaco.languages.CodeAction[] = [
-              {
-                title: 'Kink-Liste formatieren',
-                kind: 'source.fixAll',
-                edit: {
-                  edits: [
-                    {
-                      resource: model.uri,
-                      versionId: model.getVersionId(),
-                      textEdit: {
-                        range: model.getFullModelRange(),
-                        text: formatKinkListText(model.getValue()),
+              const suggestions = getSnippets().map((snippet, index) => ({
+                label: snippet.label,
+                kind: monaco.languages.CompletionItemKind.Snippet,
+                insertText: snippet.insertText,
+                insertTextRules:
+                  monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                range,
+                detail: snippet.detail,
+                documentation: snippet.documentation,
+                sortText: `z_${index.toString().padStart(3, '0')}`,
+              }))
+
+              return { suggestions }
+            },
+          })
+
+          // Register code action provider for formatting
+          monaco.languages.registerCodeActionProvider(languageId, {
+            provideCodeActions: (model) => {
+              const actions: monaco.languages.CodeAction[] = [
+                {
+                  title: 'Kink-Liste formatieren',
+                  kind: 'source.fixAll',
+                  edit: {
+                    edits: [
+                      {
+                        resource: model.uri,
+                        versionId: model.getVersionId(),
+                        textEdit: {
+                          range: model.getFullModelRange(),
+                          text: formatKinkListText(model.getValue()),
+                        },
                       },
-                    },
-                  ],
+                    ],
+                  },
                 },
-              },
-            ]
-            return { actions, dispose: () => {} }
-          },
-        })
+              ]
+              return { actions, dispose: () => {} }
+            },
+          })
 
-        console.log('Before mount: Language and themes registered')
-        isInitializedRef.current = true
-      }
-    }, [])
+          console.log('=== MONACO EDITOR INITIALIZATION COMPLETE ===')
+          isInitializedRef.current = true
+        }
+      },
+      [theme]
+    )
 
     // Handle value changes
     const handleChange = useCallback(
@@ -203,14 +229,16 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
     // Determine theme based on system preference if auto
     const getTheme = useCallback(() => {
       if (theme !== 'auto') {
-        return theme === 'dark' ? 'kink-list-dark' : 'kink-list-light'
+        return theme === 'dark'
+          ? 'kinklist-simple-dark'
+          : 'kinklist-simple-light'
       }
 
       // Auto-detect system theme
       const prefersDark = window.matchMedia(
         '(prefers-color-scheme: dark)'
       ).matches
-      return prefersDark ? 'kink-list-dark' : 'kink-list-light'
+      return prefersDark ? 'kinklist-simple-dark' : 'kinklist-simple-light'
     }, [theme])
 
     // After editor mount - configure editor
@@ -221,21 +249,33 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
         // Debug: Check if language is registered
         console.log('Available languages:', monaco.languages.getLanguages())
 
-        // Set theme explicitly after editor is mounted
-        const currentTheme = getTheme()
-        console.log('Setting theme:', currentTheme)
-        monaco.editor.setTheme(currentTheme)
-
-        // Force re-tokenization by changing the model language
+        // Get the model and ensure language is set
         const model = editor.getModel()
         if (model) {
           console.log('Current model language:', model.getLanguageId())
-          monaco.editor.setModelLanguage(model, 'kinklist')
-          console.log('Set model language to kinklist')
 
-          // Force tokenization
-          const tokens = monaco.editor.tokenize(model.getValue(), 'kinklist')
-          console.log('Tokenization result:', tokens)
+          // Force set language to kinklist-simple
+          monaco.editor.setModelLanguage(model, 'kinklist-simple')
+          console.log('Set model language to kinklist-simple')
+
+          // Set theme AFTER setting the language
+          const currentTheme = getTheme()
+          console.log('Setting theme:', currentTheme)
+          monaco.editor.setTheme(currentTheme)
+
+          // Force re-tokenization by triggering a model change
+          setTimeout(() => {
+            const currentValue = model.getValue()
+            model.setValue('')
+            model.setValue(currentValue)
+
+            // Test tokenization
+            const tokens = monaco.editor.tokenize(
+              currentValue,
+              'kinklist-simple'
+            )
+            console.log('Forced tokenization result:', tokens)
+          }, 200)
         }
 
         // Test syntax highlighting with a sample text
@@ -245,14 +285,27 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
 * Test neutral kink
 + Test positive kink
 - Test negative kink
-? Test maybe kink
+? Test maybe kink without space
 ? This is a description with space after question mark
 // This is a comment`
           console.log('Testing syntax highlighting with sample text')
+          console.log('Sample text:', testText)
+
+          // Immediate test of tokenization
+          const tokens = monaco.editor.tokenize(testText, 'kinklist-simple')
+          console.log('Tokenization test:', tokens)
+
           setTimeout(() => {
             editor.setValue(testText)
             onChange(testText)
-          }, 100)
+
+            // Check tokenization after setting text
+            const modelTokens = monaco.editor.tokenize(
+              model.getValue(),
+              'kinklist-simple'
+            )
+            console.log('Model tokenization after setValue:', modelTokens)
+          }, 300)
         }
 
         // Configure editor options
@@ -280,6 +333,40 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
           tabCompletion: 'on',
           parameterHints: { enabled: true },
           autoIndent: 'full',
+          // Enable token hover to debug highlighting
+          hover: {
+            enabled: true,
+            delay: 100,
+          },
+        })
+
+        // Debug: Add hover provider to show token information
+        monaco.languages.registerHoverProvider('kinklist-simple', {
+          provideHover: (model, position) => {
+            const line = model.getLineContent(position.lineNumber)
+            const tokens = monaco.editor.tokenize(line, 'kinklist-simple')
+
+            console.log('Hover debug - Line:', line)
+            console.log('Hover debug - Tokens:', tokens)
+
+            return {
+              range: new monaco.Range(
+                position.lineNumber,
+                1,
+                position.lineNumber,
+                line.length + 1
+              ),
+              contents: [
+                { value: `**Line:** ${line}` },
+                {
+                  value: `**Position:** ${position.lineNumber}:${position.column}`,
+                },
+                {
+                  value: `**Tokens:** ${JSON.stringify(tokens[0] || [], null, 2)}`,
+                },
+              ],
+            }
+          },
         }) // Add keyboard shortcuts
         editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, () => {
           editor.trigger('keyboard', 'editor.action.triggerSuggest', {})
@@ -315,7 +402,7 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
       <div className="kink-list-editor">
         <Editor
           height={height}
-          language="kinklist"
+          language="kinklist-simple"
           value={value}
           onChange={handleChange}
           beforeMount={handleBeforeMount}
