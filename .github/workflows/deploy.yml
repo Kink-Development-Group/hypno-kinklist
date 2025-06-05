@@ -95,6 +95,25 @@ jobs:
           echo "Testing SFTP/SSH (port ${{ secrets.SFTP_PORT || 22 }})..."
           timeout 10 nc -z ${{ secrets.SFTP_HOST }} ${{ secrets.SFTP_PORT || 22 }} && echo "✅ SFTP/SSH port is open" || echo "❌ SFTP/SSH port is closed"
 
+      - name: Debug SFTP Deployment
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y lftp
+          echo "Testing SFTP connection..."
+          lftp -u ${{ secrets.SFTP_USER }},${{ secrets.SFTP_PASS }} -e "exit" -p ${{ secrets.SFTP_PORT || 22 }} sftp://${{ secrets.SFTP_HOST }}
+          if [[ $? -ne 0 ]]; then
+            echo "❌ SFTP connection failed. Double-check credentials and port settings."
+            exit 1
+          fi
+
+      - name: Debug FTP Deployment
+        run: |
+          echo "Testing FTP connection..."
+          timeout 10 nc -zv ${{ secrets.SFTP_HOST }} 21 || echo "❌ FTP port is closed."
+
+      - name: Debug Rsync Deployment
+        run: |
+          sshpass -p "${{ secrets.SFTP_PASS }}" ssh -o StrictHostKeyChecking=no ${{ secrets.SFTP_USER }}@${{ secrets.SFTP_HOST }} -p ${{ secrets.SFTP_PORT || 22 }} "mkdir -p ${{ steps.target.outputs.dir }} || echo '❌ Permission denied to create directory.'"
+
       - name: Deploy via SFTP
         id: sftp_deploy
         continue-on-error: true
