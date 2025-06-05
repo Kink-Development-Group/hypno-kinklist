@@ -14,7 +14,16 @@ jobs:
       FTP_HOST: ${{ secrets.FTP_HOST }}
     steps:
       - name: Debug Environment Variables
-        run: env
+        run: |
+          echo "FTP_USER_DEV=$FTP_USER_DEV"
+          echo "FTP_HOST=$FTP_HOST"
+
+      - name: Show repo env secret
+        run: |
+          echo ${{ secrets.FTP_USER_DEV }}
+          echo ${{ secrets.FTP_PASS_DEV }}
+          echo ${{ secrets.FTP_HOST }}
+          echo "This is a test to ensure secrets are set correctly."
 
       - name: Checkout code
         uses: actions/checkout@v4
