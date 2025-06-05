@@ -40,6 +40,22 @@ jobs:
             echo "env=development" >> $GITHUB_OUTPUT
           fi
 
+      - name: Set Default Ports
+        run: |
+          if [[ -z "${{ secrets.SFTP_PORT }}" ]]; then
+            echo "Using default SFTP port 22."
+            echo "SFTP_PORT=22" >> $GITHUB_ENV
+          fi
+
+      - name: Debug Enhanced Error Logging
+        run: |
+          echo "Testing server connectivity..."
+          echo "Host: ${{ secrets.SFTP_HOST }}"
+          echo "User: ${{ secrets.SFTP_USER }}"
+          echo "Port: ${{ secrets.SFTP_PORT }}"
+          echo "Testing SFTP connection..."
+          lftp -u ${{ secrets.SFTP_USER }},${{ secrets.SFTP_PASS }} -e "exit" -p ${{ secrets.SFTP_PORT }} sftp://${{ secrets.SFTP_HOST }} || echo "❌ SFTP connection failed. Check host, user, and port."
+
       - name: Debug Print all relevant secrets and environment variables
         run: |
           echo "SFTP_HOST: ${{ secrets.SFTP_HOST }}"
