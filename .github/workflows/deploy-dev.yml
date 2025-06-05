@@ -18,13 +18,6 @@ jobs:
           echo "FTP_USER_DEV=$FTP_USER_DEV"
           echo "FTP_HOST=$FTP_HOST"
 
-      - name: Show repo env secret
-        run: |
-          echo ${{ secrets.FTP_USER_DEV }}
-          echo ${{ secrets.FTP_PASS_DEV }}
-          echo ${{ secrets.FTP_HOST }}
-          echo "This is a test to ensure secrets are set correctly."
-
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -51,12 +44,9 @@ jobs:
       - name: Deploy via FTPS (Development)
         run: |
           echo "🔄 Attempting FTPS deployment to development with lftp..."
-          echo "FTP_USER_DEV: ${{ secrets.FTP_USER_DEV }}"
-          echo "FTP_PASS_DEV: ${{ secrets.FTP_PASS_DEV }}"
-          echo "FTP_HOST: ${{ secrets.FTP_HOST }}"
-          USER=${{ secrets.FTP_USER_DEV }}
-          PASS=${{ secrets.FTP_PASS_DEV }}
-          HOST=${{ secrets.FTP_HOST }}
+          echo "FTP_USER_DEV: $FTP_USER_DEV"
+          echo "FTP_PASS_DEV: $FTP_PASS_DEV"
+          echo "FTP_HOST: $FTP_HOST"
           cat > deploy_ftps.lftp << EOF
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
@@ -67,7 +57,7 @@ jobs:
           set net:max-retries 3
           set cmd:fail-exit yes
           set debug 10
-          open -u $USER,$PASS ftps://$HOST:21
+          open -u $FTP_USER_DEV,$FTP_PASS_DEV ftps://$FTP_HOST:21
           rm -rf *
           mirror -R --delete --verbose ./dist/ .
           bye
