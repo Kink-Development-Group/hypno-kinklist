@@ -17,9 +17,9 @@ jobs:
           FTP_PASS_DEV: ${{ secrets.FTP_PASS_DEV }}
           FTP_HOST: ${{ secrets.FTP_HOST }}
         run: |
-          echo "FTP_USER_DEV (shell): $FTP_USER_DEV"
-          echo "FTP_PASS_DEV (shell): $FTP_PASS_DEV"
-          echo "FTP_HOST (shell): $FTP_HOST"
+          echo "FTP_USER_DEV is set: $([ -n "$FTP_USER_DEV" ] && echo "yes" || echo "no")"
+          echo "FTP_PASS_DEV is set: $([ -n "$FTP_PASS_DEV" ] && echo "yes" || echo "no")"
+          echo "FTP_HOST is set: $([ -n "$FTP_HOST" ] && echo "yes" || echo "no")"
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -45,26 +45,42 @@ jobs:
           sudo apt-get install -y lftp
 
       - name: Deploy via FTPS (Development)
+        env:
+          FTP_USER_DEV: ${{ secrets.FTP_USER_DEV }}
+          FTP_PASS_DEV: ${{ secrets.FTP_PASS_DEV }}
+          FTP_HOST: ${{ secrets.FTP_HOST }}
         run: |
           echo "🔄 Attempting FTPS deployment to development with lftp..."
-          echo "FTP_USER_DEV: $FTP_USER_DEV"
-          echo "FTP_PASS_DEV: $FTP_PASS_DEV"
-          echo "FTP_HOST: $FTP_HOST"
-          cat > deploy_ftps.lftp << EOF
+
+          # Verify secrets are available
+          if [ -z "$FTP_USER_DEV" ] || [ -z "$FTP_PASS_DEV" ] || [ -z "$FTP_HOST" ]; then
+            echo "❌ Missing required secrets!"
+            exit 1
+          fi
+
+          # Create lftp script with proper escaping
+          cat > deploy_ftps.lftp << 'EOF'
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ftp:ssl-protect-list true
-          set ssl:verify-certificate yes
+          set ssl:verify-certificate no
           set ftp:passive-mode yes
-          set net:timeout 30
+          set net:timeout 60
           set net:max-retries 3
           set cmd:fail-exit yes
-          set debug 10
-          open -u $FTP_USER_DEV,$FTP_PASS_DEV ftps://$FTP_HOST:21
+          set debug 5
+          EOF
+
+          # Add connection command with environment variables
+          echo "open -u \"$FTP_USER_DEV\",\"$FTP_PASS_DEV\" ftps://$FTP_HOST:21" >> deploy_ftps.lftp
+
+          cat >> deploy_ftps.lftp << 'EOF'
           rm -rf *
           mirror -R --delete --verbose ./dist/ .
           bye
           EOF
+
+          # Execute lftp
           lftp -f deploy_ftps.lftp
 
       - name: Deployment result
