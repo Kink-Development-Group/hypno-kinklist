@@ -263,7 +263,7 @@ const Export: React.FC<ExportProps> = () => {
             offsets.left + offsets.right + columnWidth * numCols
           const canvasHeight =
             offsets.top + offsets.bottom + tallestColumnHeight
-          let displayName = pendingExportName.length
+          const displayName = pendingExportName.length
             ? `(${pendingExportName})`
             : ''
           const canvas = setupCanvas(
@@ -402,7 +402,7 @@ const Export: React.FC<ExportProps> = () => {
                 const words = description.split(' ')
                 let line = ''
                 let testLine = ''
-                let lineHeight = textLineHeight
+                const lineHeight = textLineHeight
                 let currentY = descY
 
                 // Subtiler Indikator

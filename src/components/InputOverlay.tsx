@@ -51,7 +51,7 @@ const InputOverlay: React.FC = () => {
   // Handle showing previous kink
   const handleShowPrev = useCallback(
     (skip = 1) => {
-      let newIndex = (popupIndex - skip + selection.length) % selection.length
+      const newIndex = (popupIndex - skip + selection.length) % selection.length
       setPopupIndex(newIndex)
     },
     [popupIndex, selection.length, setPopupIndex]
@@ -60,7 +60,7 @@ const InputOverlay: React.FC = () => {
   // Handle showing next kink
   const handleShowNext = useCallback(
     (skip = 1) => {
-      let newIndex = (popupIndex + skip) % selection.length
+      const newIndex = (popupIndex + skip) % selection.length
       setPopupIndex(newIndex)
     },
     [popupIndex, selection.length, setPopupIndex]

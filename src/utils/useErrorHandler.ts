@@ -7,7 +7,6 @@ export function useErrorHandler(): ErrorHandler {
     // Hier kann später Logging, Toast, Sentry etc. ergänzt werden
     // window.alert ist Fallback
     if (error) {
-      // eslint-disable-next-line no-console
       console.error(message, error)
     }
     window.alert(message)
