@@ -16,8 +16,10 @@
     "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,css,scss}\""
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "axios": "^1.7.2",
     "html2canvas": "^1.4.1",
+    "monaco-editor": "^0.52.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

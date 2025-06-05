@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, memo, useRef } from 'react'
 import { useKinklist } from '../context/KinklistContext'
 import { parseKinksText, kinksToText, getAllKinks } from '../utils'
 import { useErrorHandler } from '../utils/useErrorHandler'
+import KinkListEditor, { KinkListEditorRef } from './editor/KinkListEditor'
+import EditorToolbar from './editor/EditorToolbar'
 
 const EditOverlay: React.FC = () => {
   const {
@@ -17,15 +19,26 @@ const EditOverlay: React.FC = () => {
   } = useKinklist()
 
   const [kinksText, setKinksText] = useState<string>(originalKinksText)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [validationErrors, setValidationErrors] = useState<string[]>([])
+  const [isValid, setIsValid] = useState<boolean>(true)
+  const editorRef = useRef<KinkListEditorRef>(null)
   const errorHandler = useErrorHandler()
 
   // Focus management
   useEffect(() => {
-    if (isEditOverlayOpen && textareaRef.current) {
-      textareaRef.current.focus()
+    if (isEditOverlayOpen && editorRef.current) {
+      editorRef.current.focus()
     }
   }, [isEditOverlayOpen])
+
+  // Handle validation changes from editor
+  const handleValidationChange = useCallback(
+    (valid: boolean, errors: string[]) => {
+      setIsValid(valid)
+      setValidationErrors(errors)
+    },
+    []
+  )
 
   const handleClose = useCallback(() => {
     setIsEditOverlayOpen(false)
@@ -108,12 +121,17 @@ const EditOverlay: React.FC = () => {
         <h2 id="edit-overlay-title" className="sr-only edit-overlay-title">
           Edit Kink List
         </h2>
-        <textarea
-          id="Kinks"
-          ref={textareaRef}
+        <EditorToolbar
+          editorRef={editorRef}
+          showValidation={!isValid}
+          validationErrors={validationErrors}
+        />
+        <KinkListEditor
+          ref={editorRef}
           value={kinksText}
-          onChange={(e) => setKinksText(e.target.value)}
-          aria-label="Kinks Liste bearbeiten"
+          onChange={setKinksText}
+          onValidationChange={handleValidationChange}
+          height="400px"
           placeholder="Kategorie und Kinks hier eingeben..."
         />
         <div className="edit-overlay-actions">
