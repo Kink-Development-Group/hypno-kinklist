@@ -35,7 +35,13 @@ jobs:
       - name: Deploy via FTPS (Development)
         run: |
           echo "🔄 Attempting FTPS deployment to development with lftp..."
-          cat > deploy_ftps.lftp << 'EOF'
+          echo "FTP_USER_DEV: ${{ secrets.FTP_USER_DEV }}"
+          echo "FTP_PASS_DEV: ${{ secrets.FTP_PASS_DEV }}"
+          echo "FTP_HOST: ${{ secrets.FTP_HOST }}"
+          USER=${{ secrets.FTP_USER_DEV }}
+          PASS=${{ secrets.FTP_PASS_DEV }}
+          HOST=${{ secrets.FTP_HOST }}
+          cat > deploy_ftps.lftp << EOF
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ftp:ssl-protect-list true
@@ -45,8 +51,7 @@ jobs:
           set net:max-retries 3
           set cmd:fail-exit yes
           set debug 10
-          open -u ${{ secrets.FTP_USER_DEV }},${{ secrets.FTP_PASS_DEV }} ftps://${{ secrets.FTP_HOST }}:21
-          # Wir befinden uns nach Login bereits im Zielverzeichnis
+          open -u $USER,$PASS ftps://$HOST:21
           rm -rf *
           mirror -R --delete --verbose ./dist/ .
           bye
