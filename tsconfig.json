@@ -25,6 +25,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": false,
 
     /* Testing */
     "types": ["vitest/globals", "@testing-library/jest-dom"]

@@ -6,17 +6,17 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
-    open: true
+    open: true,
   },
   build: {
     outDir: 'dist',
-    sourcemap: true
+    sourcemap: true,
   },
   css: {
     preprocessorOptions: {
       scss: {
-        api: 'modern-compiler'
-      }
-    }
-  }
+        api: 'modern-compiler',
+      },
+    },
+  },
 })

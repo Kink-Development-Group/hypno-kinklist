@@ -397,12 +397,12 @@ const AppContent: React.FC = () => {
   const handleEditClick = () => {
     setIsEditOverlayOpen(true)
   }
-
   const handleStartClick = () => {
     setIsInputOverlayOpen(true)
   }
+
   return (
-    <div className="container">
+    <div className="container" data-theme={theme}>
       <div className="header-controls">
         <button
           type="button"
