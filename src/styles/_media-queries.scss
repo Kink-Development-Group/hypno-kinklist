@@ -73,6 +73,7 @@
 @media (max-width: 599px) {
   body {
     font-size: 14px;
+    overflow-x: hidden; // Verhindert horizontales Scrollen der gesamten Seite
   }
 
   .header-controls {
@@ -84,13 +85,23 @@
   }
 
   table {
-    min-width: 100%;
+    width: 100%;
+    min-width: 100%; // Verhindert, dass Tabellen zu breit werden
     font-size: 13px;
+    table-layout: auto; // Ermöglicht responsive Spalten
   }
 
   table th,
   table td {
-    padding: 8px;
+    padding: 6px 4px; // Reduziertes Padding für mobile
+  }
+
+  // Spezielle Anpassungen für choice columns
+  table th.choicesCol {
+    width: 70px !important;
+    min-width: 60px !important;
+    max-width: 70px !important;
+    padding: 6px 2px !important;
   }
 
   .legend-container {
@@ -148,8 +159,31 @@
 
 // Sehr kleine Mobilgeräte (unter 480px)
 @media (max-width: 479px) {
+  body {
+    overflow-x: hidden; // Verhindert horizontales Scrollen
+  }
+
   .container {
     padding: 0 8px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  // Tabellen für sehr kleine Bildschirme optimieren
+  table {
+    font-size: 11px;
+  }
+
+  table th,
+  table td {
+    padding: 4px 2px;
+  }
+
+  table th.choicesCol {
+    width: 60px !important;
+    min-width: 50px !important;
+    max-width: 60px !important;
+    padding: 4px 1px !important;
   }
 
   .action-buttons-container {
@@ -181,6 +215,10 @@
 
 // Zusätzliche Sicherheit für sehr kleine Bildschirme
 @media (max-width: 320px) {
+  body {
+    overflow-x: hidden;
+  }
+
   .action-buttons-container {
     padding: 0 3px;
     gap: 6px;
@@ -210,6 +248,24 @@
 
   .container {
     padding: 0 5px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  // Ultra-kompakte Tabellendarstellung
+  table {
+    font-size: 10px;
+  }
+
+  table th,
+  table td {
+    padding: 3px 1px;
+  }
+
+  table th.choicesCol {
+    width: 50px !important;
+    min-width: 45px !important;
+    max-width: 50px !important;
   }
 }
 
@@ -240,24 +296,24 @@
   // Für Tablets und kleinere Bildschirme
   table {
     th.choicesCol {
-      width: 100px;
-      min-width: 90px;
-      max-width: 100px;
+      width: 90px;
+      min-width: 80px;
+      max-width: 90px;
       padding: 8px 6px;
       font-size: 13px;
     }
 
     .choices {
-      min-width: 80px;
-      max-width: 100px;
+      min-width: 70px;
+      max-width: 90px;
       gap: 2px;
     }
 
     .choice {
-      width: 16px;
-      height: 16px;
-      min-width: 16px;
-      min-height: 16px;
+      width: 14px;
+      height: 14px;
+      min-width: 14px;
+      min-height: 14px;
     }
 
     td.kink-name {
