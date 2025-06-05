@@ -9,8 +9,7 @@ import Editor, { BeforeMount, OnMount } from '@monaco-editor/react'
 import * as monaco from 'monaco-editor'
 import {
   registerKinkListLanguage,
-  kinkListTheme,
-  kinkListDarkTheme,
+  registerKinkListThemes,
 } from './KinkListLanguage'
 import { getSnippets, formatKinkListText } from './EditorUtils'
 
@@ -128,12 +127,12 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
     // Before editor mount - register language and themes
     const handleBeforeMount: BeforeMount = useCallback((monaco) => {
       if (!isInitializedRef.current) {
-        // Register the custom language
+        // Register the custom language first
+        console.log('Before mount: Registering language and themes...')
         registerKinkListLanguage()
 
-        // Register themes (they are already defined in KinkListLanguage.ts)
-        monaco.editor.defineTheme('kink-list-light', kinkListTheme)
-        monaco.editor.defineTheme('kink-list-dark', kinkListDarkTheme)
+        // Register themes separately
+        registerKinkListThemes()
 
         // Register completion provider for snippets
         monaco.languages.registerCompletionItemProvider('kinklist', {
@@ -186,14 +185,75 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
           },
         })
 
+        console.log('Before mount: Language and themes registered')
         isInitializedRef.current = true
       }
     }, [])
+
+    // Handle value changes
+    const handleChange = useCallback(
+      (value: string | undefined) => {
+        if (value !== undefined) {
+          onChange(value)
+        }
+      },
+      [onChange]
+    )
+
+    // Determine theme based on system preference if auto
+    const getTheme = useCallback(() => {
+      if (theme !== 'auto') {
+        return theme === 'dark' ? 'kink-list-dark' : 'kink-list-light'
+      }
+
+      // Auto-detect system theme
+      const prefersDark = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches
+      return prefersDark ? 'kink-list-dark' : 'kink-list-light'
+    }, [theme])
 
     // After editor mount - configure editor
     const handleMount: OnMount = useCallback(
       (editor, monaco) => {
         editorRef.current = editor
+
+        // Debug: Check if language is registered
+        console.log('Available languages:', monaco.languages.getLanguages())
+
+        // Set theme explicitly after editor is mounted
+        const currentTheme = getTheme()
+        console.log('Setting theme:', currentTheme)
+        monaco.editor.setTheme(currentTheme)
+
+        // Force re-tokenization by changing the model language
+        const model = editor.getModel()
+        if (model) {
+          console.log('Current model language:', model.getLanguageId())
+          monaco.editor.setModelLanguage(model, 'kinklist')
+          console.log('Set model language to kinklist')
+
+          // Force tokenization
+          const tokens = monaco.editor.tokenize(model.getValue(), 'kinklist')
+          console.log('Tokenization result:', tokens)
+        }
+
+        // Test syntax highlighting with a sample text
+        if (model && value.length === 0) {
+          const testText = `#Test Category
+(Test Field)
+* Test neutral kink
++ Test positive kink
+- Test negative kink
+? Test maybe kink
+? This is a description with space after question mark
+// This is a comment`
+          console.log('Testing syntax highlighting with sample text')
+          setTimeout(() => {
+            editor.setValue(testText)
+            onChange(testText)
+          }, 100)
+        }
 
         // Configure editor options
         editor.updateOptions({
@@ -243,31 +303,8 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
         }) // Focus the editor
         editor.focus()
       },
-      [validateContent, onChange]
+      [validateContent, onChange, getTheme, value.length]
     )
-
-    // Handle value changes
-    const handleChange = useCallback(
-      (value: string | undefined) => {
-        if (value !== undefined) {
-          onChange(value)
-        }
-      },
-      [onChange]
-    )
-
-    // Determine theme based on system preference if auto
-    const getTheme = useCallback(() => {
-      if (theme !== 'auto') {
-        return theme === 'dark' ? 'kink-list-dark' : 'kink-list-light'
-      }
-
-      // Auto-detect system theme
-      const prefersDark = window.matchMedia(
-        '(prefers-color-scheme: dark)'
-      ).matches
-      return prefersDark ? 'kink-list-dark' : 'kink-list-light'
-    }, [theme])
 
     // Update validation when value changes externally
     useEffect(() => {
