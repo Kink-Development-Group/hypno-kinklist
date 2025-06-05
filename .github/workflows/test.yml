@@ -38,12 +38,12 @@ jobs:
 
       - name: Test build artifacts
         run: |
-          if [ ! -d "build" ]; then
+          if [ ! -d "dist" ]; then
             echo "Build directory not found!"
             exit 1
           fi
-          if [ ! -f "build/index.html" ]; then
-            echo "index.html not found in build directory!"
+          if [ ! -f "dist/index.html" ]; then
+            echo "index.html not found in dist directory!"
             exit 1
           fi
           echo "Build artifacts validated successfully"
