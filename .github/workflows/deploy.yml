@@ -202,18 +202,26 @@ jobs:
           # Execute FTP deployment
           lftp -f deploy_ftp.lftp
 
-      - name: Deploy via rsync (final fallback)
-        if: steps.sftp_deploy.outcome == 'failure' && steps.ftp_deploy.outcome == 'failure'
+      - name: Deploy via FTPS
+        id: ftps_deploy
         run: |
-          echo "🔄 FTP also failed, trying rsync over SSH..."
-          
-          # Install sshpass
-          sudo apt-get install -y sshpass rsync
-          
-          # Deploy using rsync
-          sshpass -p "${{ secrets.SFTP_PASS }}" rsync -avz --delete \
-            -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p ${{ secrets.SFTP_PORT || 22 }}" \
-            ./dist/ ${{ secrets.SFTP_USER }}@${{ secrets.SFTP_HOST }}:${{ steps.target.outputs.dir }}/
+          sudo apt-get update -qq && sudo apt-get install -y lftp
+          echo "🔄 Attempting FTPS deployment with lftp..."
+          cat > deploy_ftps.lftp << 'EOF'
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ftp:ssl-protect-list true
+          set ssl:verify-certificate no
+          set net:timeout 30
+          set net:max-retries 3
+          set cmd:fail-exit yes
+          open -u ${{ secrets.SFTP_USER }},${{ secrets.SFTP_PASS }} ftps://${{ secrets.SFTP_HOST }}:21
+          mkdir -p ${{ steps.target.outputs.dir }}
+          cd ${{ steps.target.outputs.dir }}
+          mirror -R --delete --verbose ./dist/ .
+          bye
+          EOF
+          lftp -f deploy_ftps.lftp
 
       - name: Deployment result
         run: |
@@ -221,8 +229,10 @@ jobs:
             echo "🚀 Deployment successful via SFTP!"
           elif [[ "${{ steps.ftp_deploy.outcome }}" == "success" ]]; then
             echo "🚀 Deployment successful via FTP!"
+          elif [[ "${{ steps.ftps_deploy.outcome }}" == "success" ]]; then
+            echo "🚀 Deployment erfolgreich via FTPS!"
           else
-            echo "🚀 Deployment completed via rsync!"
+            echo "❌ FTPS-Deployment fehlgeschlagen. Prüfe Zugangsdaten, Port und Server-Konfiguration."
           fi
           echo "📁 Deployed to: ${{ steps.target.outputs.dir }}"
           echo "🌍 Environment: ${{ steps.target.outputs.env }}"
