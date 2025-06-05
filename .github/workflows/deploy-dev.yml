@@ -17,8 +17,9 @@ jobs:
           FTP_PASS_DEV: ${{ secrets.FTP_PASS_DEV }}
           FTP_HOST: ${{ secrets.FTP_HOST }}
         run: |
-          echo "FTP_USER_DEV=$FTP_USER_DEV"
-          echo "FTP_HOST=$FTP_HOST"
+          echo "FTP_USER_DEV (shell): $FTP_USER_DEV"
+          echo "FTP_PASS_DEV (shell): $FTP_PASS_DEV"
+          echo "FTP_HOST (shell): $FTP_HOST"
 
       - name: Checkout code
         uses: actions/checkout@v4
