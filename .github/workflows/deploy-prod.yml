@@ -39,12 +39,14 @@ jobs:
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ftp:ssl-protect-list true
-          set ssl:verify-certificate no
+          set ssl:verify-certificate yes
+          set ftp:passive-mode yes
           set net:timeout 30
           set net:max-retries 3
           set cmd:fail-exit yes
+          set debug 10
           open -u ${{ secrets.FTP_USER_PROD }},${{ secrets.FTP_PASS_PROD }} ftps://${{ secrets.FTP_HOST }}:21
-          cd ./
+          # Wir befinden uns nach Login bereits im Zielverzeichnis
           rm -rf *
           mirror -R --delete --verbose ./dist/ .
           bye
