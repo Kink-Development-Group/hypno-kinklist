@@ -40,6 +40,33 @@ jobs:
             echo "env=development" >> $GITHUB_OUTPUT
           fi
 
+      - name: Debug Print all relevant secrets and environment variables
+        run: |
+          echo "SFTP_HOST: ${{ secrets.SFTP_HOST }}"
+          echo "SFTP_USER: ${{ secrets.SFTP_USER }}"
+          echo "SFTP_PORT: ${{ secrets.SFTP_PORT }}"
+          echo "SFTP_REMOTE_DIR_PROD: ${{ secrets.SFTP_REMOTE_DIR_PROD }}"
+          echo "SFTP_REMOTE_DIR_DEV: ${{ secrets.SFTP_REMOTE_DIR_DEV }}"
+          echo "Current branch: ${{ github.ref }}"
+          echo "Target dir: ${{ steps.target.outputs.dir }}"
+          echo "Environment: ${{ steps.target.outputs.env }}"
+
+      - name: Debug Test SFTP credentials
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y lftp
+          echo "Testing SFTP credentials..."
+          lftp -u ${{ secrets.SFTP_USER }},${{ secrets.SFTP_PASS }} -e "exit" -p ${{ secrets.SFTP_PORT || 22 }} sftp://${{ secrets.SFTP_HOST }} || echo "❌ Invalid SFTP credentials or port unreachable"
+
+      - name: Debug SSH keyscan for rsync
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p ${{ secrets.SFTP_PORT || 22 }} ${{ secrets.SFTP_HOST }} >> ~/.ssh/known_hosts || echo "❌ ssh-keyscan failed"
+
+      - name: Debug Print directory existence on remote (SFTP)
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y lftp
+          lftp -u ${{ secrets.SFTP_USER }},${{ secrets.SFTP_PASS }} -p ${{ secrets.SFTP_PORT || 22 }} sftp://${{ secrets.SFTP_HOST }} -e "ls ${{ steps.target.outputs.dir }}; bye" || echo "❌ Could not list remote directory"
+
       - name: Test server connectivity
         run: |
           echo "🔍 Testing server connectivity..."
