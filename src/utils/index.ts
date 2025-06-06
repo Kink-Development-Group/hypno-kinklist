@@ -363,12 +363,15 @@ export const getAllKinks = (
 }
 
 // Download image function
+// Die Version wird im Dateinamen ergänzt, um Nachvollziehbarkeit zu gewährleisten
+import { getAppVersion } from './version'
 export const downloadImage = (
   canvas: HTMLCanvasElement,
   username: string
 ): void => {
   try {
-    const filename = `kinklist_${username ? username.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'export'}_${new Date().toISOString().slice(0, 10)}.png`
+    const version = getAppVersion()
+    const filename = `kinklist_${username ? username.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'export'}_v${version}_${new Date().toISOString().slice(0, 10)}.png`
 
     // Create a temporary link element to trigger the download
     const link = document.createElement('a')

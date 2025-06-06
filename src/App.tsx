@@ -8,6 +8,7 @@ import EditOverlay from './components/EditOverlay'
 import InputOverlay from './components/InputOverlay'
 import CommentOverlay from './components/CommentOverlay'
 import ThemeToggle from './components/ThemeToggle'
+import VersionDisplay from './components/VersionDisplay'
 import './styles/main.scss'
 
 // Default kinks text with comprehensive English descriptions for all kinks
@@ -411,7 +412,9 @@ const AppContent: React.FC = () => {
           onClick={handleEditClick}
           aria-label="Bearbeiten"
         ></button>
-        <h1>Hypno Kink List - BETA</h1>
+        <h1>
+          Hypno Kink List <VersionDisplay />
+        </h1>
         <ThemeToggle theme={theme} toggleTheme={toggleTheme} />{' '}
       </div>
 

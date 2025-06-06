@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { useKinklist } from '../context/KinklistContext'
 import { downloadImage, setupCanvas } from '../utils'
+import { getAppVersion } from '../utils/version'
 import ErrorModal from './ErrorModal'
 import NameModal from './NameModal'
 
@@ -539,7 +540,7 @@ const Export: React.FC<ExportProps> = () => {
           }
 
           // Dezenter Footer
-          const footerText = 'Created with https://kink.hypnose-stammtisch.de'
+          const footerText = `Created with https://kink.hypnose-stammtisch.de  |  v${getAppVersion()}`
           context.save()
           context.font = 'italic 10px Arial'
           context.fillStyle = '#888888'
