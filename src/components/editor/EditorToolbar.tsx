@@ -4,7 +4,6 @@ import {
   getHelpText,
   EditorSnippet,
   getDetailedHelpText,
-  getPasteableBlocks,
   PasteableBlock,
 } from './EditorUtils'
 import type { CodeMirrorKinkListEditorRef } from './CodeMirrorKinkListEditor'

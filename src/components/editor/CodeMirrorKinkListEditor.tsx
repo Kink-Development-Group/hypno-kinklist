@@ -4,7 +4,7 @@ import { EditorView } from '@codemirror/view'
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { tags } from '@lezer/highlight'
 import { oneDark } from '@codemirror/theme-one-dark'
-import { kinklistLanguage } from './KinklistLanguage'
+import { kinklistLanguage } from './KinkListLanguage'
 
 // Define the Kinklist syntax highlighting styles
 const kinklistHighlightStyle = HighlightStyle.define([
