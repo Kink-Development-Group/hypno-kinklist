@@ -8,6 +8,16 @@ export interface EditorSnippet {
   documentation: string
 }
 
+// Neue Funktionen für einfüllbare Blöcke
+export interface PasteableBlock {
+  id: string
+  name: string
+  description: string
+  content: string
+  category: string
+  tags: string[]
+}
+
 // Hilfstext für den Editor
 export const getHelpText = (): string => {
   return `Kink-Listen-Editor Hilfe:
@@ -240,4 +250,173 @@ export const getKinkExamples = (category?: string): string[] => {
   }
 
   return examples
+}
+
+// Vordefinierte einfüllbare Blöcke
+export const getPasteableBlocks = (): PasteableBlock[] => {
+  return [
+    {
+      id: 'basic-category',
+      name: 'Grundlegende Kategorie',
+      description: 'Eine einfache Kategorie mit Unterkategorie',
+      content: '#Kategorie Name\n(Unterkategorie)\n',
+      category: 'Struktur',
+      tags: ['kategorie', 'basic'],
+    },
+    {
+      id: 'kink-with-description',
+      name: 'Kink mit Beschreibung',
+      description: 'Ein Kink-Eintrag mit ausführlicher Beschreibung',
+      content:
+        '* Kink Name\n? Hier steht eine detaillierte Beschreibung des Kinks.\n',
+      category: 'Kink',
+      tags: ['kink', 'description'],
+    },
+    {
+      id: 'full-category-block',
+      name: 'Vollständige Kategorie',
+      description: 'Eine Kategorie mit mehreren Kinks und Beschreibungen',
+      content: `#Kategorie Name
+(Unterkategorie)
+* Erster Kink
+? Beschreibung des ersten Kinks
+* Zweiter Kink
+? Beschreibung des zweiten Kinks
+* Dritter Kink
+? Beschreibung des dritten Kinks
+`,
+      category: 'Vorlagen',
+      tags: ['template', 'full'],
+    },
+    {
+      id: 'positive-kink',
+      name: 'Positiver Kink',
+      description: 'Ein Kink mit positivem Status (+)',
+      content: '+ Positiver Kink\n? Ein Kink, den ich mag\n',
+      category: 'Kink',
+      tags: ['positive', 'kink'],
+    },
+    {
+      id: 'negative-kink',
+      name: 'Negativer Kink',
+      description: 'Ein Kink mit negativem Status (-)',
+      content: '- Negativer Kink\n? Ein Kink, den ich nicht mag\n',
+      category: 'Kink',
+      tags: ['negative', 'kink'],
+    },
+    {
+      id: 'safety-category',
+      name: 'Sicherheit & Einverständnis',
+      description: 'Eine Kategorie für Sicherheitsaspekte',
+      content: `#Sicherheit & Einverständnis
+(Allgemein)
+* Vertrauen
+? Vertrauen ist die Grundlage jeder Interaktion.
+* Klare Einwilligung
+? Ich benötige explizite, enthusiastische Zustimmung.
+* Nachbesprechung/Aftercare
+? Ich schätze Zeit nach der Erfahrung, um zu besprechen und zu entspannen.
+`,
+      category: 'Vorlagen',
+      tags: ['safety', 'consent'],
+    },
+    {
+      id: 'comment-block',
+      name: 'Kommentarblock',
+      description: 'Ein Block mit Kommentaren für Notizen',
+      content: `// ------------------------------------
+// NOTIZEN:
+// - Punkt 1
+// - Punkt 2
+// - Punkt 3
+// ------------------------------------
+`,
+      category: 'Hilfe',
+      tags: ['comment', 'notes'],
+    },
+    {
+      id: 'meta-kink',
+      name: 'Kink mit Metadaten',
+      description: 'Ein Kink mit zusätzlichen Metadaten in Tags',
+      content:
+        '* Kink mit Metadaten [wichtig] [favorit]\n? Ein Kink mit zusätzlichen Tags zur besseren Kategorisierung\n',
+      category: 'Erweitert',
+      tags: ['meta', 'advanced'],
+    },
+  ]
+}
+
+// Hilfsfunktion zum Filtern von Blöcken nach Kategorie
+export const getBlocksByCategory = (category: string): PasteableBlock[] => {
+  return getPasteableBlocks().filter(
+    (block) => block.category.toLowerCase() === category.toLowerCase()
+  )
+}
+
+// Hilfsfunktion zum Filtern von Blöcken nach Tags
+export const getBlocksByTags = (tags: string[]): PasteableBlock[] => {
+  return getPasteableBlocks().filter((block) =>
+    block.tags.some((tag) =>
+      tags.some((t) => tag.toLowerCase().includes(t.toLowerCase()))
+    )
+  )
+}
+
+// Hilfsfunktion zum Suchen von Blöcken nach Suchbegriff
+export const searchBlocks = (query: string): PasteableBlock[] => {
+  const lowerQuery = query.toLowerCase()
+  return getPasteableBlocks().filter(
+    (block) =>
+      block.name.toLowerCase().includes(lowerQuery) ||
+      block.description.toLowerCase().includes(lowerQuery) ||
+      block.category.toLowerCase().includes(lowerQuery) ||
+      block.tags.some((tag) => tag.toLowerCase().includes(lowerQuery))
+  )
+}
+
+// Erweiterte Hilfetexte
+export const getDetailedHelpText = (): { [key: string]: string } => {
+  return {
+    syntax: `Kinklist Syntax Übersicht:
+
+# Kategorie Name          - Definiert eine neue Kategorie
+(Unterkategorie)          - Optionale Unterkategorie nach #-Zeile
+* Kink Name               - Kink mit neutralem Status
++ Kink Name               - Kink mit positivem Status (Mag ich / Ja)
+- Kink Name               - Kink mit negativem Status (Mag ich nicht / Nein)
+? Kink Name               - Kink mit unbestimmtem Status (Vielleicht / Interessiert)
+? Beschreibung            - Beschreibung des vorherigen Kinks
+// Kommentar              - Kommentarzeile (wird nicht angezeigt)
+
+[tag] Text mit Tag        - Text mit Metadaten-Tag
+`,
+    quickStart: `Schnellstart:
+1. Beginnen Sie mit einer Kategorie (#)
+2. Fügen Sie optional eine Unterkategorie hinzu (())
+3. Listen Sie Kinks mit * + - oder ? auf
+4. Fügen Sie Beschreibungen mit ? hinzu
+5. Nutzen Sie die Snippets für schnelleres Arbeiten
+6. Formatieren Sie Ihren Code mit der Format-Funktion
+7. Fügen Sie Blöcke ein, um schnell komplexe Inhalte zu erstellen
+`,
+    keyboardShortcuts: `Tastenkürzel:
+Strg+Space         - Autovervollständigung anzeigen
+Strg+K             - Snippet-Vorschläge
+Alt+Shift+F        - Code formatieren
+Strg+/             - Zeile kommentieren/auskommentieren
+Strg+Enter         - Speichern
+F1                 - Kommandopalette öffnen
+Alt+Z              - Zeilenumbruch ein/ausschalten
+Strg+G             - Zu Zeile springen
+Strg+F             - Suchen
+Strg+H             - Suchen und Ersetzen
+`,
+    advanced: `Erweiterte Funktionen:
+- Metadaten-Tags: Verwenden Sie [tag] um zusätzliche Informationen zu Kinks hinzuzufügen
+- Statusänderung: Ändern Sie den Status eines Kinks, indem Sie das Präfix (* + - ?) ändern
+- Blockkommentare: Fügen Sie mehrere //-Zeilen ein, um Abschnitte zu gruppieren
+- Block-Einfügung: Nutzen Sie vordefinierte Blöcke für komplexe Strukturen
+- Validierung: Der Editor hebt Fehler und Warnungen automatisch hervor
+`,
+  }
 }

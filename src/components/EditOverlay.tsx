@@ -3,9 +3,9 @@ import { useKinklist } from '../context/KinklistContext'
 import { parseKinksText, kinksToText, getAllKinks } from '../utils'
 import { useErrorHandler } from '../utils/useErrorHandler'
 import { useTheme } from '../context/ThemeContext'
-import CodeMirrorKinkListEditor, {
-  CodeMirrorKinkListEditorRef,
-} from './editor/CodeMirrorKinkListEditor'
+import AdvancedKinkListEditor, {
+  AdvancedKinkListEditorRef,
+} from './editor/AdvancedKinkListEditor'
 
 const EditOverlay: React.FC = () => {
   const {
@@ -21,7 +21,7 @@ const EditOverlay: React.FC = () => {
   } = useKinklist()
 
   const [kinksText, setKinksText] = useState<string>(originalKinksText)
-  const editorRef = useRef<CodeMirrorKinkListEditorRef>(null)
+  const editorRef = useRef<AdvancedKinkListEditorRef>(null)
   const errorHandler = useErrorHandler()
   const { theme } = useTheme()
 
@@ -113,13 +113,14 @@ const EditOverlay: React.FC = () => {
         <h2 id="edit-overlay-title" className="sr-only edit-overlay-title">
           Edit Kink List
         </h2>
-        <CodeMirrorKinkListEditor
+        <AdvancedKinkListEditor
           ref={editorRef}
-          value={kinksText}
+          initialValue={kinksText}
           onChange={setKinksText}
           height="400px"
           placeholder="Kategorie und Kinks hier eingeben..."
           theme={theme}
+          showValidation={true}
         />
         <div className="edit-overlay-actions">
           <button
