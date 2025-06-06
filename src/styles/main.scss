@@ -1313,6 +1313,13 @@ table {
   transition: opacity 0.18s cubic-bezier(0.4, 1.4, 0.6, 1);
   outline: none;
   white-space: pre-line;
+
+  // Linke Positionierung für Tooltips, die sonst aus dem Fenster laufen würden
+  &.left {
+    left: auto;
+    right: 110%; // Links neben dem Icon positionieren
+    transform: translateY(-50%);
+  }
 }
 
 .kink-tooltip-portal {

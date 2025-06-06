@@ -23,6 +23,43 @@ const InputOverlay: React.FC = () => {
 
   // State für Tooltip-Anzeige im Modal
   const [showTooltip, setShowTooltip] = useState(false)
+  const [tooltipPosition, setTooltipPosition] = useState<'right' | 'left'>(
+    'right'
+  )
+  const tooltipRef = useRef<HTMLSpanElement>(null)
+
+  // Berechne die optimale Tooltip-Position
+  const calculateTooltipPosition = useCallback((iconElement: HTMLElement) => {
+    const iconRect = iconElement.getBoundingClientRect()
+    const viewportWidth = window.innerWidth
+
+    // Geschätzte Tooltip-Breite (basierend auf CSS max-width)
+    const tooltipWidth = 320
+    const rightSpaceNeeded = iconRect.right + tooltipWidth + 20 // 20px Puffer
+
+    // Wenn nicht genug Platz rechts, dann links positionieren
+    if (rightSpaceNeeded > viewportWidth) {
+      setTooltipPosition('left')
+    } else {
+      setTooltipPosition('right')
+    }
+  }, [])
+
+  // Handle Tooltip anzeigen mit Positionsberechnung
+  const handleShowTooltip = useCallback(
+    (
+      e: React.MouseEvent<HTMLSpanElement> | React.FocusEvent<HTMLSpanElement>
+    ) => {
+      setShowTooltip(true)
+      calculateTooltipPosition(e.currentTarget)
+    },
+    [calculateTooltipPosition]
+  )
+
+  // Handle Tooltip verstecken
+  const handleHideTooltip = useCallback(() => {
+    setShowTooltip(false)
+  }, [])
 
   // Number of kinks to show in previous/next sections
   const numPrev = 3
@@ -323,16 +360,19 @@ const InputOverlay: React.FC = () => {
                       className="kink-tooltip-icon"
                       tabIndex={0}
                       aria-label="Beschreibung anzeigen"
-                      onMouseEnter={() => setShowTooltip(true)}
-                      onFocus={() => setShowTooltip(true)}
-                      onMouseLeave={() => setShowTooltip(false)}
-                      onBlur={() => setShowTooltip(false)}
+                      onMouseEnter={handleShowTooltip}
+                      onFocus={handleShowTooltip}
+                      onMouseLeave={handleHideTooltip}
+                      onBlur={handleHideTooltip}
+                      ref={tooltipRef}
                     >
                       ?
                     </span>
                     {showTooltip && (
                       <span
-                        className="kink-tooltip-text kink-tooltip-text-overlay"
+                        className={`kink-tooltip-text kink-tooltip-text-overlay ${
+                          tooltipPosition === 'left' ? 'left' : ''
+                        }`}
                         tabIndex={-1}
                       >
                         {description}

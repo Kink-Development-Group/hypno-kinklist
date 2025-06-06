@@ -48,9 +48,26 @@ const KinkRow: React.FC<KinkRowProps> = ({
   const handleTooltipShow = (_e: React.MouseEvent | React.FocusEvent) => {
     if (!tooltipRef.current) return
     const rect = tooltipRef.current.getBoundingClientRect()
+
+    // Prüfe verfügbaren Platz und justiere Position entsprechend
+    const viewportWidth = window.innerWidth
+    const tooltipWidth = 320 // max-width aus CSS
+    const spaceRight = viewportWidth - rect.right
+
+    let left = rect.left
+
+    // Wenn nicht genug Platz rechts, positioniere links vom Element
+    if (spaceRight < tooltipWidth + 20) {
+      left = rect.right - tooltipWidth
+      // Stelle sicher, dass es nicht zu weit links geht
+      if (left < 10) {
+        left = 10
+      }
+    }
+
     setTooltipPos({
       top: rect.bottom + 6, // etwas Abstand nach unten
-      left: rect.left,
+      left: left,
       width: rect.width,
       height: rect.height,
     })
