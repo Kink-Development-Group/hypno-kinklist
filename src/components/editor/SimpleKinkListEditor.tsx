@@ -1,4 +1,10 @@
-import { useRef, forwardRef, useImperativeHandle, useEffect } from 'react'
+import {
+  forwardRef,
+  useRef,
+  useImperativeHandle,
+  useCallback,
+  useEffect,
+} from 'react'
 
 export interface SimpleKinkListEditorProps {
   value: string
@@ -78,7 +84,7 @@ const SimpleKinkListEditor = forwardRef<
     }))
 
     // Apply syntax highlighting
-    const applySyntaxHighlighting = (text: string): string => {
+    const applySyntaxHighlighting = useCallback((text: string): string => {
       const lines = text.split('\n')
       const highlightedLines = lines.map((line) => {
         // Categories starting with #
@@ -111,7 +117,7 @@ const SimpleKinkListEditor = forwardRef<
       })
 
       return highlightedLines.join('\n')
-    }
+    }, [])
 
     const escapeHtml = (text: string): string => {
       const div = document.createElement('div')
@@ -124,7 +130,7 @@ const SimpleKinkListEditor = forwardRef<
       if (preRef.current) {
         preRef.current.innerHTML = applySyntaxHighlighting(value)
       }
-    }, [value])
+    }, [value, applySyntaxHighlighting])
 
     // Determine theme class
     const isDark =
@@ -169,7 +175,7 @@ const SimpleKinkListEditor = forwardRef<
           />
         </div>
 
-        <style jsx>{`
+        <style>{`
           .simple-kinklist-editor {
             position: relative;
             border: 1px solid #ccc;

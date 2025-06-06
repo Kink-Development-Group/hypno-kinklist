@@ -98,6 +98,7 @@ const AdvancedKinkListEditor = forwardRef<
     }
 
     // Tastaturkürzel für Speichern und andere Aktionen
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const handleKeyDown = (e: KeyboardEvent) => {
       // Strg+Enter zum Speichern
       if (e.ctrlKey && e.key === 'Enter' && onSave) {
@@ -127,7 +128,7 @@ const AdvancedKinkListEditor = forwardRef<
       return () => {
         document.removeEventListener('keydown', handleKeyDown)
       }
-    }, [value, onSave])
+    }, [handleKeyDown])
 
     return (
       <div className="advanced-kinklist-editor">
