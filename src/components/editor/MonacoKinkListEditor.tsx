@@ -78,8 +78,8 @@ const MonacoKinkListEditor = forwardRef<
 
       // Sprache und Themes registrieren
       try {
-        const languageId = registerKinkListLanguage()
-        registerKinkListThemes()
+        registerKinkListLanguage(monaco)
+        registerKinkListThemes(monaco)
         console.log('Language and themes registered successfully')
 
         // Theme anwenden
@@ -93,17 +93,36 @@ const MonacoKinkListEditor = forwardRef<
         monaco.editor.setTheme(themeName)
 
         // Model-Sprache explizit setzen
-        const model = editor.getModel()
-        if (model) {
+        let model = editor.getModel()
+        if (!model || model.getLanguageId() !== languageId) {
+          // Falls kein Model existiert oder falsche Sprache: neues Model erzeugen
+          const value = editor.getValue()
+          model = monaco.editor.createModel(value, languageId)
+          editor.setModel(model)
+          console.log('Created new model with language:', languageId)
+        } else {
+          // Sprache sicherheitshalber setzen
           monaco.editor.setModelLanguage(model, languageId)
-          console.log('Model language set to:', languageId)
-
-          // Force tokenization
-          setTimeout(() => {
-            model.getLineContent(1) // This triggers tokenization
-            console.log('Tokenization triggered')
-          }, 100)
         }
+        // Debug: aktuelle Sprache des Models ausgeben
+        const currentLang = model.getLanguageId()
+        console.log(
+          'Model language set to:',
+          languageId,
+          '| Current model language:',
+          currentLang
+        )
+
+        // Force tokenization
+        setTimeout(() => {
+          model.getLineContent(1) // This triggers tokenization
+          console.log('Tokenization triggered')
+          // Debug: aktuelle Sprache nach Tokenisierung
+          console.log(
+            'Model language after tokenization:',
+            model.getLanguageId()
+          )
+        }, 100)
       } catch (error) {
         console.error('Error setting up Monaco editor:', error)
       }
@@ -162,7 +181,7 @@ const MonacoKinkListEditor = forwardRef<
       if (!model) return
 
       // Validierung durchführen
-      const markers = validateKinkListSyntax(model.getValue())
+      const markers = validateKinkListSyntax(monaco, model.getValue())
 
       // Marker setzen
       monaco.editor.setModelMarkers(model, 'kinklist', markers)

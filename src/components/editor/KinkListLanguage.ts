@@ -1,4 +1,4 @@
-import * as monaco from 'monaco-editor'
+// Kein globales monaco importieren! Das Monaco-Objekt muss immer als Argument übergeben werden.
 
 export interface KinkListToken {
   type: 'category' | 'subcategory' | 'kink' | 'description' | 'comment' | 'meta'
@@ -8,7 +8,7 @@ export interface KinkListToken {
   endColumn: number
 }
 
-export const kinkListLanguageConfig: monaco.languages.LanguageConfiguration = {
+export const kinkListLanguageConfig = {
   comments: {
     lineComment: '//',
   },
@@ -35,49 +35,33 @@ export const kinkListLanguageConfig: monaco.languages.LanguageConfiguration = {
   },
 }
 
-// Token Provider für Monaco Editor basierend auf dem Standard-Schema
-export const kinkListTokenProvider: monaco.languages.IMonarchLanguage = {
+export const kinkListTokenProvider = {
   defaultToken: 'text',
   ignoreCase: false,
-
   tokenizer: {
     root: [
-      // Kommentare haben höchste Priorität - Zeilen die mit // beginnen
-      [/^\/\/.*/, 'comment'],
-
-      // Kategorien: Zeilen die mit # beginnen
-      [/^#.*/, 'category'],
-
-      // Feldbezeichnungen: Zeilen die mit ( beginnen und mit ) enden
-      [/^\s*\([^)]*\)\s*/, 'subcategory'],
-
-      // Kink-Einträge: Zeilen die mit * beginnen
-      [/^\*.*/, 'kink-neutral'],
-
-      // Beschreibungen: Zeilen die mit ? beginnen
-      [/^\?.*/, 'description'],
-
-      // Metadaten in eckigen Klammern [tag] (innerhalb einer Zeile)
+      [/^\s*\/\/.*/, 'comment'],
+      [/^\s*#.*/, 'category'],
+      [/^\s*\([^)]*\)\s*$/, 'subcategory'],
+      [/^\s*\*.*/, 'kink-neutral'],
+      [/^\s*\?.*/, 'description'],
       [/\[([^\]]*)\]/, 'meta'],
-
-      // Alles andere als normaler Text
       [/.*/, 'text'],
     ],
   },
 }
 
-// Licht-Theme basierend auf dem Standard-Schema
-export const kinkListTheme: monaco.editor.IStandaloneThemeData = {
+export const kinkListTheme = {
   base: 'vs',
   inherit: true,
   rules: [
-    { token: 'category', foreground: '2e7d32', fontStyle: 'bold' }, // Kategorien (#) - grün und fett
-    { token: 'subcategory', foreground: '1565c0', fontStyle: 'italic' }, // Felder (()) - blau und kursiv
-    { token: 'kink-neutral', foreground: 'f57c00', fontStyle: 'bold' }, // Kinks (*) - orange/gelb und fett
-    { token: 'description', foreground: '5d4037', fontStyle: 'italic' }, // Beschreibungen (?) - braun/grau und kursiv
-    { token: 'comment', foreground: '757575', fontStyle: 'italic' }, // Kommentare (//) - grau und kursiv
-    { token: 'meta', foreground: '00695c', fontStyle: 'italic' }, // Metadaten [tags] - türkis und kursiv
-    { token: 'text', foreground: '212121' }, // Normaler Text
+    { token: 'category', foreground: '2e7d32', fontStyle: 'bold' },
+    { token: 'subcategory', foreground: '1565c0', fontStyle: 'italic' },
+    { token: 'kink-neutral', foreground: 'f57c00', fontStyle: 'bold' },
+    { token: 'description', foreground: '5d4037', fontStyle: 'italic' },
+    { token: 'comment', foreground: '757575', fontStyle: 'italic' },
+    { token: 'meta', foreground: '00695c', fontStyle: 'italic' },
+    { token: 'text', foreground: '212121' },
   ],
   colors: {
     'editor.background': '#ffffff',
@@ -89,18 +73,17 @@ export const kinkListTheme: monaco.editor.IStandaloneThemeData = {
   },
 }
 
-// Dunkles Theme basierend auf dem Standard-Schema
-export const kinkListDarkTheme: monaco.editor.IStandaloneThemeData = {
+export const kinkListDarkTheme = {
   base: 'vs-dark',
   inherit: true,
   rules: [
-    { token: 'category', foreground: '81c784', fontStyle: 'bold' }, // Kategorien (#) - grün und fett
-    { token: 'subcategory', foreground: '64b5f6', fontStyle: 'italic' }, // Felder (()) - blau und kursiv
-    { token: 'kink-neutral', foreground: 'ffb74d', fontStyle: 'bold' }, // Kinks (*) - orange/gelb und fett
-    { token: 'description', foreground: 'bcaaa4', fontStyle: 'italic' }, // Beschreibungen (?) - braun/grau und kursiv
-    { token: 'comment', foreground: '9e9e9e', fontStyle: 'italic' }, // Kommentare (//) - grau und kursiv
-    { token: 'meta', foreground: '80cbc4', fontStyle: 'italic' }, // Metadaten [tags] - türkis und kursiv
-    { token: 'text', foreground: 'e0e0e0' }, // Normaler Text
+    { token: 'category', foreground: '81c784', fontStyle: 'bold' },
+    { token: 'subcategory', foreground: '64b5f6', fontStyle: 'italic' },
+    { token: 'kink-neutral', foreground: 'ffb74d', fontStyle: 'bold' },
+    { token: 'description', foreground: 'bcaaa4', fontStyle: 'italic' },
+    { token: 'comment', foreground: '9e9e9e', fontStyle: 'italic' },
+    { token: 'meta', foreground: '80cbc4', fontStyle: 'italic' },
+    { token: 'text', foreground: 'e0e0e0' },
   ],
   colors: {
     'editor.background': '#1e1e1e',
@@ -115,31 +98,22 @@ export const kinkListDarkTheme: monaco.editor.IStandaloneThemeData = {
 let isLanguageRegistered = false
 let themesRegistered = false
 
-export const registerKinkListLanguage = () => {
+export const registerKinkListLanguage = (monaco) => {
   const languageId = 'kinklist'
-
-  // Verhindere mehrfache Registrierung
   if (isLanguageRegistered) {
     console.log('Language already registered:', languageId)
     return languageId
   }
-
   console.log('=== REGISTERING KINKLIST LANGUAGE ===')
   console.log('1. Registering language:', languageId)
-
   try {
-    // Registriere die Sprache
     monaco.languages.register({ id: languageId })
     console.log('2. Language registered successfully')
-
-    // Setze die Sprachkonfiguration
     monaco.languages.setLanguageConfiguration(
       languageId,
       kinkListLanguageConfig
     )
     console.log('3. Language configuration set')
-
-    // Setze den Token-Provider
     monaco.languages.setMonarchTokensProvider(languageId, kinkListTokenProvider)
     console.log('4. Token provider set - rules registered for:')
     console.log('   - Comments (//)')
@@ -148,8 +122,6 @@ export const registerKinkListLanguage = () => {
     console.log('   - Kinks (*)')
     console.log('   - Descriptions (?)')
     console.log('   - Meta [tags]')
-
-    // Registriere Autovervollständigung
     monaco.languages.registerCompletionItemProvider(languageId, {
       provideCompletionItems: (model, position) => {
         const word = model.getWordUntilPosition(position)
@@ -159,9 +131,7 @@ export const registerKinkListLanguage = () => {
           startColumn: word.startColumn,
           endColumn: word.endColumn,
         }
-
         const suggestions = [
-          // Kategorie-Snippets
           {
             label: 'cat',
             kind: monaco.languages.CompletionItemKind.Snippet,
@@ -172,8 +142,6 @@ export const registerKinkListLanguage = () => {
               'Erstellt eine neue Kategorie mit optionaler Feldbezeichnung',
             range: range,
           },
-
-          // Kink-Snippets
           {
             label: 'item',
             kind: monaco.languages.CompletionItemKind.Snippet,
@@ -183,8 +151,6 @@ export const registerKinkListLanguage = () => {
             documentation: 'Erstellt einen neuen Kink-Eintrag mit Beschreibung',
             range: range,
           },
-
-          // Kommentar-Snippet
           {
             label: 'comment',
             kind: monaco.languages.CompletionItemKind.Snippet,
@@ -195,11 +161,9 @@ export const registerKinkListLanguage = () => {
             range: range,
           },
         ]
-
         return { suggestions }
       },
     })
-
     console.log('5. Completion provider registered successfully')
     console.log(
       'Language and completion provider registered successfully:',
@@ -213,31 +177,26 @@ export const registerKinkListLanguage = () => {
   }
 }
 
-export const registerKinkListThemes = () => {
+export const registerKinkListThemes = (monaco) => {
   if (themesRegistered) {
     console.log('Themes already registered')
     return
   }
-
   console.log('=== REGISTERING KINKLIST THEMES ===')
   console.log('1. Defining light theme...')
-
   try {
-    // Definiere Themes
     monaco.editor.defineTheme('kink-list-light', kinkListTheme)
     console.log(
       '2. Light theme defined with rules:',
       kinkListTheme.rules.length,
       'rules'
     )
-
     monaco.editor.defineTheme('kink-list-dark', kinkListDarkTheme)
     console.log(
       '3. Dark theme defined with rules:',
       kinkListDarkTheme.rules.length,
       'rules'
     )
-
     console.log('4. Themes registered successfully')
     themesRegistered = true
   } catch (error) {
@@ -246,12 +205,10 @@ export const registerKinkListThemes = () => {
   }
 }
 
-// Verbesserte Validierungsfunktion
-export const validateKinkListSyntax = (
-  text: string
-): monaco.editor.IMarkerData[] => {
+// Die Validierungsfunktion benötigt jetzt das Monaco-Objekt als Argument!
+export const validateKinkListSyntax = (monaco, text) => {
   const lines = text.split('\n')
-  const markers: monaco.editor.IMarkerData[] = []
+  const markers: any[] = []
 
   let currentCategory = ''
   let hasAnyContent = false
@@ -303,44 +260,25 @@ export const validateKinkListSyntax = (
           endColumn: line.length + 1,
         })
       }
-      if (line.length <= 2) {
-        markers.push({
-          severity: monaco.MarkerSeverity.Warning,
-          message: 'Kink-Eintrag sollte einen Namen haben',
-          startLineNumber: lineNumber,
-          startColumn: 1,
-          endLineNumber: lineNumber,
-          endColumn: line.length + 1,
-        })
-      }
     } else if (line.startsWith('?')) {
       // Beschreibung - sollte nach einem Kink kommen
       if (lastKinkLine !== lineNumber - 1) {
         markers.push({
           severity: monaco.MarkerSeverity.Info,
-          message: 'Beschreibung sollte direkt nach einem Kink folgen',
+          message: 'Beschreibung sollte direkt nach einem Kink-Eintrag stehen',
           startLineNumber: lineNumber,
           startColumn: 1,
           endLineNumber: lineNumber,
           endColumn: line.length + 1,
         })
       }
-
-      if (line.length <= 1) {
-        markers.push({
-          severity: monaco.MarkerSeverity.Warning,
-          message: 'Leere Beschreibung',
-          startLineNumber: lineNumber,
-          startColumn: 1,
-          endLineNumber: lineNumber,
-          endColumn: line.length + 1,
-        })
-      }
-    } else if (!line.startsWith('//')) {
-      // Ignoriere Kommentare
+    } else if (line.startsWith('//')) {
+      // Kommentar - keine spezielle Validierung
+    } else {
+      // Unbekannte Zeile
       markers.push({
         severity: monaco.MarkerSeverity.Warning,
-        message: `Unbekanntes Format - "${line.substring(0, 50)}${line.length > 50 ? '...' : ''}"`,
+        message: 'Unbekannte Zeile oder Format',
         startLineNumber: lineNumber,
         startColumn: 1,
         endLineNumber: lineNumber,
@@ -352,7 +290,7 @@ export const validateKinkListSyntax = (
   if (!hasAnyContent) {
     markers.push({
       severity: monaco.MarkerSeverity.Info,
-      message: 'Dokument ist leer',
+      message: 'Die Liste ist leer.',
       startLineNumber: 1,
       startColumn: 1,
       endLineNumber: 1,
