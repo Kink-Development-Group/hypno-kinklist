@@ -11,7 +11,7 @@ import { getSnippets, formatKinkListText } from './EditorUtils'
 import {
   registerKinkListLanguage,
   registerKinkListThemes,
-} from './KinkListLanguage-test'
+} from './KinkListLanguage'
 
 export interface KinkListEditorProps {
   value: string
@@ -132,8 +132,8 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
 
           // Register the kinklist language
           console.log('1. Registering kinklist language...')
-          const languageId = registerKinkListLanguage()
-          registerKinkListThemes()
+          const languageId = registerKinkListLanguage(monaco)
+          registerKinkListThemes(monaco)
           console.log('Language registered:', languageId)
 
           // Force theme setting immediately after registration
