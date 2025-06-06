@@ -20,16 +20,22 @@ export interface PasteableBlock {
 
 // Hilfstext für den Editor
 export const getHelpText = (): string => {
-  return `Kink-Listen-Editor Hilfe:
+  return `Kinklist-Editor Hilfe:
 
-SYNTAX:
-# Kategorie Name - Definiert eine neue Kategorie
-(Unterkategorie) - Optionale Unterkategorie nach #-Zeile
-* Kink Name - Definiert einen Kink (Standard-Status)
-+ Kink Name - Kink mit positivem Status (Mag ich / Ja)
-- Kink Name - Kink mit negativem Status (Mag ich nicht / Nein)
+SYNTAX (NUR diese Präfixe sind gültig):
+# Kategorie Name - Definiert eine neue Kategorie (z.B. #Basics)
+(Feldbezeichnung) - Optionales Feld nach #-Zeile (z.B. (General))
+* Kink Name - Definiert einen Kink-Eintrag
 ? Beschreibung - Beschreibung des vorherigen Kinks
-// Kommentar - Kommentarzeile (grau dargestellt)
+// Kommentar - Kommentarzeile
+
+BEISPIEL (Standard-Schema):
+#Basics
+(General)
+* I enjoy working with cisgender people
+? I feel comfortable and positive about engaging in hypnosis with cisgender individuals.
+* I drop very easily
+? I enter trance states quickly and with little resistance, often after minimal induction.
 
 FARB-CODING:
 # Kategorien - Grün und fett
@@ -38,11 +44,12 @@ FARB-CODING:
 ? Beschreibungen - Braun/grau und kursiv
 // Kommentare - Grau und kursiv
 
-TASTENKÜRZEL:
+TASTENKÜRZEL (Monaco Editor):
 Strg+Space - IntelliSense/Autocomplete
-Strg+Shift+F - Formatieren
+Strg+Shift+I - Formatieren
 Strg+F - Suchen
 Strg+H - Suchen und Ersetzen
+Strg+G - Zu Zeile springen
 F1 - Befehlspalette
 Alt+Z - Zeilenumbruch aktivieren/deaktivieren
 
@@ -55,7 +62,8 @@ SNIPPETS:
 TIPPS:
 - Verwenden Sie leere Zeilen zur besseren Lesbarkeit
 - Kategorien sollten mit # beginnen
-- Jeder Kink sollte eine Beschreibung mit ? haben`
+- Jeder Kink sollte eine Beschreibung mit ? haben
+- Nur die oben gezeigten Präfixe sind gültig`
 }
 
 // Snippets basierend auf dem Default-Template
@@ -63,10 +71,10 @@ export const getSnippets = (): EditorSnippet[] => {
   return [
     {
       label: 'cat',
-      insertText: '#${1:Kategorie Name}\n(${2:Unterkategorie})\n',
+      insertText: '#${1:Kategorie Name}\n(${2:General})\n',
       detail: 'Neue Kategorie',
       documentation:
-        'Erstellt eine neue Kategorie mit optionaler Unterkategorie',
+        'Erstellt eine neue Kategorie mit optionaler Feldbezeichnung',
     },
     {
       label: 'item',
@@ -77,7 +85,7 @@ export const getSnippets = (): EditorSnippet[] => {
     {
       label: 'section',
       insertText:
-        '#${1:Kategorie}\n(${2:Unterkategorie})\n* ${3:Kink 1}\n? ${4:Beschreibung 1}\n* ${5:Kink 2}\n? ${6:Beschreibung 2}\n',
+        '#${1:Kategorie}\n(${2:General})\n* ${3:Kink 1}\n? ${4:Beschreibung 1}\n* ${5:Kink 2}\n? ${6:Beschreibung 2}\n',
       detail: 'Kategorie mit Kinks',
       documentation:
         'Erstellt eine vollständige Sektion mit Kategorie und mehreren Kinks',
@@ -99,16 +107,15 @@ export const getSnippets = (): EditorSnippet[] => {
     {
       label: 'safety-section',
       insertText:
-        '#Safety and consent\n(General)\n* Trust\n? Trust is the foundation of any hypnotic interaction; I need to feel safe with my partner.\n* Clear consent before going under\n? I require explicit, enthusiastic consent before any hypnotic activity begins.\n* Post talk/Aftercare\n? I value time after trance to discuss the experience, decompress, and ensure well-being.\n',
+        "#Safety and consent\n(General)\n* Trust\n? Trust is the foundation of any hypnotic interaction; I need to feel safe with my partner.\n* Unknown play partner\n? I may feel uneasy or require extra caution when engaging with someone I don't know well.\n* A lot of safety talk / triggers\n? I prefer thorough discussions about boundaries, triggers, and safety before starting.\n",
       detail: 'Safety Sektion',
       documentation: 'Erstellt eine Safety and Consent-Sektion',
     },
     {
-      label: 'types-section',
-      insertText:
-        '#Types Of Hypnosis\n(General)\n* Erotic hypnosis\n? Hypnosis with a focus on sexual arousal, pleasure, or erotic scenarios.\n* Recreational hypnosis\n? Hypnosis for fun, relaxation, or entertainment, without therapeutic or sexual intent.\n* Therapeutic hypnosis\n? Hypnosis used for healing, self-improvement, or addressing psychological issues.\n',
-      detail: 'Types Sektion',
-      documentation: 'Erstellt eine Types of Hypnosis-Sektion',
+      label: 'comment',
+      insertText: '// ${1:Kommentar}\n',
+      detail: 'Kommentar',
+      documentation: 'Fügt eine Kommentarzeile hinzu',
     },
   ]
 }
@@ -135,13 +142,16 @@ export const formatKinkListText = (text: string): string => {
       }
       formattedLines.push(trimmedLine)
     } else if (trimmedLine.startsWith('(') && trimmedLine.endsWith(')')) {
-      // Unterkategorien: Direkt nach Kategorie
+      // Feldbezeichnungen: Direkt nach Kategorie
       formattedLines.push(trimmedLine)
-    } else if (trimmedLine.match(/^[*+\-?]\s/)) {
+    } else if (trimmedLine.startsWith('*')) {
       // Kink-Einträge: Standard-Einrückung
       formattedLines.push(trimmedLine)
     } else if (trimmedLine.startsWith('?')) {
       // Beschreibungen: Standard-Einrückung
+      formattedLines.push(trimmedLine)
+    } else if (trimmedLine.startsWith('//')) {
+      // Kommentare: Standard-Einrückung
       formattedLines.push(trimmedLine)
     } else {
       // Andere Zeilen: Unverändert
@@ -178,13 +188,13 @@ export const validateKinkListText = (
         errors.push(`Zeile ${lineNumber}: Kategorie muss einen Namen haben`)
       }
     } else if (line.startsWith('(') && line.endsWith(')')) {
-      // Unterkategorie - sollte nach einer Kategorie kommen
+      // Feldbezeichnung - sollte nach einer Kategorie kommen
       if (!currentCategory) {
         warnings.push(
-          `Zeile ${lineNumber}: Unterkategorie ohne vorherige Kategorie`
+          `Zeile ${lineNumber}: Feldbezeichnung ohne vorherige Kategorie`
         )
       }
-    } else if (line.match(/^[*+\-?]\s/)) {
+    } else if (line.startsWith('*')) {
       // Kink-Eintrag
       if (!currentCategory) {
         warnings.push(`Zeile ${lineNumber}: Kink-Eintrag ohne Kategorie`)
@@ -199,6 +209,9 @@ export const validateKinkListText = (
       if (line.length <= 1) {
         warnings.push(`Zeile ${lineNumber}: Leere Beschreibung`)
       }
+    } else if (line.startsWith('//')) {
+      // Kommentar - immer gültig
+      // Keine Validierung notwendig
     } else {
       warnings.push(
         `Zeile ${lineNumber}: Unbekanntes Format - "${line.substring(0, 50)}${line.length > 50 ? '...' : ''}"`
@@ -246,8 +259,8 @@ export const getKinkExamples = (category?: string): string[] => {
       const categoryName = trimmedLine.substring(1).trim().toLowerCase()
       inTargetCategory =
         !category || categoryName.includes(category.toLowerCase())
-    } else if (inTargetCategory && trimmedLine.match(/^[*+\-?]\s/)) {
-      const kinkName = trimmedLine.substring(2).trim()
+    } else if (inTargetCategory && trimmedLine.startsWith('*')) {
+      const kinkName = trimmedLine.substring(1).trim()
       if (kinkName && examples.length < 10) {
         // Maximal 10 Beispiele
         examples.push(kinkName)
@@ -264,8 +277,8 @@ export const getPasteableBlocks = (): PasteableBlock[] => {
     {
       id: 'basic-category',
       name: 'Grundlegende Kategorie',
-      description: 'Eine einfache Kategorie mit Unterkategorie',
-      content: '#Kategorie Name\n(Unterkategorie)\n',
+      description: 'Eine einfache Kategorie mit Feldbezeichnung',
+      content: '#Kategorie Name\n(General)\n',
       category: 'Struktur',
       tags: ['kategorie', 'basic'],
     },
@@ -283,7 +296,7 @@ export const getPasteableBlocks = (): PasteableBlock[] => {
       name: 'Vollständige Kategorie',
       description: 'Eine Kategorie mit mehreren Kinks und Beschreibungen',
       content: `#Kategorie Name
-(Unterkategorie)
+(General)
 * Erster Kink
 ? Beschreibung des ersten Kinks
 * Zweiter Kink
@@ -295,33 +308,17 @@ export const getPasteableBlocks = (): PasteableBlock[] => {
       tags: ['template', 'full'],
     },
     {
-      id: 'positive-kink',
-      name: 'Positiver Kink',
-      description: 'Ein Kink mit positivem Status (Alternative zu *)',
-      content: '+ Positiver Kink\n? Ein Kink, den ich mag\n',
-      category: 'Kink',
-      tags: ['positive', 'kink'],
-    },
-    {
-      id: 'negative-kink',
-      name: 'Negativer Kink',
-      description: 'Ein Kink mit negativem Status (Alternative zu *)',
-      content: '- Negativer Kink\n? Ein Kink, den ich nicht mag\n',
-      category: 'Kink',
-      tags: ['negative', 'kink'],
-    },
-    {
       id: 'safety-category',
       name: 'Sicherheit & Einverständnis',
       description: 'Eine Kategorie für Sicherheitsaspekte',
-      content: `#Sicherheit & Einverständnis
-(Allgemein)
-* Vertrauen
-? Vertrauen ist die Grundlage jeder Interaktion.
-* Klare Einwilligung
-? Ich benötige explizite, enthusiastische Zustimmung.
-* Nachbesprechung/Aftercare
-? Ich schätze Zeit nach der Erfahrung, um zu besprechen und zu entspannen.
+      content: `#Safety and consent
+(General)
+* Trust
+? Trust is the foundation of any hypnotic interaction; I need to feel safe with my partner.
+* Unknown play partner
+? I may feel uneasy or require extra caution when engaging with someone I don't know well.
+* A lot of safety talk / triggers
+? I prefer thorough discussions about boundaries, triggers, and safety before starting.
 `,
       category: 'Vorlagen',
       tags: ['safety', 'consent'],
@@ -341,13 +338,20 @@ export const getPasteableBlocks = (): PasteableBlock[] => {
       tags: ['comment', 'notes'],
     },
     {
-      id: 'meta-kink',
-      name: 'Kink mit Metadaten',
-      description: 'Ein Kink mit zusätzlichen Metadaten in Tags',
-      content:
-        '* Kink mit Metadaten [wichtig] [favorit]\n? Ein Kink mit zusätzlichen Tags zur besseren Kategorisierung\n',
-      category: 'Erweitert',
-      tags: ['meta', 'advanced'],
+      id: 'basics-template',
+      name: 'Basics Template',
+      description: 'Standard Basics-Sektion aus dem Default-Template',
+      content: `#Basics
+(General)
+* I enjoy working with cisgender people
+? I feel comfortable and positive about engaging in hypnosis with cisgender individuals.
+* I enjoy working with trans people
+? I am open to and enjoy hypnotic experiences with transgender people, respecting their identities.
+* Gender doesn't matter to me
+? The gender of my hypnosis partner is not important to me; I focus on the experience itself.
+`,
+      category: 'Vorlagen',
+      tags: ['basics', 'template'],
     },
   ]
 }
@@ -383,30 +387,43 @@ export const searchBlocks = (query: string): PasteableBlock[] => {
 // Erweiterte Hilfetexte
 export const getDetailedHelpText = (): { [key: string]: string } => {
   return {
-    syntax: `Kinklist Syntax Übersicht:
+    syntax: `Kinklist Syntax Übersicht (NUR diese Präfixe sind gültig):
 
 # Kategorie Name          - Definiert eine neue Kategorie (grün, fett)
-(Unterkategorie)          - Optionale Unterkategorie nach #-Zeile (blau, kursiv)
-* Kink Name               - Kink mit Standard-Status (orange/gelb, fett)
-+ Kink Name               - Kink mit positivem Status (Mag ich / Ja)
-- Kink Name               - Kink mit negativem Status (Mag ich nicht / Nein)
+(Feldbezeichnung)         - Optionale Feldbezeichnung nach #-Zeile (blau, kursiv)
+* Kink Name               - Kink-Eintrag (orange/gelb, fett)
 ? Beschreibung            - Beschreibung des vorherigen Kinks (braun/grau, kursiv)
 // Kommentar              - Kommentarzeile (grau, kursiv)
 
-[tag] Text mit Tag        - Text mit Metadaten-Tag
+BEISPIEL (Standard-Schema):
+#Basics
+(General)
+* I enjoy working with cisgender people
+? I feel comfortable and positive about engaging in hypnosis with cisgender individuals.
+* I drop very easily
+? I enter trance states quickly and with little resistance, often after minimal induction.
+
+// Kommentar für Notizen
+
+WICHTIG: Nur die oben gezeigten 5 Präfixe (#, (), *, ?, //) sind gültig!
 `,
     quickStart: `Schnellstart:
-1. Beginnen Sie mit einer Kategorie (#)
-2. Fügen Sie optional eine Unterkategorie hinzu (())
-3. Listen Sie Kinks mit * + - oder ? auf
-4. Fügen Sie Beschreibungen mit ? hinzu
-5. Nutzen Sie die Snippets für schnelleres Arbeiten
-6. Formatieren Sie Ihren Code mit der Format-Funktion
-7. Fügen Sie Blöcke ein, um schnell komplexe Inhalte zu erstellen
+1. Beginnen Sie mit einer Kategorie (#Basics)
+2. Fügen Sie optional eine Feldbezeichnung hinzu ((General))
+3. Listen Sie Kinks mit * auf (* Trust)
+4. Fügen Sie Beschreibungen mit ? hinzu (? Trust is the foundation...)
+5. Nutzen Sie // für Kommentare (// This is a comment)
+6. Nutzen Sie die Snippets für schnelleres Arbeiten:
+   - 'cat' für neue Kategorie
+   - 'item' für neuen Kink
+   - 'section' für vollständige Sektion
+   - 'template' für das Standard-Template
+7. Formatieren Sie Ihren Code mit Strg+Shift+I
+8. Fügen Sie Blöcke ein, um schnell komplexe Inhalte zu erstellen
 `,
-    keyboardShortcuts: `Tastenkürzel:
+    keyboardShortcuts: `Tastenkürzel (Monaco Editor):
 Strg+Space         - IntelliSense/Autocomplete anzeigen
-Strg+Shift+F       - Code formatieren
+Strg+Shift+I       - Code formatieren (wichtig!)
 Strg+F             - Suchen
 Strg+H             - Suchen und Ersetzen
 Strg+G             - Zu Zeile springen
@@ -415,14 +432,18 @@ Strg+L             - Zeile auswählen
 Strg+/             - Zeile kommentieren/auskommentieren
 Alt+Z              - Zeilenumbruch ein/ausschalten
 F1                 - Befehlspalette öffnen
-Strg+Enter         - Änderungen übernehmen
+Strg+Enter         - Änderungen übernehmen und Editor schließen
 `,
     advanced: `Erweiterte Funktionen:
-- Metadaten-Tags: Verwenden Sie [tag] um zusätzliche Informationen zu Kinks hinzuzufügen
-- Statusänderung: Ändern Sie den Status eines Kinks, indem Sie das Präfix (* + - ?) ändern
-- Blockkommentare: Fügen Sie mehrere //-Zeilen ein, um Abschnitte zu gruppieren
-- Block-Einfügung: Nutzen Sie vordefinierte Blöcke für komplexe Strukturen
-- Validierung: Der Editor hebt Fehler und Warnungen automatisch hervor
+- Snippets: Verwenden Sie die integrierten Code-Snippets für schnellere Eingabe
+- IntelliSense: Strg+Space zeigt Vorschläge basierend auf dem Kontext
+- Formatierung: Strg+Shift+I formatiert das gesamte Dokument korrekt
+- Validierung: Der Editor hebt Syntaxfehler automatisch hervor
+- Standard-Template: Nutzen Sie das 'template' Snippet für das vollständige Standard-Schema
+- Kommentare: Verwenden Sie // für Notizen und Strukturierung
+- Nur gültige Syntax: Nur #, (), *, ?, // Präfixe werden unterstützt
+
+Tipp: Schauen Sie sich das Standard-Template an, um die korrekte Syntax zu verstehen.
 `,
   }
 }

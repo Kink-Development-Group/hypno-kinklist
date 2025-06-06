@@ -12,6 +12,7 @@ import {
   registerKinkListLanguage,
   registerKinkListThemes,
   validateKinkListSyntax,
+  resetRegistrationFlags,
 } from './KinkListLanguage-test'
 
 export interface MonacoKinkListEditorProps {
@@ -69,17 +70,44 @@ const MonacoKinkListEditor = forwardRef<
       editorRef.current = editor
       monacoRef.current = monaco
 
+      console.log('=== MONACO EDITOR MOUNTED ===')
+
+      // In Entwicklungsmodus: Reset flags to allow re-registration
+      if (import.meta.env.DEV) {
+        resetRegistrationFlags()
+      }
+
       // Sprache und Themes registrieren
-      registerKinkListLanguage()
-      registerKinkListThemes()
+      try {
+        const languageId = registerKinkListLanguage()
+        registerKinkListThemes()
+        console.log('Language and themes registered successfully')
 
-      // Theme anwenden
-      const isDark =
-        theme === 'dark' ||
-        (theme === 'auto' &&
-          window.matchMedia('(prefers-color-scheme: dark)').matches)
+        // Theme anwenden
+        const isDark =
+          theme === 'dark' ||
+          (theme === 'auto' &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches)
 
-      monaco.editor.setTheme(isDark ? 'kink-list-dark' : 'kink-list-light')
+        const themeName = isDark ? 'kink-list-dark' : 'kink-list-light'
+        console.log('Applying theme:', themeName)
+        monaco.editor.setTheme(themeName)
+
+        // Model-Sprache explizit setzen
+        const model = editor.getModel()
+        if (model) {
+          monaco.editor.setModelLanguage(model, languageId)
+          console.log('Model language set to:', languageId)
+
+          // Force tokenization
+          setTimeout(() => {
+            model.getLineContent(1) // This triggers tokenization
+            console.log('Tokenization triggered')
+          }, 100)
+        }
+      } catch (error) {
+        console.error('Error setting up Monaco editor:', error)
+      }
 
       // Platzhalter einrichten
       if (placeholder && !value) {
@@ -308,3 +336,4 @@ const MonacoKinkListEditor = forwardRef<
 MonacoKinkListEditor.displayName = 'MonacoKinkListEditor'
 
 export default MonacoKinkListEditor
+export { MonacoKinkListEditor }

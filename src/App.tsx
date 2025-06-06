@@ -8,6 +8,8 @@ import EditOverlay from './components/EditOverlay'
 import InputOverlay from './components/InputOverlay'
 import CommentOverlay from './components/CommentOverlay'
 import ThemeToggle from './components/ThemeToggle'
+import SimpleMonacoTest from './components/editor/SimpleMonacoTest'
+import MonacoTest from './components/editor/MonacoTest'
 import './styles/main.scss'
 
 // Default kinks text with comprehensive English descriptions for all kinks
@@ -438,6 +440,20 @@ const AppContent: React.FC = () => {
         <div className="grid-row">
           <div className="grid-col-12">
             <InputList />
+          </div>
+        </div>
+
+        {/* Debug: Monaco Test Component */}
+        <div className="grid-row">
+          <div className="grid-col-12">
+            <SimpleMonacoTest />
+          </div>
+        </div>
+
+        {/* Debug: Monaco Advanced Test Component */}
+        <div className="grid-row">
+          <div className="grid-col-12">
+            <MonacoTest />
           </div>
         </div>
       </div>
