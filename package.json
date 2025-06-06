@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "start": "vite",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
@@ -16,8 +17,22 @@
     "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,css,scss}\""
   },
   "dependencies": {
+    "@codemirror/basic-setup": "^0.20.0",
+    "@codemirror/commands": "^6.8.1",
+    "@codemirror/highlight": "^0.19.8",
+    "@codemirror/lang-markdown": "^6.3.2",
+    "@codemirror/language": "^6.11.1",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/theme-one-dark": "^6.1.2",
+    "@codemirror/view": "^6.37.1",
+    "@lezer/highlight": "^1.2.1",
+    "@lezer/lr": "^1.4.2",
+    "@monaco-editor/react": "^4.7.0",
+    "@uiw/react-codemirror": "^4.23.12",
     "axios": "^1.7.2",
+    "codemirror": "^6.0.1",
     "html2canvas": "^1.4.1",
+    "monaco-editor": "^0.52.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

@@ -2,6 +2,10 @@ import React, { useState, useEffect, useCallback, memo, useRef } from 'react'
 import { useKinklist } from '../context/KinklistContext'
 import { parseKinksText, kinksToText, getAllKinks } from '../utils'
 import { useErrorHandler } from '../utils/useErrorHandler'
+import { useTheme } from '../context/ThemeContext'
+import AdvancedKinkListEditor, {
+  AdvancedKinkListEditorRef,
+} from './editor/AdvancedKinkListEditor'
 
 const EditOverlay: React.FC = () => {
   const {
@@ -17,13 +21,29 @@ const EditOverlay: React.FC = () => {
   } = useKinklist()
 
   const [kinksText, setKinksText] = useState<string>(originalKinksText)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const editorRef = useRef<AdvancedKinkListEditorRef>(null)
   const errorHandler = useErrorHandler()
+  const { theme } = useTheme()
 
-  // Focus management
+  // Focus management & Body-Scroll-Lock für mobiles Overlay
   useEffect(() => {
-    if (isEditOverlayOpen && textareaRef.current) {
-      textareaRef.current.focus()
+    if (isEditOverlayOpen) {
+      // Fokus auf Editor setzen
+      if (editorRef.current) {
+        editorRef.current.focus()
+      }
+      // Body-Scroll verhindern (z.B. auf Mobilgeräten)
+      document.body.style.overflow = 'hidden'
+      document.body.style.touchAction = 'none'
+    } else {
+      // Body-Scroll wieder erlauben
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
+    }
+    // Cleanup falls Komponente unmounted wird
+    return () => {
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
     }
   }, [isEditOverlayOpen])
 
@@ -108,13 +128,14 @@ const EditOverlay: React.FC = () => {
         <h2 id="edit-overlay-title" className="sr-only edit-overlay-title">
           Edit Kink List
         </h2>
-        <textarea
-          id="Kinks"
-          ref={textareaRef}
-          value={kinksText}
-          onChange={(e) => setKinksText(e.target.value)}
-          aria-label="Kinks Liste bearbeiten"
+        <AdvancedKinkListEditor
+          ref={editorRef}
+          initialValue={kinksText}
+          onChange={setKinksText}
+          height="400px"
           placeholder="Kategorie und Kinks hier eingeben..."
+          theme={theme}
+          showValidation={true}
         />
         <div className="edit-overlay-actions">
           <button

@@ -5,6 +5,8 @@
 @use 'overlay';
 @use 'media-queries';
 @use 'comment-styles';
+@use 'editor';
+@use 'advanced-editor';
 
 // CSS Variables for theming
 :root {
@@ -267,22 +269,16 @@ table {
 
 // Wrapper für die Tabellen, um horizontales Scrollen zu ermöglichen
 .kinkCategory {
-  overflow-x: auto; // Ermöglicht horizontales Scrollen nur bei Bedarf
+  overflow-x: hidden; // Kein horizontales Scrollen mehr
   max-width: 100%;
 
-  // Mobile Optimierungen
-  @media (max-width: 768px) {
-    overflow-x: visible; // Kein Scrollen auf mobile, Tabelle soll sich anpassen
-  }
-
-  // Tabelle behält ihre Größe, selbst wenn der Container zu klein ist
+  // Tabelle passt sich immer dem Container an
   table.kinkGroup {
-    min-width: max-content;
-
-    @media (max-width: 768px) {
-      min-width: 100%; // Auf mobile: Tabelle passt sich an Container an
-      width: 100%;
-    }
+    min-width: 0;
+    width: 100%;
+    table-layout: auto;
+    word-break: break-word;
+    white-space: normal;
   }
 }
 

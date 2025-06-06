@@ -11,7 +11,7 @@ import ThemeToggle from './components/ThemeToggle'
 import './styles/main.scss'
 
 // Default kinks text with comprehensive English descriptions for all kinks
-const defaultKinksText = `#Basics
+export const defaultKinksText = `#Basics
 (General)
 * I enjoy working with cisgender people
 ? I feel comfortable and positive about engaging in hypnosis with cisgender individuals.
