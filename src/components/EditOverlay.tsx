@@ -25,10 +25,25 @@ const EditOverlay: React.FC = () => {
   const errorHandler = useErrorHandler()
   const { theme } = useTheme()
 
-  // Focus management
+  // Focus management & Body-Scroll-Lock für mobiles Overlay
   useEffect(() => {
-    if (isEditOverlayOpen && editorRef.current) {
-      editorRef.current.focus()
+    if (isEditOverlayOpen) {
+      // Fokus auf Editor setzen
+      if (editorRef.current) {
+        editorRef.current.focus()
+      }
+      // Body-Scroll verhindern (z.B. auf Mobilgeräten)
+      document.body.style.overflow = 'hidden'
+      document.body.style.touchAction = 'none'
+    } else {
+      // Body-Scroll wieder erlauben
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
+    }
+    // Cleanup falls Komponente unmounted wird
+    return () => {
+      document.body.style.overflow = ''
+      document.body.style.touchAction = ''
     }
   }, [isEditOverlayOpen])
 
