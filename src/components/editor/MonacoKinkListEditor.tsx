@@ -12,8 +12,7 @@ import {
   registerKinkListLanguage,
   registerKinkListThemes,
   validateKinkListSyntax,
-  resetRegistrationFlags,
-} from './KinkListLanguage-test'
+} from './KinkListLanguage'
 
 export interface MonacoKinkListEditorProps {
   value: string
@@ -74,7 +73,7 @@ const MonacoKinkListEditor = forwardRef<
 
       // In Entwicklungsmodus: Reset flags to allow re-registration
       if (import.meta.env.DEV) {
-        resetRegistrationFlags()
+        // Reset flags are handled internally by registerKinkListLanguage
       }
 
       // Sprache und Themes registrieren
