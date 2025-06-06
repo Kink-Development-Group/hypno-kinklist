@@ -6,11 +6,11 @@ import {
   getDetailedHelpText,
   PasteableBlock,
 } from './EditorUtils'
-import type { CodeMirrorKinkListEditorRef } from './CodeMirrorKinkListEditor'
+import type { MonacoKinkListEditorRef } from './MonacoKinkListEditor'
 import BlockPicker from './BlockPicker'
 
 export interface EditorToolbarProps {
-  editorRef: React.RefObject<CodeMirrorKinkListEditorRef>
+  editorRef: React.RefObject<MonacoKinkListEditorRef>
   onInsertSnippet?: (snippet: string) => void
   showValidation?: boolean
   validationErrors?: string[]

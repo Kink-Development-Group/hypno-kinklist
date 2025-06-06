@@ -25,19 +25,26 @@ export const getHelpText = (): string => {
 SYNTAX:
 # Kategorie Name - Definiert eine neue Kategorie
 (Unterkategorie) - Optionale Unterkategorie nach #-Zeile
-* Kink Name - Definiert einen Kink mit Standard-Status "?"
-? Beschreibung - Beschreibung des Kinks (optional)
+* Kink Name - Definiert einen Kink (Standard-Status)
++ Kink Name - Kink mit positivem Status (Mag ich / Ja)
+- Kink Name - Kink mit negativem Status (Mag ich nicht / Nein)
+? Beschreibung - Beschreibung des vorherigen Kinks
+// Kommentar - Kommentarzeile (grau dargestellt)
 
-STATUS-SYMBOLE:
-* Standard/Neutral (gelb)
-+ Mag ich / Ja (grün)
-- Mag ich nicht / Nein (rot)
-? Interessiert / Vielleicht (orange)
+FARB-CODING:
+# Kategorien - Grün und fett
+() Felder - Blau und kursiv
+* Kinks - Orange/gelb und fett
+? Beschreibungen - Braun/grau und kursiv
+// Kommentare - Grau und kursiv
 
 TASTENKÜRZEL:
-Strg+Space - Snippet-Vorschläge
+Strg+Space - IntelliSense/Autocomplete
 Strg+Shift+F - Formatieren
-F1 - Hilfe anzeigen
+Strg+F - Suchen
+Strg+H - Suchen und Ersetzen
+F1 - Befehlspalette
+Alt+Z - Zeilenumbruch aktivieren/deaktivieren
 
 SNIPPETS:
 - cat: Neue Kategorie
@@ -48,8 +55,7 @@ SNIPPETS:
 TIPPS:
 - Verwenden Sie leere Zeilen zur besseren Lesbarkeit
 - Kategorien sollten mit # beginnen
-- Jeder Kink sollte mit *, +, - oder ? beginnen
-- Beschreibungen sind optional aber empfohlen`
+- Jeder Kink sollte eine Beschreibung mit ? haben`
 }
 
 // Snippets basierend auf dem Default-Template
@@ -291,7 +297,7 @@ export const getPasteableBlocks = (): PasteableBlock[] => {
     {
       id: 'positive-kink',
       name: 'Positiver Kink',
-      description: 'Ein Kink mit positivem Status (+)',
+      description: 'Ein Kink mit positivem Status (Alternative zu *)',
       content: '+ Positiver Kink\n? Ein Kink, den ich mag\n',
       category: 'Kink',
       tags: ['positive', 'kink'],
@@ -299,7 +305,7 @@ export const getPasteableBlocks = (): PasteableBlock[] => {
     {
       id: 'negative-kink',
       name: 'Negativer Kink',
-      description: 'Ein Kink mit negativem Status (-)',
+      description: 'Ein Kink mit negativem Status (Alternative zu *)',
       content: '- Negativer Kink\n? Ein Kink, den ich nicht mag\n',
       category: 'Kink',
       tags: ['negative', 'kink'],
@@ -379,14 +385,13 @@ export const getDetailedHelpText = (): { [key: string]: string } => {
   return {
     syntax: `Kinklist Syntax Übersicht:
 
-# Kategorie Name          - Definiert eine neue Kategorie
-(Unterkategorie)          - Optionale Unterkategorie nach #-Zeile
-* Kink Name               - Kink mit neutralem Status
+# Kategorie Name          - Definiert eine neue Kategorie (grün, fett)
+(Unterkategorie)          - Optionale Unterkategorie nach #-Zeile (blau, kursiv)
+* Kink Name               - Kink mit Standard-Status (orange/gelb, fett)
 + Kink Name               - Kink mit positivem Status (Mag ich / Ja)
 - Kink Name               - Kink mit negativem Status (Mag ich nicht / Nein)
-? Kink Name               - Kink mit unbestimmtem Status (Vielleicht / Interessiert)
-? Beschreibung            - Beschreibung des vorherigen Kinks
-// Kommentar              - Kommentarzeile (wird nicht angezeigt)
+? Beschreibung            - Beschreibung des vorherigen Kinks (braun/grau, kursiv)
+// Kommentar              - Kommentarzeile (grau, kursiv)
 
 [tag] Text mit Tag        - Text mit Metadaten-Tag
 `,
@@ -400,16 +405,17 @@ export const getDetailedHelpText = (): { [key: string]: string } => {
 7. Fügen Sie Blöcke ein, um schnell komplexe Inhalte zu erstellen
 `,
     keyboardShortcuts: `Tastenkürzel:
-Strg+Space         - Autovervollständigung anzeigen
-Strg+K             - Snippet-Vorschläge
-Alt+Shift+F        - Code formatieren
-Strg+/             - Zeile kommentieren/auskommentieren
-Strg+Enter         - Speichern
-F1                 - Kommandopalette öffnen
-Alt+Z              - Zeilenumbruch ein/ausschalten
-Strg+G             - Zu Zeile springen
+Strg+Space         - IntelliSense/Autocomplete anzeigen
+Strg+Shift+F       - Code formatieren
 Strg+F             - Suchen
 Strg+H             - Suchen und Ersetzen
+Strg+G             - Zu Zeile springen
+Strg+D             - Nächstes Vorkommen auswählen
+Strg+L             - Zeile auswählen
+Strg+/             - Zeile kommentieren/auskommentieren
+Alt+Z              - Zeilenumbruch ein/ausschalten
+F1                 - Befehlspalette öffnen
+Strg+Enter         - Änderungen übernehmen
 `,
     advanced: `Erweiterte Funktionen:
 - Metadaten-Tags: Verwenden Sie [tag] um zusätzliche Informationen zu Kinks hinzuzufügen

@@ -1,4 +1,4 @@
-import React, {
+import {
   useRef,
   forwardRef,
   useImperativeHandle,
@@ -85,7 +85,6 @@ const MonacoKinkListEditor = forwardRef<
       if (placeholder && !value) {
         editor.updateOptions({
           accessibilitySupport: 'off',
-          language: languageId,
           minimap: { enabled: showMinimap },
           lineNumbers: showLineNumbers ? 'on' : 'off',
           readOnly: readOnly,

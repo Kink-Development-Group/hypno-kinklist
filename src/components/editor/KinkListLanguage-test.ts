@@ -46,55 +46,51 @@ export const kinkListLanguageConfig: monaco.languages.LanguageConfiguration = {
   },
 }
 
-// Erweiterter Token Provider mit umfassender Syntax-Hervorhebung
+// Token Provider für Monaco Editor basierend auf test-highlighting.md
 export const kinkListTokenProvider: monaco.languages.IMonarchLanguage = {
   defaultToken: 'text',
 
   tokenizer: {
     root: [
-      // Kategorien
-      [/^#(.*)$/, 'category'],
-
-      // Unterkategorien
-      [/^\(([^)]*)\)$/, 'subcategory'],
-
-      // Kinks mit verschiedenen Status
-      [/^\+\s+(.*)$/, 'kink-positive'],
-      [/^-\s+(.*)$/, 'kink-negative'],
-      [/^\*\s+(.*)$/, 'kink-neutral'],
-      [/^\?\s+(.*)$/, 'kink-question'],
-
-      // Beschreibungen
-      [/^\?\s+(.*)$/, 'description'],
-
-      // Kommentare
+      // Kommentare haben höchste Priorität
       [/^\/\/.*$/, 'comment'],
 
-      // Schlüsselwörter
-      [/\b(must|never|always|sometimes)\b/i, 'keyword'],
+      // Kategorien: Zeilen die mit # beginnen
+      [/^#(.*)$/, 'category'],
 
-      // Tags und Metadaten
+      // Unterkategorien/Felder: Zeilen die mit ( beginnen und mit ) enden
+      [/^\(([^)]*)\)$/, 'subcategory'],
+
+      // Kink-Einträge: Zeilen die mit *, +, -, oder ? (als erstes Zeichen) beginnen
+      [/^\+\s+(.*)$/, 'kink-positive'], // + Kinks (grün)
+      [/^-\s+(.*)$/, 'kink-negative'], // - Kinks (rot)
+      [/^\*\s+(.*)$/, 'kink-neutral'], // * Kinks (orange/gelb)
+
+      // Beschreibungen: Zeilen die mit ? beginnen (nur wenn nicht als Kink erkannt)
+      [/^\?\s+(.*)$/, 'description'],
+
+      // Metadaten und Keywords für erweiterte Funktionen
       [/\[([^\]]*)\]/, 'meta'],
+      [/\b(must|never|always|sometimes)\b/i, 'keyword'],
     ],
   },
 }
 
-// Grundlegendes Licht-Theme
+// Licht-Theme basierend auf test-highlighting.md Spezifikation
 export const kinkListTheme: monaco.editor.IStandaloneThemeData = {
   base: 'vs',
   inherit: true,
   rules: [
-    { token: 'category', foreground: '2e7d32', fontStyle: 'bold' },
-    { token: 'subcategory', foreground: '1565c0', fontStyle: 'italic' },
-    { token: 'kink-positive', foreground: '388e3c', fontStyle: 'bold' },
-    { token: 'kink-negative', foreground: 'd32f2f', fontStyle: 'bold' },
-    { token: 'kink-neutral', foreground: 'f57c00', fontStyle: 'bold' },
-    { token: 'kink-question', foreground: '0288d1', fontStyle: 'bold' },
-    { token: 'description', foreground: '5d4037', fontStyle: 'italic' },
-    { token: 'comment', foreground: '757575', fontStyle: 'italic' },
+    { token: 'category', foreground: '2e7d32', fontStyle: 'bold' }, // Kategorien (#) - grün und fett
+    { token: 'subcategory', foreground: '1565c0', fontStyle: 'italic' }, // Felder (()) - blau und kursiv
+    { token: 'kink-neutral', foreground: 'f57c00', fontStyle: 'bold' }, // Kinks (*) - orange/gelb und fett
+    { token: 'kink-positive', foreground: '388e3c', fontStyle: 'bold' }, // + Kinks - grün und fett
+    { token: 'kink-negative', foreground: 'd32f2f', fontStyle: 'bold' }, // - Kinks - rot und fett
+    { token: 'description', foreground: '5d4037', fontStyle: 'italic' }, // Beschreibungen (?) - braun/grau und kursiv
+    { token: 'comment', foreground: '757575', fontStyle: 'italic' }, // Kommentare (//) - grau und kursiv
     { token: 'keyword', foreground: '6a1b9a', fontStyle: 'bold' },
     { token: 'meta', foreground: '00695c', fontStyle: 'italic' },
-    { token: 'text', foreground: '000000' },
+    { token: 'text', foreground: '212121' },
   ],
   colors: {
     'editor.background': '#ffffff',
@@ -106,22 +102,21 @@ export const kinkListTheme: monaco.editor.IStandaloneThemeData = {
   },
 }
 
-// Dunkles Theme
+// Dunkles Theme basierend auf test-highlighting.md Spezifikation
 export const kinkListDarkTheme: monaco.editor.IStandaloneThemeData = {
   base: 'vs-dark',
   inherit: true,
   rules: [
-    { token: 'category', foreground: '81c784', fontStyle: 'bold' },
-    { token: 'subcategory', foreground: '64b5f6', fontStyle: 'italic' },
-    { token: 'kink-positive', foreground: 'a5d6a7', fontStyle: 'bold' },
-    { token: 'kink-negative', foreground: 'ef9a9a', fontStyle: 'bold' },
-    { token: 'kink-neutral', foreground: 'ffcc80', fontStyle: 'bold' },
-    { token: 'kink-question', foreground: '90caf9', fontStyle: 'bold' },
-    { token: 'description', foreground: 'bcaaa4', fontStyle: 'italic' },
-    { token: 'comment', foreground: '9e9e9e', fontStyle: 'italic' },
+    { token: 'category', foreground: '81c784', fontStyle: 'bold' }, // Kategorien (#) - grün und fett
+    { token: 'subcategory', foreground: '64b5f6', fontStyle: 'italic' }, // Felder (()) - blau und kursiv
+    { token: 'kink-neutral', foreground: 'ffb74d', fontStyle: 'bold' }, // Kinks (*) - orange/gelb und fett
+    { token: 'kink-positive', foreground: 'a5d6a7', fontStyle: 'bold' }, // + Kinks - grün und fett
+    { token: 'kink-negative', foreground: 'ef9a9a', fontStyle: 'bold' }, // - Kinks - rot und fett
+    { token: 'description', foreground: 'bcaaa4', fontStyle: 'italic' }, // Beschreibungen (?) - braun/grau und kursiv
+    { token: 'comment', foreground: '9e9e9e', fontStyle: 'italic' }, // Kommentare (//) - grau und kursiv
     { token: 'keyword', foreground: 'ce93d8', fontStyle: 'bold' },
     { token: 'meta', foreground: '80cbc4', fontStyle: 'italic' },
-    { token: 'text', foreground: 'd4d4d4' },
+    { token: 'text', foreground: 'e0e0e0' },
   ],
   colors: {
     'editor.background': '#1e1e1e',

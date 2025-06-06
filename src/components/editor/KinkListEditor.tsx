@@ -8,7 +8,10 @@ import {
 import Editor, { BeforeMount, OnMount } from '@monaco-editor/react'
 import * as monaco from 'monaco-editor'
 import { getSnippets, formatKinkListText } from './EditorUtils'
-import { createSimpleKinkListLanguage } from './SimpleKinkListLanguage'
+import {
+  registerKinkListLanguage,
+  registerKinkListThemes,
+} from './KinkListLanguage-test'
 
 export interface KinkListEditorProps {
   value: string
@@ -127,20 +130,21 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
         if (!isInitializedRef.current) {
           console.log('=== MONACO EDITOR INITIALIZATION ===')
 
-          // Register the simple custom language
-          console.log('1. Registering simple language...')
-          const languageId = createSimpleKinkListLanguage()
+          // Register the kinklist language
+          console.log('1. Registering kinklist language...')
+          const languageId = registerKinkListLanguage()
+          registerKinkListThemes()
           console.log('Language registered:', languageId)
 
           // Force theme setting immediately after registration
           const currentTheme =
-            theme === 'dark' ? 'kinklist-simple-dark' : 'kinklist-simple-light'
+            theme === 'dark' ? 'kink-list-dark' : 'kink-list-light'
           if (theme === 'auto') {
             const prefersDark = window.matchMedia(
               '(prefers-color-scheme: dark)'
             ).matches
             monaco.editor.setTheme(
-              prefersDark ? 'kinklist-simple-dark' : 'kinklist-simple-light'
+              prefersDark ? 'kink-list-dark' : 'kink-list-light'
             )
           } else {
             monaco.editor.setTheme(currentTheme)

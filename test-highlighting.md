@@ -2,6 +2,8 @@
 
 Das ist das echte Format aus defaultKinksText zum Testen des Syntax-Highlightings:
 
+```Kink
+
 #Basics
 (General)
 * I enjoy working with cisgender people
@@ -10,7 +12,7 @@ Das ist das echte Format aus defaultKinksText zum Testen des Syntax-Highlighting
 ? I enter trance states quickly and with little resistance, often after minimal induction.
 
 #Safety and consent
-(General)
+(Dom, Sub)
 * Trust
 ? Trust is the foundation of any hypnotic interaction; I need to feel safe with my partner.
 * Post talk/Aftercare
@@ -24,3 +26,5 @@ Das ist das echte Format aus defaultKinksText zum Testen des Syntax-Highlighting
 - Kink-Einträge mit `*` sollten orange/gelb und fett sein
 - Beschreibungen mit `?` sollten braun/grau und kursiv sein
 - Kommentare mit `//` sollten grau und kursiv sein
+
+```
