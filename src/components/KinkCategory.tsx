@@ -1,7 +1,7 @@
 import React, { memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import KinkRow from './KinkRow'
 import { strToClass } from '../utils'
+import KinkRow from './KinkRow'
 
 interface KinkCategoryProps {
   name: string
