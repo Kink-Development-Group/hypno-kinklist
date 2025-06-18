@@ -1,7 +1,8 @@
 {
   "app": {
     "title": "Hypno Kinklist - Beta",
-    "subtitle": "Your personalized kink preference list"
+    "subtitle": "Your personalized kink preference list",
+    "version": "App Version"
   },
   "navigation": {
     "home": "Home",

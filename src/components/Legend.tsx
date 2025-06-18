@@ -6,9 +6,27 @@ const Legend: React.FC = () => {
   const { levels } = useKinklist()
   const { t } = useTranslation()
 
+  // Mapping von Level-Namen zu i18n-Schlüsseln
+  const getLevelTranslationKey = (levelName: string): string => {
+    const keyMap: Record<string, string> = {
+      'Not Entered': 'legend.notEntered',
+      Favorite: 'legend.favorite',
+      Like: 'legend.like',
+      Okay: 'legend.okay',
+      Maybe: 'legend.maybe',
+      No: 'legend.no',
+    }
+
+    return (
+      keyMap[levelName] ||
+      `legend.${levelName.toLowerCase().replace(/\s+/g, '')}`
+    )
+  }
+
   return (
     <div className="legend-container">
       <div className="legend">
+        <h2 className="legend-title">{t('legend.title')}</h2>
         {Object.entries(levels).map(([levelName, level]) => (
           <div className="legend-item" key={levelName}>
             <span
@@ -16,7 +34,7 @@ const Legend: React.FC = () => {
               className={`choice ${level.class}`}
             />
             <span className="legend-text">
-              {t(`legend.${levelName.toLowerCase().replace(' ', '')}`)}
+              {t(getLevelTranslationKey(levelName))}
             </span>
           </div>
         ))}

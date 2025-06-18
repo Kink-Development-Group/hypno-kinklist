@@ -1,4 +1,5 @@
 import React, { memo } from 'react'
+import { useTranslation } from 'react-i18next'
 import KinkRow from './KinkRow'
 import { strToClass } from '../utils'
 
@@ -12,6 +13,8 @@ interface KinkCategoryProps {
 const KinkCategory: React.FC<
   KinkCategoryProps & { descriptions?: string[] }
 > = ({ name, fields, kinks, descriptions }) => {
+  const { t } = useTranslation()
+
   return (
     <div
       className={`kinkCategory cat-${strToClass(name)}`}
@@ -22,7 +25,7 @@ const KinkCategory: React.FC<
       <table
         className="kinkGroup"
         data-fields={fields.join(',')}
-        aria-label={`Kinks in der Kategorie ${name}`}
+        aria-label={t('kinks.categoryLabel', { categoryName: name })}
       >
         <thead>
           <tr>

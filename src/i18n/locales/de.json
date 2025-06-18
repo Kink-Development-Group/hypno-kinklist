@@ -1,7 +1,8 @@
 {
   "app": {
     "title": "Hypno Kinklist - Beta",
-    "subtitle": "Ihre personalisierte Kink-Präferenzliste"
+    "subtitle": "Ihre personalisierte Kink-Präferenzliste",
+    "version": "App-Version"
   },
   "navigation": {
     "home": "Startseite",
@@ -55,10 +56,16 @@
       "bold": "Fett",
       "italic": "Kursiv",
       "help": "Hilfe",
+      "helpTooltip": "Syntax-Hilfe anzeigen",
       "validate": "Validieren",
       "format": "Code formatieren",
+      "formatTooltip": "Code formatieren (Alt+Shift+F)",
+      "snippets": "Snippets",
+      "snippetsTooltip": "Snippet einfügen (Strg+K für Autovervollständigung)",
       "blocks": "Vorlagen",
-      "focus": "Editor fokussieren"
+      "blocksTooltip": "Vorgefertigte Blöcke einfügen",
+      "focus": "Editor fokussieren",
+      "focusTooltip": "Editor fokussieren"
     },
     "snippets": {
       "categories": {
@@ -277,7 +284,8 @@
   "kinks": {
     "basics": "Grundlagen",
     "safety": "Sicherheit und Einverständnis",
-    "types": "Arten der Hypnose"
+    "types": "Arten der Hypnose",
+    "categoryLabel": "Kinks in der Kategorie {{categoryName}}"
   },
   "comments": {
     "addComment": "Kommentar hinzufügen",
