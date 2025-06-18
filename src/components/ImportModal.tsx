@@ -7,6 +7,7 @@ import {
   importFromXML,
 } from '../utils/exportUtils'
 import { convertFromExportData, validateExportData } from '../utils/importUtils'
+import { kinksToText } from '../utils/index'
 import ErrorModal from './ErrorModal'
 
 interface ImportModalProps {
@@ -15,7 +16,8 @@ interface ImportModalProps {
 }
 
 const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
-  const { setKinks, setLevels, setSelection } = useKinklist()
+  const { setKinks, setLevels, setSelection, setOriginalKinksText } =
+    useKinklist()
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isSuccess, setIsSuccess] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
@@ -101,7 +103,6 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
               result = importFromSSV(text)
             }
         }
-
         if (result.success && result.data) {
           if (validateExportData(result.data)) {
             const {
@@ -110,9 +111,12 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
               selection: newSelection,
             } = convertFromExportData(result.data)
 
+            // Setze alle Daten im Context
             setKinks(newKinks)
             setLevels(newLevels)
-            setSelection(newSelection)
+            setSelection(newSelection) // Aktualisiere auch den originalKinksText für den Editor
+            const newKinksText = kinksToText(newKinks)
+            setOriginalKinksText(newKinksText)
 
             setIsSuccess(true)
             setTimeout(() => setIsSuccess(false), 3000)
@@ -130,7 +134,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
         setIsLoading(false)
       }
     },
-    [setKinks, setLevels, setSelection, onClose]
+    [setKinks, setLevels, setSelection, setOriginalKinksText, onClose]
   )
 
   const handleFileSelect = useCallback(

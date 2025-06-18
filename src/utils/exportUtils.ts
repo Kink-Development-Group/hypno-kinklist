@@ -997,26 +997,22 @@ export const importFromXML = (xmlString: string): ImportResult => {
       totalSelections: parseInt(
         metadataNode?.querySelector('totalSelections')?.textContent || '0'
       ),
-    }
-
-    // Parse levels
+    } // Parse levels
     const levels: {
       [key: string]: { name: string; color: string; class: string }
     } = {}
     root.querySelectorAll('levels > level').forEach((levelNode) => {
       const key = levelNode.getAttribute('key') || ''
       levels[key] = {
-        name: levelNode.querySelector('name')?.textContent || '',
+        name: levelNode.querySelector('n')?.textContent || '',
         color: levelNode.querySelector('color')?.textContent || '#000000',
         class: levelNode.querySelector('class')?.textContent || '',
       }
-    })
-
-    // Parse categories
+    }) // Parse categories
     const categories: ExportData['categories'] = []
     root.querySelectorAll('categories > category').forEach((categoryNode) => {
       const category = {
-        name: categoryNode.querySelector('name')?.textContent || '',
+        name: categoryNode.querySelector('n')?.textContent || '',
         fields: Array.from(categoryNode.querySelectorAll('fields > field')).map(
           (fieldNode) => fieldNode.textContent || ''
         ),
@@ -1025,7 +1021,7 @@ export const importFromXML = (xmlString: string): ImportResult => {
 
       categoryNode.querySelectorAll('kinks > kink').forEach((kinkNode) => {
         const kink = {
-          name: kinkNode.querySelector('name')?.textContent || '',
+          name: kinkNode.querySelector('n')?.textContent || '',
           description:
             kinkNode.querySelector('description')?.textContent || undefined,
           selections: {} as {
