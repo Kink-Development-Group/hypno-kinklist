@@ -183,29 +183,23 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
         3,
         Math.max(2, Math.ceil(Math.sqrt(finalCategories.length)))
       )
-      const gridRows = Math.ceil(finalCategories.length / gridColumns)
 
       const columnWidth = 380
       const headerHeight = 180
       const footerHeight = 50
       const margin = 20
 
-      // Berechne individuelle Kategorie-Höhen und Positionen
+      // Berechne individuelle Kategorie-Höhen und Positionen (Masonry-Layout)
       const categoryInfos: Array<{
         name: string
         data: any
         height: number
         x: number
         y: number
-        col: number
-        row: number
       }> = []
 
       // Erst alle Kategorie-Höhen berechnen
-      finalCategories.forEach(([categoryName, categoryData], index) => {
-        const col = index % gridColumns
-        const row = Math.floor(index / gridColumns)
-
+      finalCategories.forEach(([categoryName, categoryData]) => {
         let categoryHeight = 100 // Header + Fields base height
 
         categoryData.kinks.forEach((kinkName) => {
@@ -239,45 +233,41 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
           name: categoryName,
           data: categoryData,
           height: categoryHeight + 20, // Etwas Puffer
-          x: 0, // Wird später berechnet
-          y: 0, // Wird später berechnet
-          col,
-          row,
+          x: 0, // Wird dynamisch berechnet
+          y: 0, // Wird dynamisch berechnet
         })
       })
 
-      // Berechne Positionen basierend auf individuellen Höhen
-      const rowHeights: number[] = []
-      for (let row = 0; row < gridRows; row++) {
-        const categoriesInRow = categoryInfos.filter((info) => info.row === row)
-        const maxHeightInRow = Math.max(
-          ...categoriesInRow.map((info) => info.height)
-        )
-        rowHeights[row] = maxHeightInRow
-      }
+      // Dynamisches Masonry-Layout: Kategorien optimal anordnen
+      const columnHeights: number[] = new Array(gridColumns).fill(0)
 
-      // Setze finale Positionen
       categoryInfos.forEach((info) => {
-        info.x = margin + info.col * (columnWidth + margin)
+        // Finde die Spalte mit der geringsten aktuellen Höhe
+        let shortestColumnIndex = 0
+        let shortestColumnHeight = columnHeights[0]
 
-        let yOffset = headerHeight + margin
-        for (let r = 0; r < info.row; r++) {
-          yOffset += rowHeights[r] + margin
+        for (let i = 1; i < gridColumns; i++) {
+          if (columnHeights[i] < shortestColumnHeight) {
+            shortestColumnHeight = columnHeights[i]
+            shortestColumnIndex = i
+          }
         }
-        info.y = yOffset
+
+        // Positioniere Kategorie in der kürzesten Spalte
+        info.x = margin + shortestColumnIndex * (columnWidth + margin)
+        info.y = headerHeight + margin + columnHeights[shortestColumnIndex]
+
+        // Aktualisiere die Spaltenhöhe
+        columnHeights[shortestColumnIndex] += info.height + margin
       })
 
-      // Berechne finale Canvas-Höhe
-      const totalContentHeight = rowHeights.reduce(
-        (sum, height) => sum + height + margin,
-        0
-      )
+      // Berechne finale Canvas-Höhe basierend auf höchster Spalte
+      const maxColumnHeight = Math.max(...columnHeights)
 
       // Höhere Auflösung für bessere Bildqualität
       const scale = 3 // 3x höhere Auflösung für scharfe Bilder
       const baseWidth = gridColumns * columnWidth + (gridColumns + 1) * margin
-      const baseHeight =
-        headerHeight + totalContentHeight + footerHeight + margin
+      const baseHeight = headerHeight + maxColumnHeight + footerHeight + margin
 
       const canvas = document.createElement('canvas')
       canvas.width = baseWidth * scale
@@ -530,13 +520,13 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
                 height: commentHeight,
               })
 
-              kinkContentHeight += commentHeight + 4
+              kinkContentHeight += commentHeight
             }
           })
 
           // Zeichne Kommentare direkt unter dem Kink
           if (commentsData.length > 0) {
-            let commentY = kinkY + 20
+            let commentY = kinkY + 22
 
             commentsData.forEach(({ lines, height }) => {
               // Kommentar-Hintergrund mit berechneter Höhe und mehr Padding
