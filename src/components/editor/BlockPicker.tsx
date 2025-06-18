@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
+  getBlocksByCategory,
   getPasteableBlocks,
   PasteableBlock,
-  getBlocksByCategory,
   searchBlocks,
 } from './EditorUtils'
 
@@ -19,9 +20,10 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
   showSearch = true,
   className = '',
 }) => {
+  const { t } = useTranslation()
   const [blocks, setBlocks] = useState<PasteableBlock[]>([])
   const [filteredBlocks, setFilteredBlocks] = useState<PasteableBlock[]>([])
-  const [selectedCategory, setSelectedCategory] = useState<string>('Alle')
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [expandedBlockId, setExpandedBlockId] = useState<string | null>(null)
 
@@ -37,7 +39,7 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
     let result = blocks
 
     // Nach Kategorie filtern
-    if (selectedCategory !== 'Alle') {
+    if (selectedCategory !== 'all') {
       result = getBlocksByCategory(selectedCategory)
     }
 

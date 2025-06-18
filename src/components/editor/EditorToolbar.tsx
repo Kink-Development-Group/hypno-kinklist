@@ -128,11 +128,11 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
           type="button"
           className="toolbar-button"
           onClick={handleFormatCode}
-          title="Code formatieren (Alt+Shift+F)"
-          aria-label="Code formatieren"
+          title={t('editor.toolbar.formatTooltip')}
+          aria-label={t('editor.toolbar.format')}
         >
           <span className="icon">📝</span>
-          Formatieren
+          {t('editor.toolbar.format')}
         </button>
 
         <div className="toolbar-dropdown" ref={dropdownRef}>
@@ -143,12 +143,12 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
               setShowSnippets(!showSnippets)
               setShowBlocks(false)
             }}
-            title="Snippet einfügen (Ctrl+K für Autocomplete)"
-            aria-label="Snippet-Menü öffnen"
+            title={t('editor.toolbar.snippetsTooltip')}
+            aria-label={t('editor.toolbar.snippets')}
             aria-expanded={showSnippets}
           >
             <span className="icon">📋</span>
-            Snippets
+            {t('editor.toolbar.snippets')}
             <span className="dropdown-arrow">{showSnippets ? '▼' : '▶'}</span>
           </button>
 
@@ -193,12 +193,12 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
             setShowBlocks(!showBlocks)
             setShowSnippets(false)
           }}
-          title="Vorgefertigte Blöcke einfügen"
-          aria-label="Block-Menü öffnen"
+          title={t('editor.toolbar.blocksTooltip')}
+          aria-label={t('editor.toolbar.blocks')}
           aria-expanded={showBlocks}
         >
           <span className="icon">📦</span>
-          Blöcke
+          {t('editor.toolbar.blocks')}
         </button>
 
         <button
@@ -209,23 +209,23 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
             setShowSnippets(false)
             setShowBlocks(false)
           }}
-          title="Syntax-Hilfe anzeigen"
-          aria-label="Hilfe anzeigen"
+          title={t('editor.toolbar.helpTooltip')}
+          aria-label={t('editor.toolbar.help')}
           aria-expanded={showHelp}
         >
           <span className="icon">❓</span>
-          Hilfe
+          {t('editor.toolbar.help')}
         </button>
 
         <button
           type="button"
           className="toolbar-button"
           onClick={handleFocus}
-          title="Editor fokussieren"
-          aria-label="Editor fokussieren"
+          title={t('editor.toolbar.focusTooltip')}
+          aria-label={t('editor.toolbar.focus')}
         >
           <span className="icon">🎯</span>
-          Fokus
+          {t('editor.toolbar.focus')}
         </button>
       </div>
 
@@ -243,7 +243,7 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
         <div className="validation-panel">
           <div className="validation-header">
             <span className="icon error">⚠️</span>
-            Validierungsfehler ({validationErrors.length})
+            {t('editor.validation.errors')} ({validationErrors.length})
           </div>
           <ul className="validation-errors">
             {validationErrors.map((error, index) => (
