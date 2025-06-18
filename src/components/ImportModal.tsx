@@ -124,7 +124,11 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
           setError(result.error || 'Import fehlgeschlagen')
         }
       } catch (error) {
-        setError(`Import fehlgeschlagen: ${error}`)
+        if (error instanceof Error) {
+          setError(`Import fehlgeschlagen: ${error.message}`)
+        } else {
+          setError(`Import fehlgeschlagen: ${JSON.stringify(error)}`)
+        }
       } finally {
         setIsLoading(false)
       }
