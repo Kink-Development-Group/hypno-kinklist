@@ -446,21 +446,21 @@ export const exportAsPDF = async (
                 pdf.setFillColor(rgb.r, rgb.g, rgb.b)
                 pdf.setDrawColor(0, 0, 0)
                 pdf.setLineWidth(0.2)
-                pdf.circle(choiceX + 2, currentY, 1.5, 'FD')
+                pdf.circle(choiceX + 2, currentY + 2, 1.5, 'FD')
               }
             }
           } else {
             // Leerer Kreis für "Not Entered"
             pdf.setDrawColor(222, 226, 230) // #dee2e6
             pdf.setLineWidth(0.3)
-            pdf.circle(choiceX + 2, currentY, 1.5, 'D')
+            pdf.circle(choiceX + 2, currentY + 2, 1.5, 'D')
           }
 
           // Kommentar-Indikator (ohne Emoji)
           if (selection?.comment) {
             pdf.setFontSize(6)
             pdf.setTextColor(255, 193, 7) // #ffc107
-            pdf.text('C', choiceX + 4, currentY + 1) // 'C' für Comment
+            pdf.text('C', choiceX + 4, currentY + 3) // 'C' für Comment
           }
 
           choiceX += 8
@@ -468,38 +468,112 @@ export const exportAsPDF = async (
 
         currentY += 6
 
-        // Moderne Kommentare (PDF-optimiert)
+        // Moderne Kommentare mit Textumbruch (wie beim Canvas-Export)
         if (options.includeComments) {
           Object.entries(kink.selections).forEach(([field, selection]) => {
             if (selection.comment) {
-              // Kommentar-Hintergrund (ohne Transparenz für PDF)
+              // Textumbruch-Funktion für PDF
+              const wrapTextForPDF = (
+                text: string,
+                maxWidth: number
+              ): string[] => {
+                const words = text.split(' ')
+                const lines: string[] = []
+                let currentLine = ''
+
+                for (const word of words) {
+                  const testLine = currentLine + (currentLine ? ' ' : '') + word
+                  const testWidth = pdf.getTextWidth(testLine)
+
+                  if (testWidth > maxWidth && currentLine) {
+                    lines.push(currentLine)
+                    currentLine = word
+                  } else {
+                    currentLine = testLine
+                  }
+                }
+
+                if (currentLine) {
+                  lines.push(currentLine)
+                }
+
+                return lines
+              }
+
+              // Bereite Kommentar-Text mit Field-Name vor
+              const fullCommentText = `${field}: ${selection.comment}`
+              const maxCommentWidth = contentWidth - 16 // Abzug für Padding
+
+              // Setze Font für Breiten-Berechnung
+              pdf.setFontSize(7)
+              pdf.setFont('helvetica', 'normal')
+
+              const commentLines = wrapTextForPDF(
+                fullCommentText,
+                maxCommentWidth
+              )
+              const commentHeight = commentLines.length * 3 + 4 // 3mm pro Zeile + Padding
+
+              // Kommentar-Hintergrund mit dynamischer Höhe
               pdf.setFillColor(240, 240, 255) // Heller Lila-Ton
-              pdf.rect(margin + 3, currentY - 1, contentWidth - 6, 6, 'F')
+              pdf.rect(
+                margin + 3,
+                currentY - 1,
+                contentWidth - 6,
+                commentHeight + 4,
+                'F'
+              )
 
               // Dezenter Rahmen
               pdf.setDrawColor(200, 200, 200)
               pdf.setLineWidth(0.2)
-              pdf.rect(margin + 3, currentY - 1, contentWidth - 6, 6)
+              pdf.rect(
+                margin + 3,
+                currentY - 1,
+                contentWidth - 6,
+                commentHeight + 4
+              )
 
-              // Kommentar-Text mit Field-Name
-              pdf.setFontSize(7)
-              pdf.setFont('helvetica', 'bold')
-              pdf.setTextColor(108, 92, 231) // #6c5ce7
-              pdf.text(`${field}:`, margin + 5, currentY + 2)
+              // Zeichne Kommentar-Zeilen
+              commentLines.forEach((line, lineIndex) => {
+                const lineY = currentY + 3 + lineIndex * 3
 
-              const fieldWidth = pdf.getTextWidth(`${field}: `)
-              pdf.setFont('helvetica', 'normal')
-              pdf.setTextColor(60, 60, 60) // Dunkler Grau
+                if (lineIndex === 0) {
+                  // Erste Zeile: Field-Name fett
+                  const colonIndex = line.indexOf(': ')
+                  if (colonIndex > -1) {
+                    pdf.setFont('helvetica', 'bold')
+                    pdf.setTextColor(108, 92, 231) // #6c5ce7
+                    pdf.text(
+                      line.substring(0, colonIndex + 2),
+                      margin + 4,
+                      lineY
+                    )
 
-              // Kürze Kommentar für PDF
-              const maxCommentLength = 100
-              const commentText =
-                selection.comment.length > maxCommentLength
-                  ? selection.comment.substring(0, maxCommentLength) + '...'
-                  : selection.comment
+                    const fieldWidth = pdf.getTextWidth(
+                      line.substring(0, colonIndex + 2)
+                    )
+                    pdf.setFont('helvetica', 'normal')
+                    pdf.setTextColor(60, 60, 60) // Dunkler Grau
+                    pdf.text(
+                      line.substring(colonIndex + 2),
+                      margin + 5 + fieldWidth,
+                      lineY
+                    )
+                  } else {
+                    pdf.setFont('helvetica', 'normal')
+                    pdf.setTextColor(60, 60, 60)
+                    pdf.text(line, margin + 5, lineY)
+                  }
+                } else {
+                  // Weitere Zeilen: normal, leicht eingerückt
+                  pdf.setFont('helvetica', 'normal')
+                  pdf.setTextColor(60, 60, 60)
+                  pdf.text(line, margin + 8, lineY)
+                }
+              })
 
-              pdf.text(commentText, margin + 5 + fieldWidth, currentY + 2)
-              currentY += 8
+              currentY += commentHeight + 6 // Abstand zum nächsten Kommentar
             }
           })
         }
