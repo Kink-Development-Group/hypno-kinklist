@@ -253,7 +253,7 @@ export const exportAsCSV = async (
 }
 
 /**
- * Erstellt ein verbessertes professionelles PDF mit A4-Layout und erweitertem Design
+ * Erstellt ein verbessertes professionelles PDF mit modernem Design entsprechend dem Bild-Export
  */
 export const exportAsPDF = async (
   data: ExportData,
@@ -270,54 +270,62 @@ export const exportAsPDF = async (
 
     const pageWidth = pdf.internal.pageSize.getWidth()
     const pageHeight = pdf.internal.pageSize.getHeight()
-    const margin = 20
+    const margin = 15
     const contentWidth = pageWidth - 2 * margin
     let currentY = margin
 
-    // Professional Header with Background
-    pdf.setFillColor(63, 81, 181) // Material Blue
-    pdf.rect(0, 0, pageWidth, 35, 'F')
+    // Moderner Gradient-ähnlicher Header (Grau-Verlauf simulation)
+    pdf.setFillColor(248, 249, 250) // Heller Grau-Ton
+    pdf.rect(0, 0, pageWidth, 40, 'F')
 
-    // Title in white
-    pdf.setTextColor(255, 255, 255)
-    pdf.setFontSize(28)
+    // Hauptpanel-Simulation mit dezentem Schatten-Effekt
+    pdf.setFillColor(255, 255, 255)
+    pdf.rect(5, 35, pageWidth - 10, pageHeight - 45, 'F')
+    pdf.setDrawColor(233, 236, 239)
+    pdf.setLineWidth(1)
+    pdf.rect(5, 35, pageWidth - 10, pageHeight - 45)
+
+    // Moderner Header-Titel (ohne Emojis für PDF-Kompatibilität)
+    pdf.setTextColor(44, 62, 80) // #2c3e50
+    pdf.setFontSize(20)
     pdf.setFont('helvetica', 'bold')
-    const title = `Kinklist${data.metadata.username ? ` - ${data.metadata.username}` : ''}`
+    const title = data.metadata.username
+      ? `${data.metadata.username}'s Kink List`
+      : 'Kink List'
     const titleWidth = pdf.getTextWidth(title)
     const titleX = (pageWidth - titleWidth) / 2
     pdf.text(title, titleX, 25)
 
-    // Reset colors and position
-    pdf.setTextColor(0, 0, 0)
+    // Dezente Untertitel-Linie
+    pdf.setDrawColor(206, 212, 218)
+    pdf.setLineWidth(0.5)
+    pdf.line(margin + 20, 32, pageWidth - margin - 20, 32)
+
     currentY = 50
 
-    // Document info section with subtle background
-    pdf.setFillColor(248, 249, 250)
-    pdf.rect(margin, currentY - 5, contentWidth, 25, 'F')
-
-    pdf.setFontSize(10)
+    // Kompakte Info-Sektion (ohne Emojis)
+    pdf.setFontSize(8)
     pdf.setFont('helvetica', 'normal')
-    pdf.setTextColor(100)
-    const infoLines = [
-      `Erstellt am: ${new Date(data.metadata.exportDate).toLocaleDateString('de-DE')}`,
-      `Version: ${data.metadata.version}`,
-      `Kategorien: ${data.metadata.totalCategories} | Kinks: ${data.metadata.totalKinks} | Bewertungen: ${data.metadata.totalSelections}`,
-    ]
+    pdf.setTextColor(173, 181, 189) // #adb5bd
+    const infoText = `Neo-Kinklist v${data.metadata.version} | ${new Date(data.metadata.exportDate).toLocaleDateString('de-DE')}`
+    pdf.text(infoText, margin, currentY)
 
-    infoLines.forEach((line, index) => {
-      pdf.text(line, margin + 5, currentY + 5 + index * 5)
-    })
-    currentY += 35
+    // Statistiken rechts (ohne Emojis)
+    const statsText = `${data.metadata.totalSelections}/${data.metadata.totalKinks} ausgefüllt`
+    const statsWidth = pdf.getTextWidth(statsText)
+    pdf.text(statsText, pageWidth - margin - statsWidth, currentY)
 
-    // Legend Section with enhanced design
-    pdf.setFontSize(16)
+    currentY += 15
+
+    // Moderne Legende (ohne Emojis)
+    pdf.setFontSize(12)
     pdf.setFont('helvetica', 'bold')
-    pdf.setTextColor(63, 81, 181)
+    pdf.setTextColor(44, 62, 80)
     pdf.text('Bewertungslegende', margin, currentY)
-    currentY += 10
+    currentY += 8
 
-    // Legend grid with improved layout
-    const legendColumns = 3
+    // Legende in kompakter Form (ähnlich Canvas-Grid)
+    const legendColumns = 4
     const legendItemWidth = contentWidth / legendColumns
     let legendX = margin
     let legendRowCount = 0
@@ -325,19 +333,23 @@ export const exportAsPDF = async (
     Object.entries(data.levels).forEach(([levelName, level]) => {
       if (levelName === 'Not Entered') return
 
-      // Draw colored rectangle instead of circle for better visibility
+      // Moderner Farbkreis (wie im Canvas-Export)
       const hexColor = level.color
       const rgb = hexToRgb(hexColor)
       if (rgb) {
         pdf.setFillColor(rgb.r, rgb.g, rgb.b)
-        pdf.rect(legendX, currentY - 3, 8, 4, 'F')
+        pdf.setDrawColor(0, 0, 0)
+        pdf.setLineWidth(0.3)
+        pdf.circle(legendX + 3, currentY - 1, 2, 'FD') // Gefüllter Kreis mit Rahmen
       }
 
-      // Label with better spacing
-      pdf.setFontSize(9)
+      // Kompakte Label-Darstellung
+      pdf.setFontSize(7)
       pdf.setFont('helvetica', 'normal')
-      pdf.setTextColor(0)
-      pdf.text(levelName, legendX + 12, currentY)
+      pdf.setTextColor(33, 37, 41) // #212529
+      const truncatedName =
+        levelName.length > 12 ? levelName.substring(0, 12) + '...' : levelName
+      pdf.text(truncatedName, legendX + 8, currentY)
 
       legendX += legendItemWidth
       legendRowCount++
@@ -345,7 +357,7 @@ export const exportAsPDF = async (
       if (legendRowCount >= legendColumns) {
         legendX = margin
         legendRowCount = 0
-        currentY += 8
+        currentY += 6
       }
     })
 
@@ -354,173 +366,171 @@ export const exportAsPDF = async (
     }
     currentY += 15
 
-    // Categories with improved design
-    data.categories.forEach((category, categoryIndex) => {
+    // Moderne Kategorien mit Canvas-ähnlichem Design
+    data.categories.forEach((category) => {
       // Check if we need a new page for category header
       if (currentY > pageHeight - 60) {
         pdf.addPage()
+        // Wiederhole Hauptpanel für neue Seite
+        pdf.setFillColor(255, 255, 255)
+        pdf.rect(5, 5, pageWidth - 10, pageHeight - 10, 'F')
+        pdf.setDrawColor(233, 236, 239)
+        pdf.setLineWidth(1)
+        pdf.rect(5, 5, pageWidth - 10, pageHeight - 10)
         currentY = margin
       }
 
-      // Category header with background and border
-      pdf.setFillColor(63, 81, 181, 0.1)
-      pdf.rect(margin, currentY - 5, contentWidth, 15, 'F')
+      // Moderner Kategorie-Header (ohne Emojis)
+      pdf.setFillColor(233, 236, 239) // #e9ecef
+      pdf.rect(margin, currentY - 3, contentWidth, 12, 'F')
 
-      pdf.setDrawColor(63, 81, 181)
-      pdf.setLineWidth(0.5)
-      pdf.rect(margin, currentY - 5, contentWidth, 15)
-
-      // Category title
-      pdf.setFontSize(14)
+      pdf.setFontSize(11)
       pdf.setFont('helvetica', 'bold')
-      pdf.setTextColor(63, 81, 181)
-      pdf.text(category.name, margin + 5, currentY + 3)
+      pdf.setTextColor(73, 80, 87) // #495057
+      pdf.text(`[${category.name}]`, margin + 3, currentY + 4)
       currentY += 12
 
-      // Fields subtitle with improved styling
-      pdf.setFontSize(9)
-      pdf.setFont('helvetica', 'italic')
-      pdf.setTextColor(100)
-      pdf.text(`Bereiche: ${category.fields.join(', ')}`, margin + 5, currentY)
-      currentY += 12
+      // Kompakte Fields-Anzeige (wie im Canvas)
+      pdf.setFontSize(7)
+      pdf.setFont('helvetica', 'bold')
+      pdf.setTextColor(108, 117, 125) // #6c757d
+      const fieldsText = category.fields.slice(0, 4).join(' • ')
+      pdf.text(fieldsText, margin + 3, currentY + 3)
+      currentY += 8
 
-      // Kinks in a more structured layout
-      category.kinks.forEach((kink, kinkIndex) => {
-        // Estimate height needed for this kink
-        const baseHeight = 8
-        const descriptionHeight =
-          options.includeDescriptions && kink.description
-            ? Math.ceil(
-                pdf.getTextWidth(kink.description) / (contentWidth - 30)
-              ) * 4
-            : 0
+      // Kinks mit modernem Layout
+      category.kinks.forEach((kink) => {
+        // Schätze benötigte Höhe
+        const baseHeight = 6
         const commentsHeight = options.includeComments
-          ? Object.values(kink.selections).filter((s) => s.comment).length * 4
+          ? Object.values(kink.selections).filter((s) => s.comment).length * 3
           : 0
-        const estimatedHeight =
-          baseHeight + descriptionHeight + commentsHeight + 5
+        const estimatedHeight = baseHeight + commentsHeight + 2
 
-        // Check if we need a new page
+        // Überprüfe Seitenumbruch
         if (currentY + estimatedHeight > pageHeight - margin) {
           pdf.addPage()
+          pdf.setFillColor(255, 255, 255)
+          pdf.rect(5, 5, pageWidth - 10, pageHeight - 10, 'F')
+          pdf.setDrawColor(233, 236, 239)
+          pdf.setLineWidth(1)
+          pdf.rect(5, 5, pageWidth - 10, pageHeight - 10)
           currentY = margin
         }
 
-        // Alternating row backgrounds for better readability
-        if (kinkIndex % 2 === 0) {
-          pdf.setFillColor(250, 250, 250)
-          pdf.rect(
-            margin + 5,
-            currentY - 2,
-            contentWidth - 10,
-            estimatedHeight,
-            'F'
-          )
+        // Kink-Name mit Canvas-ähnlicher Typografie
+        pdf.setFontSize(8)
+        pdf.setFont('helvetica', 'normal')
+        pdf.setTextColor(33, 37, 41) // #212529
+
+        // Kürze lange Namen falls nötig
+        const maxKinkWidth = 100
+        let displayName = kink.name
+        while (
+          pdf.getTextWidth(displayName) > maxKinkWidth &&
+          displayName.length > 10
+        ) {
+          displayName = displayName.substring(0, displayName.length - 4) + '...'
         }
+        pdf.text(displayName, margin + 3, currentY + 3)
 
-        // Kink name with enhanced typography
-        pdf.setFontSize(10)
-        pdf.setFont('helvetica', 'bold')
-        pdf.setTextColor(0)
-        pdf.text(kink.name, margin + 10, currentY + 3)
-
-        // Selection indicators with improved visual design
-        let indicatorX = margin + 10 + pdf.getTextWidth(kink.name) + 15
-        Object.entries(kink.selections).forEach(([field, selection]) => {
-          if (selection.level !== 'Not Entered') {
+        // Choice-Kreise (wie im Canvas-Export)
+        let choiceX = margin + 105
+        category.fields.slice(0, 4).forEach((field) => {
+          const selection = kink.selections[field]
+          if (selection && selection.level !== 'Not Entered') {
             const level = data.levels[selection.level]
             if (level) {
               const rgb = hexToRgb(level.color)
               if (rgb) {
                 pdf.setFillColor(rgb.r, rgb.g, rgb.b)
-                pdf.rect(indicatorX, currentY - 1, 6, 4, 'F')
-
-                // Add field initial as text overlay
-                pdf.setFontSize(6)
-                pdf.setTextColor(255)
-                pdf.text(field[0].toUpperCase(), indicatorX + 1.5, currentY + 2)
-
-                indicatorX += 10
+                pdf.setDrawColor(0, 0, 0)
+                pdf.setLineWidth(0.2)
+                pdf.circle(choiceX + 2, currentY, 1.5, 'FD')
               }
             }
+          } else {
+            // Leerer Kreis für "Not Entered"
+            pdf.setDrawColor(222, 226, 230) // #dee2e6
+            pdf.setLineWidth(0.3)
+            pdf.circle(choiceX + 2, currentY, 1.5, 'D')
           }
+
+          // Kommentar-Indikator (ohne Emoji)
+          if (selection?.comment) {
+            pdf.setFontSize(6)
+            pdf.setTextColor(255, 193, 7) // #ffc107
+            pdf.text('C', choiceX + 4, currentY + 1) // 'C' für Comment
+          }
+
+          choiceX += 8
         })
 
-        currentY += 8
+        currentY += 6
 
-        // Description with better formatting
-        if (options.includeDescriptions && kink.description) {
-          pdf.setFontSize(8)
-          pdf.setFont('helvetica', 'italic')
-          pdf.setTextColor(100)
-          const descLines = pdf.splitTextToSize(
-            kink.description,
-            contentWidth - 25
-          )
-          pdf.text(descLines, margin + 15, currentY)
-          currentY += descLines.length * 4 + 2
-        }
-
-        // Comments with enhanced styling
+        // Moderne Kommentare (PDF-optimiert)
         if (options.includeComments) {
           Object.entries(kink.selections).forEach(([field, selection]) => {
             if (selection.comment) {
-              pdf.setFontSize(8)
+              // Kommentar-Hintergrund (ohne Transparenz für PDF)
+              pdf.setFillColor(240, 240, 255) // Heller Lila-Ton
+              pdf.rect(margin + 3, currentY - 1, contentWidth - 6, 6, 'F')
+
+              // Dezenter Rahmen
+              pdf.setDrawColor(200, 200, 200)
+              pdf.setLineWidth(0.2)
+              pdf.rect(margin + 3, currentY - 1, contentWidth - 6, 6)
+
+              // Kommentar-Text mit Field-Name
+              pdf.setFontSize(7)
+              pdf.setFont('helvetica', 'bold')
+              pdf.setTextColor(108, 92, 231) // #6c5ce7
+              pdf.text(`${field}:`, margin + 5, currentY + 2)
+
+              const fieldWidth = pdf.getTextWidth(`${field}: `)
               pdf.setFont('helvetica', 'normal')
-              pdf.setTextColor(2, 119, 189)
+              pdf.setTextColor(60, 60, 60) // Dunkler Grau
 
-              // Comment icon
-              pdf.text('💬', margin + 15, currentY)
+              // Kürze Kommentar für PDF
+              const maxCommentLength = 100
+              const commentText =
+                selection.comment.length > maxCommentLength
+                  ? selection.comment.substring(0, maxCommentLength) + '...'
+                  : selection.comment
 
-              const commentText = `${field}: ${selection.comment}`
-              const commentLines = pdf.splitTextToSize(
-                commentText,
-                contentWidth - 30
-              )
-              pdf.text(commentLines, margin + 20, currentY)
-              currentY += commentLines.length * 4 + 1
+              pdf.text(commentText, margin + 5 + fieldWidth, currentY + 2)
+              currentY += 8
             }
           })
         }
 
-        currentY += 3
+        currentY += 2
       })
 
-      // Add spacing between categories
-      currentY += 8
-
-      // Add subtle separator line between categories (except for last)
-      if (categoryIndex < data.categories.length - 1) {
-        pdf.setDrawColor(200)
-        pdf.setLineWidth(0.3)
-        pdf.line(margin, currentY, pageWidth - margin, currentY)
-        currentY += 5
-      }
+      // Dezenter Kategorie-Abstand
+      currentY += 6
     })
 
-    // Professional footer on every page
+    // Moderner Footer (ähnlich Canvas-Export)
     const pageCount = (pdf as any).internal.getNumberOfPages()
     for (let i = 1; i <= pageCount; i++) {
       pdf.setPage(i)
 
-      // Footer background
+      // Footer-Hintergrund
       pdf.setFillColor(248, 249, 250)
-      pdf.rect(0, pageHeight - 15, pageWidth, 15, 'F')
+      pdf.rect(0, pageHeight - 12, pageWidth, 12, 'F')
 
-      // Footer text
-      pdf.setFontSize(8)
-      pdf.setFont('helvetica', 'italic')
-      pdf.setTextColor(150)
+      // Footer-Text (ohne Emoji)
+      pdf.setFontSize(7)
+      pdf.setFont('helvetica', 'normal')
+      pdf.setTextColor(173, 181, 189) // #adb5bd
+      pdf.text(`Neo-Kinklist v${data.metadata.version}`, margin, pageHeight - 5)
 
-      const footerText = 'Erstellt mit https://kink.hypnose-stammtisch.de'
-      const footerWidth = pdf.getTextWidth(footerText)
-      pdf.text(footerText, (pageWidth - footerWidth) / 2, pageHeight - 8)
-
-      // Page number
+      // Seitenzahl rechts
       pdf.text(
         `Seite ${i} von ${pageCount}`,
-        pageWidth - margin,
-        pageHeight - 8
+        pageWidth - margin - 20,
+        pageHeight - 5
       )
     }
 
