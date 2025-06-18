@@ -417,9 +417,7 @@ const AppContent: React.FC = () => {
         </h1>
         <ThemeToggle theme={theme} toggleTheme={toggleTheme} />{' '}
       </div>
-
       <Legend />
-
       <div className="action-buttons-container">
         <div className="export-container">
           <Export />
@@ -435,8 +433,7 @@ const AppContent: React.FC = () => {
         >
           <span className="button-label">Start</span>
         </button>
-      </div>
-
+      </div>{' '}
       <div className="grid-container">
         <div className="grid-row">
           <div className="grid-col-12">

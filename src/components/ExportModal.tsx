@@ -12,7 +12,6 @@ import {
   exportAsCSV,
   exportAsJSON,
   exportAsPDF,
-  exportAsSSV,
   exportAsSVG,
   exportAsXML,
   exportCanvasAsImage,
@@ -62,17 +61,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
       mode: 'advanced',
       title: 'Erweiterte Optionen',
       description: 'Alle Formate mit detaillierten Einstellungen',
-      formats: [
-        'PNG',
-        'JPEG',
-        'WebP',
-        'SVG',
-        'PDF',
-        'JSON',
-        'XML',
-        'CSV',
-        'SSV',
-      ],
+      formats: ['PNG', 'JPEG', 'WebP', 'SVG', 'PDF', 'JSON', 'XML', 'CSV'],
       defaultOptions: {
         includeComments: true,
         includeDescriptions: true,
@@ -91,7 +80,6 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
     JSON: 'Strukturierte Daten, vollständig importierbar',
     XML: 'Standardisiertes Datenformat, vollständig importierbar',
     CSV: 'Tabellendaten für Excel/Google Sheets',
-    SSV: 'Space-separated values für spezielle Anwendungen',
   }
 
   const handleExport = useCallback((format: ExportFormat) => {
@@ -640,9 +628,6 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
         case 'CSV':
           result = await exportAsCSV(exportData, options)
           break
-        case 'SSV':
-          result = await exportAsSSV(exportData, options)
-          break
         case 'PDF':
           result = await exportAsPDF(exportData, options)
           break
@@ -801,9 +786,10 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
                     <div className="format-header">
                       <strong>{format}</strong>
                       <span className="format-type">
+                        {' '}
                         {['PNG', 'JPEG', 'WebP', 'SVG'].includes(format)
                           ? 'Bild'
-                          : ['JSON', 'XML', 'CSV', 'SSV'].includes(format)
+                          : ['JSON', 'XML', 'CSV'].includes(format)
                             ? 'Daten'
                             : 'Dokument'}
                       </span>

@@ -883,100 +883,31 @@ export const exportAsXMLFull = async (
 }
 
 /**
- * Exportiert als SSV (Space-Separated Values) für einfache Datenanalyse
- */
-export const exportAsSSV = async (
-  data: ExportData,
-  options: ExportOptions
-): Promise<ExportResult> => {
-  try {
-    const filename = options.filename || `kinklist_${Date.now()}.ssv`
-
-    const ssvData: string[][] = []
-
-    // Header
-    const headers = [
-      'Category',
-      'Kink',
-      'Field',
-      'Level',
-      ...(options.includeComments ? ['Comment'] : []),
-      ...(options.includeDescriptions ? ['Description'] : []),
-    ]
-    ssvData.push(headers)
-
-    // Data rows
-    data.categories.forEach((category) => {
-      category.kinks.forEach((kink) => {
-        Object.entries(kink.selections).forEach(([field, selection]) => {
-          const row = [
-            category.name,
-            kink.name,
-            field,
-            selection.level,
-            ...(options.includeComments ? [selection.comment || ''] : []),
-            ...(options.includeDescriptions ? [kink.description || ''] : []),
-          ]
-          ssvData.push(row)
-        })
-      })
-    })
-
-    // Convert to SSV format (space-separated, quoted if contains spaces)
-    const ssvContent = ssvData
-      .map((row) =>
-        row
-          .map((cell) => {
-            const str = String(cell)
-            // Quote if contains spaces, quotes, or special characters
-            if (
-              str.includes(' ') ||
-              str.includes('"') ||
-              str.includes('\n') ||
-              str.includes('\t')
-            ) {
-              return '"' + str.replace(/"/g, '""') + '"'
-            }
-            return str
-          })
-          .join(' ')
-      )
-      .join('\n')
-
-    const blob = new Blob([ssvContent], { type: 'text/plain;charset=utf-8;' })
-    saveAs(blob, filename)
-
-    return {
-      success: true,
-      filename,
-      size: blob.size,
-    }
-  } catch (error) {
-    return {
-      success: false,
-      filename: '',
-      error: `SSV Export failed: ${error}`,
-    }
-  }
-}
-
-/**
  * Importiert XML-Daten zurück in die Anwendung
  */
 export const importFromXML = (xmlString: string): ImportResult => {
   try {
+    // Normalisiere Line Endings und entferne potentielle BOM
+    const cleanedXmlString = xmlString
+      .replace(/\r\n/g, '\n')
+      .replace(/^\uFEFF/, '')
+
     const parser = new DOMParser()
-    const xmlDoc = parser.parseFromString(xmlString, 'text/xml')
+    const xmlDoc = parser.parseFromString(cleanedXmlString, 'text/xml')
 
     // Check for parsing errors
     const parseError = xmlDoc.querySelector('parsererror')
     if (parseError) {
-      throw new Error('Invalid XML format')
+      console.error('XML Parse Error:', parseError.textContent)
+      throw new Error('Invalid XML format: ' + parseError.textContent)
     }
 
     const root = xmlDoc.querySelector('kinklist')
     if (!root) {
-      throw new Error('Invalid kinklist XML structure')
+      console.error('No kinklist root element found')
+      throw new Error(
+        'Invalid kinklist XML structure - missing kinklist root element'
+      )
     }
 
     // Parse metadata
@@ -997,31 +928,115 @@ export const importFromXML = (xmlString: string): ImportResult => {
       totalSelections: parseInt(
         metadataNode?.querySelector('totalSelections')?.textContent || '0'
       ),
-    } // Parse levels
+    }
+
+    // Parse levels
     const levels: {
       [key: string]: { name: string; color: string; class: string }
     } = {}
     root.querySelectorAll('levels > level').forEach((levelNode) => {
       const key = levelNode.getAttribute('key') || ''
-      levels[key] = {
-        name: levelNode.querySelector('n')?.textContent || '',
-        color: levelNode.querySelector('color')?.textContent || '#000000',
-        class: levelNode.querySelector('class')?.textContent || '',
+      if (key) {
+        // Support both <n> and <name> for level names
+        const levelNameElement =
+          levelNode.querySelector('n') || levelNode.querySelector('name')
+        levels[key] = {
+          name: levelNameElement?.textContent || key,
+          color: levelNode.querySelector('color')?.textContent || '#000000',
+          class:
+            levelNode.querySelector('class')?.textContent ||
+            key.toLowerCase().replace(/\s+/g, '-'),
+        }
       }
-    }) // Parse categories
+    })
+
+    // Falls keine Levels gefunden wurden, erstelle Standard-Levels
+    if (Object.keys(levels).length === 0) {
+      levels['Not Entered'] = {
+        name: 'Not Entered',
+        color: '#FFFFFF',
+        class: 'notEntered',
+      }
+      levels['Favorite'] = {
+        name: 'Favorite',
+        color: '#6DB5FE',
+        class: 'favorite',
+      }
+      levels['Like'] = { name: 'Like', color: '#23FD22', class: 'like' }
+      levels['Okay'] = { name: 'Okay', color: '#FDFD6B', class: 'okay' }
+      levels['Maybe'] = { name: 'Maybe', color: '#DB6C00', class: 'maybe' }
+      levels['No'] = { name: 'No', color: '#920000', class: 'no' }
+    }
+
+    // Parse categories
     const categories: ExportData['categories'] = []
-    root.querySelectorAll('categories > category').forEach((categoryNode) => {
+    // Finde das categories-Element und dann alle category-Children
+    const categoriesElement = root.querySelector('categories')
+    const categoryNodes = categoriesElement
+      ? categoriesElement.querySelectorAll('category')
+      : root.querySelectorAll('category')
+
+    console.log('=== XML IMPORT DEBUG ===')
+    console.log('Root element:', root.tagName)
+    console.log(
+      'Root children:',
+      Array.from(root.children).map((child) => child.tagName)
+    )
+    console.log('Categories element exists:', !!categoriesElement)
+    console.log('Found category nodes:', categoryNodes.length)
+    console.log(
+      'Direct category query:',
+      root.querySelectorAll('category').length
+    )
+    console.log(
+      'CSS selector categories > category:',
+      root.querySelectorAll('categories > category').length
+    )
+
+    // Debug: Zeige die vollständige XML-Struktur
+    console.log('Full XML innerHTML:', root.innerHTML.substring(0, 500) + '...')
+
+    categoryNodes.forEach((categoryNode, categoryIndex) => {
+      // Support both <n> and <name> for category names
+      const categoryNameElement =
+        categoryNode.querySelector('n') || categoryNode.querySelector('name')
+      const categoryName = categoryNameElement?.textContent || ''
+      console.log(`Processing category ${categoryIndex}: "${categoryName}"`)
+
       const category = {
-        name: categoryNode.querySelector('n')?.textContent || '',
+        name: categoryName,
         fields: Array.from(categoryNode.querySelectorAll('fields > field')).map(
           (fieldNode) => fieldNode.textContent || ''
         ),
         kinks: [] as ExportData['categories'][0]['kinks'],
       }
+      console.log(
+        `Category "${categoryName}" has ${category.fields.length} fields:`,
+        category.fields
+      )
 
-      categoryNode.querySelectorAll('kinks > kink').forEach((kinkNode) => {
+      // Falls keine Felder gefunden wurden, setze ein Standard-Feld
+      if (category.fields.length === 0) {
+        category.fields = ['General']
+        console.log(
+          `No fields found for category "${categoryName}", using default: ['General']`
+        )
+      }
+
+      const kinkNodes = categoryNode.querySelectorAll('kinks > kink')
+      console.log(
+        `Category "${categoryName}" has ${kinkNodes.length} kink nodes`
+      )
+
+      kinkNodes.forEach((kinkNode, kinkIndex) => {
+        // Support both <n> and <name> for kink names
+        const kinkNameElement =
+          kinkNode.querySelector('n') || kinkNode.querySelector('name')
+        const kinkName = kinkNameElement?.textContent || ''
+        console.log(`Processing kink ${kinkIndex}: "${kinkName}"`)
+
         const kink = {
-          name: kinkNode.querySelector('n')?.textContent || '',
+          name: kinkName,
           description:
             kinkNode.querySelector('description')?.textContent || undefined,
           selections: {} as {
@@ -1029,25 +1044,95 @@ export const importFromXML = (xmlString: string): ImportResult => {
           },
         }
 
-        kinkNode
-          .querySelectorAll('selections > selection')
-          .forEach((selectionNode) => {
-            const field = selectionNode.getAttribute('field') || ''
-            kink.selections[field] = {
-              level:
-                selectionNode.querySelector('level')?.textContent ||
-                'Not Entered',
-              comment:
-                selectionNode.querySelector('comment')?.textContent ||
-                undefined,
-            }
-          })
+        // Parse selections
+        const selectionNodes = kinkNode.querySelectorAll(
+          'selections > selection'
+        )
+        console.log(
+          `Kink "${kinkName}" has ${selectionNodes.length} selection nodes`
+        )
 
-        category.kinks.push(kink)
+        selectionNodes.forEach((selectionNode, selectionIndex) => {
+          const field =
+            selectionNode.getAttribute('field') ||
+            category.fields[0] ||
+            'General'
+          const level =
+            selectionNode.querySelector('level')?.textContent || 'Not Entered'
+          const comment =
+            selectionNode.querySelector('comment')?.textContent || undefined
+
+          console.log(
+            `Selection ${selectionIndex}: field="${field}", level="${level}"`
+          )
+
+          kink.selections[field] = {
+            level,
+            comment,
+          }
+        })
+
+        // Stelle sicher, dass für jedes Feld eine Selection existiert
+        category.fields.forEach((field) => {
+          if (!kink.selections[field]) {
+            kink.selections[field] = {
+              level: 'Not Entered',
+              comment: undefined,
+            }
+            console.log(
+              `Added default selection for field "${field}" in kink "${kinkName}"`
+            )
+          }
+        })
+
+        // Füge Kink hinzu, auch wenn der Name leer ist (für Debug-Zwecke)
+        if (kinkName.trim() || Object.keys(kink.selections).length > 0) {
+          category.kinks.push(kink)
+          console.log(`Added kink "${kinkName}" to category "${categoryName}"`)
+        } else {
+          console.log(`Skipped empty kink in category "${categoryName}"`)
+        }
       })
 
-      categories.push(category)
+      // Füge Kategorie hinzu, auch wenn sie leer ist (für Debug-Zwecke)
+      if (categoryName.trim()) {
+        categories.push(category)
+        console.log(
+          `Added category "${categoryName}" with ${category.kinks.length} kinks`
+        )
+      } else {
+        console.log('Skipped category with empty name')
+      }
     })
+
+    console.log(`Total categories processed: ${categories.length}`)
+
+    if (categories.length === 0) {
+      console.error('No valid categories found. Check XML structure:')
+      console.error('- Root element:', root.tagName)
+      console.error(
+        '- Categories element exists:',
+        !!root.querySelector('categories')
+      )
+      console.error(
+        '- Category elements:',
+        root.querySelectorAll('category').length
+      )
+      console.error(
+        '- Categories > category elements:',
+        root.querySelectorAll('categories > category').length
+      )
+
+      // Zeige XML-Struktur für Debug
+      console.error(
+        '- First 500 chars of XML content:',
+        xmlString.substring(0, 500)
+      )
+
+      throw new Error(
+        'No valid categories found in XML. Please check the XML format and structure.'
+      )
+    }
 
     const data: ExportData = {
       metadata,
@@ -1060,142 +1145,10 @@ export const importFromXML = (xmlString: string): ImportResult => {
       data,
     }
   } catch (error) {
+    console.error('XML Import Error:', error)
     return {
       success: false,
-      error: `XML Import failed: ${error}`,
-    }
-  }
-}
-
-/**
- * Importiert SSV-Daten zurück in die Anwendung
- */
-export const importFromSSV = (ssvString: string): ImportResult => {
-  try {
-    const lines = ssvString.trim().split('\n')
-    if (lines.length < 2) {
-      throw new Error('Invalid SSV format: insufficient data')
-    }
-
-    // Parse header
-    const header = parseSSVLine(lines[0])
-    const expectedColumns = ['Category', 'Kink', 'Field', 'Level']
-
-    if (!expectedColumns.every((col) => header.includes(col))) {
-      throw new Error('Invalid SSV format: missing required columns')
-    }
-
-    const categoryIndex = header.indexOf('Category')
-    const kinkIndex = header.indexOf('Kink')
-    const fieldIndex = header.indexOf('Field')
-    const levelIndex = header.indexOf('Level')
-    const commentIndex = header.indexOf('Comment')
-    const descriptionIndex = header.indexOf('Description')
-
-    // Parse data
-    const categoriesMap = new Map<string, any>()
-    const levelsSet = new Set<string>()
-
-    for (let i = 1; i < lines.length; i++) {
-      const row = parseSSVLine(lines[i])
-      if (row.length < expectedColumns.length) continue
-
-      const categoryName = row[categoryIndex]
-      const kinkName = row[kinkIndex]
-      const field = row[fieldIndex]
-      const level = row[levelIndex]
-      const comment = commentIndex >= 0 ? row[commentIndex] : undefined
-      const description =
-        descriptionIndex >= 0 ? row[descriptionIndex] : undefined
-
-      levelsSet.add(level)
-
-      if (!categoriesMap.has(categoryName)) {
-        categoriesMap.set(categoryName, {
-          name: categoryName,
-          fields: new Set<string>(),
-          kinks: new Map<string, any>(),
-        })
-      }
-
-      const category = categoriesMap.get(categoryName)
-      category.fields.add(field)
-
-      if (!category.kinks.has(kinkName)) {
-        category.kinks.set(kinkName, {
-          name: kinkName,
-          description,
-          selections: {},
-        })
-      }
-
-      const kink = category.kinks.get(kinkName)
-      kink.selections[field] = {
-        level,
-        comment: comment || undefined,
-      }
-    }
-
-    // Convert to ExportData format
-    const categories = Array.from(categoriesMap.values()).map((cat) => ({
-      name: cat.name as string,
-      fields: Array.from(cat.fields) as string[],
-      kinks: Array.from(
-        cat.kinks.values()
-      ) as ExportData['categories'][0]['kinks'],
-    }))
-
-    // Create basic levels structure
-    const levels: {
-      [key: string]: { name: string; color: string; class: string }
-    } = {}
-    const defaultColors = [
-      '#ff0000',
-      '#ff8800',
-      '#ffff00',
-      '#88ff00',
-      '#00ff00',
-    ]
-    Array.from(levelsSet).forEach((level, index) => {
-      levels[level] = {
-        name: level,
-        color: defaultColors[index % defaultColors.length] || '#888888',
-        class: level.toLowerCase().replace(/\s+/g, '-'),
-      }
-    })
-
-    const data: ExportData = {
-      metadata: {
-        exportDate: new Date().toISOString(),
-        version: '1.0.0',
-        totalCategories: categories.length,
-        totalKinks: categories.reduce(
-          (total, cat) => total + cat.kinks.length,
-          0
-        ),
-        totalSelections: categories.reduce(
-          (total, cat) =>
-            total +
-            cat.kinks.reduce(
-              (kinkTotal: number, kink) =>
-                kinkTotal + Object.keys(kink.selections).length,
-              0
-            ),
-          0
-        ),
-      },
-      levels,
-      categories,
-    }
-
-    return {
-      success: true,
-      data,
-    }
-  } catch (error) {
-    return {
-      success: false,
-      error: `SSV Import failed: ${error}`,
+      error: `XML Import failed: ${error instanceof Error ? error.message : String(error)}`,
     }
   }
 }
@@ -1316,48 +1269,4 @@ export const importFromCSV = (csvString: string): ImportResult => {
       error: `CSV Import failed: ${error}`,
     }
   }
-}
-
-/**
- * Hilfsfunktion zum Parsen von SSV-Zeilen
- */
-const parseSSVLine = (line: string): string[] => {
-  const result: string[] = []
-  let current = ''
-  let inQuotes = false
-  let i = 0
-
-  while (i < line.length) {
-    const char = line[i]
-
-    if (char === '"') {
-      if (inQuotes && line[i + 1] === '"') {
-        // Escaped quote
-        current += '"'
-        i += 2
-      } else {
-        // Toggle quote state
-        inQuotes = !inQuotes
-        i++
-      }
-    } else if (char === ' ' && !inQuotes) {
-      // Field separator
-      result.push(current)
-      current = ''
-      i++
-      // Skip additional spaces
-      while (i < line.length && line[i] === ' ') {
-        i++
-      }
-    } else {
-      current += char
-      i++
-    }
-  }
-
-  if (current || result.length > 0) {
-    result.push(current)
-  }
-
-  return result
 }

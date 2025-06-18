@@ -3,7 +3,6 @@ import { useKinklist } from '../context/KinklistContext'
 import {
   importFromCSV,
   importFromJSON,
-  importFromSSV,
   importFromXML,
 } from '../utils/exportUtils'
 import { convertFromExportData, validateExportData } from '../utils/importUtils'
@@ -27,7 +26,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
 
   const handleImport = () => {
     if (fileInputRef.current) {
-      fileInputRef.current.accept = '.json,.xml,.csv,.ssv'
+      fileInputRef.current.accept = '.json,.xml,.csv'
       fileInputRef.current.click()
     }
   }
@@ -55,7 +54,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
     if (files.length === 0) return
 
     const file = files[0]
-    const allowedTypes = ['.json', '.xml', '.csv', '.ssv']
+    const allowedTypes = ['.json', '.xml', '.csv']
     const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase()
 
     if (!allowedTypes.includes(fileExtension)) {
@@ -85,9 +84,6 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
           case 'xml':
             result = importFromXML(text)
             break
-          case 'ssv':
-            result = importFromSSV(text)
-            break
           case 'csv':
             result = importFromCSV(text)
             break
@@ -97,10 +93,8 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
               result = importFromJSON(text)
             } else if (text.trim().startsWith('<?xml')) {
               result = importFromXML(text)
-            } else if (text.includes(',')) {
-              result = importFromCSV(text)
             } else {
-              result = importFromSSV(text)
+              result = importFromCSV(text)
             }
         }
         if (result.success && result.data) {
@@ -178,7 +172,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
             <div className="import-dropzone-overlay">
               <div className="import-dropzone-content">
                 <h3>📁 Datei hier ablegen</h3>
-                <p>Unterstützte Formate: JSON, XML, CSV, SSV</p>
+                <p>Unterstützte Formate: JSON, XML, CSV</p>
               </div>
             </div>
           )}
@@ -190,7 +184,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
           <div className="import-methods">
             <div className="import-method">
               <h3>📁 Datei auswählen</h3>
-              <p>Wähle eine JSON-, XML-, CSV- oder SSV-Datei aus</p>
+              <p>Wähle eine JSON-, XML- oder CSV-Datei aus</p>
               <button
                 className="btn btn-primary import-button"
                 onClick={handleImport}
@@ -205,7 +199,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
               <p>Füge exportierte Daten direkt als Text ein</p>
               <textarea
                 className="import-textarea"
-                placeholder="Hier JSON-, XML-, CSV- oder SSV-Daten einfügen..."
+                placeholder="Hier JSON-, XML- oder CSV-Daten einfügen..."
                 value={importText}
                 onChange={(e) => setImportText(e.target.value)}
                 rows={6}
@@ -234,10 +228,6 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
               <li>
                 <strong>CSV:</strong> Import von Kink-Auswahlen und Bewertungen
               </li>
-              <li>
-                <strong>SSV:</strong> Space-separated values für spezielle
-                Anwendungen
-              </li>
             </ul>
           </div>
 
@@ -252,7 +242,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
       <input
         ref={fileInputRef}
         type="file"
-        accept=".json,.xml,.csv,.ssv,.txt"
+        accept=".json,.xml,.csv"
         onChange={handleFileSelect}
         style={{ display: 'none' }}
         aria-label="Datei für Import auswählen"

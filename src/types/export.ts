@@ -48,7 +48,6 @@ export type ExportFormat =
   | 'JSON'
   | 'XML'
   | 'CSV'
-  | 'SSV'
 
 export type ExportMode = 'quick' | 'advanced'
 

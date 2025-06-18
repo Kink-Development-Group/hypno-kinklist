@@ -12,13 +12,11 @@ import {
   exportAsCSV,
   exportAsJSON,
   exportAsPDF,
-  exportAsSSV,
   exportAsSVG,
   exportAsXML,
   exportCanvasAsImage,
   importFromCSV,
   importFromJSON,
-  importFromSSV,
   importFromXML,
 } from '../utils/exportUtils'
 import { convertFromExportData, validateExportData } from '../utils/importUtils'
@@ -68,17 +66,7 @@ const AdvancedExport: React.FC<AdvancedExportProps> = () => {
       mode: 'advanced',
       title: 'Erweiterte Optionen',
       description: 'Alle Formate mit detaillierten Einstellungen',
-      formats: [
-        'PNG',
-        'JPEG',
-        'WebP',
-        'SVG',
-        'PDF',
-        'JSON',
-        'XML',
-        'CSV',
-        'SSV',
-      ],
+      formats: ['PNG', 'JPEG', 'WebP', 'SVG', 'PDF', 'JSON', 'XML', 'CSV'],
       defaultOptions: {
         includeComments: true,
         includeDescriptions: true,
@@ -365,10 +353,6 @@ const AdvancedExport: React.FC<AdvancedExportProps> = () => {
           result = await exportAsCSV(exportData, options)
           break
 
-        case 'SSV':
-          result = await exportAsSSV(exportData, options)
-          break
-
         case 'PDF':
           result = await exportAsPDF(exportData, options)
           break
@@ -487,9 +471,6 @@ const AdvancedExport: React.FC<AdvancedExportProps> = () => {
           case 'xml':
             result = importFromXML(text)
             break
-          case 'ssv':
-            result = importFromSSV(text)
-            break
           case 'csv':
             result = importFromCSV(text)
             break
@@ -499,10 +480,8 @@ const AdvancedExport: React.FC<AdvancedExportProps> = () => {
               result = importFromJSON(text)
             } else if (text.trim().startsWith('<?xml')) {
               result = importFromXML(text)
-            } else if (text.includes(',')) {
-              result = importFromCSV(text)
             } else {
-              result = importFromSSV(text)
+              result = importFromCSV(text)
             }
         }
 
