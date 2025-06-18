@@ -1,0 +1,294 @@
+{
+  "app": {
+    "title": "Hypno Kinklist",
+    "subtitle": "Ihre personalisierte Kink-Präferenzliste"
+  },
+  "navigation": {
+    "home": "Startseite",
+    "edit": "Bearbeiten",
+    "export": "Exportieren",
+    "import": "Importieren",
+    "settings": "Einstellungen"
+  },
+  "common": {
+    "or": "oder",
+    "and": "und",
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolgreich",
+    "warning": "Warnung"
+  },
+  "theme": {
+    "toggleDark": "Zum dunklen Modus wechseln",
+    "toggleLight": "Zum hellen Modus wechseln"
+  },
+  "legend": {
+    "title": "Legende",
+    "notEntered": "Nicht eingegeben",
+    "favorite": "Favorit",
+    "like": "Mag ich",
+    "okay": "Okay",
+    "maybe": "Vielleicht",
+    "no": "Nein"
+  },
+  "buttons": {
+    "start": "Start",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "close": "Schließen",
+    "continue": "Fortfahren",
+    "edit": "Bearbeiten",
+    "export": "Exportieren",
+    "import": "Importieren",
+    "delete": "Löschen",
+    "confirm": "Bestätigen",
+    "reset": "Zurücksetzen",
+    "help": "Hilfe",
+    "focus": "Fokussieren"
+  },
+  "editor": {
+    "title": "Kink-Liste bearbeiten",
+    "placeholder": "Geben Sie Ihren Kinklist-Code hier ein...",
+    "toolbar": {
+      "bold": "Fett",
+      "italic": "Kursiv",
+      "help": "Hilfe",
+      "validate": "Validieren",
+      "format": "Code formatieren",
+      "blocks": "Vorlagen",
+      "focus": "Editor fokussieren"
+    },
+    "snippets": {
+      "categories": {
+        "all": "Alle",
+        "category": "Kategorien",
+        "kink": "Kinks",
+        "description": "Beschreibungen",
+        "template": "Vorlagen"
+      }
+    },
+    "help": {
+      "sections": {
+        "syntax": "Syntax",
+        "quickStart": "Schnellstart",
+        "keyboardShortcuts": "Tastenkürzel",
+        "advanced": "Erweitert"
+      }
+    },
+    "validation": {
+      "errors": "Validierungsfehler",
+      "warnings": "Warnungen",
+      "moreItems": "weitere"
+    }
+  },
+  "export": {
+    "title": "Export-Optionen",
+    "subtitle": "Wählen Sie Ihr Export-Format",
+    "modes": {
+      "quick": {
+        "title": "Schnellexport",
+        "description": "Direkte Exports mit Standardeinstellungen",
+        "formatsCount": "Formate"
+      },
+      "advanced": {
+        "title": "Erweiterte Optionen",
+        "description": "Alle Formate mit detaillierten Einstellungen",
+        "formatsCount": "Formate"
+      }
+    },
+    "formats": {
+      "image": "Bild",
+      "data": "Daten",
+      "document": "Dokument",
+      "pdf": "PDF-Dokument",
+      "json": "JSON-Daten",
+      "xml": "XML-Daten",
+      "csv": "CSV-Tabelle"
+    },
+    "options": {
+      "includeComments": "Kommentare einschließen",
+      "includeDescriptions": "Beschreibungen einschließen",
+      "compactMode": "Kompaktmodus"
+    },
+    "filename": {
+      "label": "Dateiname",
+      "placeholder": "Dateiname eingeben..."
+    },
+    "export": "Exportieren",
+    "import": "Importieren",
+    "exportKinklist": "Kinklist exportieren",
+    "importKinklist": "Kinklist importieren",
+    "exportSuccessful": "Export erfolgreich!",
+    "importSuccessful": "Import erfolgreich!",
+    "exportFailed": "Export fehlgeschlagen",
+    "importFailed": "Import fehlgeschlagen",
+    "preparing": "Export wird vorbereitet...",
+    "processing": "Import wird verarbeitet...",
+    "pleaseWait": "Bitte warten Sie, während Ihre Daten importiert werden.",
+    "closeDialog": "Schließen",
+    "quickExport": "Schnellexport",
+    "advancedOptions": "Erweiterte Optionen",
+    "exportMode": "Export-Modus",
+    "exportSettings": "Export-Einstellungen",
+    "includeComments": "Kommentare einschließen",
+    "includeDescriptions": "Beschreibungen einschließen",
+    "includeMetadata": "Metadaten einschließen",
+    "exportFormats": "Export-Formate",
+    "supportedFormats": "Unterstützte Formate",
+    "formatDescriptions": {
+      "PNG": "Hochqualitatives Rasterbild, ideal für Screenshots",
+      "JPEG": "Komprimiertes Bild, kleinere Dateigröße",
+      "WebP": "Modernes Bildformat mit optimaler Kompression",
+      "SVG": "Vektorgrafik, skalierbar und editierbar",
+      "PDF": "Professionelles A4-Layout zum Drucken",
+      "JSON": "Strukturierte Daten, vollständig importierbar",
+      "XML": "Standardisiertes Datenformat, vollständig importierbar",
+      "CSV": "Tabellendaten für Excel/Google Sheets",
+      "SSV": "Space-separated values für spezielle Anwendungen"
+    },
+    "errors": {
+      "noData": "🚫 Keine Kinklist-Daten",
+      "loadKinklist": "Bitte laden Sie eine Kinklist oder warten Sie,",
+      "dataLoading": "bis die Standard-Kinks geladen sind.",
+      "exportError": "❌ Export-Fehler",
+      "tryAgain": "Bitte versuchen Sie es erneut oder überprüfen Sie Ihre Auswahl.",
+      "unexpectedError": "🔧 Unerwarteter Fehler",
+      "reportIssue": "Bitte melden Sie dieses Problem, falls es weiterhin auftritt.",
+      "selectionsNeeded": "⚠️ Keine Auswahlen gefunden",
+      "makeSelections": "Bitte treffen Sie einige Auswahlen vor dem Export."
+    },
+    "actions": {
+      "exportAs": "Als {{format}} exportieren",
+      "tryAgain": "Erneut versuchen",
+      "reportIssue": "Problem melden"
+    }
+  },
+  "import": {
+    "title": "Daten importieren",
+    "subtitle": "Laden Sie Ihre Kink-Liste aus verschiedenen Quellen",
+    "heading": "📥 Kinklist importieren",
+    "methods": {
+      "file": {
+        "title": "📁 Datei hochladen",
+        "description": "Wählen Sie eine Datei von Ihrem Gerät",
+        "button": "Datei auswählen",
+        "dropHint": "oder Dateien hierher ziehen"
+      },
+      "text": {
+        "title": "📋 Daten einfügen",
+        "description": "Füge exportierte Daten direkt als Text ein",
+        "placeholder": "Hier JSON-, XML- oder CSV-Daten einfügen...",
+        "button": "Daten importieren"
+      }
+    },
+    "supportedFormats": "ℹ️ Unterstützte Formate",
+    "formats": {
+      "json": {
+        "title": "JSON:",
+        "description": "Vollständiger Import aller Daten und Einstellungen"
+      },
+      "xml": {
+        "title": "XML:",
+        "description": "Strukturierter Import aller Daten"
+      },
+      "csv": {
+        "title": "CSV:",
+        "description": "Import von Kink-Auswahlen und Bewertungen"
+      }
+    },
+    "dragActive": "📂 Dateien hier ablegen zum Importieren",
+    "processing": "Import wird verarbeitet...",
+    "successful": "Import erfolgreich!",
+    "importSuccessful": "Import erfolgreich!",
+    "dataImported": "Die Daten wurden erfolgreich importiert.",
+    "pleaseWait": "Bitte warten Sie, während Ihre Daten importiert werden.",
+    "errors": {
+      "unsupportedFileType": "Nicht unterstützter Dateityp: {{extension}}. Erlaubt: {{allowed}}",
+      "invalidFormat": "Ungültiges Datenformat",
+      "importFailed": "Import fehlgeschlagen",
+      "failedWithMessage": "Import fehlgeschlagen: {{message}}"
+    },
+    "accessibility": {
+      "selectFile": "Datei für Import auswählen"
+    }
+  },
+  "input": {
+    "title": "Kink-Auswahl",
+    "category": "Kategorie",
+    "description": "Beschreibung anzeigen",
+    "comment": "Kommentar hinzufügen",
+    "actions": {
+      "showDescription": "Beschreibung anzeigen",
+      "addComment": "Kommentar hinzufügen",
+      "close": "Schließen"
+    }
+  },
+  "comment": {
+    "title": "Kommentar hinzufügen",
+    "placeholder": "Geben Sie Ihren Kommentar ein...",
+    "save": "Kommentar speichern",
+    "delete": "Kommentar löschen"
+  },
+  "name": {
+    "title": "Export-Name",
+    "label": "Listen-Name",
+    "placeholder": "Listen-Name eingeben...",
+    "required": "Name ist erforderlich"
+  },
+  "error": {
+    "title": "Fehler",
+    "general": "Ein Fehler ist aufgetreten",
+    "parsing": "Fehler beim Analysieren der Kink-Liste",
+    "export": "Fehler beim Export",
+    "import": "Fehler beim Import",
+    "network": "Netzwerk-Fehler",
+    "close": "Schließen"
+  },
+  "success": {
+    "export": "Export erfolgreich abgeschlossen",
+    "import": "Import erfolgreich abgeschlossen",
+    "save": "Erfolgreich gespeichert"
+  },
+  "accessibility": {
+    "closeDialog": "Dialog schließen",
+    "openMenu": "Menü öffnen",
+    "selectOption": "Option auswählen",
+    "toggleOption": "Option umschalten"
+  },
+  "loading": {
+    "default": "Lädt...",
+    "export": "Exportiert...",
+    "import": "Importiert...",
+    "save": "Speichert..."
+  },
+  "language": {
+    "select": "Sprache auswählen",
+    "en": "English",
+    "de": "Deutsch"
+  },
+  "fix": {
+    "title": "Problem mit dem Start-Modal beheben",
+    "description": "Falls das Start-Modal (Kink-Auswahl) nicht richtig schließt oder nicht angezeigt wird, können Sie mit diesem Button den Status zurücksetzen:",
+    "button": "Modal-Status zurücksetzen",
+    "successMessage": "Der Modal-Status wurde erfolgreich zurückgesetzt. Sie können das Start-Modal jetzt wieder normal verwenden."
+  },
+  "kinks": {
+    "basics": "Grundlagen",
+    "safety": "Sicherheit und Einverständnis",
+    "types": "Arten der Hypnose"
+  },
+  "comments": {
+    "addComment": "Kommentar hinzufügen",
+    "category": "Kategorie",
+    "field": "Feld",
+    "kink": "Kink",
+    "rating": "Bewertung",
+    "commentOptional": "Kommentar (optional)",
+    "placeholder": "Fügen Sie hier Ihren Kommentar hinzu...",
+    "characters": "Zeichen",
+    "toClose": "zum Schließen",
+    "toSave": "zum Speichern"
+  }
+}

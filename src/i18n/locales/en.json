@@ -1,0 +1,300 @@
+{
+  "app": {
+    "title": "Hypno Kinklist",
+    "subtitle": "Your personalized kink preference list"
+  },
+  "navigation": {
+    "home": "Home",
+    "edit": "Edit",
+    "export": "Export",
+    "import": "Import",
+    "settings": "Settings"
+  },
+  "common": {
+    "or": "or",
+    "and": "and",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning"
+  },
+  "theme": {
+    "toggleDark": "Switch to dark mode",
+    "toggleLight": "Switch to light mode"
+  },
+  "legend": {
+    "title": "Legend",
+    "notEntered": "Not Entered",
+    "favorite": "Favorite",
+    "like": "Like",
+    "okay": "Okay",
+    "maybe": "Maybe",
+    "no": "No"
+  },
+  "buttons": {
+    "start": "Start",
+    "next": "Next",
+    "previous": "Previous",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "continue": "Continue",
+    "edit": "Edit",
+    "export": "Export",
+    "import": "Import",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "reset": "Reset",
+    "help": "Help",
+    "focus": "Focus"
+  },
+  "editor": {
+    "title": "Edit Kink List",
+    "placeholder": "Enter your kinklist code here...",
+    "toolbar": {
+      "bold": "Bold",
+      "italic": "Italic",
+      "help": "Help",
+      "helpTooltip": "Show syntax help",
+      "validate": "Validate",
+      "format": "Format Code",
+      "formatTooltip": "Format code (Alt+Shift+F)",
+      "snippets": "Snippets",
+      "snippetsTooltip": "Insert snippet (Ctrl+K for autocomplete)",
+      "blocks": "Templates",
+      "blocksTooltip": "Insert pre-made blocks",
+      "focus": "Focus Editor",
+      "focusTooltip": "Focus editor"
+    },
+    "snippets": {
+      "categories": {
+        "all": "All",
+        "category": "Categories",
+        "kink": "Kinks",
+        "description": "Descriptions",
+        "template": "Templates"
+      }
+    },
+    "help": {
+      "sections": {
+        "syntax": "Syntax",
+        "quickStart": "Quick Start",
+        "keyboardShortcuts": "Keyboard Shortcuts",
+        "advanced": "Advanced"
+      }
+    },
+    "validation": {
+      "errors": "Validation Errors",
+      "warnings": "Warnings",
+      "moreItems": "more items"
+    }
+  },
+  "export": {
+    "title": "Export Options",
+    "subtitle": "Choose your export format",
+    "modes": {
+      "quick": {
+        "title": "Quick Export",
+        "description": "Direct exports with default settings",
+        "formatsCount": "formats"
+      },
+      "advanced": {
+        "title": "Advanced Options",
+        "description": "All formats with detailed settings",
+        "formatsCount": "formats"
+      }
+    },
+    "formats": {
+      "image": "Image",
+      "data": "Data",
+      "document": "Document",
+      "pdf": "PDF Document",
+      "json": "JSON Data",
+      "xml": "XML Data",
+      "csv": "CSV Spreadsheet"
+    },
+    "options": {
+      "includeComments": "Include comments",
+      "includeDescriptions": "Include descriptions",
+      "compactMode": "Compact mode"
+    },
+    "filename": {
+      "label": "Filename",
+      "placeholder": "Enter filename..."
+    },
+    "export": "Export",
+    "import": "Import",
+    "exportKinklist": "Export Kinklist",
+    "importKinklist": "Import Kinklist",
+    "exportSuccessful": "Export successful!",
+    "importSuccessful": "Import successful!",
+    "exportFailed": "Export failed",
+    "importFailed": "Import failed",
+    "preparing": "Export is being prepared...",
+    "processing": "Import is being processed...",
+    "pleaseWait": "Please wait while your data is being imported.",
+    "closeDialog": "Close",
+    "quickExport": "Quick Export",
+    "advancedOptions": "Advanced Options",
+    "exportMode": "Export Mode",
+    "exportSettings": "Export Settings",
+    "includeComments": "Include comments",
+    "includeDescriptions": "Include descriptions",
+    "includeMetadata": "Include metadata",
+    "exportFormats": "Export Formats",
+    "supportedFormats": "Supported Formats",
+    "formatDescriptions": {
+      "PNG": "High-quality raster image, ideal for screenshots",
+      "JPEG": "Compressed image, smaller file size",
+      "WebP": "Modern image format with optimal compression",
+      "SVG": "Vector graphics, scalable and editable",
+      "PDF": "Professional A4 layout for printing",
+      "JSON": "Structured data, fully importable",
+      "XML": "Standardized data format, fully importable",
+      "CSV": "Table data for Excel/Google Sheets",
+      "SSV": "Space-separated values for special applications"
+    },
+    "errors": {
+      "noData": "🚫 No Kinklist Data",
+      "loadKinklist": "Please load a kinklist or wait",
+      "dataLoading": "until the default kinks are loaded.",
+      "exportError": "❌ Export Error",
+      "tryAgain": "Please try again or check your selection.",
+      "unexpectedError": "🔧 Unexpected Error",
+      "reportIssue": "Please report this issue if it persists.",
+      "selectionsNeeded": "⚠️ No Selections Found",
+      "makeSelections": "Please make some selections before exporting."
+    },
+    "actions": {
+      "exportAs": "Export as {{format}}",
+      "tryAgain": "Try Again",
+      "reportIssue": "Report Issue"
+    }
+  },
+  "import": {
+    "title": "Import Data",
+    "subtitle": "Load your kink list from various sources",
+    "heading": "📥 Import Kinklist",
+    "methods": {
+      "file": {
+        "title": "📁 File Upload",
+        "description": "Select a file from your device",
+        "button": "Choose File",
+        "dropHint": "or drag files here"
+      },
+      "text": {
+        "title": "📋 Paste Data",
+        "description": "Paste exported data directly as text",
+        "placeholder": "Paste JSON, XML or CSV data here...",
+        "button": "Import Data"
+      }
+    },
+    "supportedFormats": "ℹ️ Supported Formats",
+    "formats": {
+      "json": {
+        "title": "JSON:",
+        "description": "Complete import of all data and settings"
+      },
+      "xml": {
+        "title": "XML:",
+        "description": "Structured import of all data"
+      },
+      "csv": {
+        "title": "CSV:",
+        "description": "Import of kink selections and ratings"
+      }
+    },
+    "dragActive": "📂 Drop files here to import",
+    "processing": "Import is being processed...",
+    "successful": "Import successful!",
+    "importSuccessful": "Import successful!",
+    "dataImported": "The data has been imported successfully.",
+    "pleaseWait": "Please wait while your data is being imported.",
+    "errors": {
+      "unsupportedFileType": "Unsupported file type: {{extension}}. Allowed: {{allowed}}",
+      "invalidFormat": "Invalid data format",
+      "importFailed": "Import failed",
+      "failedWithMessage": "Import failed: {{message}}"
+    },
+    "accessibility": {
+      "selectFile": "Select file for import"
+    }
+  },
+  "input": {
+    "title": "Kink Selection",
+    "category": "Category",
+    "description": "Show description",
+    "comment": "Add comment",
+    "actions": {
+      "showDescription": "Show description",
+      "addComment": "Add comment",
+      "close": "Close"
+    }
+  },
+  "comment": {
+    "title": "Add Comment",
+    "placeholder": "Enter your comment...",
+    "save": "Save Comment",
+    "delete": "Delete Comment"
+  },
+  "name": {
+    "title": "Export Name",
+    "label": "List Name",
+    "placeholder": "Enter list name...",
+    "required": "Name is required"
+  },
+  "error": {
+    "title": "Error",
+    "general": "An error occurred",
+    "parsing": "Error parsing the kink list",
+    "export": "Error during export",
+    "import": "Error during import",
+    "network": "Network error",
+    "close": "Close"
+  },
+  "success": {
+    "export": "Export completed successfully",
+    "import": "Import completed successfully",
+    "save": "Saved successfully"
+  },
+  "accessibility": {
+    "closeDialog": "Close dialog",
+    "openMenu": "Open menu",
+    "selectOption": "Select option",
+    "toggleOption": "Toggle option"
+  },
+  "loading": {
+    "default": "Loading...",
+    "export": "Exporting...",
+    "import": "Importing...",
+    "save": "Saving..."
+  },
+  "language": {
+    "select": "Select Language",
+    "en": "English",
+    "de": "Deutsch"
+  },
+  "fix": {
+    "title": "Fix Start Modal Issue",
+    "description": "If the start modal (kink selection) doesn't close properly or isn't displayed, you can reset the status with this button:",
+    "button": "Reset Modal Status",
+    "successMessage": "The modal status has been successfully reset. You can now use the start modal normally again."
+  },
+  "kinks": {
+    "basics": "Basics",
+    "safety": "Safety and consent",
+    "types": "Types of Hypnosis"
+  },
+  "comments": {
+    "addComment": "Add Comment",
+    "category": "Category",
+    "field": "Field",
+    "kink": "Kink",
+    "rating": "Rating",
+    "commentOptional": "Comment (optional)",
+    "placeholder": "Add your comment here...",
+    "characters": "characters",
+    "toClose": "to close",
+    "toSave": "to save"
+  }
+}

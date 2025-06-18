@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback, memo, useRef } from 'react'
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
-import { parseKinksText, kinksToText, getAllKinks } from '../utils'
-import { useErrorHandler } from '../utils/useErrorHandler'
 import { useTheme } from '../context/ThemeContext'
+import { getAllKinks, kinksToText, parseKinksText } from '../utils'
+import { useErrorHandler } from '../utils/useErrorHandler'
 import AdvancedKinkListEditor, {
   AdvancedKinkListEditorRef,
 } from './editor/AdvancedKinkListEditor'
@@ -19,6 +20,7 @@ const EditOverlay: React.FC = () => {
     isEditOverlayOpen,
     setIsEditOverlayOpen,
   } = useKinklist()
+  const { t } = useTranslation()
 
   const [kinksText, setKinksText] = useState<string>(originalKinksText)
   const editorRef = useRef<AdvancedKinkListEditorRef>(null)
@@ -126,14 +128,14 @@ const EditOverlay: React.FC = () => {
     >
       <div role="document" className="edit-overlay-content">
         <h2 id="edit-overlay-title" className="sr-only edit-overlay-title">
-          Edit Kink List
+          {t('editor.title')}
         </h2>
         <AdvancedKinkListEditor
           ref={editorRef}
           initialValue={kinksText}
           onChange={setKinksText}
           height="400px"
-          placeholder="Kategorie und Kinks hier eingeben..."
+          placeholder={t('editor.placeholder')}
           theme={theme}
           showValidation={true}
         />
@@ -142,16 +144,16 @@ const EditOverlay: React.FC = () => {
             id="KinksOK"
             onClick={handleAccept}
             type="button"
-            aria-label="Änderungen akzeptieren"
+            aria-label={t('buttons.save')}
           >
-            Akzeptieren
+            {t('buttons.save')}
           </button>
           <button
             onClick={handleClose}
             type="button"
-            aria-label="Bearbeitung abbrechen"
+            aria-label={t('buttons.cancel')}
           >
-            Abbrechen
+            {t('buttons.cancel')}
           </button>
         </div>
       </div>

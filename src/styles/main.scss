@@ -140,6 +140,12 @@ h6 {
   position: relative; // Für bessere Positionskontrolle
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 // Theme toggle button
 #ThemeToggle {
   background-color: transparent;
@@ -166,6 +172,35 @@ h6 {
     &:hover {
       background-color: rgba(255, 255, 255, 0.2);
     }
+  }
+}
+
+// Language toggle button
+.language-toggle {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  color: var(--text-color);
+
+  &:hover {
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+    border-color: var(--button-bg-color);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(73, 128, 174, 0.3);
   }
 }
 

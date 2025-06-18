@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import {
   importFromCSV,
@@ -16,6 +17,7 @@ interface ImportModalProps {
 }
 
 const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
+  const { t } = useTranslation()
   const { setKinks, setLevels, setSelection, setOriginalKinksText } =
     useKinklist()
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -60,7 +62,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
 
     if (!allowedTypes.includes(fileExtension)) {
       setError(
-        `Unsupported file type: ${fileExtension}. Allowed: ${allowedTypes.join(', ')}`
+        `${t('import.errors.unsupportedFileType', { extension: fileExtension, allowed: allowedTypes.join(', ') })}`
       )
       return
     }
@@ -118,22 +120,28 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
             // Schließe Modal nach erfolgreichem Import
             setTimeout(() => onClose(), 1000)
           } else {
-            setError('Ungültiges Datenformat')
+            setError(t('import.errors.invalidFormat'))
           }
         } else {
-          setError(result.error || 'Import fehlgeschlagen')
+          setError(result.error || t('import.errors.importFailed'))
         }
       } catch (error) {
         if (error instanceof Error) {
-          setError(`Import fehlgeschlagen: ${error.message}`)
+          setError(
+            t('import.errors.failedWithMessage', { message: error.message })
+          )
         } else {
-          setError(`Import fehlgeschlagen: ${JSON.stringify(error)}`)
+          setError(
+            t('import.errors.failedWithMessage', {
+              message: JSON.stringify(error),
+            })
+          )
         }
       } finally {
         setIsLoading(false)
       }
     },
-    [setKinks, setLevels, setSelection, setOriginalKinksText, onClose]
+    [setKinks, setLevels, setSelection, setOriginalKinksText, onClose, t]
   )
 
   const handleFileSelect = useCallback(
@@ -146,7 +154,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
 
       event.target.value = ''
     },
-    [processImportText]
+    [processImportText, t]
   )
 
   const handleTextImport = useCallback(async () => {
@@ -170,41 +178,37 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
         onDrop={handleDrop}
       >
         <div className="modal-content import-modal">
-          <h2>📥 Kinklist importieren</h2>
-
+          {' '}
+          <h2>{t('import.heading')}</h2>
           {/* Dropzone Overlay */}
           {showDropzone && (
             <div className="import-dropzone-overlay">
               <div className="import-dropzone-content">
-                <h3>📁 Datei hier ablegen</h3>
-                <p>Unterstützte Formate: JSON, XML, CSV</p>
+                <h3>{t('import.dragActive')}</h3>
+                <p>{t('import.supportedFormats')}</p>
               </div>
             </div>
           )}
-
-          <p className="import-subtitle">
-            Importiere zuvor exportierte Daten zurück in die Anwendung
-          </p>
-
+          <p className="import-subtitle">{t('import.subtitle')}</p>{' '}
           <div className="import-methods">
             <div className="import-method">
-              <h3>📁 Datei auswählen</h3>
-              <p>Wähle eine JSON-, XML- oder CSV-Datei aus</p>
+              <h3>{t('import.methods.file.title')}</h3>
+              <p>{t('import.methods.file.description')}</p>
               <button
                 className="btn btn-primary import-button"
                 onClick={handleImport}
                 disabled={isLoading}
               >
-                Datei auswählen
+                {t('import.methods.file.button')}
               </button>
             </div>
 
             <div className="import-method">
-              <h3>📋 Daten einfügen</h3>
-              <p>Füge exportierte Daten direkt als Text ein</p>
+              <h3>{t('import.methods.text.title')}</h3>
+              <p>{t('import.methods.text.description')}</p>
               <textarea
                 className="import-textarea"
-                placeholder="Hier JSON-, XML- oder CSV-Daten einfügen..."
+                placeholder={t('import.methods.text.placeholder')}
                 value={importText}
                 onChange={(e) => setImportText(e.target.value)}
                 rows={6}
@@ -215,69 +219,65 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
                 onClick={handleTextImport}
                 disabled={isLoading || !importText.trim()}
               >
-                Daten importieren
+                {t('import.methods.text.button')}
               </button>
             </div>
-          </div>
-
+          </div>{' '}
           <div className="import-info">
-            <h3>ℹ️ Unterstützte Formate</h3>
+            <h3>{t('import.supportedFormats')}</h3>
             <ul>
               <li>
-                <strong>JSON:</strong> Vollständiger Import aller Daten und
-                Einstellungen
+                <strong>{t('import.formats.json.title')}</strong>{' '}
+                {t('import.formats.json.description')}
               </li>
               <li>
-                <strong>XML:</strong> Strukturierter Import aller Daten
+                <strong>{t('import.formats.xml.title')}</strong>{' '}
+                {t('import.formats.xml.description')}
               </li>
               <li>
-                <strong>CSV:</strong> Import von Kink-Auswahlen und Bewertungen
+                <strong>{t('import.formats.csv.title')}</strong>{' '}
+                {t('import.formats.csv.description')}
               </li>
             </ul>
           </div>
-
           <div className="modal-actions">
             <button type="button" className="btn" onClick={onClose}>
-              Schließen
+              {t('buttons.close')}
             </button>
           </div>
         </div>
       </div>
-
       <input
         ref={fileInputRef}
         type="file"
         accept=".json,.xml,.csv"
         onChange={handleFileSelect}
         style={{ display: 'none' }}
-        aria-label="Datei für Import auswählen"
+        aria-label={t('import.accessibility.selectFile')}
       />
-
-      {error && <ErrorModal message={error} onClose={handleCloseError} />}
-
+      {error && <ErrorModal message={error} onClose={handleCloseError} />}{' '}
       {isSuccess && (
         <div className="overlay visible">
           <div className="modal-content success-modal">
-            <h2>✅ Import erfolgreich!</h2>
-            <p>Die Daten wurden erfolgreich importiert.</p>
+            <h2>✅ {t('import.importSuccessful')}</h2>
+            <p>{t('import.dataImported')}</p>
             <div className="modal-actions">
               <button
                 className="btn btn-primary"
                 onClick={() => setIsSuccess(false)}
               >
-                OK
+                {t('buttons.confirm')}
               </button>
             </div>
           </div>
         </div>
-      )}
-
+      )}{' '}
       {isLoading && (
         <div className="overlay visible">
           <div className="modal-content loading-modal">
-            <h2>Import wird verarbeitet...</h2>
+            <h2>{t('import.processing')}</h2>
             <div className="loading-spinner"></div>
-            <p>Bitte warten Sie, während Ihre Daten importiert werden.</p>
+            <p>{t('import.pleaseWait')}</p>
           </div>
         </div>
       )}

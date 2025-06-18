@@ -1,15 +1,16 @@
 import React, {
-  useState,
-  useRef,
-  useEffect,
   forwardRef,
+  useEffect,
   useImperativeHandle,
+  useRef,
+  useState,
 } from 'react'
+import { useTranslation } from 'react-i18next'
+import EditorToolbar from './EditorToolbar'
+import { formatKinkListText, validateKinkListText } from './EditorUtils'
 import MonacoKinkListEditor, {
   MonacoKinkListEditorRef,
 } from './MonacoKinkListEditor'
-import EditorToolbar from './EditorToolbar'
-import { formatKinkListText, validateKinkListText } from './EditorUtils'
 
 export interface AdvancedKinkListEditorRef {
   focus: () => void
@@ -41,15 +42,19 @@ const AdvancedKinkListEditor = forwardRef<
       height = 500,
       readOnly = false,
       theme = 'auto',
-      placeholder = 'Geben Sie Ihren Kinklist-Code hier ein...',
+      placeholder,
       showValidation = true,
     },
     ref
   ) => {
+    const { t } = useTranslation()
     const [value, setValue] = useState(initialValue)
     const [validationErrors, setValidationErrors] = useState<string[]>([])
     const [validationWarnings, setValidationWarnings] = useState<string[]>([])
     const editorRef = useRef<MonacoKinkListEditorRef>(null)
+
+    // Use translation for placeholder if not provided
+    const editorPlaceholder = placeholder || t('editor.placeholder')
 
     // Ref-Methoden für die Parent-Komponente bereitstellen
     useImperativeHandle(
@@ -147,7 +152,7 @@ const AdvancedKinkListEditor = forwardRef<
           value={value}
           onChange={handleChange}
           height={height}
-          placeholder={placeholder}
+          placeholder={editorPlaceholder}
           readOnly={readOnly}
           theme={theme}
           showLineNumbers={true}
@@ -160,13 +165,18 @@ const AdvancedKinkListEditor = forwardRef<
         {showValidation && validationWarnings.length > 0 && (
           <div className="validation-summary">
             <div className="validation-warnings">
-              <h4>Hinweise ({validationWarnings.length})</h4>
+              <h4>
+                {t('editor.validation.warnings')} ({validationWarnings.length})
+              </h4>
               <ul>
                 {validationWarnings.slice(0, 5).map((warning, index) => (
                   <li key={index}>{warning}</li>
                 ))}
                 {validationWarnings.length > 5 && (
-                  <li>...und {validationWarnings.length - 5} weitere</li>
+                  <li>
+                    ...{t('common.and')} {validationWarnings.length - 5}{' '}
+                    {t('editor.validation.moreItems')}
+                  </li>
                 )}
               </ul>
             </div>

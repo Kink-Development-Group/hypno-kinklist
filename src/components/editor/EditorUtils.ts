@@ -1,4 +1,4 @@
-import { defaultKinksText } from '../../App'
+import { getKinkTemplate } from '../../utils/kinkTemplates'
 
 // Interface für Snippets
 export interface EditorSnippet {
@@ -227,13 +227,13 @@ export const validateKinkListText = (
 }
 
 // Funktion zum Abrufen des Standard-Templates
-export const getDefaultTemplate = (): string => {
-  return defaultKinksText
+export const getDefaultTemplate = (language: string = 'en'): string => {
+  return getKinkTemplate(language)
 }
 
 // Funktion zum Extrahieren von Kategorien aus dem Standard-Template
-export const getDefaultCategories = (): string[] => {
-  const lines = defaultKinksText.split('\n')
+export const getDefaultCategories = (language: string = 'en'): string[] => {
+  const lines = getKinkTemplate(language).split('\n')
   const categories: string[] = []
 
   for (const line of lines) {
@@ -247,8 +247,12 @@ export const getDefaultCategories = (): string[] => {
 }
 
 // Funktion zum Extrahieren von Kink-Beispielen aus bestimmten Kategorien
-export const getKinkExamples = (category?: string): string[] => {
-  const lines = defaultKinksText.split('\n')
+export const getKinkExamples = (
+  category?: string,
+  language: string = 'en'
+): string[] => {
+  const templateText = getKinkTemplate(language)
+  const lines = templateText.split('\n')
   const examples: string[] = []
   let inTargetCategory = !category // Wenn keine Kategorie angegeben, alle sammeln
 

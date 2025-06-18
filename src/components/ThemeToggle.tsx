@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface ThemeToggleProps {
   theme: string
@@ -6,14 +7,16 @@ interface ThemeToggleProps {
 }
 
 const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, toggleTheme }) => {
+  const { t } = useTranslation()
+
   return (
     <button
       type="button"
       id="ThemeToggle"
       onClick={toggleTheme}
-      title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+      title={theme === 'light' ? t('theme.toggleDark') : t('theme.toggleLight')}
       aria-label={
-        theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'
+        theme === 'light' ? t('theme.toggleDark') : t('theme.toggleLight')
       }
     >
       {theme === 'light' ? '🌙' : '☀️'}

@@ -1,13 +1,14 @@
-import React, { useState, useRef } from 'react'
+import React, { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import BlockPicker from './BlockPicker'
 import {
-  getSnippets,
-  getHelpText,
   EditorSnippet,
   getDetailedHelpText,
+  getHelpText,
+  getSnippets,
   PasteableBlock,
 } from './EditorUtils'
 import type { MonacoKinkListEditorRef } from './MonacoKinkListEditor'
-import BlockPicker from './BlockPicker'
 
 export interface EditorToolbarProps {
   editorRef: React.RefObject<MonacoKinkListEditorRef>
@@ -24,6 +25,7 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
   validationErrors = [],
   theme = 'auto',
 }) => {
+  const { t } = useTranslation()
   const [showSnippets, setShowSnippets] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [showBlocks, setShowBlocks] = useState(false)
@@ -80,18 +82,24 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
   }
 
   const snippetCategories = [
-    { value: 'all', label: 'Alle' },
-    { value: 'category', label: 'Kategorien' },
-    { value: 'kink', label: 'Kinks' },
-    { value: 'description', label: 'Beschreibungen' },
-    { value: 'template', label: 'Vorlagen' },
+    { value: 'all', label: t('editor.snippets.categories.all') },
+    { value: 'category', label: t('editor.snippets.categories.category') },
+    { value: 'kink', label: t('editor.snippets.categories.kink') },
+    {
+      value: 'description',
+      label: t('editor.snippets.categories.description'),
+    },
+    { value: 'template', label: t('editor.snippets.categories.template') },
   ]
 
   const helpSections = [
-    { value: 'syntax', label: 'Syntax' },
-    { value: 'quickStart', label: 'Schnellstart' },
-    { value: 'keyboardShortcuts', label: 'Tastenkürzel' },
-    { value: 'advanced', label: 'Erweitert' },
+    { value: 'syntax', label: t('editor.help.sections.syntax') },
+    { value: 'quickStart', label: t('editor.help.sections.quickStart') },
+    {
+      value: 'keyboardShortcuts',
+      label: t('editor.help.sections.keyboardShortcuts'),
+    },
+    { value: 'advanced', label: t('editor.help.sections.advanced') },
   ]
 
   const detailedHelp = getDetailedHelpText()
