@@ -1,14 +1,14 @@
 import React from 'react'
-import { KinklistProvider, useKinklist } from './context/KinklistContext'
-import { ThemeProvider, useTheme } from './context/ThemeContext'
-import Legend from './components/Legend'
+import CommentOverlay from './components/CommentOverlay'
+import EditOverlay from './components/EditOverlay'
 import Export from './components/Export'
 import InputList from './components/InputList'
-import EditOverlay from './components/EditOverlay'
 import InputOverlay from './components/InputOverlay'
-import CommentOverlay from './components/CommentOverlay'
+import Legend from './components/Legend'
 import ThemeToggle from './components/ThemeToggle'
 import VersionDisplay from './components/VersionDisplay'
+import { KinklistProvider, useKinklist } from './context/KinklistContext'
+import { ThemeProvider, useTheme } from './context/ThemeContext'
 import './styles/main.scss'
 
 // Default kinks text with comprehensive English descriptions for all kinks
@@ -417,9 +417,7 @@ const AppContent: React.FC = () => {
         </h1>
         <ThemeToggle theme={theme} toggleTheme={toggleTheme} />{' '}
       </div>
-
       <Legend />
-
       <div className="action-buttons-container">
         <div className="export-container">
           <Export />
@@ -435,8 +433,7 @@ const AppContent: React.FC = () => {
         >
           <span className="button-label">Start</span>
         </button>
-      </div>
-
+      </div>{' '}
       <div className="grid-container">
         <div className="grid-row">
           <div className="grid-col-12">
