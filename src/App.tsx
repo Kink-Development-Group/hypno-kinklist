@@ -1,5 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import AsyncKinklistProvider from './components/AsyncKinklistProvider'
 import CommentOverlay from './components/CommentOverlay'
 import EditOverlay from './components/EditOverlay'
 import Export from './components/Export'
@@ -9,17 +10,16 @@ import LanguageToggle from './components/LanguageToggle'
 import Legend from './components/Legend'
 import ThemeToggle from './components/ThemeToggle'
 import VersionDisplay from './components/VersionDisplay'
-import { KinklistProvider, useKinklist } from './context/KinklistContext'
+import { useKinklist } from './context/KinklistContext'
 import { ThemeProvider, useTheme } from './context/ThemeContext'
 import './styles/main.scss'
-import { getEnhancedKinkTemplate } from './utils/kinkTemplates'
 
 const App: React.FC = () => {
   return (
     <ThemeProvider>
-      <KinklistProvider initialKinksText={getEnhancedKinkTemplate()}>
+      <AsyncKinklistProvider>
         <AppContent />
-      </KinklistProvider>
+      </AsyncKinklistProvider>
     </ThemeProvider>
   )
 }
