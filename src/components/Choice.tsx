@@ -1,10 +1,11 @@
 import React, {
+  KeyboardEvent,
+  memo,
+  useCallback,
   useEffect,
   useState,
-  useCallback,
-  memo,
-  KeyboardEvent,
 } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 
 interface ChoiceProps {
@@ -15,6 +16,7 @@ interface ChoiceProps {
 
 const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
   const { levels, selection, setSelection } = useKinklist()
+  const { t } = useTranslation()
   const [selectedLevel, setSelectedLevel] = useState<string>(
     Object.keys(levels)[0]
   )
@@ -70,7 +72,7 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
       className={`choices choice-${field.toLowerCase().replace(/\s+/g, '')}`}
       data-field={field}
       role="radiogroup"
-      aria-label={`Auswahl für ${kinkName} (${field})`}
+      aria-label={t('choice.selectionFor', { kinkName, field })}
     >
       {Object.entries(levels).map(([levelName, level], index) => {
         const isSelected = selectedLevel === levelName
@@ -80,13 +82,13 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
             className={`choice ${level.class} ${isSelected ? 'selected' : ''}`}
             data-level={levelName}
             data-level-int={index}
-            title={`${levelName} für ${kinkName} (${field})`}
+            title={t('choice.levelFor', { levelName, kinkName, field })}
             onClick={() => handleClick(levelName)}
             onKeyDown={(e) => handleKeyDown(e, levelName)}
             type="button"
             role="radio"
             aria-checked={isSelected ? true : false}
-            aria-label={`${levelName} für ${kinkName} (${field})`}
+            aria-label={t('choice.levelFor', { levelName, kinkName, field })}
             tabIndex={isSelected ? 0 : -1}
           />
         )

@@ -332,9 +332,17 @@ const InputOverlay: React.FC = () => {
                 <button
                   className={`comment-button-small modal-comment-button ${hasComment ? 'has-comment' : ''}`}
                   onClick={handleOpenComment}
-                  aria-label={`Kommentar für ${currentKink.kink} ${hasComment ? 'bearbeiten' : 'hinzufügen'}`}
+                  aria-label={t('comments.forField', {
+                    kinkName: currentKink.kink,
+                    field: currentKink.field,
+                    action: hasComment
+                      ? t('comments.editComment')
+                      : t('comments.addComment'),
+                  })}
                   title={
-                    hasComment ? 'Kommentar bearbeiten' : 'Kommentar hinzufügen'
+                    hasComment
+                      ? t('comments.editComment')
+                      : t('comments.addComment')
                   }
                   type="button"
                 >

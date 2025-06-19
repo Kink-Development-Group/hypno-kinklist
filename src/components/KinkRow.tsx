@@ -1,8 +1,9 @@
 import React, { memo, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
-import Choice from './Choice'
-import { strToClass } from '../utils'
+import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
+import { strToClass } from '../utils'
+import Choice from './Choice'
 
 interface KinkRowProps {
   categoryName: string
@@ -20,6 +21,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
   forceInlineTooltip = false,
 }) => {
   const { selection, setIsCommentOverlayOpen, setSelectedKink } = useKinklist()
+  const { t } = useTranslation()
 
   const rowId = `kink-row-${strToClass(categoryName)}-${strToClass(kinkName)}`
   const kinkNameId = `kink-name-${strToClass(kinkName)}`
@@ -126,7 +128,11 @@ const KinkRow: React.FC<KinkRowProps> = ({
           //   kinkSelection?.comment && kinkSelection.comment.trim().length > 0;
 
           return (
-            <td key={field} role="cell" aria-label={`${field} für ${kinkName}`}>
+            <td
+              key={field}
+              role="cell"
+              aria-label={t('comments.fieldFor', { field, kinkName })}
+            >
               <div className="choice-container">
                 <Choice
                   field={field}
@@ -157,9 +163,17 @@ const KinkRow: React.FC<KinkRowProps> = ({
                   key={`comment-${field}`}
                   className={`comment-button-small${hasComment ? ' has-comment' : ''}`}
                   onClick={() => handleOpenComment(field)}
-                  aria-label={`Kommentar für ${kinkName} - ${field} ${hasComment ? 'bearbeiten' : 'hinzufügen'}`}
+                  aria-label={t('comments.forField', {
+                    kinkName,
+                    field,
+                    action: hasComment
+                      ? t('comments.editComment')
+                      : t('comments.addComment'),
+                  })}
                   title={
-                    hasComment ? 'Kommentar bearbeiten' : 'Kommentar hinzufügen'
+                    hasComment
+                      ? t('comments.editComment')
+                      : t('comments.addComment')
                   }
                   type="button"
                 >
@@ -172,7 +186,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
                 <span
                   className="kink-tooltip-icon"
                   tabIndex={0}
-                  aria-label="Beschreibung anzeigen"
+                  aria-label={t('comments.showDescription')}
                   onKeyDown={handleTooltipKeyDown}
                   ref={tooltipRef}
                   onMouseEnter={handleTooltipShow}

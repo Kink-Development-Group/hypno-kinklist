@@ -74,7 +74,8 @@
         "kink": "Kinks",
         "description": "Descriptions",
         "template": "Templates"
-      }
+      },
+      "selectCategory": "Select snippet category"
     },
     "help": {
       "sections": {
@@ -82,12 +83,74 @@
         "quickStart": "Quick Start",
         "keyboardShortcuts": "Keyboard Shortcuts",
         "advanced": "Advanced"
-      }
+      },
+      "title": "Syntax Help",
+      "close": "Close help"
+    },
+    "blocks": {
+      "title": "Insertable Blocks",
+      "all": "All",
+      "search": "Search blocks...",
+      "select": "Select block",
+      "preview": "Preview"
     },
     "validation": {
       "errors": "Validation Errors",
       "warnings": "Warnings",
       "moreItems": "more items"
+    },
+    "shortcuts": {
+      "description": "Shortcuts:",
+      "autocomplete": "Autocomplete",
+      "format": "Format",
+      "save": "Save",
+      "close": "Close"
+    },
+    "content": {
+      "helpText": "Kinklist Editor Help:\n\nSYNTAX (ONLY these prefixes are valid):\n# Category Name - Defines a new category (e.g. #Basics)\n(Field designation) - Optional field after #-line (e.g. (General))\n* Kink Name - Defines a kink entry\n? Description - Description of the previous kink\n// Comment - Comment line\n\nEXAMPLE (Standard Schema):\n#Basics\n(General)\n* I enjoy working with cisgender people\n? I feel comfortable and positive about engaging in hypnosis with cisgender individuals.\n* I drop very easily\n? I enter trance states quickly and with little resistance, often after minimal induction.\n\nCOLOR CODING:\n# Categories - Green and bold\n() Fields - Blue and italic\n* Kinks - Orange/yellow and bold\n? Descriptions - Brown/gray and italic\n// Comments - Gray and italic\n\nKEYBOARD SHORTCUTS (Monaco Editor):\nCtrl+Space - IntelliSense/Autocomplete\nCtrl+Shift+I - Format\nCtrl+F - Find\nCtrl+H - Find and Replace\nCtrl+G - Go to Line\nF1 - Command Palette\nAlt+Z - Toggle Word Wrap\n\nSNIPPETS:\n- cat: New category\n- item: New kink entry\n- section: Category with kinks\n- template: Complete standard template\n\nTIPS:\n- Use empty lines for better readability\n- Categories should start with #\n- Each kink should have a description with ?\n- Only the prefixes shown above are valid",
+      "snippets": {
+        "cat": {
+          "label": "cat",
+          "detail": "New Category",
+          "documentation": "Creates a new category with optional field designation"
+        },
+        "item": {
+          "label": "item",
+          "detail": "New Kink Entry",
+          "documentation": "Creates a new kink entry with description"
+        },
+        "section": {
+          "label": "section",
+          "detail": "Category with Kinks",
+          "documentation": "Creates a complete section with category and multiple kinks"
+        },
+        "template": {
+          "label": "template",
+          "detail": "Standard Template",
+          "documentation": "Inserts the complete standard template"
+        },
+        "basicSection": {
+          "label": "basic-section",
+          "detail": "Basics Section",
+          "documentation": "Creates a Basics section based on the standard template"
+        },
+        "safetySection": {
+          "label": "safety-section",
+          "detail": "Safety Section",
+          "documentation": "Creates a Safety and Consent section"
+        },
+        "comment": {
+          "label": "comment",
+          "detail": "Comment",
+          "documentation": "Adds a comment line"
+        }
+      },
+      "detailedHelp": {
+        "syntax": "Kinklist Syntax Overview (ONLY these prefixes are valid):\n\n# Category Name          - Defines a new category (green, bold)\n(Field designation)      - Optional field designation after #-line (blue, italic)\n* Kink Name              - Kink entry (orange/yellow, bold)\n? Description            - Description of the previous kink (brown/gray, italic)\n// Comment               - Comment line (gray, italic)\n\nEXAMPLE (Standard Schema):\n#Basics\n(General)\n* I enjoy working with cisgender people\n? I feel comfortable and positive about engaging in hypnosis with cisgender individuals.\n* I drop very easily\n? I enter trance states quickly and with little resistance, often after minimal induction.\n\n// Comment for notes\n\nIMPORTANT: Only the 5 prefixes shown above (#, (), *, ?, //) are valid!",
+        "quickStart": "Quick Start:\n1. Start with a category (#Basics)\n2. Optionally add a field designation ((General))\n3. List kinks with * (* Trust)\n4. Add descriptions with ? (? Trust is the foundation...)\n5. Use // for comments (// This is a comment)\n6. Use snippets for faster work:\n   - 'cat' for new category\n   - 'item' for new kink\n   - 'section' for complete section\n   - 'template' for standard template\n7. Format your code with Ctrl+Shift+I\n8. Insert blocks to quickly create complex content",
+        "keyboardShortcuts": "Keyboard Shortcuts (Monaco Editor):\nCtrl+Space         - Show IntelliSense/Autocomplete\nCtrl+Shift+I       - Format code (important!)\nCtrl+F             - Find\nCtrl+H             - Find and Replace\nCtrl+G             - Go to Line\nCtrl+D             - Select Next Occurrence\nCtrl+L             - Select Line\nCtrl+/             - Toggle Line Comment\nAlt+Z              - Toggle Word Wrap\nF1                 - Open Command Palette\nCtrl+Enter         - Apply changes and close editor",
+        "advanced": "Advanced Features:\n- Snippets: Use integrated code snippets for faster input\n- IntelliSense: Ctrl+Space shows suggestions based on context\n- Formatting: Ctrl+Shift+I formats the entire document correctly\n- Validation: Editor automatically highlights syntax errors\n- Standard Template: Use the 'template' snippet for the complete standard schema\n- Comments: Use // for notes and structuring\n- Valid Syntax Only: Only #, (), *, ?, // prefixes are supported\n\nTip: Look at the standard template to understand the correct syntax."
+      }
     }
   },
   "export": {
@@ -284,10 +347,12 @@
   "kinks": {
     "basics": "Basics",
     "safety": "Safety and consent",
-    "types": "Types of Hypnosis"
+    "types": "Types of Hypnosis",
+    "categoryLabel": "Kinks in category {{categoryName}}"
   },
   "comments": {
     "addComment": "Add Comment",
+    "editComment": "Edit Comment",
     "category": "Category",
     "field": "Field",
     "kink": "Kink",
@@ -296,6 +361,13 @@
     "placeholder": "Add your comment here...",
     "characters": "characters",
     "toClose": "to close",
-    "toSave": "to save"
+    "toSave": "to save",
+    "forField": "for {{kinkName}} - {{field}} {{action}}",
+    "fieldFor": "{{field}} for {{kinkName}}",
+    "showDescription": "Show description"
+  },
+  "choice": {
+    "selectionFor": "Selection for {{kinkName}} ({{field}})",
+    "levelFor": "{{levelName}} for {{kinkName}} ({{field}})"
   }
 }

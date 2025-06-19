@@ -159,7 +159,7 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   className="category-filter"
-                  aria-label="Snippet-Kategorie auswählen"
+                  aria-label={t('editor.snippets.selectCategory')}
                 >
                   {snippetCategories.map((category) => (
                     <option key={category.value} value={category.value}>
@@ -260,7 +260,7 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
         <div className="help-panel">
           <div className="help-header">
             <span className="icon">📚</span>
-            Syntax-Hilfe
+            {t('editor.help.title')}
             <div className="help-tabs">
               {helpSections.map((section) => (
                 <button
@@ -277,7 +277,7 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
               type="button"
               className="close-button"
               onClick={() => setShowHelp(false)}
-              aria-label="Hilfe schließen"
+              aria-label={t('editor.help.close')}
             >
               ✕
             </button>
@@ -290,8 +290,11 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
 
       <div className="toolbar-shortcuts">
         <small>
-          Shortcuts: <kbd>Strg+K</kbd> Autocomplete, <kbd>Alt+Shift+F</kbd>{' '}
-          Formatieren, <kbd>Strg+Enter</kbd> Speichern, <kbd>Esc</kbd> Schließen
+          {t('editor.shortcuts.description')} <kbd>Strg+K</kbd>{' '}
+          {t('editor.shortcuts.autocomplete')}, <kbd>Alt+Shift+F</kbd>{' '}
+          {t('editor.shortcuts.format')}, <kbd>Strg+Enter</kbd>{' '}
+          {t('editor.shortcuts.save')}, <kbd>Esc</kbd>{' '}
+          {t('editor.shortcuts.close')}
         </small>
       </div>
     </div>

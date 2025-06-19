@@ -74,7 +74,8 @@
         "kink": "Kinks",
         "description": "Beschreibungen",
         "template": "Vorlagen"
-      }
+      },
+      "selectCategory": "Snippet-Kategorie auswählen"
     },
     "help": {
       "sections": {
@@ -82,12 +83,74 @@
         "quickStart": "Schnellstart",
         "keyboardShortcuts": "Tastenkürzel",
         "advanced": "Erweitert"
-      }
+      },
+      "title": "Syntax-Hilfe",
+      "close": "Hilfe schließen"
+    },
+    "blocks": {
+      "title": "Einfügbare Blöcke",
+      "all": "Alle",
+      "search": "Blöcke durchsuchen...",
+      "select": "Block auswählen",
+      "preview": "Vorschau"
     },
     "validation": {
       "errors": "Validierungsfehler",
       "warnings": "Warnungen",
       "moreItems": "weitere"
+    },
+    "shortcuts": {
+      "description": "Shortcuts:",
+      "autocomplete": "Autocomplete",
+      "format": "Formatieren",
+      "save": "Speichern",
+      "close": "Schließen"
+    },
+    "content": {
+      "helpText": "Kinklist-Editor Hilfe:\n\nSYNTAX (NUR diese Präfixe sind gültig):\n# Kategorie Name - Definiert eine neue Kategorie (z.B. #Basics)\n(Feldbezeichnung) - Optionales Feld nach #-Zeile (z.B. (General))\n* Kink Name - Definiert einen Kink-Eintrag\n? Beschreibung - Beschreibung des vorherigen Kinks\n// Kommentar - Kommentarzeile\n\nBEISPIEL (Standard-Schema):\n#Basics\n(General)\n* I enjoy working with cisgender people\n? I feel comfortable and positive about engaging in hypnosis with cisgender individuals.\n* I drop very easily\n? I enter trance states quickly and with little resistance, often after minimal induction.\n\nFARB-CODING:\n# Kategorien - Grün und fett\n() Felder - Blau und kursiv\n* Kinks - Orange/gelb und fett\n? Beschreibungen - Braun/grau und kursiv\n// Kommentare - Grau und kursiv\n\nTASTENKÜRZEL (Monaco Editor):\nStrg+Space - IntelliSense/Autocomplete\nStrg+Shift+I - Formatieren\nStrg+F - Suchen\nStrg+H - Suchen und Ersetzen\nStrg+G - Zu Zeile springen\nF1 - Befehlspalette\nAlt+Z - Zeilenumbruch aktivieren/deaktivieren\n\nSNIPPETS:\n- cat: Neue Kategorie\n- item: Neuer Kink-Eintrag\n- section: Kategorie mit Kinks\n- template: Vollständiges Standard-Template\n\nTIPPS:\n- Verwenden Sie leere Zeilen zur besseren Lesbarkeit\n- Kategorien sollten mit # beginnen\n- Jeder Kink sollte eine Beschreibung mit ? haben\n- Nur die oben gezeigten Präfixe sind gültig",
+      "snippets": {
+        "cat": {
+          "label": "cat",
+          "detail": "Neue Kategorie",
+          "documentation": "Erstellt eine neue Kategorie mit optionaler Feldbezeichnung"
+        },
+        "item": {
+          "label": "item",
+          "detail": "Neuer Kink-Eintrag",
+          "documentation": "Erstellt einen neuen Kink-Eintrag mit Beschreibung"
+        },
+        "section": {
+          "label": "section",
+          "detail": "Kategorie mit Kinks",
+          "documentation": "Erstellt eine vollständige Sektion mit Kategorie und mehreren Kinks"
+        },
+        "template": {
+          "label": "template",
+          "detail": "Standard-Template",
+          "documentation": "Fügt das vollständige Standard-Template ein"
+        },
+        "basicSection": {
+          "label": "basic-section",
+          "detail": "Basics Sektion",
+          "documentation": "Erstellt eine Basics-Sektion basierend auf dem Standard-Template"
+        },
+        "safetySection": {
+          "label": "safety-section",
+          "detail": "Safety Sektion",
+          "documentation": "Erstellt eine Safety and Consent-Sektion"
+        },
+        "comment": {
+          "label": "comment",
+          "detail": "Kommentar",
+          "documentation": "Fügt eine Kommentarzeile hinzu"
+        }
+      },
+      "detailedHelp": {
+        "syntax": "Kinklist Syntax Übersicht (NUR diese Präfixe sind gültig):\n\n# Kategorie Name          - Definiert eine neue Kategorie (grün, fett)\n(Feldbezeichnung)         - Optionale Feldbezeichnung nach #-Zeile (blau, kursiv)\n* Kink Name               - Kink-Eintrag (orange/gelb, fett)\n? Beschreibung            - Beschreibung des vorherigen Kinks (braun/grau, kursiv)\n// Kommentar              - Kommentarzeile (grau, kursiv)\n\nBEISPIEL (Standard-Schema):\n#Basics\n(General)\n* I enjoy working with cisgender people\n? I feel comfortable and positive about engaging in hypnosis with cisgender individuals.\n* I drop very easily\n? I enter trance states quickly and with little resistance, often after minimal induction.\n\n// Kommentar für Notizen\n\nWICHTIG: Nur die oben gezeigten 5 Präfixe (#, (), *, ?, //) sind gültig!",
+        "quickStart": "Schnellstart:\n1. Beginnen Sie mit einer Kategorie (#Basics)\n2. Fügen Sie optional eine Feldbezeichnung hinzu ((General))\n3. Listen Sie Kinks mit * auf (* Trust)\n4. Fügen Sie Beschreibungen mit ? hinzu (? Trust is the foundation...)\n5. Nutzen Sie // für Kommentare (// This is a comment)\n6. Nutzen Sie die Snippets für schnelleres Arbeiten:\n   - 'cat' für neue Kategorie\n   - 'item' für neuen Kink\n   - 'section' für vollständige Sektion\n   - 'template' für das Standard-Template\n7. Formatieren Sie Ihren Code mit Strg+Shift+I\n8. Fügen Sie Blöcke ein, um schnell komplexe Inhalte zu erstellen",
+        "keyboardShortcuts": "Tastenkürzel (Monaco Editor):\nStrg+Space         - IntelliSense/Autocomplete anzeigen\nStrg+Shift+I       - Code formatieren (wichtig!)\nStrg+F             - Suchen\nStrg+H             - Suchen und Ersetzen\nStrg+G             - Zu Zeile springen\nStrg+D             - Nächstes Vorkommen auswählen\nStrg+L             - Zeile auswählen\nStrg+/             - Zeile kommentieren/auskommentieren\nAlt+Z              - Zeilenumbruch ein/ausschalten\nF1                 - Befehlspalette öffnen\nStrg+Enter         - Änderungen übernehmen und Editor schließen",
+        "advanced": "Erweiterte Funktionen:\n- Snippets: Verwenden Sie die integrierten Code-Snippets für schnellere Eingabe\n- IntelliSense: Strg+Space zeigt Vorschläge basierend auf dem Kontext\n- Formatierung: Strg+Shift+I formatiert das gesamte Dokument korrekt\n- Validierung: Der Editor hebt Syntaxfehler automatisch hervor\n- Standard-Template: Nutzen Sie das 'template' Snippet für das vollständige Standard-Schema\n- Kommentare: Verwenden Sie // für Notizen und Strukturierung\n- Nur gültige Syntax: Nur #, (), *, ?, // Präfixe werden unterstützt\n\nTipp: Schauen Sie sich das Standard-Template an, um die korrekte Syntax zu verstehen."
+      }
     }
   },
   "export": {
@@ -289,6 +352,7 @@
   },
   "comments": {
     "addComment": "Kommentar hinzufügen",
+    "editComment": "Kommentar bearbeiten",
     "category": "Kategorie",
     "field": "Feld",
     "kink": "Kink",
@@ -297,6 +361,13 @@
     "placeholder": "Fügen Sie hier Ihren Kommentar hinzu...",
     "characters": "Zeichen",
     "toClose": "zum Schließen",
-    "toSave": "zum Speichern"
+    "toSave": "zum Speichern",
+    "forField": "für {{kinkName}} - {{field}} {{action}}",
+    "fieldFor": "{{field}} für {{kinkName}}",
+    "showDescription": "Beschreibung anzeigen"
+  },
+  "choice": {
+    "selectionFor": "Auswahl für {{kinkName}} ({{field}})",
+    "levelFor": "{{levelName}} für {{kinkName}} ({{field}})"
   }
 }

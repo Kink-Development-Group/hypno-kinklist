@@ -1,3 +1,4 @@
+import i18n from '../../i18n'
 import { getKinkTemplate } from '../../utils/kinkTemplates'
 
 // Interface für Snippets
@@ -20,102 +21,60 @@ export interface PasteableBlock {
 
 // Hilfstext für den Editor
 export const getHelpText = (): string => {
-  return `Kinklist-Editor Hilfe:
-
-SYNTAX (NUR diese Präfixe sind gültig):
-# Kategorie Name - Definiert eine neue Kategorie (z.B. #Basics)
-(Feldbezeichnung) - Optionales Feld nach #-Zeile (z.B. (General))
-* Kink Name - Definiert einen Kink-Eintrag
-? Beschreibung - Beschreibung des vorherigen Kinks
-// Kommentar - Kommentarzeile
-
-BEISPIEL (Standard-Schema):
-#Basics
-(General)
-* I enjoy working with cisgender people
-? I feel comfortable and positive about engaging in hypnosis with cisgender individuals.
-* I drop very easily
-? I enter trance states quickly and with little resistance, often after minimal induction.
-
-FARB-CODING:
-# Kategorien - Grün und fett
-() Felder - Blau und kursiv
-* Kinks - Orange/gelb und fett
-? Beschreibungen - Braun/grau und kursiv
-// Kommentare - Grau und kursiv
-
-TASTENKÜRZEL (Monaco Editor):
-Strg+Space - IntelliSense/Autocomplete
-Strg+Shift+I - Formatieren
-Strg+F - Suchen
-Strg+H - Suchen und Ersetzen
-Strg+G - Zu Zeile springen
-F1 - Befehlspalette
-Alt+Z - Zeilenumbruch aktivieren/deaktivieren
-
-SNIPPETS:
-- cat: Neue Kategorie
-- item: Neuer Kink-Eintrag
-- section: Kategorie mit Kinks
-- template: Vollständiges Standard-Template
-
-TIPPS:
-- Verwenden Sie leere Zeilen zur besseren Lesbarkeit
-- Kategorien sollten mit # beginnen
-- Jeder Kink sollte eine Beschreibung mit ? haben
-- Nur die oben gezeigten Präfixe sind gültig`
+  return i18n.t('editor.content.helpText')
 }
 
 // Snippets basierend auf dem Default-Template
 export const getSnippets = (): EditorSnippet[] => {
   return [
     {
-      label: 'cat',
+      label: i18n.t('editor.content.snippets.cat.label'),
       insertText: '#${1:Kategorie Name}\n(${2:General})\n',
-      detail: 'Neue Kategorie',
-      documentation:
-        'Erstellt eine neue Kategorie mit optionaler Feldbezeichnung',
+      detail: i18n.t('editor.content.snippets.cat.detail'),
+      documentation: i18n.t('editor.content.snippets.cat.documentation'),
     },
     {
-      label: 'item',
+      label: i18n.t('editor.content.snippets.item.label'),
       insertText: '* ${1:Kink Name}\n? ${2:Beschreibung des Kinks}\n',
-      detail: 'Neuer Kink-Eintrag',
-      documentation: 'Erstellt einen neuen Kink-Eintrag mit Beschreibung',
+      detail: i18n.t('editor.content.snippets.item.detail'),
+      documentation: i18n.t('editor.content.snippets.item.documentation'),
     },
     {
-      label: 'section',
+      label: i18n.t('editor.content.snippets.section.label'),
       insertText:
         '#${1:Kategorie}\n(${2:General})\n* ${3:Kink 1}\n? ${4:Beschreibung 1}\n* ${5:Kink 2}\n? ${6:Beschreibung 2}\n',
-      detail: 'Kategorie mit Kinks',
-      documentation:
-        'Erstellt eine vollständige Sektion mit Kategorie und mehreren Kinks',
+      detail: i18n.t('editor.content.snippets.section.detail'),
+      documentation: i18n.t('editor.content.snippets.section.documentation'),
     },
     {
-      label: 'template',
+      label: i18n.t('editor.content.snippets.template.label'),
       insertText: getDefaultTemplate(),
-      detail: 'Standard-Template',
-      documentation: 'Fügt das vollständige Standard-Template ein',
+      detail: i18n.t('editor.content.snippets.template.detail'),
+      documentation: i18n.t('editor.content.snippets.template.documentation'),
     },
     {
-      label: 'basic-section',
+      label: i18n.t('editor.content.snippets.basicSection.label'),
       insertText:
         "#Basics\n(General)\n* I enjoy working with cisgender people\n? I feel comfortable and positive about engaging in hypnosis with cisgender individuals.\n* I enjoy working with trans people\n? I am open to and enjoy hypnotic experiences with transgender people, respecting their identities.\n* Gender doesn't matter to me\n? The gender of my hypnosis partner is not important to me; I focus on the experience itself.\n",
-      detail: 'Basics Sektion',
-      documentation:
-        'Erstellt eine Basics-Sektion basierend auf dem Standard-Template',
+      detail: i18n.t('editor.content.snippets.basicSection.detail'),
+      documentation: i18n.t(
+        'editor.content.snippets.basicSection.documentation'
+      ),
     },
     {
-      label: 'safety-section',
+      label: i18n.t('editor.content.snippets.safetySection.label'),
       insertText:
         "#Safety and consent\n(General)\n* Trust\n? Trust is the foundation of any hypnotic interaction; I need to feel safe with my partner.\n* Unknown play partner\n? I may feel uneasy or require extra caution when engaging with someone I don't know well.\n* A lot of safety talk / triggers\n? I prefer thorough discussions about boundaries, triggers, and safety before starting.\n",
-      detail: 'Safety Sektion',
-      documentation: 'Erstellt eine Safety and Consent-Sektion',
+      detail: i18n.t('editor.content.snippets.safetySection.detail'),
+      documentation: i18n.t(
+        'editor.content.snippets.safetySection.documentation'
+      ),
     },
     {
-      label: 'comment',
+      label: i18n.t('editor.content.snippets.comment.label'),
       insertText: '// ${1:Kommentar}\n',
-      detail: 'Kommentar',
-      documentation: 'Fügt eine Kommentarzeile hinzu',
+      detail: i18n.t('editor.content.snippets.comment.detail'),
+      documentation: i18n.t('editor.content.snippets.comment.documentation'),
     },
   ]
 }
@@ -391,63 +350,9 @@ export const searchBlocks = (query: string): PasteableBlock[] => {
 // Erweiterte Hilfetexte
 export const getDetailedHelpText = (): { [key: string]: string } => {
   return {
-    syntax: `Kinklist Syntax Übersicht (NUR diese Präfixe sind gültig):
-
-# Kategorie Name          - Definiert eine neue Kategorie (grün, fett)
-(Feldbezeichnung)         - Optionale Feldbezeichnung nach #-Zeile (blau, kursiv)
-* Kink Name               - Kink-Eintrag (orange/gelb, fett)
-? Beschreibung            - Beschreibung des vorherigen Kinks (braun/grau, kursiv)
-// Kommentar              - Kommentarzeile (grau, kursiv)
-
-BEISPIEL (Standard-Schema):
-#Basics
-(General)
-* I enjoy working with cisgender people
-? I feel comfortable and positive about engaging in hypnosis with cisgender individuals.
-* I drop very easily
-? I enter trance states quickly and with little resistance, often after minimal induction.
-
-// Kommentar für Notizen
-
-WICHTIG: Nur die oben gezeigten 5 Präfixe (#, (), *, ?, //) sind gültig!
-`,
-    quickStart: `Schnellstart:
-1. Beginnen Sie mit einer Kategorie (#Basics)
-2. Fügen Sie optional eine Feldbezeichnung hinzu ((General))
-3. Listen Sie Kinks mit * auf (* Trust)
-4. Fügen Sie Beschreibungen mit ? hinzu (? Trust is the foundation...)
-5. Nutzen Sie // für Kommentare (// This is a comment)
-6. Nutzen Sie die Snippets für schnelleres Arbeiten:
-   - 'cat' für neue Kategorie
-   - 'item' für neuen Kink
-   - 'section' für vollständige Sektion
-   - 'template' für das Standard-Template
-7. Formatieren Sie Ihren Code mit Strg+Shift+I
-8. Fügen Sie Blöcke ein, um schnell komplexe Inhalte zu erstellen
-`,
-    keyboardShortcuts: `Tastenkürzel (Monaco Editor):
-Strg+Space         - IntelliSense/Autocomplete anzeigen
-Strg+Shift+I       - Code formatieren (wichtig!)
-Strg+F             - Suchen
-Strg+H             - Suchen und Ersetzen
-Strg+G             - Zu Zeile springen
-Strg+D             - Nächstes Vorkommen auswählen
-Strg+L             - Zeile auswählen
-Strg+/             - Zeile kommentieren/auskommentieren
-Alt+Z              - Zeilenumbruch ein/ausschalten
-F1                 - Befehlspalette öffnen
-Strg+Enter         - Änderungen übernehmen und Editor schließen
-`,
-    advanced: `Erweiterte Funktionen:
-- Snippets: Verwenden Sie die integrierten Code-Snippets für schnellere Eingabe
-- IntelliSense: Strg+Space zeigt Vorschläge basierend auf dem Kontext
-- Formatierung: Strg+Shift+I formatiert das gesamte Dokument korrekt
-- Validierung: Der Editor hebt Syntaxfehler automatisch hervor
-- Standard-Template: Nutzen Sie das 'template' Snippet für das vollständige Standard-Schema
-- Kommentare: Verwenden Sie // für Notizen und Strukturierung
-- Nur gültige Syntax: Nur #, (), *, ?, // Präfixe werden unterstützt
-
-Tipp: Schauen Sie sich das Standard-Template an, um die korrekte Syntax zu verstehen.
-`,
+    syntax: i18n.t('editor.content.detailedHelp.syntax'),
+    quickStart: i18n.t('editor.content.detailedHelp.quickStart'),
+    keyboardShortcuts: i18n.t('editor.content.detailedHelp.keyboardShortcuts'),
+    advanced: i18n.t('editor.content.detailedHelp.advanced'),
   }
 }

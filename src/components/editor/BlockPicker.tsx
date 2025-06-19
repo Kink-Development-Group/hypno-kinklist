@@ -47,16 +47,17 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
     if (searchQuery) {
       result = searchBlocks(searchQuery).filter(
         (block) =>
-          selectedCategory === 'Alle' || block.category === selectedCategory
+          selectedCategory === t('editor.blocks.all') ||
+          block.category === selectedCategory
       )
     }
 
     setFilteredBlocks(result)
-  }, [selectedCategory, searchQuery, blocks])
+  }, [selectedCategory, searchQuery, blocks, t])
 
   // Eindeutige Kategorien für Filter
   const uniqueCategories = [
-    'Alle',
+    t('editor.blocks.all'),
     ...new Set(blocks.map((block) => block.category)),
   ]
 
@@ -74,13 +75,13 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
   return (
     <div className={`block-picker ${position} ${className}`}>
       <div className="block-picker-header">
-        <h3>Einfügbare Blöcke</h3>
+        <h3>{t('editor.blocks.title')}</h3>
 
         {showSearch && (
           <div className="block-picker-search">
             <input
               type="text"
-              placeholder="Suche..."
+              placeholder={t('editor.blocks.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               aria-label="Blöcke durchsuchen"
