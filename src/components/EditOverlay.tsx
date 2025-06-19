@@ -18,7 +18,6 @@ import AdvancedKinkListEditor, {
 
 const EditOverlay: React.FC = () => {
   const {
-    kinks,
     setKinks,
     levels,
     selection,
