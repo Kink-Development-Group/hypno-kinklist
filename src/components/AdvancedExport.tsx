@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import {
   ExportFormat,
@@ -28,6 +29,7 @@ import NameModal from './NameModal'
 interface AdvancedExportProps {}
 
 const AdvancedExport: React.FC<AdvancedExportProps> = () => {
+  const { t } = useTranslation()
   const { kinks, levels, selection, setKinks, setLevels, setSelection } =
     useKinklist()
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -54,8 +56,8 @@ const AdvancedExport: React.FC<AdvancedExportProps> = () => {
   const exportModes: ExportModeOption[] = [
     {
       mode: 'quick',
-      title: 'Schnellexport',
-      description: 'Direkte Exports mit Standardeinstellungen',
+      title: t('export.modes.quick.title'),
+      description: t('export.modes.quick.description'),
       formats: ['PNG', 'JSON', 'PDF'],
       defaultOptions: {
         includeComments: true,
@@ -65,8 +67,8 @@ const AdvancedExport: React.FC<AdvancedExportProps> = () => {
     },
     {
       mode: 'advanced',
-      title: 'Erweiterte Optionen',
-      description: 'Alle Formate mit detaillierten Einstellungen',
+      title: t('export.modes.advanced.title'),
+      description: t('export.modes.advanced.description'),
       formats: ['PNG', 'JPEG', 'WebP', 'SVG', 'PDF', 'JSON', 'XML', 'CSV'],
       defaultOptions: {
         includeComments: true,
@@ -78,15 +80,15 @@ const AdvancedExport: React.FC<AdvancedExportProps> = () => {
 
   // Format-spezifische Einstellungen
   const formatDescriptions = {
-    PNG: 'Hochqualitatives Rasterbild, ideal für Screenshots',
-    JPEG: 'Komprimiertes Bild, kleinere Dateigröße',
-    WebP: 'Modernes Bildformat mit optimaler Kompression',
-    SVG: 'Vektorgrafik, skalierbar und editierbar',
-    PDF: 'Professionelles A4-Layout zum Drucken',
-    JSON: 'Strukturierte Daten, vollständig importierbar',
-    XML: 'Standardisiertes Datenformat, vollständig importierbar',
-    CSV: 'Tabellendaten für Excel/Google Sheets',
-    SSV: 'Space-separated values für spezielle Anwendungen',
+    PNG: t('export.formatDescriptions.PNG'),
+    JPEG: t('export.formatDescriptions.JPEG'),
+    WebP: t('export.formatDescriptions.WebP'),
+    SVG: t('export.formatDescriptions.SVG'),
+    PDF: t('export.formatDescriptions.PDF'),
+    JSON: t('export.formatDescriptions.JSON'),
+    XML: t('export.formatDescriptions.XML'),
+    CSV: t('export.formatDescriptions.CSV'),
+    SSV: t('export.formatDescriptions.SSV'),
   }
 
   const handleExport = useCallback((format: ExportFormat) => {
@@ -203,7 +205,7 @@ const AdvancedExport: React.FC<AdvancedExportProps> = () => {
 
       context.font = 'bold 12px Arial'
       context.fillStyle = '#3f51b5'
-      context.fillText('Legende:', 12, legendY)
+      context.fillText(t('legend.titleSimple'), 12, legendY)
 
       levelNames.forEach((levelName, index) => {
         const x = 80 + index * 120
@@ -384,17 +386,17 @@ const AdvancedExport: React.FC<AdvancedExportProps> = () => {
         }
 
         default:
-          throw new Error(`Unbekanntes Format: ${format}`)
+          throw new Error(`Unknown format: ${format}`)
       }
 
       if (result.success) {
         setIsSuccess(true)
         setTimeout(() => setIsSuccess(false), 3000)
       } else {
-        setError(result.error || 'Export fehlgeschlagen')
+        setError(result.error || t('export.exportFailed'))
       }
     } catch (error) {
-      setError(`Export fehlgeschlagen: ${error}`)
+      setError(`${t('export.exportFailed')}: ${error}`)
       console.error('Export error:', error)
     } finally {
       setIsLoading(false)
@@ -504,13 +506,13 @@ const AdvancedExport: React.FC<AdvancedExportProps> = () => {
             setIsSuccess(true)
             setTimeout(() => setIsSuccess(false), 3000)
           } else {
-            setError('Ungültiges Datenformat')
+            setError(t('import.errors.invalidFormat'))
           }
         } else {
-          setError(result.error || 'Import fehlgeschlagen')
+          setError(result.error || t('import.errors.importFailed'))
         }
       } catch (error) {
-        setError(`Import fehlgeschlagen: ${error}`)
+        setError(`${t('import.errors.importFailed')}: ${error}`)
       } finally {
         setIsLoading(false)
       }
@@ -696,33 +698,33 @@ const AdvancedExport: React.FC<AdvancedExportProps> = () => {
 
         <div className="import-methods">
           <div className="import-method">
-            <h4>📁 Datei auswählen</h4>
-            <p>Wähle eine JSON-, XML-, CSV- oder SSV-Datei aus</p>
+            <h4>📁 {t('import.methods.file.title')}</h4>
+            <p>{t('import.methods.file.description')}</p>
             <button
               className="import-button file-select"
               onClick={handleImport}
             >
               <span className="icon">📂</span>
-              Datei auswählen
+              {t('import.methods.file.button')}
             </button>
           </div>
 
           <div className="import-divider">
-            <span>oder</span>
+            <span>{t('common.or')}</span>
           </div>
 
           <div className="import-method">
             <h4>🎯 Drag & Drop</h4>
-            <p>Ziehe eine Datei einfach auf diesen Bereich</p>
+            <p>Drag files directly to this area</p>
             <div className="dropzone-hint">
               <span className="icon">⬆️</span>
-              Ziehe Dateien hierher
+              {t('import.methods.file.dropHint')}
             </div>
           </div>
         </div>
 
         <div className="supported-formats">
-          <h5>Unterstützte Formate:</h5>
+          <h5>{t('import.supportedFormats')}:</h5>
           <div className="format-tags">
             <span className="format-tag json">JSON</span>
             <span className="format-tag xml">XML</span>
@@ -737,7 +739,7 @@ const AdvancedExport: React.FC<AdvancedExportProps> = () => {
           accept=".json,.xml,.csv,.ssv"
           style={{ display: 'none' }}
           onChange={handleFileSelect}
-          aria-label="Datei zum Import auswählen"
+          aria-label={t('import.accessibility.selectFile')}
         />
       </div>
 
@@ -745,7 +747,7 @@ const AdvancedExport: React.FC<AdvancedExportProps> = () => {
         <div className="loading-overlay">
           <div className="loading-spinner"></div>
           <p>
-            {selectedFormat ? 'Export wird vorbereitet...' : 'Import läuft...'}
+            {selectedFormat ? t('export.preparing') : t('import.processing')}
           </p>
         </div>
       )}

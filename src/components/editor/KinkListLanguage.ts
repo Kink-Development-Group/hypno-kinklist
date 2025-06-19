@@ -41,6 +41,10 @@ export const kinkListTokenProvider = {
   tokenizer: {
     root: [
       [/^\s*\/\/.*/, 'comment'],
+      [/^\s*\+\s*\[[A-Z]{2}\]\s*#.*/, 'multilingual-category'],
+      [/^\s*\+\s*\[[A-Z]{2}\]\s*\([^)]*\)\s*$/, 'multilingual-subcategory'],
+      [/^\s*\+\s*\[[A-Z]{2}\]\s*\*.*/, 'multilingual-kink'],
+      [/^\s*\+\s*\[[A-Z]{2}\]\s*\?.*/, 'multilingual-description'],
       [/^\s*#.*/, 'category'],
       [/^\s*\([^)]*\)\s*$/, 'subcategory'],
       [/^\s*\*.*/, 'kink-neutral'],
@@ -56,9 +60,29 @@ export const kinkListTheme = {
   inherit: true,
   rules: [
     { token: 'category', foreground: '2e7d32', fontStyle: 'bold' },
+    {
+      token: 'multilingual-category',
+      foreground: '1b5e20',
+      fontStyle: 'bold italic',
+    },
     { token: 'subcategory', foreground: '1565c0', fontStyle: 'italic' },
+    {
+      token: 'multilingual-subcategory',
+      foreground: '0d47a1',
+      fontStyle: 'italic',
+    },
     { token: 'kink-neutral', foreground: 'f57c00', fontStyle: 'bold' },
+    {
+      token: 'multilingual-kink',
+      foreground: 'e65100',
+      fontStyle: 'bold italic',
+    },
     { token: 'description', foreground: '5d4037', fontStyle: 'italic' },
+    {
+      token: 'multilingual-description',
+      foreground: '3e2723',
+      fontStyle: 'italic',
+    },
     { token: 'comment', foreground: '757575', fontStyle: 'italic' },
     { token: 'meta', foreground: '00695c', fontStyle: 'italic' },
     { token: 'text', foreground: '212121' },
@@ -78,9 +102,29 @@ export const kinkListDarkTheme = {
   inherit: true,
   rules: [
     { token: 'category', foreground: '81c784', fontStyle: 'bold' },
+    {
+      token: 'multilingual-category',
+      foreground: '4caf50',
+      fontStyle: 'bold italic',
+    },
     { token: 'subcategory', foreground: '64b5f6', fontStyle: 'italic' },
+    {
+      token: 'multilingual-subcategory',
+      foreground: '2196f3',
+      fontStyle: 'italic',
+    },
     { token: 'kink-neutral', foreground: 'ffb74d', fontStyle: 'bold' },
+    {
+      token: 'multilingual-kink',
+      foreground: 'ff9800',
+      fontStyle: 'bold italic',
+    },
     { token: 'description', foreground: 'bcaaa4', fontStyle: 'italic' },
+    {
+      token: 'multilingual-description',
+      foreground: '8d6e63',
+      fontStyle: 'italic',
+    },
     { token: 'comment', foreground: '9e9e9e', fontStyle: 'italic' },
     { token: 'meta', foreground: '80cbc4', fontStyle: 'italic' },
     { token: 'text', foreground: 'e0e0e0' },
@@ -104,24 +148,14 @@ export const registerKinkListLanguage = (monaco) => {
     console.log('Language already registered:', languageId)
     return languageId
   }
-  console.log('=== REGISTERING KINKLIST LANGUAGE ===')
-  console.log('1. Registering language:', languageId)
+
   try {
     monaco.languages.register({ id: languageId })
-    console.log('2. Language registered successfully')
     monaco.languages.setLanguageConfiguration(
       languageId,
       kinkListLanguageConfig
     )
-    console.log('3. Language configuration set')
     monaco.languages.setMonarchTokensProvider(languageId, kinkListTokenProvider)
-    console.log('4. Token provider set - rules registered for:')
-    console.log('   - Comments (//)')
-    console.log('   - Categories (#)')
-    console.log('   - Subcategories (())')
-    console.log('   - Kinks (*)')
-    console.log('   - Descriptions (?)')
-    console.log('   - Meta [tags]')
     monaco.languages.registerCompletionItemProvider(languageId, {
       provideCompletionItems: (model, position) => {
         const word = model.getWordUntilPosition(position)
@@ -143,12 +177,43 @@ export const registerKinkListLanguage = (monaco) => {
             range: range,
           },
           {
+            label: 'mcat',
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText:
+              '#${1:Category Name}\n+ [DE] #${2:Deutscher Name}\n+ [SV] #${3:Svenska namn}\n(${4:General})\n+ [DE] (${5:Allgemein})\n+ [SV] (${6:Allmänt})\n',
+            insertTextRules:
+              monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            documentation:
+              'Erstellt eine multilingual Kategorie mit Übersetzungen',
+            range: range,
+          },
+          {
             label: 'item',
             kind: monaco.languages.CompletionItemKind.Snippet,
             insertText: '* ${1:Kink Name}\n? ${2:Beschreibung des Kinks}\n',
             insertTextRules:
               monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
             documentation: 'Erstellt einen neuen Kink-Eintrag mit Beschreibung',
+            range: range,
+          },
+          {
+            label: 'mitem',
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText:
+              '* ${1:Kink Name}\n+ [DE] * ${2:Deutscher Kink Name}\n+ [SV] * ${3:Svenska kink namn}\n? ${4:Description}\n+ [DE] ? ${5:Deutsche Beschreibung}\n+ [SV] ? ${6:Svenska beskrivning}\n',
+            insertTextRules:
+              monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            documentation:
+              'Erstellt einen multilinguale Kink-Eintrag mit Übersetzungen',
+            range: range,
+          },
+          {
+            label: 'trans',
+            kind: monaco.languages.CompletionItemKind.Snippet,
+            insertText: '+ [${1:DE}] ${2:Übersetzung}\n',
+            insertTextRules:
+              monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            documentation: 'Fügt eine Übersetzungszeile hinzu',
             range: range,
           },
           {
@@ -164,11 +229,7 @@ export const registerKinkListLanguage = (monaco) => {
         return { suggestions }
       },
     })
-    console.log('5. Completion provider registered successfully')
-    console.log(
-      'Language and completion provider registered successfully:',
-      languageId
-    )
+
     isLanguageRegistered = true
     return languageId
   } catch (error) {
@@ -179,25 +240,11 @@ export const registerKinkListLanguage = (monaco) => {
 
 export const registerKinkListThemes = (monaco) => {
   if (themesRegistered) {
-    console.log('Themes already registered')
     return
   }
-  console.log('=== REGISTERING KINKLIST THEMES ===')
-  console.log('1. Defining light theme...')
   try {
     monaco.editor.defineTheme('kink-list-light', kinkListTheme)
-    console.log(
-      '2. Light theme defined with rules:',
-      kinkListTheme.rules.length,
-      'rules'
-    )
     monaco.editor.defineTheme('kink-list-dark', kinkListDarkTheme)
-    console.log(
-      '3. Dark theme defined with rules:',
-      kinkListDarkTheme.rules.length,
-      'rules'
-    )
-    console.log('4. Themes registered successfully')
     themesRegistered = true
   } catch (error) {
     console.error('Error registering themes:', error)
@@ -213,6 +260,9 @@ export const validateKinkListSyntax = (monaco, text) => {
   let currentCategory = ''
   let hasAnyContent = false
   let lastKinkLine = -1
+  let lastCategoryLine = -1
+  let lastFieldLine = -1
+  let lastDescriptionLine = -1
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim()
@@ -222,8 +272,100 @@ export const validateKinkListSyntax = (monaco, text) => {
 
     hasAnyContent = true
 
+    // Multilingual translation lines
+    if (line.match(/^\+\s*\[[A-Z]{2}\]/)) {
+      const translationMatch = line.match(/^\+\s*\[([A-Z]{2})\]\s*(.*)$/)
+      if (!translationMatch) {
+        markers.push({
+          severity: monaco.MarkerSeverity.Error,
+          message: 'Ungültiges Übersetzungsformat. Erwartet: + [XX] content',
+          startLineNumber: lineNumber,
+          startColumn: 1,
+          endLineNumber: lineNumber,
+          endColumn: line.length + 1,
+        })
+        continue
+      }
+
+      const [, lang, content] = translationMatch
+
+      // Validate language code
+      if (lang.length !== 2) {
+        markers.push({
+          severity: monaco.MarkerSeverity.Error,
+          message: 'Sprachcode muss aus genau 2 Buchstaben bestehen',
+          startLineNumber: lineNumber,
+          startColumn: 1,
+          endLineNumber: lineNumber,
+          endColumn: line.length + 1,
+        })
+      }
+
+      // Check if translation content is appropriate
+      if (
+        content.startsWith('#') &&
+        lastCategoryLine !== i - 1 &&
+        lastCategoryLine !== i - 2
+      ) {
+        markers.push({
+          severity: monaco.MarkerSeverity.Warning,
+          message:
+            'Kategorieübersetzung sollte direkt nach der Kategorie stehen',
+          startLineNumber: lineNumber,
+          startColumn: 1,
+          endLineNumber: lineNumber,
+          endColumn: line.length + 1,
+        })
+      } else if (
+        content.startsWith('(') &&
+        lastFieldLine !== i - 1 &&
+        lastFieldLine !== i - 2
+      ) {
+        markers.push({
+          severity: monaco.MarkerSeverity.Warning,
+          message:
+            'Feldübersetzung sollte direkt nach der Feldbezeichnung stehen',
+          startLineNumber: lineNumber,
+          startColumn: 1,
+          endLineNumber: lineNumber,
+          endColumn: line.length + 1,
+        })
+      } else if (
+        content.startsWith('*') &&
+        lastKinkLine !== i - 1 &&
+        lastKinkLine !== i - 2
+      ) {
+        markers.push({
+          severity: monaco.MarkerSeverity.Warning,
+          message: 'Kink-Übersetzung sollte direkt nach dem Kink stehen',
+          startLineNumber: lineNumber,
+          startColumn: 1,
+          endLineNumber: lineNumber,
+          endColumn: line.length + 1,
+        })
+      } else if (
+        content.startsWith('?') &&
+        lastDescriptionLine !== i - 1 &&
+        lastDescriptionLine !== i - 2
+      ) {
+        markers.push({
+          severity: monaco.MarkerSeverity.Warning,
+          message:
+            'Beschreibungsübersetzung sollte direkt nach der Beschreibung stehen',
+          startLineNumber: lineNumber,
+          startColumn: 1,
+          endLineNumber: lineNumber,
+          endColumn: line.length + 1,
+        })
+      }
+
+      continue
+    }
+
+    // Regular content lines
     if (line.startsWith('#')) {
       currentCategory = line
+      lastCategoryLine = i
       // Prüfe auf gültigen Kategorienamen
       if (line.length <= 1) {
         markers.push({
@@ -236,6 +378,7 @@ export const validateKinkListSyntax = (monaco, text) => {
         })
       }
     } else if (line.startsWith('(') && line.endsWith(')')) {
+      lastFieldLine = i
       // Feldbezeichnung - sollte nach einer Kategorie kommen
       if (!currentCategory) {
         markers.push({
@@ -248,12 +391,23 @@ export const validateKinkListSyntax = (monaco, text) => {
         })
       }
     } else if (line.startsWith('*')) {
-      // Kink-Eintrag (nur * ist gültig!)
-      lastKinkLine = lineNumber
+      lastKinkLine = i
+      // Kink-Eintrag - sollte nach einer Kategorie kommen
       if (!currentCategory) {
         markers.push({
           severity: monaco.MarkerSeverity.Warning,
-          message: 'Kink-Eintrag ohne Kategorie',
+          message: 'Kink-Eintrag ohne vorherige Kategorie',
+          startLineNumber: lineNumber,
+          startColumn: 1,
+          endLineNumber: lineNumber,
+          endColumn: line.length + 1,
+        })
+      }
+      // Prüfe auf leeren Kink-Namen
+      if (line.length <= 1 || line.substring(1).trim() === '') {
+        markers.push({
+          severity: monaco.MarkerSeverity.Error,
+          message: 'Kink-Eintrag muss einen Namen haben',
           startLineNumber: lineNumber,
           startColumn: 1,
           endLineNumber: lineNumber,
@@ -261,11 +415,12 @@ export const validateKinkListSyntax = (monaco, text) => {
         })
       }
     } else if (line.startsWith('?')) {
+      lastDescriptionLine = i
       // Beschreibung - sollte nach einem Kink kommen
-      if (lastKinkLine !== lineNumber - 1) {
+      if (lastKinkLine === -1 || i - lastKinkLine > 10) {
         markers.push({
-          severity: monaco.MarkerSeverity.Info,
-          message: 'Beschreibung sollte direkt nach einem Kink-Eintrag stehen',
+          severity: monaco.MarkerSeverity.Warning,
+          message: 'Beschreibung ohne zugehörigen Kink-Eintrag',
           startLineNumber: lineNumber,
           startColumn: 1,
           endLineNumber: lineNumber,
@@ -273,12 +428,14 @@ export const validateKinkListSyntax = (monaco, text) => {
         })
       }
     } else if (line.startsWith('//')) {
-      // Kommentar - keine spezielle Validierung
+      // Kommentar - ist immer OK
+      continue
     } else {
       // Unbekannte Zeile
       markers.push({
-        severity: monaco.MarkerSeverity.Warning,
-        message: 'Unbekannte Zeile oder Format',
+        severity: monaco.MarkerSeverity.Info,
+        message:
+          'Unbekanntes Format. Zeilen sollten mit #, (, *, ?, // oder + [XX] beginnen',
         startLineNumber: lineNumber,
         startColumn: 1,
         endLineNumber: lineNumber,
@@ -287,10 +444,11 @@ export const validateKinkListSyntax = (monaco, text) => {
     }
   }
 
+  // Prüfe ob mindestens ein Inhalt vorhanden ist
   if (!hasAnyContent) {
     markers.push({
-      severity: monaco.MarkerSeverity.Info,
-      message: 'Die Liste ist leer.',
+      severity: monaco.MarkerSeverity.Warning,
+      message: 'Dokument ist leer',
       startLineNumber: 1,
       startColumn: 1,
       endLineNumber: 1,

@@ -1,0 +1,436 @@
+{
+  "app": {
+    "title": "Hypno Kinklist - Beta",
+    "subtitle": "Ihre personalisierte Kink-Präferenzliste",
+    "version": "App-Version"
+  },
+  "navigation": {
+    "home": "Startseite",
+    "edit": "Bearbeiten",
+    "export": "Exportieren",
+    "import": "Importieren",
+    "settings": "Einstellungen"
+  },
+  "common": {
+    "or": "oder",
+    "and": "und",
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolgreich",
+    "warning": "Warnung"
+  },
+  "theme": {
+    "toggleDark": "Zum dunklen Modus wechseln",
+    "toggleLight": "Zum hellen Modus wechseln"
+  },
+  "legend": {
+    "title": "🎨 Legende:",
+    "titleSimple": "Legende:",
+    "notEntered": "Nicht eingegeben",
+    "favorite": "Favorit",
+    "like": "Mag ich",
+    "okay": "Okay",
+    "maybe": "Vielleicht",
+    "no": "Nein"
+  },
+  "buttons": {
+    "start": "Start",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "close": "Schließen",
+    "continue": "Fortfahren",
+    "edit": "Bearbeiten",
+    "export": "Exportieren",
+    "import": "Importieren",
+    "delete": "Löschen",
+    "confirm": "Bestätigen",
+    "reset": "Zurücksetzen",
+    "help": "Hilfe",
+    "focus": "Fokussieren"
+  },
+  "editor": {
+    "title": "Kink-Liste bearbeiten",
+    "placeholder": "Geben Sie Ihren Kinklist-Code hier ein...",
+    "toolbar": {
+      "bold": "Fett",
+      "italic": "Kursiv",
+      "help": "Hilfe",
+      "helpTooltip": "Syntax-Hilfe anzeigen",
+      "validate": "Validieren",
+      "format": "Code formatieren",
+      "formatTooltip": "Code formatieren (Alt+Shift+F)",
+      "snippets": "Snippets",
+      "snippetsTooltip": "Snippet einfügen (Strg+K für Autovervollständigung)",
+      "blocks": "Vorlagen",
+      "blocksTooltip": "Vorgefertigte Blöcke einfügen",
+      "focus": "Editor fokussieren",
+      "focusTooltip": "Editor fokussieren"
+    },
+    "snippets": {
+      "categories": {
+        "all": "Alle",
+        "category": "Kategorien",
+        "kink": "Kinks",
+        "description": "Beschreibungen",
+        "template": "Vorlagen"
+      },
+      "selectCategory": "Snippet-Kategorie auswählen"
+    },
+    "help": {
+      "sections": {
+        "syntax": "Syntax",
+        "quickStart": "Schnellstart",
+        "keyboardShortcuts": "Tastenkürzel",
+        "advanced": "Erweitert"
+      },
+      "title": "Syntax-Hilfe",
+      "close": "Hilfe schließen"
+    },
+    "blocks": {
+      "title": "Einfügbaren Blöcke",
+      "all": "Alle",
+      "search": "Blöcke durchsuchen...",
+      "select": "Block auswählen",
+      "preview": "Vorschau"
+    },
+    "validation": {
+      "errors": "Validierungsfehler",
+      "warnings": "Warnungen",
+      "moreItems": "weitere"
+    },
+    "shortcuts": {
+      "description": "Shortcuts:",
+      "autocomplete": "Autocomplete",
+      "format": "Formatieren",
+      "save": "Speichern",
+      "close": "Schließen"
+    },
+    "content": {
+      "helpText": "Kinklist-Editor Hilfe:\n\nSYNTAX (NUR diese Präfixe sind gültig):\n# Kategorie Name - Definiert eine neue Kategorie (z.B. #Basics)\n(Feldbezeichnung) - Optionales Feld nach #-Zeile (z.B. (General))\n* Kink Name - Definiert einen Kink-Eintrag\n? Beschreibung - Beschreibung des vorherigen Kinks\n// Kommentar - Kommentarzeile\n\nBEISPIEL (Standard-Schema):\n#Basics\n(General)\n* I enjoy working with cisgender people\n? I feel comfortable and positive about engaging in hypnosis with cisgender individuals.\n* I drop very easily\n? I enter trance states quickly and with little resistance, often after minimal induction.\n\nFARB-CODING:\n# Kategorien - Grün und fett\n() Felder - Blau und kursiv\n* Kinks - Orange/gelb und fett\n? Beschreibungen - Braun/grau und kursiv\n// Kommentare - Grau und kursiv\n\nTASTENKÜRZEL (Monaco Editor):\nStrg+Space - IntelliSense/Autocomplete\nStrg+Shift+I - Formatieren\nStrg+F - Suchen\nStrg+H - Suchen und Ersetzen\nStrg+G - Zu Zeile springen\nF1 - Befehlspalette\nAlt+Z - Zeilenumbruch aktivieren/deaktivieren\n\nSNIPPETS:\n- cat: Neue Kategorie\n- item: Neuer Kink-Eintrag\n- section: Kategorie mit Kinks\n- template: Vollständiges Standard-Template\n\nTIPPS:\n- Verwenden Sie leere Zeilen zur besseren Lesbarkeit\n- Kategorien sollten mit # beginnen\n- Jeder Kink sollte eine Beschreibung mit ? haben\n- Nur die oben gezeigten Präfixe sind gültig",
+      "snippets": {
+        "cat": {
+          "label": "cat",
+          "detail": "Neue Kategorie",
+          "documentation": "Erstellt eine neue Kategorie mit optionaler Feldbezeichnung"
+        },
+        "item": {
+          "label": "item",
+          "detail": "Neuer Kink-Eintrag",
+          "documentation": "Erstellt einen neuen Kink-Eintrag mit Beschreibung"
+        },
+        "section": {
+          "label": "section",
+          "detail": "Kategorie mit Kinks",
+          "documentation": "Erstellt eine vollständige Sektion mit Kategorie und mehreren Kinks"
+        },
+        "template": {
+          "label": "template",
+          "detail": "Standard-Template",
+          "documentation": "Fügt das vollständige Standard-Template ein"
+        },
+        "basicSection": {
+          "label": "basic-section",
+          "detail": "Basics Sektion",
+          "documentation": "Erstellt eine Basics-Sektion basierend auf dem Standard-Template"
+        },
+        "safetySection": {
+          "label": "safety-section",
+          "detail": "Safety Sektion",
+          "documentation": "Erstellt eine Safety and Consent-Sektion"
+        },
+        "comment": {
+          "label": "comment",
+          "detail": "Kommentar",
+          "documentation": "Fügt eine Kommentarzeile hinzu"
+        },
+        "multilingualCat": {
+          "label": "multilingual-cat",
+          "detail": "Mehrsprachige Kategorie",
+          "documentation": "Erstellt eine Kategorie mit Übersetzungen für mehrere Sprachen mittels + [LANG] Syntax"
+        },
+        "multilingualItem": {
+          "label": "multilingual-item",
+          "detail": "Mehrsprachiger Kink-Eintrag",
+          "documentation": "Erstellt einen Kink-Eintrag mit Namen- und Beschreibungsübersetzungen für mehrere Sprachen"
+        },
+        "translationLine": {
+          "label": "translation",
+          "detail": "Übersetzungszeile",
+          "documentation": "Fügt eine Übersetzungszeile für die vorherige Kategorie, Kink oder Beschreibung mittels + [LANG] Syntax hinzu"
+        },
+        "enhancedTemplate": {
+          "label": "enhanced-template",
+          "detail": "Erweitertes Mehrsprachiges Template",
+          "documentation": "Fügt das vollständige erweiterte Template mit mehrsprachigem Inhalt für mehrere Sprachen ein"
+        }
+      },
+      "detailedHelp": {
+        "syntax": "Kinklist Syntax Übersicht (NUR diese Präfixe sind gültig):\n\n# Kategorie Name          - Definiert eine neue Kategorie (grün, fett)\n(Feldbezeichnung)         - Optionale Feldbezeichnung nach #-Zeile (blau, kursiv)\n* Kink Name               - Kink-Eintrag (orange/gelb, fett)\n? Beschreibung            - Beschreibung des vorherigen Kinks (braun/grau, kursiv)\n+ [LANG] Übersetzung      - Übersetzung der vorherigen Zeile (türkis, kursiv)\n// Kommentar              - Kommentarzeile (grau, kursiv)\n\nBEISPIEL (Standard-Schema):\n#Basics\n+ [DE] #Grundlagen\n(General)\n+ [DE] (Allgemein)\n* I enjoy working with cisgender people\n+ [DE] * Ich arbeite gerne mit cisgender Personen\n? I feel comfortable and positive about engaging in hypnosis with cisgender individuals.\n+ [DE] ? Ich fühle mich wohl und positiv dabei, mich hypnotisch mit cisgender Personen zu beschäftigen.\n\n// Kommentar für Notizen\n\nMEHRSPRACHIGE ÜBERSETZUNGEN:\n+ [DE] Text     - Deutsche Übersetzung\n+ [EN] Text     - Englische Übersetzung\n+ [SV] Text     - Schwedische Übersetzung\n+ [XX] Text     - Beliebige 2-stellige Sprachcodes\n\nWICHTIG: Nur die oben gezeigten 6 Präfixe (#, (), *, ?, +, //) sind gültig!",
+        "quickStart": "Schnellstart:\n1. Beginnen Sie mit einer Kategorie (#Basics)\n2. Fügen Sie optional eine Feldbezeichnung hinzu ((General))\n3. Listen Sie Kinks mit * auf (* Trust)\n4. Fügen Sie Beschreibungen mit ? hinzu (? Trust is the foundation...)\n5. Fügen Sie Übersetzungen mit + [LANG] hinzu (+ [DE] Vertrauen ist die Grundlage...)\n6. Nutzen Sie // für Kommentare (// This is a comment)\n7. Nutzen Sie die Snippets für schnelleres Arbeiten:\n   - 'cat' für neue Kategorie\n   - 'mcat' für mehrsprachige Kategorie\n   - 'item' für neuen Kink\n   - 'mitem' für mehrsprachigen Kink\n   - 'trans' für Übersetzungszeile\n   - 'template' für das Standard-Template\n8. Formatieren Sie Ihren Code mit Strg+Shift+I\n9. Fügen Sie Blöcke ein, um schnell komplexe Inhalte zu erstellen",
+        "keyboardShortcuts": "Tastenkürzel (Monaco Editor):\nStrg+Space         - IntelliSense/Autocomplete anzeigen\nStrg+Shift+I       - Code formatieren (wichtig!)\nStrg+F             - Suchen\nStrg+H             - Suchen und Ersetzen\nStrg+G             - Zu Zeile springen\nStrg+D             - Nächstes Vorkommen auswählen\nStrg+L             - Zeile auswählen\nStrg+/             - Zeile kommentieren/auskommentieren\nAlt+Z              - Zeilenumbruch ein/ausschalten\nF1                 - Befehlspalette öffnen\nStrg+Enter         - Änderungen übernehmen und Editor schließen",
+        "advanced": "Erweiterte Funktionen:\n- Snippets: Verwenden Sie die integrierten Code-Snippets für schnellere Eingabe\n- IntelliSense: Strg+Space zeigt Vorschläge basierend auf dem Kontext\n- Formatierung: Strg+Shift+I formatiert das gesamte Dokument korrekt\n- Validierung: Der Editor hebt Syntaxfehler automatisch hervor\n- Standard-Template: Nutzen Sie das 'template' Snippet für das vollständige Standard-Schema\n- Mehrsprachigkeit: Verwenden Sie + [LANG] Syntax für Übersetzungen\n- Kommentare: Verwenden Sie // für Notizen und Strukturierung\n- Nur gültige Syntax: Nur #, (), *, ?, +, // Präfixe werden unterstützt\n\nMEHRSPRACHIGE SYNTAX:\n+ [DE] Deutsche Übersetzung\n+ [EN] English translation\n+ [SV] Svenska översättning\n+ [XX] Beliebiger 2-stelliger Sprachcode\n\nTipp: Schauen Sie sich das Standard-Template an, um die korrekte Syntax zu verstehen."
+      }
+    }
+  },
+  "export": {
+    "title": "Export-Optionen",
+    "subtitle": "Wählen Sie Ihr Export-Format",
+    "modes": {
+      "quick": {
+        "title": "Schnellexport",
+        "description": "Direkte Exports mit Standardeinstellungen",
+        "formatsCount": "Formate"
+      },
+      "advanced": {
+        "title": "Erweiterte Optionen",
+        "description": "Alle Formate mit detaillierten Einstellungen",
+        "formatsCount": "Formate"
+      }
+    },
+    "formats": {
+      "image": "Bild",
+      "data": "Daten",
+      "document": "Dokument",
+      "pdf": "PDF-Dokument",
+      "json": "JSON-Daten",
+      "xml": "XML-Daten",
+      "csv": "CSV-Tabelle"
+    },
+    "options": {
+      "includeComments": "Kommentare einschließen",
+      "includeDescriptions": "Beschreibungen einschließen",
+      "compactMode": "Kompaktmodus"
+    },
+    "filename": {
+      "label": "Dateiname",
+      "placeholder": "Dateiname eingeben..."
+    },
+    "export": "Exportieren",
+    "import": "Importieren",
+    "exportKinklist": "Kinklist exportieren",
+    "importKinklist": "Kinklist importieren",
+    "exportSuccessful": "Export erfolgreich!",
+    "importSuccessful": "Import erfolgreich!",
+    "exportFailed": "Export fehlgeschlagen",
+    "importFailed": "Import fehlgeschlagen",
+    "preparing": "Export wird vorbereitet...",
+    "processing": "Import wird verarbeitet...",
+    "pleaseWait": "Bitte warten Sie, während Ihre Daten importiert werden.",
+    "closeDialog": "Schließen",
+    "pdf": {
+      "title": "Kink Liste",
+      "userTitle": "{{username}}'s Kink Liste",
+      "legend": "Bewertungslegende",
+      "completedSelections": "{{completed}}/{{total}} ausgefüllt",
+      "commentIndicator": "K",
+      "fieldComment": "{{field}} Kommentar",
+      "kinkComment": "{{kink}} - {{field}}"
+    },
+    "csv": {
+      "headers": {
+        "category": "Kategorie",
+        "kink": "Kink",
+        "field": "Feld",
+        "level": "Bewertung",
+        "comment": "Kommentar",
+        "description": "Beschreibung"
+      }
+    },
+    "quickExport": "Schnellexport",
+    "advancedOptions": "Erweiterte Optionen",
+    "exportMode": "Export-Modus",
+    "exportSettings": "Export-Einstellungen",
+    "includeComments": "Kommentare einschließen",
+    "includeDescriptions": "Beschreibungen einschließen",
+    "includeMetadata": "Metadaten einschließen",
+    "exportFormats": "Export-Formate",
+    "supportedFormats": "Unterstützte Formate",
+    "formatDescriptions": {
+      "PNG": "Hochqualitatives Rasterbild, ideal für Screenshots",
+      "JPEG": "Komprimiertes Bild, kleinere Dateigröße",
+      "WebP": "Modernes Bildformat mit optimaler Kompression",
+      "SVG": "Vektorgrafik, skalierbar und editierbar",
+      "PDF": "Professionelles A4-Layout zum Drucken",
+      "JSON": "Strukturierte Daten, vollständig importierbar",
+      "XML": "Standardisiertes Datenformat, vollständig importierbar",
+      "CSV": "Tabellendaten für Excel/Google Sheets",
+      "SSV": "Space-separated values für spezielle Anwendungen"
+    },
+    "errors": {
+      "noData": "🚫 Keine Kinklist-Daten",
+      "loadKinklist": "Bitte laden Sie eine Kinklist oder warten Sie,",
+      "dataLoading": "bis die Standard-Kinks geladen sind.",
+      "exportError": "❌ Export-Fehler",
+      "tryAgain": "Bitte versuchen Sie es erneut oder überprüfen Sie Ihre Auswahl.",
+      "unexpectedError": "🔧 Unerwarteter Fehler",
+      "reportIssue": "Bitte melden Sie dieses Problem, falls es weiterhin auftritt.",
+      "selectionsNeeded": "⚠️ Keine Auswahlen gefunden",
+      "makeSelections": "Bitte treffen Sie einige Auswahlen vor dem Export.",
+      "jsonExportFailed": "JSON-Export fehlgeschlagen: {{error}}",
+      "xmlExportFailed": "XML-Export fehlgeschlagen: {{error}}",
+      "csvExportFailed": "CSV-Export fehlgeschlagen: {{error}}",
+      "pdfExportFailed": "PDF-Export fehlgeschlagen: {{error}}",
+      "imageExportFailed": "Bild-Export fehlgeschlagen: {{error}}",
+      "svgExportFailed": "SVG-Export fehlgeschlagen: {{error}}",
+      "importFailed": "Import fehlgeschlagen: {{error}}",
+      "invalidDataFormat": "Ungültiges Datenformat",
+      "xmlParseError": "XML-Analysefehler:",
+      "invalidXmlFormat": "Ungültiges XML-Format: {{error}}",
+      "invalidXmlStructure": "Ungültige Kinklist-XML-Struktur - fehlendes Kinklist-Root-Element",
+      "xmlImportError": "XML-Import-Fehler:",
+      "noRootElement": "Kein Kinklist-Root-Element gefunden"
+    },
+    "canvas": {
+      "title": "Kinklist {{username}}",
+      "defaultFilename": "export",
+      "downloadError": "Fehler beim Herunterladen des Bildes:"
+    },
+    "actions": {
+      "exportAs": "Als {{format}} exportieren",
+      "tryAgain": "Erneut versuchen",
+      "reportIssue": "Problem melden"
+    }
+  },
+  "import": {
+    "title": "Daten importieren",
+    "subtitle": "Laden Sie Ihre Kink-Liste aus verschiedenen Quellen",
+    "heading": "📥 Kinklist importieren",
+    "methods": {
+      "file": {
+        "title": "📁 Datei hochladen",
+        "description": "Wählen Sie eine Datei von Ihrem Gerät",
+        "button": "Datei auswählen",
+        "dropHint": "oder Dateien hierher ziehen"
+      },
+      "text": {
+        "title": "📋 Daten einfügen",
+        "description": "Füge exportierte Daten direkt als Text ein",
+        "placeholder": "Hier JSON-, XML- oder CSV-Daten einfügen...",
+        "button": "Daten importieren"
+      }
+    },
+    "supportedFormats": "ℹ️ Unterstützte Formate",
+    "formats": {
+      "json": {
+        "title": "JSON:",
+        "description": "Vollständiger Import aller Daten und Einstellungen"
+      },
+      "xml": {
+        "title": "XML:",
+        "description": "Strukturierter Import aller Daten"
+      },
+      "csv": {
+        "title": "CSV:",
+        "description": "Import von Kink-Auswahlen und Bewertungen"
+      }
+    },
+    "dragActive": "📂 Dateien hier ablegen zum Importieren",
+    "processing": "Import wird verarbeitet...",
+    "successful": "Import erfolgreich!",
+    "importSuccessful": "Import erfolgreich!",
+    "dataImported": "Die Daten wurden erfolgreich importiert.",
+    "pleaseWait": "Bitte warten Sie, während Ihre Daten importiert werden.",
+    "errors": {
+      "unsupportedFileType": "Nicht unterstützter Dateityp: {{extension}}. Erlaubt: {{allowed}}",
+      "invalidFormat": "Ungültiges Datenformat",
+      "importFailed": "Import fehlgeschlagen",
+      "failedWithMessage": "Import fehlgeschlagen: {{message}}"
+    },
+    "accessibility": {
+      "selectFile": "Datei für Import auswählen"
+    }
+  },
+  "input": {
+    "title": "Kink-Auswahl",
+    "category": "Kategorie",
+    "description": "Beschreibung anzeigen",
+    "comment": "Kommentar hinzufügen",
+    "actions": {
+      "showDescription": "Beschreibung anzeigen",
+      "addComment": "Kommentar hinzufügen",
+      "close": "Schließen"
+    }
+  },
+  "comment": {
+    "title": "Kommentar hinzufügen",
+    "placeholder": "Geben Sie Ihren Kommentar ein...",
+    "save": "Kommentar speichern",
+    "delete": "Kommentar löschen"
+  },
+  "name": {
+    "title": "Export-Name",
+    "label": "Listen-Name",
+    "placeholder": "Listen-Name eingeben...",
+    "required": "Name ist erforderlich"
+  },
+  "error": {
+    "title": "Fehler",
+    "general": "Ein Fehler ist aufgetreten",
+    "parsing": "Fehler beim Analysieren der Kink-Liste",
+    "export": "Fehler beim Export",
+    "import": "Fehler beim Import",
+    "network": "Netzwerk-Fehler",
+    "close": "Schließen"
+  },
+  "success": {
+    "export": "Export erfolgreich abgeschlossen",
+    "import": "Import erfolgreich abgeschlossen",
+    "save": "Erfolgreich gespeichert"
+  },
+  "accessibility": {
+    "closeDialog": "Dialog schließen",
+    "openMenu": "Menü öffnen",
+    "selectOption": "Option auswählen",
+    "toggleOption": "Option umschalten"
+  },
+  "loading": {
+    "default": "Lädt...",
+    "export": "Exportiert...",
+    "import": "Importiert...",
+    "save": "Speichert..."
+  },
+  "language": {
+    "select": "Sprache auswählen",
+    "en": "English",
+    "de": "Deutsch",
+    "sv": "Svenska"
+  },
+  "fix": {
+    "title": "Problem mit dem Start-Modal beheben",
+    "description": "Falls das Start-Modal (Kink-Auswahl) nicht richtig schließt oder nicht angezeigt wird, können Sie mit diesem Button den Status zurücksetzen:",
+    "button": "Modal-Status zurücksetzen",
+    "successMessage": "Der Modal-Status wurde erfolgreich zurückgesetzt. Sie können das Start-Modal jetzt wieder normal verwenden."
+  },
+  "kinks": {
+    "basics": "Grundlagen",
+    "safety": "Sicherheit und Einverständnis",
+    "types": "Arten der Hypnose",
+    "categoryLabel": "Kinks in der Kategorie {{categoryName}}"
+  },
+  "comments": {
+    "addComment": "Kommentar hinzufügen",
+    "editComment": "Kommentar bearbeiten",
+    "category": "Kategorie",
+    "field": "Feld",
+    "kink": "Kink",
+    "rating": "Bewertung",
+    "commentOptional": "Kommentar (optional)",
+    "placeholder": "Fügen Sie hier Ihren Kommentar hinzu...",
+    "characters": "Zeichen",
+    "toClose": "zum Schließen",
+    "toSave": "zum Speichern",
+    "forField": "für {{kinkName}} - {{field}} {{action}}",
+    "fieldFor": "{{field}} für {{kinkName}}",
+    "showDescription": "Beschreibung anzeigen"
+  },
+  "choice": {
+    "selectionFor": "Auswahl für {{kinkName}} ({{field}})",
+    "levelFor": "{{levelName}} für {{kinkName}} ({{field}})"
+  },
+  "utils": {
+    "commentEncodeError": "Fehler beim Kodieren der Kommentare:",
+    "commentDecodeError": "Fehler beim Dekodieren der Kommentare:"
+  }
+}

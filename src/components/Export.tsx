@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import ExportModal from './ExportModal'
 import ImportModal from './ImportModal'
 
 const Export: React.FC = () => {
+  const { t } = useTranslation()
   const [exportModalOpen, setExportModalOpen] = useState(false)
   const [importModalOpen, setImportModalOpen] = useState(false)
 
@@ -28,17 +30,17 @@ const Export: React.FC = () => {
         <button
           className="export-action-button"
           onClick={handleOpenExportModal}
-          aria-label="Kinklist exportieren"
+          aria-label={t('export.export')}
         >
-          📤 Exportieren
+          📤 {t('export.export')}
         </button>
 
         <button
           className="import-action-button"
           onClick={handleOpenImportModal}
-          aria-label="Kinklist importieren"
+          aria-label={t('export.import')}
         >
-          📥 Importieren
+          📥 {t('export.import')}
         </button>
       </div>
 

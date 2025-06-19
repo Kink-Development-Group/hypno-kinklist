@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import {
   ExportFormat,
@@ -26,6 +27,7 @@ interface ExportModalProps {
 }
 
 const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
+  const { t } = useTranslation()
   const { kinks, levels, selection } = useKinklist()
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isSuccess, setIsSuccess] = useState<boolean>(false)
@@ -48,8 +50,8 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
   const exportModes: ExportModeOption[] = [
     {
       mode: 'quick',
-      title: 'Schnellexport',
-      description: 'Direkte Exports mit Standardeinstellungen',
+      title: t('export.modes.quick.title'),
+      description: t('export.modes.quick.description'),
       formats: ['PNG', 'JSON', 'PDF'],
       defaultOptions: {
         includeComments: true,
@@ -59,8 +61,8 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
     },
     {
       mode: 'advanced',
-      title: 'Erweiterte Optionen',
-      description: 'Alle Formate mit detaillierten Einstellungen',
+      title: t('export.modes.advanced.title'),
+      description: t('export.modes.advanced.description'),
       formats: ['PNG', 'JPEG', 'WebP', 'SVG', 'PDF', 'JSON', 'XML', 'CSV'],
       defaultOptions: {
         includeComments: true,
@@ -72,14 +74,14 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
 
   // Format-spezifische Einstellungen
   const formatDescriptions = {
-    PNG: 'Hochqualitatives Rasterbild, ideal für Screenshots',
-    JPEG: 'Komprimiertes Bild, kleinere Dateigröße',
-    WebP: 'Modernes Bildformat mit optimaler Kompression',
-    SVG: 'Vektorgrafik, skalierbar und editierbar',
-    PDF: 'Professionelles A4-Layout zum Drucken',
-    JSON: 'Strukturierte Daten, vollständig importierbar',
-    XML: 'Standardisiertes Datenformat, vollständig importierbar',
-    CSV: 'Tabellendaten für Excel/Google Sheets',
+    PNG: t('export.formatDescriptions.PNG'),
+    JPEG: t('export.formatDescriptions.JPEG'),
+    WebP: t('export.formatDescriptions.WebP'),
+    SVG: t('export.formatDescriptions.SVG'),
+    PDF: t('export.formatDescriptions.PDF'),
+    JSON: t('export.formatDescriptions.JSON'),
+    XML: t('export.formatDescriptions.XML'),
+    CSV: t('export.formatDescriptions.CSV'),
   }
 
   const handleExport = useCallback((format: ExportFormat) => {
@@ -133,20 +135,12 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
           ctx.fillStyle = '#2c3e50'
           ctx.font = 'bold 32px "Segoe UI", Arial, sans-serif'
           ctx.textAlign = 'center'
-          ctx.fillText('🚫 Keine Kinklist-Daten', canvas.width / 2, 200)
+          ctx.fillText(t('export.errors.noData'), canvas.width / 2, 200)
 
           ctx.font = '18px "Segoe UI", Arial, sans-serif'
           ctx.fillStyle = '#6c757d'
-          ctx.fillText(
-            'Bitte laden Sie eine Kinklist oder warten Sie,',
-            canvas.width / 2,
-            250
-          )
-          ctx.fillText(
-            'bis die Standard-Kinks geladen sind.',
-            canvas.width / 2,
-            280
-          )
+          ctx.fillText(t('export.errors.loadKinklist'), canvas.width / 2, 250)
+          ctx.fillText(t('export.errors.dataLoading'), canvas.width / 2, 280)
 
           // Hilfetext
           ctx.font = '14px "Segoe UI", Arial, sans-serif'
@@ -311,7 +305,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
       // Kompakte horizontale Legende
       ctx.fillStyle = '#2c3e50'
       ctx.font = 'bold 14px "Segoe UI", Arial, sans-serif'
-      ctx.fillText('🎨 Legende:', margin, yPosition)
+      ctx.fillText(t('legend.title'), margin, yPosition)
 
       const legendItems = Object.entries(levels).filter(
         ([key]) => key !== 'Not Entered'
@@ -595,7 +589,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
 
       return canvas
     },
-    [kinks, levels, selection]
+    [kinks, levels, selection, t]
   )
 
   const performExport = useCallback(async () => {
@@ -663,10 +657,10 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
         // Schließe Modal nach erfolgreichem Export
         setTimeout(() => onClose(), 1000)
       } else {
-        setError(result.error || 'Export fehlgeschlagen')
+        setError(result.error || t('export.exportFailed'))
       }
     } catch (error) {
-      setError(`Export fehlgeschlagen: ${error}`)
+      setError(`${t('export.exportFailed')}: ${error}`)
     } finally {
       setIsLoading(false)
       setPendingExport(null)
@@ -679,6 +673,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
     selection,
     createExportCanvas,
     onClose,
+    t,
   ])
 
   // Effect für automatischen Export
@@ -695,11 +690,11 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
     <>
       <div className="overlay visible" role="dialog" aria-modal="true">
         <div className="modal-content export-modal">
-          <h2>📤 Kinklist exportieren</h2>
+          <h2>📤 {t('export.exportKinklist')}</h2>
 
           {/* Export-Modi-Auswahl */}
           <div className="export-mode-selection">
-            <h3>Export-Modus</h3>
+            <h3>{t('export.exportMode')}</h3>
             <div className="mode-options">
               {exportModes.map((mode) => (
                 <button
@@ -716,7 +711,8 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
                   <div className="mode-header">
                     <strong>{mode.title}</strong>
                     <span className="mode-format-count">
-                      {mode.formats.length} Formate
+                      {mode.formats.length}{' '}
+                      {t('export.modes.quick.formatsCount')}
                     </span>
                   </div>
                   <p className="mode-description">{mode.description}</p>
@@ -728,7 +724,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
           {/* Export-Optionen - nur im erweiterten Modus */}
           {selectedMode === 'advanced' && (
             <div className="export-options">
-              <h3>Export-Einstellungen</h3>
+              <h3>{t('export.exportSettings')}</h3>
               <div className="export-settings">
                 <label>
                   <input
@@ -741,7 +737,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
                       }))
                     }
                   />
-                  Kommentare einschließen
+                  {t('export.includeComments')}
                 </label>
                 <label>
                   <input
@@ -754,7 +750,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
                       }))
                     }
                   />
-                  Beschreibungen einschließen
+                  {t('export.includeDescriptions')}
                 </label>
                 <label>
                   <input
@@ -767,7 +763,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
                       }))
                     }
                   />
-                  Metadaten einschließen
+                  {t('export.includeMetadata')}
                 </label>
               </div>
             </div>
@@ -776,7 +772,9 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
           {/* Format-Auswahl */}
           <div className="export-formats">
             <h3>
-              {selectedMode === 'quick' ? 'Schnellexport' : 'Export-Formate'}
+              {selectedMode === 'quick'
+                ? t('export.quickExport')
+                : t('export.exportFormats')}
             </h3>
             <div className="format-grid">
               {exportModes
@@ -788,10 +786,10 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
                       <span className="format-type">
                         {' '}
                         {['PNG', 'JPEG', 'WebP', 'SVG'].includes(format)
-                          ? 'Bild'
+                          ? t('export.formats.image')
                           : ['JSON', 'XML', 'CSV'].includes(format)
-                            ? 'Daten'
-                            : 'Dokument'}
+                            ? t('export.formats.data')
+                            : t('export.formats.document')}
                       </span>
                     </div>
                     <p className="format-description">
@@ -802,7 +800,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
                       onClick={() => handleExport(format as ExportFormat)}
                       disabled={isLoading}
                     >
-                      Als {format} exportieren
+                      {t('export.actions.exportAs', { format })}
                     </button>
                   </div>
                 ))}
@@ -811,7 +809,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
 
           <div className="modal-actions">
             <button type="button" className="btn" onClick={onClose}>
-              Schließen
+              {t('buttons.close')}
             </button>
           </div>
         </div>
@@ -828,14 +826,14 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
       {isSuccess && (
         <div className="overlay visible">
           <div className="modal-content success-modal">
-            <h2>✅ Export erfolgreich!</h2>
-            <p>Der Export wurde erfolgreich abgeschlossen.</p>
+            <h2>✅ {t('export.exportSuccessful')}</h2>
+            <p>{t('success.export')}</p>
             <div className="modal-actions">
               <button
                 className="btn btn-primary"
                 onClick={() => setIsSuccess(false)}
               >
-                OK
+                {t('buttons.confirm')}
               </button>
             </div>
           </div>
@@ -845,9 +843,9 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
       {isLoading && (
         <div className="overlay visible">
           <div className="modal-content loading-modal">
-            <h2>Export wird vorbereitet...</h2>
+            <h2>{t('export.preparing')}</h2>
             <div className="loading-spinner"></div>
-            <p>Bitte warten Sie, während Ihr Export erstellt wird.</p>
+            <p>{t('export.pleaseWait')}</p>
           </div>
         </div>
       )}

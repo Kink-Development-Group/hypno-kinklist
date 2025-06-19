@@ -1,4 +1,9 @@
+import i18n from '../i18n'
 import { KinksData, LevelsData, Selection } from '../types'
+import {
+  parseEnhancedKinksText,
+  resolveEnhancedKinksData,
+} from './multilingualTemplates'
 
 export const strToClass = (str: string): string => {
   let className = ''
@@ -266,7 +271,7 @@ export const updateHash = (
       const encodedComments = btoa(encodeURIComponent(commentsJson))
       hash += '|' + encodedComments
     } catch (error) {
-      console.error('Fehler beim Kodieren der Kommentare:', error)
+      console.error(i18n.t('utils.commentEncodeError'), error)
     }
   }
 
@@ -292,7 +297,7 @@ export const parseHash = (
       const decodedComments = decodeURIComponent(atob(parts[1]))
       comments = JSON.parse(decodedComments)
     } catch (e) {
-      console.error('Fehler beim Dekodieren der Kommentare:', e)
+      console.error(i18n.t('utils.commentDecodeError'), e)
       comments = []
     }
   }
@@ -371,7 +376,7 @@ export const downloadImage = (
 ): void => {
   try {
     const version = getAppVersion()
-    const filename = `kinklist_${username ? username.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'export'}_v${version}_${new Date().toISOString().slice(0, 10)}.png`
+    const filename = `kinklist_${username ? username.replace(/[^a-z0-9]/gi, '_').toLowerCase() : i18n.t('export.canvas.defaultFilename')}_v${version}_${new Date().toISOString().slice(0, 10)}.png`
 
     // Create a temporary link element to trigger the download
     const link = document.createElement('a')
@@ -386,7 +391,7 @@ export const downloadImage = (
       window.URL.revokeObjectURL(link.href)
     }, 100)
   } catch (error) {
-    console.error('Error downloading image:', error)
+    console.error(i18n.t('export.canvas.downloadError'), error)
     throw error
   }
 }
@@ -415,7 +420,7 @@ export const setupCanvas = (
   // Eleganter Header
   context.font = 'bold 16px Arial, sans-serif'
   context.fillStyle = '#333333'
-  context.fillText('Kinklist ' + username, 12, 28)
+  context.fillText(i18n.t('export.canvas.title', { username }), 12, 28)
 
   // Dezente Header-Trennlinie
   context.beginPath()
@@ -499,3 +504,39 @@ export const drawCallHandlers = {
 }
 
 // Diese Funktionen wurden durch React-State-basierte Implementierungen ersetzt
+
+// Enhanced parser wrapper that automatically detects and handles multilingual templates
+export const parseKinksTextEnhanced = (
+  text: string,
+  errorHandler: (msg: string) => void = (msg) => window.alert(msg)
+): KinksData | null => {
+  // Check if the text contains multilingual syntax
+  const hasMultilingualSyntax = /^\+\s*\[[A-Z]{2}\]/.test(
+    text.split('\n').find((line) => line.trim()) || ''
+  )
+
+  if (hasMultilingualSyntax) {
+    // Use enhanced parser for multilingual templates
+    try {
+      const enhancedKinks = parseEnhancedKinksText(text, errorHandler)
+      if (enhancedKinks) {
+        // Resolve to current language and return as standard KinksData
+        return resolveEnhancedKinksData(enhancedKinks, i18n.language)
+      }
+    } catch (error) {
+      console.warn(
+        'Enhanced parsing failed, falling back to standard parser:',
+        error
+      )
+    }
+  }
+
+  // Fall back to standard parser
+  return parseKinksText(text, errorHandler)
+}
+
+// Helper function to detect if text contains multilingual syntax
+export const hasMultilingualContent = (text: string): boolean => {
+  const lines = text.split('\n')
+  return lines.some((line) => /^\+\s*\[[A-Z]{2}\]\s*/.test(line.trim()))
+}

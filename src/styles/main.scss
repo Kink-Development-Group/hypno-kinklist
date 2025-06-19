@@ -140,6 +140,12 @@ h6 {
   position: relative; // Für bessere Positionskontrolle
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 // Theme toggle button
 #ThemeToggle {
   background-color: transparent;
@@ -166,6 +172,66 @@ h6 {
     &:hover {
       background-color: rgba(255, 255, 255, 0.2);
     }
+  }
+}
+
+// Language toggle button
+.language-toggle {
+  background-color: var(--input-bg-color);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 6px 28px 6px 10px;
+  border-radius: 6px;
+  min-width: 90px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color);
+  appearance: none;
+  transition: all 0.2s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  position: relative;
+
+  // Custom dropdown arrow
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid var(--border-color);
+    transform: translateY(-50%);
+  }
+
+  &:hover,
+  &:focus {
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+    border-color: var(--button-bg-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(73, 128, 174, 0.18);
+  }
+
+  option {
+    color: var(--text-color);
+    background: var(--input-bg-color);
+  }
+}
+
+[data-theme='dark'] .language-toggle {
+  background-color: var(--input-bg-color);
+  border-color: var(--border-color);
+
+  &::after {
+    border-top-color: var(--button-text-color);
   }
 }
 
@@ -554,6 +620,15 @@ table {
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   max-width: 90%;
+
+  .legend-title {
+    width: 100%;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--header-bg-color);
+    margin: 0 0 8px 0;
+  }
 
   .legend-item {
     display: flex;
@@ -960,7 +1035,7 @@ table {
 }
 
 // Overlay styles
-// Hinweis: Die Basisstile werden aus overlay.scss importiert
+// Hinweis: Die Basisstile werden aus overlay.scss abgedeckt
 .overlay {
   // Ergänzende Stile, die nicht durch overlay.scss abgedeckt sind
   &.visible {
@@ -1576,4 +1651,47 @@ html {
   max-width: 100%;
   overflow-x: hidden;
   word-wrap: break-word;
+}
+
+// Template Loading Styles
+.template-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 2rem;
+
+  p {
+    margin: 1rem 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+
+  // Simple loading animation
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--button-bg-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

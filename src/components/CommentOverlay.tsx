@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback, memo, useRef } from 'react'
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
-// import { Selection } from "../types";s
 
 const CommentOverlay: React.FC = () => {
+  const { t } = useTranslation()
   const {
     selection,
     setSelection,
@@ -109,34 +110,34 @@ const CommentOverlay: React.FC = () => {
         <button
           className="close-button"
           onClick={handleClose}
-          aria-label="Schließen"
+          aria-label={t('buttons.close')}
           type="button"
         >
           &times;
         </button>
 
-        <h2 id="comment-overlay-title">Kommentar hinzufügen</h2>
+        <h2 id="comment-overlay-title">{t('comments.addComment')}</h2>
 
         <div className="comment-kink-info">
           <div className="comment-kink-category">
-            <strong>Kategorie:</strong> {selectedKink.category}
+            <strong>{t('comments.category')}:</strong> {selectedKink.category}
           </div>
           {selectedKink.showField && (
             <div className="comment-kink-field">
-              <strong>Feld:</strong> {selectedKink.field}
+              <strong>{t('comments.field')}:</strong> {selectedKink.field}
             </div>
           )}
           <div className="comment-kink-name">
-            <strong>Kink:</strong> {selectedKink.kink}
+            <strong>{t('comments.kink')}:</strong> {selectedKink.kink}
           </div>
           <div className="comment-kink-value">
-            <strong>Bewertung:</strong> {selectedKink.value}
+            <strong>{t('comments.rating')}:</strong> {selectedKink.value}
           </div>
         </div>
 
         <div className="comment-input-section">
           <label htmlFor="comment-textarea" className="comment-label">
-            Kommentar (optional):
+            {t('comments.commentOptional')}:
           </label>
           <textarea
             id="comment-textarea"
@@ -144,12 +145,12 @@ const CommentOverlay: React.FC = () => {
             className="comment-textarea"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder="Fügen Sie hier Ihren Kommentar hinzu..."
+            placeholder={t('comments.placeholder')}
             rows={6}
             maxLength={1000}
           />
           <div className="comment-char-count">
-            {comment.length}/1000 Zeichen
+            {comment.length}/1000 {t('comments.characters')}
           </div>
         </div>
 
@@ -159,21 +160,21 @@ const CommentOverlay: React.FC = () => {
             className="comment-button comment-button-cancel"
             onClick={handleClose}
           >
-            Abbrechen
+            {t('buttons.cancel')}
           </button>
           <button
             type="button"
             className="comment-button comment-button-save"
             onClick={handleSave}
           >
-            Speichern
+            {t('buttons.save')}
           </button>
         </div>
 
         <div className="comment-shortcuts">
           <small>
-            <kbd>Esc</kbd> zum Schließen • <kbd>Strg</kbd>+<kbd>Enter</kbd> zum
-            Speichern
+            <kbd>Esc</kbd> {t('comments.toClose')} • <kbd>Strg</kbd>+
+            <kbd>Enter</kbd> {t('comments.toSave')}
           </small>
         </div>
       </div>

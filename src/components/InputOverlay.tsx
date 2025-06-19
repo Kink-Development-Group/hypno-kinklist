@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback, memo, useRef } from 'react'
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import { Selection } from '../types'
 
@@ -15,6 +16,7 @@ const InputOverlay: React.FC = () => {
     setIsCommentOverlayOpen,
     setSelectedKink,
   } = useKinklist()
+  const { t } = useTranslation()
 
   const [previousKinks, setPreviousKinks] = useState<React.ReactNode[]>([])
   const [nextKinks, setNextKinks] = useState<React.ReactNode[]>([])
@@ -145,7 +147,7 @@ const InputOverlay: React.FC = () => {
         <div
           key={`${kink.category}-${kink.kink}-${kink.field}`}
           role="radiogroup"
-          aria-label={`Auswahloptionen für ${kink.kink}`}
+          aria-label={t('input.title')}
         >
           {Object.entries(levels).map(([levelName, level], index) => {
             const isSelected = kink.value === levelName
@@ -170,7 +172,7 @@ const InputOverlay: React.FC = () => {
         </div>
       )
     },
-    [levels, handleLevelChange]
+    [levels, handleLevelChange, t]
   )
 
   // Create a kink element for the secondary (previous/next) view
@@ -330,9 +332,17 @@ const InputOverlay: React.FC = () => {
                 <button
                   className={`comment-button-small modal-comment-button ${hasComment ? 'has-comment' : ''}`}
                   onClick={handleOpenComment}
-                  aria-label={`Kommentar für ${currentKink.kink} ${hasComment ? 'bearbeiten' : 'hinzufügen'}`}
+                  aria-label={t('comments.forField', {
+                    kinkName: currentKink.kink,
+                    field: currentKink.field,
+                    action: hasComment
+                      ? t('comments.editComment')
+                      : t('comments.addComment'),
+                  })}
                   title={
-                    hasComment ? 'Kommentar bearbeiten' : 'Kommentar hinzufügen'
+                    hasComment
+                      ? t('comments.editComment')
+                      : t('comments.addComment')
                   }
                   type="button"
                 >
@@ -387,7 +397,7 @@ const InputOverlay: React.FC = () => {
           <button
             className="closePopup"
             onClick={handleClose}
-            aria-label="Schließen"
+            aria-label={t('input.actions.close')}
           >
             &times;
           </button>

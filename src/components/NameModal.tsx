@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface NameModalProps {
   open: boolean
@@ -8,6 +9,7 @@ interface NameModalProps {
 
 const NameModal: React.FC<NameModalProps> = ({ open, onSubmit, onClose }) => {
   const inputRef = useRef<HTMLInputElement>(null)
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (open && inputRef.current) {
@@ -27,23 +29,23 @@ const NameModal: React.FC<NameModalProps> = ({ open, onSubmit, onClose }) => {
   return (
     <div className="overlay visible" role="dialog" aria-modal="true">
       <div className="modal-content name-modal">
-        <h2>Name eingeben</h2>
+        <h2>{t('name.title')}</h2>
         <form onSubmit={handleSubmit} autoComplete="off">
           <input
             ref={inputRef}
             type="text"
-            placeholder="Ihr Name (optional)"
+            placeholder={t('name.placeholder')}
             maxLength={40}
-            aria-label="Ihr Name"
+            aria-label={t('name.label')}
             className="modal-input"
             autoFocus
           />
           <div className="modal-actions">
             <button type="button" className="btn" onClick={onClose}>
-              Abbrechen
+              {t('buttons.cancel')}
             </button>
             <button type="submit" className="btn btn-primary">
-              Weiter
+              {t('buttons.continue')}
             </button>
           </div>
         </form>

@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
+  getBlocksByCategory,
   getPasteableBlocks,
   PasteableBlock,
-  getBlocksByCategory,
   searchBlocks,
 } from './EditorUtils'
 
@@ -19,9 +20,10 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
   showSearch = true,
   className = '',
 }) => {
+  const { t } = useTranslation()
   const [blocks, setBlocks] = useState<PasteableBlock[]>([])
   const [filteredBlocks, setFilteredBlocks] = useState<PasteableBlock[]>([])
-  const [selectedCategory, setSelectedCategory] = useState<string>('Alle')
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [expandedBlockId, setExpandedBlockId] = useState<string | null>(null)
 
@@ -37,7 +39,7 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
     let result = blocks
 
     // Nach Kategorie filtern
-    if (selectedCategory !== 'Alle') {
+    if (selectedCategory !== 'all') {
       result = getBlocksByCategory(selectedCategory)
     }
 
@@ -45,16 +47,17 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
     if (searchQuery) {
       result = searchBlocks(searchQuery).filter(
         (block) =>
-          selectedCategory === 'Alle' || block.category === selectedCategory
+          selectedCategory === t('editor.blocks.all') ||
+          block.category === selectedCategory
       )
     }
 
     setFilteredBlocks(result)
-  }, [selectedCategory, searchQuery, blocks])
+  }, [selectedCategory, searchQuery, blocks, t])
 
   // Eindeutige Kategorien für Filter
   const uniqueCategories = [
-    'Alle',
+    t('editor.blocks.all'),
     ...new Set(blocks.map((block) => block.category)),
   ]
 
@@ -72,13 +75,13 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
   return (
     <div className={`block-picker ${position} ${className}`}>
       <div className="block-picker-header">
-        <h3>Einfügbare Blöcke</h3>
+        <h3>{t('editor.blocks.title')}</h3>
 
         {showSearch && (
           <div className="block-picker-search">
             <input
               type="text"
-              placeholder="Suche..."
+              placeholder={t('editor.blocks.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               aria-label="Blöcke durchsuchen"

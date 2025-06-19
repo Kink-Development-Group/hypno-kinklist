@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useMemo, memo } from 'react'
-import KinkCategory from './KinkCategory'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useKinklist } from '../context/KinklistContext'
+import KinkCategory from './KinkCategory'
 
 const InputList: React.FC = () => {
   const { kinks } = useKinklist()
@@ -93,7 +93,7 @@ const InputList: React.FC = () => {
               return (
                 <KinkCategory
                   key={catName}
-                  name={catName}
+                  name={cat.name}
                   fields={cat.fields}
                   kinks={cat.kinks}
                   descriptions={cat.descriptions}
@@ -107,4 +107,4 @@ const InputList: React.FC = () => {
   )
 }
 
-export default memo(InputList)
+export default InputList

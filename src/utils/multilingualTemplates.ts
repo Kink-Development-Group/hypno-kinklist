@@ -1,0 +1,371 @@
+// Enhanced multilingual template system
+// Supports the new + [LANG] content syntax alongside existing format
+
+import i18n from '../i18n'
+
+// Interface for multilingual content
+export interface MultilingualContent {
+  default: string
+  translations: Record<string, string> // language code -> translated content
+}
+
+// Enhanced interfaces that support multilingual content
+export interface EnhancedKinkCategory {
+  name: string | MultilingualContent
+  fields: (string | MultilingualContent)[]
+  kinks: (string | MultilingualContent)[]
+  descriptions?: (string | MultilingualContent)[]
+}
+
+export type EnhancedKinksData = Record<string, EnhancedKinkCategory>
+
+// Utility functions
+export const resolveMultilingualContent = (
+  content: string | MultilingualContent,
+  language: string
+): string => {
+  if (typeof content === 'string') {
+    return content
+  }
+
+  // Try exact language match
+  if (content.translations[language]) {
+    return content.translations[language]
+  }
+
+  // Try language code without region (e.g., 'en' from 'en-US')
+  const baseLanguage = language.split('-')[0].toUpperCase()
+  if (content.translations[baseLanguage]) {
+    return content.translations[baseLanguage]
+  }
+
+  // Fall back to default
+  return content.default
+}
+
+export const createMultilingualContent = (
+  defaultContent: string,
+  translations: Record<string, string> = {}
+): MultilingualContent => ({
+  default: defaultContent,
+  translations,
+})
+
+// Helper function to parse multilingual line format: + [LANG] content
+const parseMultilingualLine = (
+  line: string
+): { language: string; content: string } | null => {
+  const match = line.match(/^\+\s*\[([A-Z]{2})\]\s*(.*)$/)
+  if (match) {
+    return {
+      language: match[1],
+      content: match[2],
+    }
+  }
+  return null
+}
+
+// Helper function to apply multilingual content to existing content
+const applyMultilingualContent = (
+  existing: string | MultilingualContent,
+  language: string,
+  content: string
+): MultilingualContent => {
+  if (typeof existing === 'string') {
+    // Convert string to MultilingualContent
+    return {
+      default: existing,
+      translations: { [language]: content },
+    }
+  } else {
+    // Add to existing MultilingualContent
+    return {
+      ...existing,
+      translations: {
+        ...existing.translations,
+        [language]: content,
+      },
+    }
+  }
+}
+
+// Enhanced parser that supports the new + [LANG] content syntax
+export const parseEnhancedKinksText = (
+  text: string,
+  _errorHandler: (msg: string) => void = (msg) => window.alert(msg)
+): EnhancedKinksData | null => {
+  const newKinks: EnhancedKinksData = {}
+  const lines = text.replace(/\r/g, '').split('\n')
+
+  let cat: Partial<EnhancedKinkCategory> | null = null
+  let catName: string | null = null
+  let lastKinkIdx: number | null = null
+  let lastCategoryLine: string | null = null
+  let lastKinkLine: string | null = null
+  let lastDescriptionLine: string | null = null
+  let lastFieldsLine: string | null = null
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    if (!line.length) continue
+
+    // Check for multilingual translation line
+    const multilingualMatch = parseMultilingualLine(line)
+
+    if (multilingualMatch) {
+      const { language, content } = multilingualMatch
+
+      // Determine what this translation applies to based on the last parsed element
+      if (content.startsWith('#') && lastCategoryLine) {
+        // Category name translation
+        const categoryContent = content.substring(1).trim()
+        if (catName && cat) {
+          cat.name = applyMultilingualContent(
+            typeof cat.name === 'string' ? cat.name : cat.name || catName,
+            language,
+            categoryContent
+          )
+        }
+      } else if (
+        content.startsWith('(') &&
+        content.endsWith(')') &&
+        lastFieldsLine &&
+        cat
+      ) {
+        // Field translation - translate the entire field list
+        const fieldContent = content.substring(1, content.length - 1).trim()
+        const translatedFields = fieldContent
+          .split(',')
+          .map((field) => field.trim())
+
+        if (cat.fields && translatedFields.length === cat.fields.length) {
+          // Apply translations to each field
+          for (let i = 0; i < cat.fields.length; i++) {
+            cat.fields[i] = applyMultilingualContent(
+              cat.fields[i],
+              language,
+              translatedFields[i]
+            )
+          }
+          lastFieldsLine = null // Reset after successful translation
+        } else if (
+          cat.fields &&
+          cat.fields.length === 1 &&
+          translatedFields.length === 1
+        ) {
+          // Single field case
+          cat.fields[0] = applyMultilingualContent(
+            cat.fields[0],
+            language,
+            translatedFields[0]
+          )
+          lastFieldsLine = null // Reset after successful translation
+        }
+      } else if (
+        content.startsWith('*') &&
+        lastKinkLine &&
+        cat &&
+        lastKinkIdx !== null
+      ) {
+        // Kink name translation
+        const kinkContent = content.substring(1).trim()
+        if (cat.kinks && cat.kinks[lastKinkIdx]) {
+          cat.kinks[lastKinkIdx] = applyMultilingualContent(
+            cat.kinks[lastKinkIdx],
+            language,
+            kinkContent
+          )
+        }
+      } else if (
+        content.startsWith('?') &&
+        lastDescriptionLine &&
+        cat &&
+        lastKinkIdx !== null
+      ) {
+        // Description translation
+        const descContent = content.substring(1).trim()
+        if (!cat.descriptions) {
+          cat.descriptions = []
+        }
+        while (cat.descriptions.length <= lastKinkIdx) {
+          cat.descriptions.push('')
+        }
+        cat.descriptions[lastKinkIdx] = applyMultilingualContent(
+          cat.descriptions[lastKinkIdx] || '',
+          language,
+          descContent
+        )
+      }
+      continue
+    }
+
+    // Handle regular template syntax
+    if (line[0] === '#') {
+      if (
+        catName &&
+        cat &&
+        Array.isArray(cat.fields) &&
+        cat.fields.length > 0 &&
+        Array.isArray(cat.kinks) &&
+        cat.kinks.length > 0
+      ) {
+        newKinks[catName] = {
+          ...cat,
+          name: cat.name || catName,
+        } as EnhancedKinkCategory
+      }
+      catName = line.substring(1).trim()
+      cat = { name: catName, kinks: [], descriptions: [] }
+      lastKinkIdx = null
+      lastCategoryLine = line
+      lastKinkLine = null
+      lastDescriptionLine = null
+      lastFieldsLine = null
+    }
+
+    if (!catName) continue
+
+    if (line[0] === '(') {
+      if (cat) {
+        cat.fields = line
+          .substring(1, line.length - 1)
+          .trim()
+          .split(',')
+          .map((field) => field.trim())
+        lastFieldsLine = line
+      }
+    } else if (line[0] === '*') {
+      const kink = line.substring(1).trim()
+      if (cat && Array.isArray(cat.kinks) && Array.isArray(cat.descriptions)) {
+        cat.kinks.push(kink)
+        cat.descriptions.push('')
+        lastKinkIdx = cat.kinks.length - 1
+        lastKinkLine = line
+        lastDescriptionLine = null
+      }
+    } else if (
+      line[0] === '?' &&
+      cat &&
+      Array.isArray(cat.descriptions) &&
+      lastKinkIdx !== null
+    ) {
+      cat.descriptions[lastKinkIdx] = line.substring(1).trim()
+      lastDescriptionLine = line
+    }
+  }
+
+  // Add final category
+  if (
+    catName &&
+    cat &&
+    Array.isArray(cat.fields) &&
+    cat.fields.length > 0 &&
+    Array.isArray(cat.kinks) &&
+    cat.kinks.length > 0
+  ) {
+    newKinks[catName] = {
+      ...cat,
+      name: cat.name || catName,
+    } as EnhancedKinkCategory
+  }
+
+  return newKinks
+}
+
+// Convert enhanced kinks data back to text format (with multilingual support)
+export const enhancedKinksToText = (
+  kinks: EnhancedKinksData,
+  includeTranslations: boolean = true
+): string => {
+  let kinksText = ''
+  const kinkCats = Object.keys(kinks)
+
+  for (let i = 0; i < kinkCats.length; i++) {
+    const catName = kinkCats[i]
+    const category = kinks[catName]
+    const catFields = category.fields
+    const catKinks = category.kinks
+    const catDescriptions = category.descriptions || []
+
+    // Write category name
+    const categoryName = resolveMultilingualContent(category.name, 'en')
+    kinksText += '#' + categoryName + '\r\n'
+
+    // Write translations for category name if available and requested
+    if (includeTranslations && typeof category.name !== 'string') {
+      Object.entries(category.name.translations).forEach(
+        ([lang, translation]) => {
+          kinksText += `+ [${lang}] #${translation}\r\n`
+        }
+      )
+    }
+
+    kinksText += '(' + catFields.join(', ') + ')\r\n'
+
+    // Write kinks and their translations
+    for (let j = 0; j < catKinks.length; j++) {
+      const kink = catKinks[j]
+      const kinkName = resolveMultilingualContent(kink, 'en')
+      kinksText += '* ' + kinkName + '\r\n'
+
+      // Write translations for kink if available and requested
+      if (includeTranslations && typeof kink !== 'string') {
+        Object.entries(kink.translations).forEach(([lang, translation]) => {
+          kinksText += `+ [${lang}] * ${translation}\r\n`
+        })
+      }
+
+      // Write description if available
+      if (catDescriptions[j]) {
+        const description = catDescriptions[j]
+        const descriptionText = resolveMultilingualContent(description, 'en')
+        if (descriptionText && descriptionText.trim().length > 0) {
+          kinksText += '? ' + descriptionText.trim() + '\r\n'
+
+          // Write translations for description if available and requested
+          if (includeTranslations && typeof description !== 'string') {
+            Object.entries(description.translations).forEach(
+              ([lang, translation]) => {
+                kinksText += `+ [${lang}] ? ${translation}\r\n`
+              }
+            )
+          }
+        }
+      }
+    }
+
+    if (i < kinkCats.length - 1) {
+      kinksText += '\r\n'
+    }
+  }
+
+  return kinksText
+}
+
+// Function to resolve enhanced kinks data to current language
+export const resolveEnhancedKinksData = (
+  kinks: EnhancedKinksData,
+  language?: string
+): import('../types').KinksData => {
+  const currentLanguage = language || i18n.language || 'en'
+  const resolvedKinks: import('../types').KinksData = {}
+
+  Object.entries(kinks).forEach(([categoryKey, category]) => {
+    const resolvedCategory = {
+      name: resolveMultilingualContent(category.name, currentLanguage),
+      fields: category.fields.map((field) =>
+        resolveMultilingualContent(field, currentLanguage)
+      ),
+      kinks: category.kinks.map((kink) =>
+        resolveMultilingualContent(kink, currentLanguage)
+      ),
+      descriptions: category.descriptions?.map((desc) =>
+        resolveMultilingualContent(desc, currentLanguage)
+      ),
+    }
+
+    resolvedKinks[categoryKey] = resolvedCategory
+  })
+
+  return resolvedKinks
+}
