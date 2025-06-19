@@ -1,0 +1,436 @@
+{
+  "app": {
+    "title": "Hypno Kinklist - Beta",
+    "subtitle": "Din personliga kinkpreferenslista",
+    "version": "Appversion"
+  },
+  "navigation": {
+    "home": "Hem",
+    "edit": "Redigera",
+    "export": "Exportera",
+    "import": "Importera",
+    "settings": "Inställningar"
+  },
+  "common": {
+    "or": "eller",
+    "and": "och",
+    "loading": "Laddar...",
+    "error": "Fel",
+    "success": "Lyckades",
+    "warning": "Varning"
+  },
+  "theme": {
+    "toggleDark": "Byt till mörkt läge",
+    "toggleLight": "Byt till ljust läge"
+  },
+  "legend": {
+    "title": "🎨 Legend:",
+    "titleSimple": "Legend:",
+    "notEntered": "Ej angivet",
+    "favorite": "Favorit",
+    "like": "Gillar",
+    "okay": "Okej",
+    "maybe": "Kanske",
+    "no": "Nej"
+  },
+  "buttons": {
+    "start": "Starta",
+    "next": "Nästa",
+    "previous": "Föregående",
+    "save": "Spara",
+    "cancel": "Avbryt",
+    "close": "Stäng",
+    "continue": "Fortsätt",
+    "edit": "Redigera",
+    "export": "Exportera",
+    "import": "Importera",
+    "delete": "Radera",
+    "confirm": "Bekräfta",
+    "reset": "Återställ",
+    "help": "Hjälp",
+    "focus": "Fokusera"
+  },
+  "editor": {
+    "title": "Redigera Kinklista",
+    "placeholder": "Ange din kinklist-kod här...",
+    "toolbar": {
+      "bold": "Fet",
+      "italic": "Kursiv",
+      "help": "Hjälp",
+      "helpTooltip": "Visa syntaxhjälp",
+      "validate": "Validera",
+      "format": "Formatera kod",
+      "formatTooltip": "Formatera kod (Alt+Shift+F)",
+      "snippets": "Snippets",
+      "snippetsTooltip": "Infoga snippet (Ctrl+K för autokomplettering)",
+      "blocks": "Mallar",
+      "blocksTooltip": "Infoga färdiga block",
+      "focus": "Fokusera redigerare",
+      "focusTooltip": "Fokusera redigerare"
+    },
+    "snippets": {
+      "categories": {
+        "all": "Alla",
+        "category": "Kategorier",
+        "kink": "Kinks",
+        "description": "Beskrivningar",
+        "template": "Mallar"
+      },
+      "selectCategory": "Välj snippetkategori"
+    },
+    "help": {
+      "sections": {
+        "syntax": "Syntax",
+        "quickStart": "Snabbstart",
+        "keyboardShortcuts": "Kortkommandon",
+        "advanced": "Avancerat"
+      },
+      "title": "Syntaxhjälp",
+      "close": "Stäng hjälp"
+    },
+    "blocks": {
+      "title": "Infogbara block",
+      "all": "Alla",
+      "search": "Sök block...",
+      "select": "Välj block",
+      "preview": "Förhandsgranska"
+    },
+    "validation": {
+      "errors": "Valideringsfel",
+      "warnings": "Varningar",
+      "moreItems": "fler objekt"
+    },
+    "shortcuts": {
+      "description": "Kortkommandon:",
+      "autocomplete": "Autokomplettering",
+      "format": "Formatera",
+      "save": "Spara",
+      "close": "Stäng"
+    },
+    "content": {
+      "helpText": "Kinklist-redigerare Hjälp:\n\nSYNTAX (ENDAST dessa prefix är giltiga):\n# Kategorinamn - Definierar en ny kategori (t.ex. #Basics)\n(Fältbeteckning) - Valfritt fält efter #-rad (t.ex. (General))\n* Kinknamn - Definierar en kinkpost\n? Beskrivning - Beskrivning av föregående kink\n// Kommentar - Kommentarrad\n\nEXEMPEL (Standardmall):\n#Basics\n(General)\n* Jag gillar att arbeta med cispersoner\n? Jag känner mig bekväm och positiv med hypnos med cispersoner.\n* Jag går ner i trance väldigt lätt\n? Jag går snabbt in i trance med liten ansträngning, ofta efter minimal induktion.\n\nFÄRGKODNING:\n# Kategorier - Grön och fet\n() Fält - Blå och kursiv\n* Kinks - Orange/gul och fet\n? Beskrivningar - Brun/grå och kursiv\n// Kommentarer - Grå och kursiv\n\nKORTKOMMANDON (Monaco Editor):\nCtrl+Space - IntelliSense/Autokomplettering\nCtrl+Shift+I - Formatera\nCtrl+F - Sök\nCtrl+H - Sök och ersätt\nCtrl+G - Gå till rad\nF1 - Kommandopalett\nAlt+Z - Växla radbrytning\n\nSNIPPETS:\n- cat: Ny kategori\n- item: Ny kinkpost\n- section: Kategori med kinks\n- template: Komplett standardmall\n\nTIPS:\n- Använd tomma rader för bättre läsbarhet\n- Kategorier bör börja med #\n- Varje kink bör ha en beskrivning med ?\n- Endast ovanstående prefix är giltiga",
+      "snippets": {
+        "cat": {
+          "label": "cat",
+          "detail": "Ny kategori",
+          "documentation": "Skapar en ny kategori med valfri fältbeteckning"
+        },
+        "item": {
+          "label": "item",
+          "detail": "Ny kinkpost",
+          "documentation": "Skapar en ny kinkpost med beskrivning"
+        },
+        "section": {
+          "label": "section",
+          "detail": "Kategori med kinks",
+          "documentation": "Skapar en komplett sektion med kategori och flera kinks"
+        },
+        "template": {
+          "label": "template",
+          "detail": "Standardmall",
+          "documentation": "Infogar hela standardmallen"
+        },
+        "basicSection": {
+          "label": "basic-section",
+          "detail": "Basics-sektion",
+          "documentation": "Skapar en Basics-sektion baserad på standardmallen"
+        },
+        "safetySection": {
+          "label": "safety-section",
+          "detail": "Säkerhetssektion",
+          "documentation": "Skapar en säkerhets- och samtyckessektion"
+        },
+        "comment": {
+          "label": "comment",
+          "detail": "Kommentar",
+          "documentation": "Lägger till en kommentarrad"
+        },
+        "multilingualCat": {
+          "label": "multilingual-cat",
+          "detail": "Flerspråkig kategori",
+          "documentation": "Skapar en kategori med översättningar för flera språk med + [LANG]-syntax"
+        },
+        "multilingualItem": {
+          "label": "multilingual-item",
+          "detail": "Flerspråkig kinkpost",
+          "documentation": "Skapar en kinkpost med namn- och beskrivningsöversättningar för flera språk"
+        },
+        "translationLine": {
+          "label": "translation",
+          "detail": "Översättningsrad",
+          "documentation": "Lägger till en översättningsrad för föregående kategori, kink eller beskrivning med + [LANG]-syntax"
+        },
+        "enhancedTemplate": {
+          "label": "enhanced-template",
+          "detail": "Utökad flerspråkig mall",
+          "documentation": "Infogar hela den utökade mallen med flerspråkigt innehåll"
+        }
+      },
+      "detailedHelp": {
+        "syntax": "Kinklist-syntaxöversikt (ENDAST dessa prefix är giltiga):\n\n# Kategorinamn          - Definierar en ny kategori (grön, fet)\n(Fältbeteckning)        - Valfritt fält efter #-rad (blå, kursiv)\n* Kinknamn              - Kinkpost (orange/gul, fet)\n? Beskrivning           - Beskrivning av föregående kink (brun/grå, kursiv)\n// Kommentar            - Kommentarrad (grå, kursiv)\n\nEXEMPEL (Standardmall):\n#Basics\n(General)\n* Jag gillar att arbeta med cispersoner\n? Jag känner mig bekväm och positiv med hypnos med cispersoner.\n* Jag går ner i trance väldigt lätt\n? Jag går snabbt in i trance med liten ansträngning, ofta efter minimal induktion.\n\n// Kommentar för anteckningar\n\nVIKTIGT: Endast de 5 prefixen ovan (#, (), *, ?, //) är giltiga!",
+        "quickStart": "Snabbstart:\n1. Börja med en kategori (#Basics)\n2. Lägg eventuellt till en fältbeteckning ((General))\n3. Lista kinks med * (* Tillit)\n4. Lägg till beskrivningar med ? (? Tillit är grunden...)\n5. Använd // för kommentarer (// Detta är en kommentar)\n6. Använd snippets för snabbare arbete:\n   - 'cat' för ny kategori\n   - 'item' för ny kink\n   - 'section' för komplett sektion\n   - 'template' för standardmall\n7. Formatera din kod med Ctrl+Shift+I\n8. Infoga block för att snabbt skapa komplext innehåll",
+        "keyboardShortcuts": "Kortkommandon (Monaco Editor):\nCtrl+Space         - Visa IntelliSense/Autokomplettering\nCtrl+Shift+I       - Formatera kod (viktigt!)\nCtrl+F             - Sök\nCtrl+H             - Sök och ersätt\nCtrl+G             - Gå till rad\nCtrl+D             - Markera nästa förekomst\nCtrl+L             - Markera rad\nCtrl+/             - Växla radkommentar\nAlt+Z              - Växla radbrytning\nF1                 - Öppna kommandopalett\nCtrl+Enter         - Verkställ ändringar och stäng redigeraren",
+        "advanced": "Avancerade funktioner:\n- Snippets: Använd inbyggda kodsnippets för snabbare inmatning\n- IntelliSense: Ctrl+Space visar förslag baserat på kontext\n- Formatering: Ctrl+Shift+I formaterar hela dokumentet korrekt\n- Validering: Redigeraren markerar automatiskt syntaxfel\n- Standardmall: Använd 'template'-snippeten för hela standardschemat\n- Kommentarer: Använd // för anteckningar och struktur\n- Endast giltig syntax: Endast #, (), *, ?, //-prefix stöds\n\nTips: Titta på standardmallen för att förstå korrekt syntax."
+      }
+    }
+  },
+  "export": {
+    "title": "Exportalternativ",
+    "subtitle": "Välj ditt exportformat",
+    "modes": {
+      "quick": {
+        "title": "Snabbexport",
+        "description": "Direkt export med standardinställningar",
+        "formatsCount": "format"
+      },
+      "advanced": {
+        "title": "Avancerade alternativ",
+        "description": "Alla format med detaljerade inställningar",
+        "formatsCount": "format"
+      }
+    },
+    "formats": {
+      "image": "Bild",
+      "data": "Data",
+      "document": "Dokument",
+      "pdf": "PDF-dokument",
+      "json": "JSON-data",
+      "xml": "XML-data",
+      "csv": "CSV-kalkylblad"
+    },
+    "options": {
+      "includeComments": "Inkludera kommentarer",
+      "includeDescriptions": "Inkludera beskrivningar",
+      "compactMode": "Kompakt läge"
+    },
+    "filename": {
+      "label": "Filnamn",
+      "placeholder": "Ange filnamn..."
+    },
+    "export": "Exportera",
+    "import": "Importera",
+    "exportKinklist": "Exportera kinklista",
+    "importKinklist": "Importera kinklista",
+    "exportSuccessful": "Export lyckades!",
+    "importSuccessful": "Import lyckades!",
+    "exportFailed": "Export misslyckades",
+    "importFailed": "Import misslyckades",
+    "preparing": "Export förbereds...",
+    "processing": "Import bearbetas...",
+    "pleaseWait": "Vänligen vänta medan dina data importeras.",
+    "closeDialog": "Stäng",
+    "pdf": {
+      "title": "Kinklista",
+      "userTitle": "{{username}}s kinklista",
+      "legend": "Betygslegend",
+      "completedSelections": "{{completed}}/{{total}} slutförda",
+      "commentIndicator": "K",
+      "fieldComment": "{{field}} kommentar",
+      "kinkComment": "{{kink}} - {{field}}"
+    },
+    "csv": {
+      "headers": {
+        "category": "Kategori",
+        "kink": "Kink",
+        "field": "Fält",
+        "level": "Nivå",
+        "comment": "Kommentar",
+        "description": "Beskrivning"
+      }
+    },
+    "quickExport": "Snabbexport",
+    "advancedOptions": "Avancerade alternativ",
+    "exportMode": "Exportläge",
+    "exportSettings": "Exportinställningar",
+    "includeComments": "Inkludera kommentarer",
+    "includeDescriptions": "Inkludera beskrivningar",
+    "includeMetadata": "Inkludera metadata",
+    "exportFormats": "Exportformat",
+    "supportedFormats": "Stödda format",
+    "formatDescriptions": {
+      "PNG": "Högkvalitativ rasterbild, idealisk för skärmdumpar",
+      "JPEG": "Komprimerad bild, mindre filstorlek",
+      "WebP": "Modernt bildformat med optimal komprimering",
+      "SVG": "Vektorgrafik, skalbar och redigerbar",
+      "PDF": "Professionell A4-layout för utskrift",
+      "JSON": "Strukturerad data, fullt importerbar",
+      "XML": "Standardiserat dataformat, fullt importerbar",
+      "CSV": "Tabell för Excel/Google Sheets",
+      "SSV": "Mellanslagsseparerade värden för specialapplikationer"
+    },
+    "errors": {
+      "noData": "🚫 Ingen kinklist-data",
+      "loadKinklist": "Ladda en kinklista eller vänta",
+      "dataLoading": "tills standardkinks har laddats.",
+      "exportError": "❌ Exportfel",
+      "tryAgain": "Försök igen eller kontrollera ditt val.",
+      "unexpectedError": "🔧 Oväntat fel",
+      "reportIssue": "Rapportera detta problem om det kvarstår.",
+      "selectionsNeeded": "⚠️ Inga val hittades",
+      "makeSelections": "Gör några val innan export.",
+      "jsonExportFailed": "JSON-export misslyckades: {{error}}",
+      "xmlExportFailed": "XML-export misslyckades: {{error}}",
+      "csvExportFailed": "CSV-export misslyckades: {{error}}",
+      "pdfExportFailed": "PDF-export misslyckades: {{error}}",
+      "imageExportFailed": "Bildexport misslyckades: {{error}}",
+      "svgExportFailed": "SVG-export misslyckades: {{error}}",
+      "importFailed": "Import misslyckades: {{error}}",
+      "invalidDataFormat": "Ogiltigt dataformat",
+      "xmlParseError": "XML-tolkningsfel:",
+      "invalidXmlFormat": "Ogiltigt XML-format: {{error}}",
+      "invalidXmlStructure": "Ogiltig kinklist-XML-struktur - saknar kinklist-root-element",
+      "xmlImportError": "XML-importfel:",
+      "noRootElement": "Inget kinklist-root-element hittades"
+    },
+    "canvas": {
+      "title": "Kinklista {{username}}",
+      "defaultFilename": "export",
+      "downloadError": "Fel vid nedladdning av bild:"
+    },
+    "actions": {
+      "exportAs": "Exportera som {{format}}",
+      "tryAgain": "Försök igen",
+      "reportIssue": "Rapportera problem"
+    }
+  },
+  "import": {
+    "title": "Importera data",
+    "subtitle": "Ladda din kinklista från olika källor",
+    "heading": "📥 Importera kinklista",
+    "methods": {
+      "file": {
+        "title": "📁 Ladda upp fil",
+        "description": "Välj en fil från din enhet",
+        "button": "Välj fil",
+        "dropHint": "eller dra filer hit"
+      },
+      "text": {
+        "title": "📋 Klistra in data",
+        "description": "Klistra in exporterad data direkt som text",
+        "placeholder": "Klistra in JSON-, XML- eller CSV-data här...",
+        "button": "Importera data"
+      }
+    },
+    "supportedFormats": "ℹ️ Stödda format",
+    "formats": {
+      "json": {
+        "title": "JSON:",
+        "description": "Fullständig import av all data och inställningar"
+      },
+      "xml": {
+        "title": "XML:",
+        "description": "Strukturerad import av all data"
+      },
+      "csv": {
+        "title": "CSV:",
+        "description": "Import av kinkval och betyg"
+      }
+    },
+    "dragActive": "📂 Släpp filer här för import",
+    "processing": "Import bearbetas...",
+    "successful": "Import lyckades!",
+    "importSuccessful": "Import lyckades!",
+    "dataImported": "Data har importerats.",
+    "pleaseWait": "Vänligen vänta medan dina data importeras.",
+    "errors": {
+      "unsupportedFileType": "Filtypen stöds inte: {{extension}}. Tillåtna: {{allowed}}",
+      "invalidFormat": "Ogiltigt dataformat",
+      "importFailed": "Import misslyckades",
+      "failedWithMessage": "Import misslyckades: {{message}}"
+    },
+    "accessibility": {
+      "selectFile": "Välj fil för import"
+    }
+  },
+  "input": {
+    "title": "Kinkval",
+    "category": "Kategori",
+    "description": "Visa beskrivning",
+    "comment": "Lägg till kommentar",
+    "actions": {
+      "showDescription": "Visa beskrivning",
+      "addComment": "Lägg till kommentar",
+      "close": "Stäng"
+    }
+  },
+  "comment": {
+    "title": "Lägg till kommentar",
+    "placeholder": "Ange din kommentar...",
+    "save": "Spara kommentar",
+    "delete": "Radera kommentar"
+  },
+  "name": {
+    "title": "Exportnamn",
+    "label": "Listnamn",
+    "placeholder": "Ange listnamn...",
+    "required": "Namn krävs"
+  },
+  "error": {
+    "title": "Fel",
+    "general": "Ett fel har inträffat",
+    "parsing": "Fel vid tolkning av kinklistan",
+    "export": "Fel vid export",
+    "import": "Fel vid import",
+    "network": "Nätverksfel",
+    "close": "Stäng"
+  },
+  "success": {
+    "export": "Export slutförd",
+    "import": "Import slutförd",
+    "save": "Sparat"
+  },
+  "accessibility": {
+    "closeDialog": "Stäng dialog",
+    "openMenu": "Öppna meny",
+    "selectOption": "Välj alternativ",
+    "toggleOption": "Växla alternativ"
+  },
+  "loading": {
+    "default": "Laddar...",
+    "export": "Exporterar...",
+    "import": "Importerar...",
+    "save": "Sparar..."
+  },
+  "language": {
+    "select": "Välj språk",
+    "en": "English",
+    "de": "Deutsch",
+    "sv": "Svenska"
+  },
+  "fix": {
+    "title": "Åtgärda startmodalproblem",
+    "description": "Om startmodulen (kinkval) inte stängs korrekt eller inte visas kan du återställa statusen med denna knapp:",
+    "button": "Återställ modalstatus",
+    "successMessage": "Modalstatus har återställts. Du kan nu använda startmodulen normalt igen."
+  },
+  "kinks": {
+    "basics": "Grunder",
+    "safety": "Säkerhet och samtycke",
+    "types": "Typer av hypnos",
+    "categoryLabel": "Kinks i kategori {{categoryName}}"
+  },
+  "comments": {
+    "addComment": "Lägg till kommentar",
+    "editComment": "Redigera kommentar",
+    "category": "Kategori",
+    "field": "Fält",
+    "kink": "Kink",
+    "rating": "Betyg",
+    "commentOptional": "Kommentar (valfritt)",
+    "placeholder": "Lägg till din kommentar här...",
+    "characters": "tecken",
+    "toClose": "för att stänga",
+    "toSave": "för att spara",
+    "forField": "för {{kinkName}} - {{field}} {{action}}",
+    "fieldFor": "{{field}} för {{kinkName}}",
+    "showDescription": "Visa beskrivning"
+  },
+  "choice": {
+    "selectionFor": "Val för {{kinkName}} ({{field}})",
+    "levelFor": "{{levelName}} för {{kinkName}} ({{field}})"
+  },
+  "utils": {
+    "commentEncodeError": "Fel vid kodning av kommentarer:",
+    "commentDecodeError": "Fel vid avkodning av kommentarer:"
+  }
+}

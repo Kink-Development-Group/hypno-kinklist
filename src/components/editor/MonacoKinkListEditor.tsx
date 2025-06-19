@@ -1,12 +1,12 @@
-import {
-  useRef,
-  forwardRef,
-  useImperativeHandle,
-  useEffect,
-  useState,
-} from 'react'
 import { Editor, Monaco } from '@monaco-editor/react'
 import type * as monaco from 'monaco-editor'
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react'
 import { formatKinkListText } from './EditorUtils'
 import {
   registerKinkListLanguage,
@@ -69,8 +69,6 @@ const MonacoKinkListEditor = forwardRef<
       editorRef.current = editor
       monacoRef.current = monaco
 
-      console.log('=== MONACO EDITOR MOUNTED ===')
-
       // In Entwicklungsmodus: Reset flags to allow re-registration
       if (import.meta.env.DEV) {
         // Reset flags are handled internally by registerKinkListLanguage
@@ -80,7 +78,6 @@ const MonacoKinkListEditor = forwardRef<
       try {
         registerKinkListLanguage(monaco)
         registerKinkListThemes(monaco)
-        console.log('Language and themes registered successfully')
 
         // Theme anwenden
         const isDark =
@@ -89,7 +86,6 @@ const MonacoKinkListEditor = forwardRef<
             window.matchMedia('(prefers-color-scheme: dark)').matches)
 
         const themeName = isDark ? 'kink-list-dark' : 'kink-list-light'
-        console.log('Applying theme:', themeName)
         monaco.editor.setTheme(themeName)
 
         // Model-Sprache explizit setzen
@@ -99,29 +95,14 @@ const MonacoKinkListEditor = forwardRef<
           const value = editor.getValue()
           model = monaco.editor.createModel(value, languageId)
           editor.setModel(model)
-          console.log('Created new model with language:', languageId)
         } else {
           // Sprache sicherheitshalber setzen
           monaco.editor.setModelLanguage(model, languageId)
         }
-        // Debug: aktuelle Sprache des Models ausgeben
-        const currentLang = model.getLanguageId()
-        console.log(
-          'Model language set to:',
-          languageId,
-          '| Current model language:',
-          currentLang
-        )
 
         // Force tokenization
         setTimeout(() => {
           model.getLineContent(1) // This triggers tokenization
-          console.log('Tokenization triggered')
-          // Debug: aktuelle Sprache nach Tokenisierung
-          console.log(
-            'Model language after tokenization:',
-            model.getLanguageId()
-          )
         }, 100)
       } catch (error) {
         console.error('Error setting up Monaco editor:', error)

@@ -3,23 +3,23 @@ import { useTranslation } from 'react-i18next'
 import CommentOverlay from './components/CommentOverlay'
 import EditOverlay from './components/EditOverlay'
 import Export from './components/Export'
-import I18nKinklistProvider from './components/I18nKinklistProvider'
 import InputList from './components/InputList'
 import InputOverlay from './components/InputOverlay'
 import LanguageToggle from './components/LanguageToggle'
 import Legend from './components/Legend'
 import ThemeToggle from './components/ThemeToggle'
 import VersionDisplay from './components/VersionDisplay'
-import { useKinklist } from './context/KinklistContext'
+import { KinklistProvider, useKinklist } from './context/KinklistContext'
 import { ThemeProvider, useTheme } from './context/ThemeContext'
 import './styles/main.scss'
+import { getEnhancedKinkTemplate } from './utils/kinkTemplates'
 
 const App: React.FC = () => {
   return (
     <ThemeProvider>
-      <I18nKinklistProvider useEnhancedTemplate={true}>
+      <KinklistProvider initialKinksText={getEnhancedKinkTemplate()}>
         <AppContent />
-      </I18nKinklistProvider>
+      </KinklistProvider>
     </ThemeProvider>
   )
 }

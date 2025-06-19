@@ -1,29 +1,31 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import i18n from '../i18n'
 
 const LanguageToggle: React.FC = () => {
-  const { i18n, t } = useTranslation()
+  const { t } = useTranslation()
 
-  const toggleLanguage = () => {
-    const currentLang = i18n.language
-    const newLang = currentLang === 'en' ? 'de' : 'en'
-    i18n.changeLanguage(newLang)
-  }
+  // Get available languages from i18n instance
+  const languages = Object.keys(i18n.options.resources || {})
 
-  const getCurrentLanguageLabel = () => {
-    return i18n.language === 'en' ? 'DE' : 'EN'
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    i18n.changeLanguage(e.target.value)
   }
 
   return (
-    <button
-      type="button"
+    <select
       className="language-toggle"
-      onClick={toggleLanguage}
+      value={i18n.language}
+      onChange={handleChange}
       title={t('language.select')}
-      aria-label={`${t('language.select')} (${getCurrentLanguageLabel()})`}
+      aria-label={t('language.select')}
     >
-      {getCurrentLanguageLabel()}
-    </button>
+      {languages.map((lang) => (
+        <option key={lang} value={lang}>
+          {t(`language.${lang}`, lang.toUpperCase())}
+        </option>
+      ))}
+    </select>
   )
 }
 

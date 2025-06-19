@@ -394,7 +394,8 @@
   "language": {
     "select": "Select Language",
     "en": "English",
-    "de": "Deutsch"
+    "de": "Deutsch",
+    "sv": "Svenska"
   },
   "fix": {
     "title": "Fix Start Modal Issue",

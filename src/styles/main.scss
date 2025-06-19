@@ -177,30 +177,61 @@ h6 {
 
 // Language toggle button
 .language-toggle {
-  background-color: transparent;
+  background-color: var(--input-bg-color);
   border: 1px solid var(--border-color);
   cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 6px 8px;
-  border-radius: 4px;
-  width: 32px;
-  height: 32px;
-  display: flex;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 6px 28px 6px 10px;
+  border-radius: 6px;
+  min-width: 90px;
+  height: 38px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
   color: var(--text-color);
+  appearance: none;
+  transition: all 0.2s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  position: relative;
 
-  &:hover {
+  // Custom dropdown arrow
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid var(--border-color);
+    transform: translateY(-50%);
+  }
+
+  &:hover,
+  &:focus {
     background-color: var(--button-bg-color);
     color: var(--button-text-color);
     border-color: var(--button-bg-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(73, 128, 174, 0.18);
   }
 
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(73, 128, 174, 0.3);
+  option {
+    color: var(--text-color);
+    background: var(--input-bg-color);
+  }
+}
+
+[data-theme='dark'] .language-toggle {
+  background-color: var(--input-bg-color);
+  border-color: var(--border-color);
+
+  &::after {
+    border-top-color: var(--button-text-color);
   }
 }
 

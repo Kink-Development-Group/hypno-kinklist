@@ -2,7 +2,16 @@ import React, { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import { useTheme } from '../context/ThemeContext'
-import { getAllKinks, kinksToText, parseKinksText } from '../utils'
+import {
+  getAllKinks,
+  hasMultilingualContent,
+  kinksToText,
+  parseKinksTextEnhanced,
+} from '../utils'
+import {
+  parseEnhancedKinksText,
+  resolveEnhancedKinksData,
+} from '../utils/multilingualTemplates'
 import { useErrorHandler } from '../utils/useErrorHandler'
 import AdvancedKinkListEditor, {
   AdvancedKinkListEditorRef,
@@ -19,8 +28,9 @@ const EditOverlay: React.FC = () => {
     setOriginalKinksText,
     isEditOverlayOpen,
     setIsEditOverlayOpen,
+    setEnhancedKinks,
   } = useKinklist()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   const [kinksText, setKinksText] = useState<string>(originalKinksText)
   const editorRef = useRef<AdvancedKinkListEditorRef>(null)
@@ -55,16 +65,53 @@ const EditOverlay: React.FC = () => {
 
   const handleAccept = useCallback(() => {
     try {
-      const parsedKinks = parseKinksText(kinksText)
-      if (parsedKinks) {
-        // Create a new selection based on the updated kink structure
-        const newSelection = getAllKinks(parsedKinks, levels, selection)
+      // Check if the text contains multilingual content
+      const isMultilingual = hasMultilingualContent(kinksText)
 
-        setKinks(parsedKinks)
-        setOriginalKinksText(kinksText)
-        setSelection(newSelection)
+      if (isMultilingual) {
+        // Parse as enhanced template
+        const enhancedData = parseEnhancedKinksText(kinksText, errorHandler)
+
+        if (enhancedData) {
+          setEnhancedKinks(enhancedData)
+          // Resolve to current language
+          const resolvedKinks = resolveEnhancedKinksData(
+            enhancedData,
+            i18n.language
+          )
+          setKinks(resolvedKinks)
+          setOriginalKinksText(kinksText)
+
+          // Create a new selection based on the updated kink structure
+          const newSelection = getAllKinks(resolvedKinks, levels, selection)
+          setSelection(newSelection)
+        } else {
+          errorHandler(
+            'Failed to parse multilingual template - no data returned'
+          )
+          return
+        }
+      } else {
+        // Parse as standard template
+        const parsedKinks = parseKinksTextEnhanced(kinksText, errorHandler)
+
+        if (parsedKinks) {
+          setKinks(parsedKinks)
+          setOriginalKinksText(kinksText)
+          setEnhancedKinks(null) // Clear enhanced data for standard templates
+
+          // Create a new selection based on the updated kink structure
+          const newSelection = getAllKinks(parsedKinks, levels, selection)
+          setSelection(newSelection)
+          console.log('Successfully set standard template')
+        } else {
+          console.error('Standard parsing returned null/undefined')
+          errorHandler('Failed to parse standard template - no data returned')
+          return
+        }
       }
     } catch (error) {
+      console.error('Exception in handleAccept:', error)
       errorHandler(
         'Ein Fehler ist beim Versuch, den eingegebenen Text zu analysieren, aufgetreten. Bitte korrigieren Sie ihn und versuchen Sie es erneut.',
         error
@@ -72,6 +119,7 @@ const EditOverlay: React.FC = () => {
       return
     }
 
+    console.log('Closing edit overlay...')
     setIsEditOverlayOpen(false)
   }, [
     kinksText,
@@ -81,6 +129,8 @@ const EditOverlay: React.FC = () => {
     setOriginalKinksText,
     setSelection,
     setIsEditOverlayOpen,
+    setEnhancedKinks,
+    i18n.language,
     errorHandler,
   ])
 
