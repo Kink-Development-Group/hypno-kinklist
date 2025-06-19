@@ -24,7 +24,8 @@
     "toggleLight": "Zum hellen Modus wechseln"
   },
   "legend": {
-    "title": "Legende",
+    "title": "🎨 Legende:",
+    "titleSimple": "Legende:",
     "notEntered": "Nicht eingegeben",
     "favorite": "Favorit",
     "like": "Mag ich",
@@ -258,7 +259,13 @@
       "xmlParseError": "XML-Analysefehler:",
       "invalidXmlFormat": "Ungültiges XML-Format: {{error}}",
       "invalidXmlStructure": "Ungültige Kinklist-XML-Struktur - fehlendes Kinklist-Root-Element",
-      "xmlImportError": "XML-Import-Fehler:"
+      "xmlImportError": "XML-Import-Fehler:",
+      "noRootElement": "Kein Kinklist-Root-Element gefunden"
+    },
+    "canvas": {
+      "title": "Kinklist {{username}}",
+      "defaultFilename": "export",
+      "downloadError": "Fehler beim Herunterladen des Bildes:"
     },
     "actions": {
       "exportAs": "Als {{format}} exportieren",
@@ -400,5 +407,9 @@
   "choice": {
     "selectionFor": "Auswahl für {{kinkName}} ({{field}})",
     "levelFor": "{{levelName}} für {{kinkName}} ({{field}})"
+  },
+  "utils": {
+    "commentEncodeError": "Fehler beim Kodieren der Kommentare:",
+    "commentDecodeError": "Fehler beim Dekodieren der Kommentare:"
   }
 }

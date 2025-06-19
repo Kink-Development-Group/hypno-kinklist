@@ -24,7 +24,8 @@
     "toggleLight": "Switch to light mode"
   },
   "legend": {
-    "title": "Legend",
+    "title": "🎨 Legend:",
+    "titleSimple": "Legend:",
     "notEntered": "Not Entered",
     "favorite": "Favorite",
     "like": "Like",
@@ -258,7 +259,13 @@
       "xmlParseError": "XML Parse Error:",
       "invalidXmlFormat": "Invalid XML format: {{error}}",
       "invalidXmlStructure": "Invalid kinklist XML structure - missing kinklist root element",
-      "xmlImportError": "XML Import Error:"
+      "xmlImportError": "XML Import Error:",
+      "noRootElement": "No kinklist root element found"
+    },
+    "canvas": {
+      "title": "Kinklist {{username}}",
+      "defaultFilename": "export",
+      "downloadError": "Error downloading image:"
     },
     "actions": {
       "exportAs": "Export as {{format}}",
@@ -400,5 +407,9 @@
   "choice": {
     "selectionFor": "Selection for {{kinkName}} ({{field}})",
     "levelFor": "{{levelName}} for {{kinkName}} ({{field}})"
+  },
+  "utils": {
+    "commentEncodeError": "Error encoding comments:",
+    "commentDecodeError": "Error decoding comments:"
   }
 }

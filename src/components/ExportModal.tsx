@@ -305,7 +305,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
       // Kompakte horizontale Legende
       ctx.fillStyle = '#2c3e50'
       ctx.font = 'bold 14px "Segoe UI", Arial, sans-serif'
-      ctx.fillText('🎨 Legende:', margin, yPosition)
+      ctx.fillText(t('legend.title'), margin, yPosition)
 
       const legendItems = Object.entries(levels).filter(
         ([key]) => key !== 'Not Entered'

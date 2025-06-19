@@ -1,3 +1,4 @@
+import i18n from '../i18n'
 import { KinksData, LevelsData, Selection } from '../types'
 
 export const strToClass = (str: string): string => {
@@ -266,7 +267,7 @@ export const updateHash = (
       const encodedComments = btoa(encodeURIComponent(commentsJson))
       hash += '|' + encodedComments
     } catch (error) {
-      console.error('Fehler beim Kodieren der Kommentare:', error)
+      console.error(i18n.t('utils.commentEncodeError'), error)
     }
   }
 
@@ -292,7 +293,7 @@ export const parseHash = (
       const decodedComments = decodeURIComponent(atob(parts[1]))
       comments = JSON.parse(decodedComments)
     } catch (e) {
-      console.error('Fehler beim Dekodieren der Kommentare:', e)
+      console.error(i18n.t('utils.commentDecodeError'), e)
       comments = []
     }
   }
@@ -371,7 +372,7 @@ export const downloadImage = (
 ): void => {
   try {
     const version = getAppVersion()
-    const filename = `kinklist_${username ? username.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'export'}_v${version}_${new Date().toISOString().slice(0, 10)}.png`
+    const filename = `kinklist_${username ? username.replace(/[^a-z0-9]/gi, '_').toLowerCase() : i18n.t('export.canvas.defaultFilename')}_v${version}_${new Date().toISOString().slice(0, 10)}.png`
 
     // Create a temporary link element to trigger the download
     const link = document.createElement('a')
@@ -386,7 +387,7 @@ export const downloadImage = (
       window.URL.revokeObjectURL(link.href)
     }, 100)
   } catch (error) {
-    console.error('Error downloading image:', error)
+    console.error(i18n.t('export.canvas.downloadError'), error)
     throw error
   }
 }
@@ -415,7 +416,7 @@ export const setupCanvas = (
   // Eleganter Header
   context.font = 'bold 16px Arial, sans-serif'
   context.fillStyle = '#333333'
-  context.fillText('Kinklist ' + username, 12, 28)
+  context.fillText(i18n.t('export.canvas.title', { username }), 12, 28)
 
   // Dezente Header-Trennlinie
   context.beginPath()

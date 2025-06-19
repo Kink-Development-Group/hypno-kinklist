@@ -926,7 +926,7 @@ export const importFromXML = (xmlString: string): ImportResult => {
 
     const root = xmlDoc.querySelector('kinklist')
     if (!root) {
-      console.error('No kinklist root element found')
+      console.error(i18n.t('export.errors.noRootElement'))
       throw new Error(i18n.t('export.errors.invalidXmlStructure'))
     }
 

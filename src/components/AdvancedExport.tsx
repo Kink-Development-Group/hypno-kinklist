@@ -205,7 +205,7 @@ const AdvancedExport: React.FC<AdvancedExportProps> = () => {
 
       context.font = 'bold 12px Arial'
       context.fillStyle = '#3f51b5'
-      context.fillText('Legende:', 12, legendY)
+      context.fillText(t('legend.titleSimple'), 12, legendY)
 
       levelNames.forEach((levelName, index) => {
         const x = 80 + index * 120
