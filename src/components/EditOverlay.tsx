@@ -5,7 +5,6 @@ import { useTheme } from '../context/ThemeContext'
 import {
   getAllKinks,
   hasMultilingualContent,
-  kinksToText,
   parseKinksTextEnhanced,
 } from '../utils'
 import {
@@ -162,9 +161,9 @@ const EditOverlay: React.FC = () => {
   // Ensure the textarea has the current kinksText when opened
   useEffect(() => {
     if (isEditOverlayOpen) {
-      setKinksText(kinksToText(kinks))
+      setKinksText(originalKinksText)
     }
-  }, [isEditOverlayOpen, kinks])
+  }, [isEditOverlayOpen, originalKinksText])
 
   return (
     <div
