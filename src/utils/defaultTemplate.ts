@@ -7,6 +7,11 @@
  */
 export const loadDefaultKinklistFromServer = async (): Promise<string> => {
   try {
+    // In tests or when window.location is not available, fail fast
+    if (typeof window === 'undefined' || !window.location) {
+      throw new Error('Not running in browser environment')
+    }
+
     const response = await fetch('/defaultList/kinks.klist')
     if (!response.ok) {
       throw new Error(
