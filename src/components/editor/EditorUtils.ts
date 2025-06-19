@@ -1,5 +1,8 @@
 import i18n from '../../i18n'
-import { getKinkTemplate } from '../../utils/kinkTemplates'
+import {
+  getEnhancedKinkTemplate,
+  getKinkTemplate,
+} from '../../utils/kinkTemplates'
 
 // Interface für Snippets
 export interface EditorSnippet {
@@ -75,6 +78,40 @@ export const getSnippets = (): EditorSnippet[] => {
       insertText: '// ${1:Kommentar}\n',
       detail: i18n.t('editor.content.snippets.comment.detail'),
       documentation: i18n.t('editor.content.snippets.comment.documentation'),
+    },
+    {
+      label: i18n.t('editor.content.snippets.multilingualCat.label'),
+      insertText:
+        '#${1:Category Name}\n+ [DE] #${2:Deutscher Name}\n+ [SV] #${3:Svenska namn}\n(${4:General})\n+ [DE] (${5:Allgemein})\n+ [SV] (${6:Allmänt})\n',
+      detail: i18n.t('editor.content.snippets.multilingualCat.detail'),
+      documentation: i18n.t(
+        'editor.content.snippets.multilingualCat.documentation'
+      ),
+    },
+    {
+      label: i18n.t('editor.content.snippets.multilingualItem.label'),
+      insertText:
+        '* ${1:Kink Name}\n+ [DE] * ${2:Deutscher Kink Name}\n+ [SV] * ${3:Svenska kink namn}\n? ${4:Description}\n+ [DE] ? ${5:Deutsche Beschreibung}\n+ [SV] ? ${6:Svenska beskrivning}\n',
+      detail: i18n.t('editor.content.snippets.multilingualItem.detail'),
+      documentation: i18n.t(
+        'editor.content.snippets.multilingualItem.documentation'
+      ),
+    },
+    {
+      label: i18n.t('editor.content.snippets.translationLine.label'),
+      insertText: '+ [${1:DE}] ${2:übersetzter Inhalt}\n',
+      detail: i18n.t('editor.content.snippets.translationLine.detail'),
+      documentation: i18n.t(
+        'editor.content.snippets.translationLine.documentation'
+      ),
+    },
+    {
+      label: i18n.t('editor.content.snippets.enhancedTemplate.label'),
+      insertText: getEnhancedDefaultTemplate(),
+      detail: i18n.t('editor.content.snippets.enhancedTemplate.detail'),
+      documentation: i18n.t(
+        'editor.content.snippets.enhancedTemplate.documentation'
+      ),
     },
   ]
 }
@@ -162,6 +199,24 @@ export const validateKinkListText = (
         warnings.push(
           `Zeile ${lineNumber}: Kink-Eintrag sollte einen Namen haben`
         )
+      }
+    } else if (line.startsWith('+ [') && line.includes(']')) {
+      // Multilinguale Übersetzungszeile
+      const match = line.match(/^\+\s*\[([A-Z]{2})\]\s*(.*)$/)
+      if (!match) {
+        errors.push(
+          `Zeile ${lineNumber}: Ungültiges Format für Übersetzungszeile. Format: + [LANG] Inhalt`
+        )
+      } else {
+        const [, langCode, content] = match
+        if (langCode.length !== 2) {
+          errors.push(
+            `Zeile ${lineNumber}: Sprachcode muss genau 2 Zeichen haben (z.B. DE, EN, SV)`
+          )
+        }
+        if (!content.trim()) {
+          warnings.push(`Zeile ${lineNumber}: Übersetzungszeile ist leer`)
+        }
       }
     } else if (line.startsWith('?')) {
       // Beschreibung
@@ -355,4 +410,15 @@ export const getDetailedHelpText = (): { [key: string]: string } => {
     keyboardShortcuts: i18n.t('editor.content.detailedHelp.keyboardShortcuts'),
     advanced: i18n.t('editor.content.detailedHelp.advanced'),
   }
+}
+
+// Funktion zum Abrufen des Enhanced-Templates
+export const getEnhancedDefaultTemplate = (): string => {
+  return getEnhancedKinkTemplate()
+}
+
+// Hilfsfunktion um zu prüfen, ob Text multilinguale Syntax enthält
+export const hasMultilingualSyntax = (text: string): boolean => {
+  const lines = text.split('\n')
+  return lines.some((line) => /^\+\s*\[[A-Z]{2}\]\s*/.test(line.trim()))
 }

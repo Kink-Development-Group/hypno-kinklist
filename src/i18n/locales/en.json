@@ -144,6 +144,26 @@
           "label": "comment",
           "detail": "Comment",
           "documentation": "Adds a comment line"
+        },
+        "multilingualCat": {
+          "label": "multilingual-cat",
+          "detail": "Multilingual Category",
+          "documentation": "Creates a category with translations for multiple languages using the + [LANG] syntax"
+        },
+        "multilingualItem": {
+          "label": "multilingual-item",
+          "detail": "Multilingual Kink Item",
+          "documentation": "Creates a kink item with name and description translations for multiple languages"
+        },
+        "translationLine": {
+          "label": "translation",
+          "detail": "Translation Line",
+          "documentation": "Adds a translation line for the previous category, kink, or description using + [LANG] syntax"
+        },
+        "enhancedTemplate": {
+          "label": "enhanced-template",
+          "detail": "Enhanced Multilingual Template",
+          "documentation": "Inserts the complete enhanced template with multilingual content for multiple languages"
         }
       },
       "detailedHelp": {

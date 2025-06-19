@@ -1,11 +1,24 @@
-import React, { createContext, useState, useEffect, useContext } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
+import { useTranslation } from 'react-i18next'
 import { KinksData, LevelsData, Selection } from '../types'
 import {
-  parseKinksText,
   getAllKinks,
-  updateHash,
+  hasMultilingualContent,
   parseHash,
+  parseKinksTextEnhanced,
+  updateHash,
 } from '../utils/index'
+import {
+  EnhancedKinksData,
+  parseEnhancedKinksText,
+  resolveEnhancedKinksData,
+} from '../utils/multilingualTemplates'
 import { useErrorHandler } from '../utils/useErrorHandler'
 
 interface KinklistContextType {
@@ -27,6 +40,12 @@ interface KinklistContextType {
   setIsCommentOverlayOpen: React.Dispatch<React.SetStateAction<boolean>>
   popupIndex: number
   setPopupIndex: React.Dispatch<React.SetStateAction<number>>
+  // Enhanced multilingual support
+  enhancedKinks: EnhancedKinksData | null
+  setEnhancedKinks: React.Dispatch<
+    React.SetStateAction<EnhancedKinksData | null>
+  >
+  refreshKinksForLanguage: () => void
 }
 
 const initialLevels: LevelsData = {
@@ -57,19 +76,54 @@ export const KinklistProvider: React.FC<{
   const [isCommentOverlayOpen, setIsCommentOverlayOpen] =
     useState<boolean>(false)
   const [popupIndex, setPopupIndex] = useState<number>(0)
+
+  // Enhanced multilingual support
+  const [enhancedKinks, setEnhancedKinks] = useState<EnhancedKinksData | null>(
+    null
+  )
+  const { i18n } = useTranslation()
   const errorHandler = useErrorHandler()
+
+  // Function to refresh kinks for current language
+  const refreshKinksForLanguage = useCallback(() => {
+    if (enhancedKinks) {
+      const resolvedKinks = resolveEnhancedKinksData(
+        enhancedKinks,
+        i18n.language
+      )
+      setKinks(resolvedKinks)
+    }
+  }, [enhancedKinks, i18n.language])
 
   // Parse initial kinks
   useEffect(() => {
     try {
-      const parsedKinks = parseKinksText(originalKinksText)
-      if (parsedKinks) {
-        setKinks(parsedKinks)
-      } else {
-        console.error('Failed to parse kinks text')
-        errorHandler(
-          'Es gab ein Problem beim Parsen des Kink-Textes. Bitte überprüfen Sie das Format.'
+      // Check if the text contains multilingual content
+      if (hasMultilingualContent(originalKinksText)) {
+        // Parse as enhanced template
+        const enhancedData = parseEnhancedKinksText(
+          originalKinksText,
+          errorHandler
         )
+        if (enhancedData) {
+          setEnhancedKinks(enhancedData)
+          // Resolve to current language
+          const resolvedKinks = resolveEnhancedKinksData(
+            enhancedData,
+            i18n.language
+          )
+          setKinks(resolvedKinks)
+        }
+      } else {
+        // Parse as standard template
+        const parsedKinks = parseKinksTextEnhanced(
+          originalKinksText,
+          errorHandler
+        )
+        if (parsedKinks) {
+          setKinks(parsedKinks)
+          setEnhancedKinks(null) // Clear enhanced data for standard templates
+        }
       }
     } catch (e) {
       console.error('Error parsing kinks text:', e)
@@ -78,7 +132,14 @@ export const KinklistProvider: React.FC<{
         e
       )
     }
-  }, [originalKinksText, errorHandler])
+  }, [originalKinksText, errorHandler, i18n.language])
+
+  // Handle language changes for enhanced templates
+  useEffect(() => {
+    if (enhancedKinks) {
+      refreshKinksForLanguage()
+    }
+  }, [i18n.language, enhancedKinks, refreshKinksForLanguage])
 
   // Parse hash from URL
   useEffect(() => {
@@ -135,6 +196,9 @@ export const KinklistProvider: React.FC<{
         setIsCommentOverlayOpen,
         popupIndex,
         setPopupIndex,
+        enhancedKinks,
+        setEnhancedKinks,
+        refreshKinksForLanguage,
       }}
     >
       {children}

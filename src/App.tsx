@@ -17,7 +17,7 @@ import './styles/main.scss'
 const App: React.FC = () => {
   return (
     <ThemeProvider>
-      <I18nKinklistProvider>
+      <I18nKinklistProvider useEnhancedTemplate={true}>
         <AppContent />
       </I18nKinklistProvider>
     </ThemeProvider>

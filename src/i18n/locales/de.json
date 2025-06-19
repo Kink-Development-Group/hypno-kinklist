@@ -144,6 +144,26 @@
           "label": "comment",
           "detail": "Kommentar",
           "documentation": "Fügt eine Kommentarzeile hinzu"
+        },
+        "multilingualCat": {
+          "label": "multilingual-cat",
+          "detail": "Mehrsprachige Kategorie",
+          "documentation": "Erstellt eine Kategorie mit Übersetzungen für mehrere Sprachen mittels + [LANG] Syntax"
+        },
+        "multilingualItem": {
+          "label": "multilingual-item",
+          "detail": "Mehrsprachiger Kink-Eintrag",
+          "documentation": "Erstellt einen Kink-Eintrag mit Namen- und Beschreibungsübersetzungen für mehrere Sprachen"
+        },
+        "translationLine": {
+          "label": "translation",
+          "detail": "Übersetzungszeile",
+          "documentation": "Fügt eine Übersetzungszeile für die vorherige Kategorie, Kink oder Beschreibung mittels + [LANG] Syntax hinzu"
+        },
+        "enhancedTemplate": {
+          "label": "enhanced-template",
+          "detail": "Erweitertes Mehrsprachiges Template",
+          "documentation": "Fügt das vollständige erweiterte Template mit mehrsprachigem Inhalt für mehrere Sprachen ein"
         }
       },
       "detailedHelp": {

@@ -1,4 +1,92 @@
-// Multilingual kink templates
+// Enhanced multilingual kink templates using the new + [LANG] syntax
+export const enhancedKinkTemplate = `#Basics
++ [DE] #Grundlagen
++ [SV] #Grunderna
+(General)
++ [DE] (Allgemein)
++ [SV] (Allmänt)
+* I enjoy working with cisgender people
++ [DE] * Ich arbeite gerne mit cisgender Personen
++ [SV] * Jag tycker om att arbeta med cispersoner
+? I feel comfortable and positive about engaging in hypnosis with cisgender individuals.
++ [DE] ? Ich fühle mich wohl und positiv dabei, Hypnose mit cisgender Personen zu erleben.
++ [SV] ? Jag känner mig bekväm och positiv när jag gör hypnos med cispersoner.
+* I enjoy working with trans people
++ [DE] * Ich arbeite gerne mit trans Personen
++ [SV] * Jag tycker om att arbeta med transpersoner
+? I am open to and enjoy hypnotic experiences with transgender people, respecting their identities.
++ [DE] ? Ich bin offen für hypnotische Erfahrungen mit Transgender-Personen und respektiere ihre Identitäten.
++ [SV] ? Jag är öppen för och njuter av hypnotiska upplevelser med transpersoner och respekterar deras identiteter.
+* I enjoy working with non-binary people
++ [DE] * Ich arbeite gerne mit non-binary Personen
++ [SV] * Jag tycker om att arbeta med icke-binära personer
+? I value and welcome non-binary participants in hypnosis, appreciating gender diversity.
++ [DE] ? Ich schätze und begrüße non-binäre Teilnehmer in der Hypnose und schätze Geschlechtervielfalt.
++ [SV] ? Jag värdesätter och välkomnar icke-binära deltagare i hypnos och uppskattar mångfald i kön.
+* I enjoy working with males
++ [DE] * Ich arbeite gerne mit Männern
++ [SV] * Jag tycker om att arbeta med män
+? I am interested in hypnotic play with men, regardless of other factors.
++ [DE] ? Ich interessiere mich für hypnotisches Spiel mit Männern, unabhängig von anderen Faktoren.
++ [SV] ? Jag är intresserad av hypnotisk lek med män, oavsett andra faktorer.
+* I enjoy working with females
++ [DE] * Ich arbeite gerne mit Frauen
++ [SV] * Jag tycker om att arbeta med kvinnor
+? I am interested in hypnotic play with women, regardless of other factors.
++ [DE] ? Ich interessiere mich für hypnotisches Spiel mit Frauen, unabhängig von anderen Faktoren.
++ [SV] ? Jag är intresserad av hypnotisk lek med kvinnor, oavsett andra faktorer.
+* Gender doesn't matter to me
++ [DE] * Das Geschlecht ist mir egal
++ [SV] * Kön spelar ingen roll för mig
+? The gender of my hypnosis partner is not important to me; I focus on the experience itself.
++ [DE] ? Das Geschlecht meines Hypnose-Partners ist mir nicht wichtig; ich konzentriere mich auf die Erfahrung selbst.
++ [SV] ? Könet på min hypnospartner är inte viktigt för mig; jag fokuserar på upplevelsen i sig.
+
+#Safety and consent
++ [DE] #Sicherheit und Einverständnis
++ [SV] #Säkerhet och samtycke
+(General)
++ [DE] (Allgemein)
++ [SV] (Allmänt)
+* Trust
++ [DE] * Vertrauen
++ [SV] * Förtroende
+? Trust is the foundation of any hypnotic interaction; I need to feel safe with my partner.
++ [DE] ? Vertrauen ist die Grundlage jeder hypnotischen Interaktion; ich muss mich bei meinem Partner sicher fühlen.
++ [SV] ? Förtroende är grunden för all hypnotisk interaktion; jag behöver känna mig trygg med min partner.
+* Clear consent before going under
++ [DE] * Klares Einverständnis vor dem Unter-Gehen
++ [SV] * Tydligt samtycke innan jag går under
+? I require explicit, enthusiastic consent before any hypnotic activity begins.
++ [DE] ? Ich benötige explizites, enthusiastisches Einverständnis vor jeder hypnotischen Aktivität.
++ [SV] ? Jag kräver explicit, entusiastiskt samtycke innan någon hypnotisk aktivitet börjar.
+
+#Types Of Hypnosis
++ [DE] #Arten der Hypnose
++ [SV] #Typer av hypnos
+(General)
++ [DE] (Allgemein)
++ [SV] (Allmänt)
+* Erotic hypnosis
++ [DE] * Erotische Hypnose
++ [SV] * Erotisk hypnos
+? Hypnosis with a focus on sexual arousal, pleasure, or erotic scenarios.
++ [DE] ? Hypnose mit Fokus auf sexuelle Erregung, Vergnügen oder erotische Szenarien.
++ [SV] ? Hypnos med fokus på sexuell upphetsning, njutning eller erotiska scenarier.
+* Recreational hypnosis
++ [DE] * Freizeithypnose
++ [SV] * Rekreationshypnos
+? Hypnosis for fun, relaxation, or entertainment, without therapeutic or sexual intent.
++ [DE] ? Hypnose zum Spaß, zur Entspannung oder Unterhaltung, ohne therapeutische oder sexuelle Absicht.
++ [SV] ? Hypnos för nöje, avkoppling eller underhållning, utan terapeutisk eller sexuell avsikt.
+* Text hypnosis
++ [DE] * Text-Hypnose
++ [SV] * Texthypnos
+? Hypnotic inductions or suggestions delivered through written words or scripts.
++ [DE] ? Hypnotische Induktionen oder Suggestionen, die durch geschriebene Worte oder Skripte übermittelt werden.
++ [SV] ? Hypnotiska induktioner eller suggestioner som levereras genom skrivna ord eller skript.`
+
+// Legacy multilingual kink templates
 export const kinkTemplates = {
   en: {
     title: 'English Kink Template',
@@ -192,4 +280,19 @@ export const getKinkTemplateTitle = (language: string): string => {
     kinkTemplates[language as keyof typeof kinkTemplates]?.title ||
     kinkTemplates.en.title
   )
+}
+
+export const getEnhancedKinkTemplate = (): string => {
+  return enhancedKinkTemplate
+}
+
+export const getEnhancedKinkTemplateTitle = (
+  language: string = 'en'
+): string => {
+  const titles = {
+    en: 'Enhanced Multilingual Kink Template',
+    de: 'Erweiterte Mehrsprachige Kink-Vorlage',
+    sv: 'Förbättrad Flerspråkig Kink-mall',
+  }
+  return titles[language as keyof typeof titles] || titles.en
 }

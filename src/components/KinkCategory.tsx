@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { strToClass } from '../utils'
 import KinkRow from './KinkRow'
@@ -58,4 +58,4 @@ const KinkCategory: React.FC<
   )
 }
 
-export default memo(KinkCategory)
+export default KinkCategory
