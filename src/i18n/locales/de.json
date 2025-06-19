@@ -88,7 +88,7 @@
       "close": "Hilfe schließen"
     },
     "blocks": {
-      "title": "Einfügbare Blöcke",
+      "title": "Einfügbaren Blöcke",
       "all": "Alle",
       "search": "Blöcke durchsuchen...",
       "select": "Block auswählen",
@@ -198,6 +198,25 @@
     "processing": "Import wird verarbeitet...",
     "pleaseWait": "Bitte warten Sie, während Ihre Daten importiert werden.",
     "closeDialog": "Schließen",
+    "pdf": {
+      "title": "Kink Liste",
+      "userTitle": "{{username}}'s Kink Liste",
+      "legend": "Bewertungslegende",
+      "completedSelections": "{{completed}}/{{total}} ausgefüllt",
+      "commentIndicator": "K",
+      "fieldComment": "{{field}} Kommentar",
+      "kinkComment": "{{kink}} - {{field}}"
+    },
+    "csv": {
+      "headers": {
+        "category": "Kategorie",
+        "kink": "Kink",
+        "field": "Feld",
+        "level": "Bewertung",
+        "comment": "Kommentar",
+        "description": "Beschreibung"
+      }
+    },
     "quickExport": "Schnellexport",
     "advancedOptions": "Erweiterte Optionen",
     "exportMode": "Export-Modus",
@@ -227,7 +246,19 @@
       "unexpectedError": "🔧 Unerwarteter Fehler",
       "reportIssue": "Bitte melden Sie dieses Problem, falls es weiterhin auftritt.",
       "selectionsNeeded": "⚠️ Keine Auswahlen gefunden",
-      "makeSelections": "Bitte treffen Sie einige Auswahlen vor dem Export."
+      "makeSelections": "Bitte treffen Sie einige Auswahlen vor dem Export.",
+      "jsonExportFailed": "JSON-Export fehlgeschlagen: {{error}}",
+      "xmlExportFailed": "XML-Export fehlgeschlagen: {{error}}",
+      "csvExportFailed": "CSV-Export fehlgeschlagen: {{error}}",
+      "pdfExportFailed": "PDF-Export fehlgeschlagen: {{error}}",
+      "imageExportFailed": "Bild-Export fehlgeschlagen: {{error}}",
+      "svgExportFailed": "SVG-Export fehlgeschlagen: {{error}}",
+      "importFailed": "Import fehlgeschlagen: {{error}}",
+      "invalidDataFormat": "Ungültiges Datenformat",
+      "xmlParseError": "XML-Analysefehler:",
+      "invalidXmlFormat": "Ungültiges XML-Format: {{error}}",
+      "invalidXmlStructure": "Ungültige Kinklist-XML-Struktur - fehlendes Kinklist-Root-Element",
+      "xmlImportError": "XML-Import-Fehler:"
     },
     "actions": {
       "exportAs": "Als {{format}} exportieren",

@@ -1,6 +1,7 @@
 import { saveAs } from 'file-saver'
 import { jsPDF } from 'jspdf'
 import Papa from 'papaparse'
+import i18n from '../i18n'
 import { KinksData, LevelsData, Selection } from '../types'
 import {
   ExportData,
@@ -35,7 +36,7 @@ export const convertToExportData = (
         )
 
         kinkSelections[field] = {
-          level: selectionItem?.value || 'Not Entered',
+          level: selectionItem?.value || i18n.t('levels.notEntered'),
           comment: selectionItem?.comment || undefined,
         }
       })
@@ -64,8 +65,9 @@ export const convertToExportData = (
         (sum, cat) => sum + cat.kinks.length,
         0
       ),
-      totalSelections: selection.filter((s) => s.value !== 'Not Entered')
-        .length,
+      totalSelections: selection.filter(
+        (s) => s.value !== i18n.t('levels.notEntered')
+      ).length,
     },
     levels,
     categories,
@@ -95,7 +97,7 @@ export const exportAsJSON = async (
     return {
       success: false,
       filename: '',
-      error: `JSON Export failed: ${error}`,
+      error: i18n.t('export.errors.jsonExportFailed', { error: String(error) }),
     }
   }
 }
@@ -189,7 +191,7 @@ export const exportAsXML = async (
     return {
       success: false,
       filename: '',
-      error: `XML Export failed: ${error}`,
+      error: i18n.t('export.errors.xmlExportFailed', { error: String(error) }),
     }
   }
 }
@@ -208,12 +210,16 @@ export const exportAsCSV = async (
 
     // Header
     const headers = [
-      'Category',
-      'Kink',
-      'Field',
-      'Level',
-      ...(options.includeComments ? ['Comment'] : []),
-      ...(options.includeDescriptions ? ['Description'] : []),
+      i18n.t('export.csv.headers.category'),
+      i18n.t('export.csv.headers.kink'),
+      i18n.t('export.csv.headers.field'),
+      i18n.t('export.csv.headers.level'),
+      ...(options.includeComments
+        ? [i18n.t('export.csv.headers.comment')]
+        : []),
+      ...(options.includeDescriptions
+        ? [i18n.t('export.csv.headers.description')]
+        : []),
     ]
     csvData.push(headers)
 
@@ -247,7 +253,7 @@ export const exportAsCSV = async (
     return {
       success: false,
       filename: '',
-      error: `CSV Export failed: ${error}`,
+      error: i18n.t('export.errors.csvExportFailed', { error: String(error) }),
     }
   }
 }
@@ -290,8 +296,8 @@ export const exportAsPDF = async (
     pdf.setFontSize(20)
     pdf.setFont('helvetica', 'bold')
     const title = data.metadata.username
-      ? `${data.metadata.username}'s Kink List`
-      : 'Kink List'
+      ? i18n.t('export.pdf.userTitle', { username: data.metadata.username })
+      : i18n.t('export.pdf.title')
     const titleWidth = pdf.getTextWidth(title)
     const titleX = (pageWidth - titleWidth) / 2
     pdf.text(title, titleX, 25)
@@ -311,7 +317,10 @@ export const exportAsPDF = async (
     pdf.text(infoText, margin, currentY)
 
     // Statistiken rechts (ohne Emojis)
-    const statsText = `${data.metadata.totalSelections}/${data.metadata.totalKinks} ausgefüllt`
+    const statsText = i18n.t('export.pdf.completedSelections', {
+      completed: data.metadata.totalSelections,
+      total: data.metadata.totalKinks,
+    })
     const statsWidth = pdf.getTextWidth(statsText)
     pdf.text(statsText, pageWidth - margin - statsWidth, currentY)
 
@@ -321,7 +330,7 @@ export const exportAsPDF = async (
     pdf.setFontSize(12)
     pdf.setFont('helvetica', 'bold')
     pdf.setTextColor(44, 62, 80)
-    pdf.text('Bewertungslegende', margin, currentY)
+    pdf.text(i18n.t('export.pdf.legend'), margin, currentY)
     currentY += 8
 
     // Legende in kompakter Form (ähnlich Canvas-Grid)
@@ -331,7 +340,7 @@ export const exportAsPDF = async (
     let legendRowCount = 0
 
     Object.entries(data.levels).forEach(([levelName, level]) => {
-      if (levelName === 'Not Entered') return
+      if (levelName === i18n.t('levels.notEntered')) return
 
       // Moderner Farbkreis (wie im Canvas-Export)
       const hexColor = level.color
@@ -438,7 +447,7 @@ export const exportAsPDF = async (
         let choiceX = margin + 105
         category.fields.slice(0, 4).forEach((field) => {
           const selection = kink.selections[field]
-          if (selection && selection.level !== 'Not Entered') {
+          if (selection && selection.level !== i18n.t('levels.notEntered')) {
             const level = data.levels[selection.level]
             if (level) {
               const rgb = hexToRgb(level.color)
@@ -450,7 +459,7 @@ export const exportAsPDF = async (
               }
             }
           } else {
-            // Leerer Kreis für "Not Entered"
+            // Leerer Kreis für i18n.t('levels.notEntered')
             pdf.setDrawColor(222, 226, 230) // #dee2e6
             pdf.setLineWidth(0.3)
             pdf.circle(choiceX + 2, currentY + 2, 1.5, 'D')
@@ -460,7 +469,11 @@ export const exportAsPDF = async (
           if (selection?.comment) {
             pdf.setFontSize(6)
             pdf.setTextColor(255, 193, 7) // #ffc107
-            pdf.text('C', choiceX + 4, currentY + 3) // 'C' für Comment
+            pdf.text(
+              i18n.t('export.pdf.commentIndicator'),
+              choiceX + 4,
+              currentY + 3
+            )
           }
 
           choiceX += 8
@@ -618,7 +631,7 @@ export const exportAsPDF = async (
     return {
       success: false,
       filename: '',
-      error: `PDF Export failed: ${error}`,
+      error: i18n.t('export.errors.pdfExportFailed', { error: String(error) }),
     }
   }
 }
@@ -687,7 +700,9 @@ export const exportCanvasAsImage = async (
     return {
       success: false,
       filename: '',
-      error: `Image Export failed: ${error}`,
+      error: i18n.t('export.errors.imageExportFailed', {
+        error: String(error),
+      }),
     }
   }
 }
@@ -737,7 +752,7 @@ export const exportAsSVG = async (
     return {
       success: false,
       filename: '',
-      error: `SVG Export failed: ${error}`,
+      error: i18n.t('export.errors.svgExportFailed', { error: String(error) }),
     }
   }
 }
@@ -751,7 +766,7 @@ export const importFromJSON = (jsonString: string): ImportResult => {
 
     // Validierung der Datenstruktur
     if (!data.metadata || !data.levels || !data.categories) {
-      throw new Error('Invalid data format')
+      throw new Error(i18n.t('export.errors.invalidDataFormat'))
     }
 
     return {
@@ -761,7 +776,7 @@ export const importFromJSON = (jsonString: string): ImportResult => {
   } catch (error) {
     return {
       success: false,
-      error: `Import failed: ${error}`,
+      error: i18n.t('export.errors.importFailed', { error: String(error) }),
     }
   }
 }
@@ -877,7 +892,7 @@ export const exportAsXMLFull = async (
     return {
       success: false,
       filename: '',
-      error: `XML Export failed: ${error}`,
+      error: i18n.t('export.errors.xmlExportFailed', { error: String(error) }),
     }
   }
 }
@@ -898,16 +913,21 @@ export const importFromXML = (xmlString: string): ImportResult => {
     // Check for parsing errors
     const parseError = xmlDoc.querySelector('parsererror')
     if (parseError) {
-      console.error('XML Parse Error:', parseError.textContent)
-      throw new Error('Invalid XML format: ' + parseError.textContent)
+      console.error(
+        i18n.t('export.errors.xmlParseError'),
+        parseError.textContent
+      )
+      throw new Error(
+        i18n.t('export.errors.invalidXmlFormat', {
+          error: parseError.textContent,
+        })
+      )
     }
 
     const root = xmlDoc.querySelector('kinklist')
     if (!root) {
       console.error('No kinklist root element found')
-      throw new Error(
-        'Invalid kinklist XML structure - missing kinklist root element'
-      )
+      throw new Error(i18n.t('export.errors.invalidXmlStructure'))
     }
 
     // Parse metadata
@@ -952,8 +972,8 @@ export const importFromXML = (xmlString: string): ImportResult => {
 
     // Falls keine Levels gefunden wurden, erstelle Standard-Levels
     if (Object.keys(levels).length === 0) {
-      levels['Not Entered'] = {
-        name: 'Not Entered',
+      levels[i18n.t('levels.notEntered')] = {
+        name: i18n.t('levels.notEntered'),
         color: '#FFFFFF',
         class: 'notEntered',
       }
@@ -976,14 +996,15 @@ export const importFromXML = (xmlString: string): ImportResult => {
       ? categoriesElement.querySelectorAll('category')
       : root.querySelectorAll('category')
 
-    console.log('=== XML IMPORT DEBUG ===')
-    console.log('Root element:', root.tagName)
-    console.log(
-      'Root children:',
-      Array.from(root.children).map((child) => child.tagName)
-    )
-    console.log('Categories element exists:', !!categoriesElement)
-    console.log('Found category nodes:', categoryNodes.length)
+    // Debug output for development
+    // console.log('=== XML IMPORT DEBUG ===')
+    // console.log('Root element:', root.tagName)
+    // console.log(
+    //   'Root children:',
+    //   Array.from(root.children).map((child) => child.tagName)
+    // )
+    // console.log('Categories element exists:', !!categoriesElement)
+    // console.log('Found category nodes:', categoryNodes.length)
     console.log(
       'Direct category query:',
       root.querySelectorAll('category').length
@@ -1145,7 +1166,7 @@ export const importFromXML = (xmlString: string): ImportResult => {
       data,
     }
   } catch (error) {
-    console.error('XML Import Error:', error)
+    console.error(i18n.t('export.errors.xmlImportError'), error)
     return {
       success: false,
       error: `XML Import failed: ${error instanceof Error ? error.message : String(error)}`,

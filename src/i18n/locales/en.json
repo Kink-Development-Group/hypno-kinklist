@@ -198,6 +198,25 @@
     "processing": "Import is being processed...",
     "pleaseWait": "Please wait while your data is being imported.",
     "closeDialog": "Close",
+    "pdf": {
+      "title": "Kink List",
+      "userTitle": "{{username}}'s Kink List",
+      "legend": "Rating Legend",
+      "completedSelections": "{{completed}}/{{total}} completed",
+      "commentIndicator": "C",
+      "fieldComment": "{{field}} comment",
+      "kinkComment": "{{kink}} - {{field}}"
+    },
+    "csv": {
+      "headers": {
+        "category": "Category",
+        "kink": "Kink",
+        "field": "Field",
+        "level": "Level",
+        "comment": "Comment",
+        "description": "Description"
+      }
+    },
     "quickExport": "Quick Export",
     "advancedOptions": "Advanced Options",
     "exportMode": "Export Mode",
@@ -227,7 +246,19 @@
       "unexpectedError": "🔧 Unexpected Error",
       "reportIssue": "Please report this issue if it persists.",
       "selectionsNeeded": "⚠️ No Selections Found",
-      "makeSelections": "Please make some selections before exporting."
+      "makeSelections": "Please make some selections before exporting.",
+      "jsonExportFailed": "JSON export failed: {{error}}",
+      "xmlExportFailed": "XML export failed: {{error}}",
+      "csvExportFailed": "CSV export failed: {{error}}",
+      "pdfExportFailed": "PDF export failed: {{error}}",
+      "imageExportFailed": "Image export failed: {{error}}",
+      "svgExportFailed": "SVG export failed: {{error}}",
+      "importFailed": "Import failed: {{error}}",
+      "invalidDataFormat": "Invalid data format",
+      "xmlParseError": "XML Parse Error:",
+      "invalidXmlFormat": "Invalid XML format: {{error}}",
+      "invalidXmlStructure": "Invalid kinklist XML structure - missing kinklist root element",
+      "xmlImportError": "XML Import Error:"
     },
     "actions": {
       "exportAs": "Export as {{format}}",
