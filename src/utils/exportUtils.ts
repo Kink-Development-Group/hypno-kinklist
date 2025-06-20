@@ -12,7 +12,61 @@ import {
 import { getAppVersion } from './version'
 
 /**
+ * Filtert Kinks und Kategorien, um nur ausgefüllte oder kommentierte Einträge zu behalten
+ */
+const filterFilledOrCommentedKinks = (
+  kinks: KinksData,
+  selection: Selection[]
+): KinksData => {
+  const filteredKinks: KinksData = {}
+
+  Object.keys(kinks).forEach((categoryName) => {
+    const category = kinks[categoryName]
+    const filteredKinkList: string[] = []
+    const filteredDescriptions: string[] = []
+
+    category.kinks.forEach((kinkName, index) => {
+      // Prüfe, ob mindestens ein Field für diesen Kink ausgefüllt oder kommentiert ist
+      const hasFilledOrCommentedField = category.fields.some((field) => {
+        const selectionItem = selection.find(
+          (item) =>
+            item.category === categoryName &&
+            item.kink === kinkName &&
+            item.field === field
+        )
+
+        // Kink ist relevant, wenn:
+        // 1. Es eine Auswahl gibt und sie nicht "Not Entered" ist
+        // 2. Oder es einen Kommentar gibt
+        return (
+          selectionItem &&
+          (selectionItem.value !== 'Not Entered' ||
+            (selectionItem.comment && selectionItem.comment.trim().length > 0))
+        )
+      })
+
+      if (hasFilledOrCommentedField) {
+        filteredKinkList.push(kinkName)
+        filteredDescriptions.push(category.descriptions?.[index] || '')
+      }
+    })
+
+    // Nur Kategorien mit mindestens einem relevanten Kink hinzufügen
+    if (filteredKinkList.length > 0) {
+      filteredKinks[categoryName] = {
+        ...category,
+        kinks: filteredKinkList,
+        descriptions: filteredDescriptions,
+      }
+    }
+  })
+
+  return filteredKinks
+}
+
+/**
  * Konvertiert Kinklist-Daten in ein standardisiertes Export-Format
+ * Exportiert nur ausgefüllte oder kommentierte Kinks
  */
 export const convertToExportData = (
   kinks: KinksData,
@@ -20,8 +74,11 @@ export const convertToExportData = (
   selection: Selection[],
   username?: string
 ): ExportData => {
-  const categories = Object.keys(kinks).map((categoryName) => {
-    const category = kinks[categoryName]
+  // Filtere zuerst die Kinks, um nur ausgefüllte oder kommentierte zu behalten
+  const filteredKinks = filterFilledOrCommentedKinks(kinks, selection)
+
+  const categories = Object.keys(filteredKinks).map((categoryName) => {
+    const category = filteredKinks[categoryName]
     const categoryKinks = category.kinks.map((kinkName, index) => {
       const kinkSelections: {
         [field: string]: { level: string; comment?: string }
@@ -60,8 +117,8 @@ export const convertToExportData = (
       exportDate: new Date().toISOString(),
       version: getAppVersion(),
       username,
-      totalCategories: Object.keys(kinks).length,
-      totalKinks: Object.values(kinks).reduce(
+      totalCategories: Object.keys(filteredKinks).length,
+      totalKinks: Object.values(filteredKinks).reduce(
         (sum, cat) => sum + cat.kinks.length,
         0
       ),

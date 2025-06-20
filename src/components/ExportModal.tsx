@@ -97,19 +97,112 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
     },
     [selectedFormat]
   )
-
   // Canvas-Erstellung für Bildexporte mit kompaktem Grid-Layout
   const createExportCanvas = useCallback(
     async (username: string): Promise<HTMLCanvasElement> => {
-      // Grid-Konfiguration
-      const categories = Object.entries(kinks)
+      // Filtere die Kinks, um nur ausgefüllte oder kommentierte zu zeigen
+      const filteredKinks = Object.keys(kinks).reduce(
+        (filtered, categoryName) => {
+          const category = kinks[categoryName]
+          const filteredKinkList: string[] = []
+          const filteredDescriptions: string[] = []
+
+          category.kinks.forEach((kinkName, index) => {
+            // Prüfe, ob mindestens ein Field für diesen Kink ausgefüllt oder kommentiert ist
+            const hasFilledOrCommentedField = category.fields.some((field) => {
+              const selectionItem = selection.find(
+                (item) =>
+                  item.category === categoryName &&
+                  item.kink === kinkName &&
+                  item.field === field
+              )
+
+              // Kink ist relevant, wenn:
+              // 1. Es eine Auswahl gibt und sie nicht "Not Entered" ist
+              // 2. Oder es einen Kommentar gibt
+              return (
+                selectionItem &&
+                (selectionItem.value !== 'Not Entered' ||
+                  (selectionItem.comment &&
+                    selectionItem.comment.trim().length > 0))
+              )
+            })
+
+            if (hasFilledOrCommentedField) {
+              filteredKinkList.push(kinkName)
+              filteredDescriptions.push(category.descriptions?.[index] || '')
+            }
+          })
+
+          // Nur Kategorien mit mindestens einem relevanten Kink hinzufügen
+          if (filteredKinkList.length > 0) {
+            filtered[categoryName] = {
+              ...category,
+              kinks: filteredKinkList,
+              descriptions: filteredDescriptions,
+            }
+          }
+
+          return filtered
+        },
+        {} as typeof kinks
+      )
+
+      // Grid-Konfiguration mit gefilterten Kinks
+      let categories = Object.entries(filteredKinks)
 
       // Warte kurz, falls Daten noch geladen werden
       if (categories.length === 0) {
         await new Promise((resolve) => setTimeout(resolve, 500))
-        const retryCategories = Object.entries(kinks)
 
-        if (retryCategories.length === 0) {
+        // Wiederhole die Filterung mit aktualisierten Daten
+        const retryFilteredKinks = Object.keys(kinks).reduce(
+          (filtered, categoryName) => {
+            const category = kinks[categoryName]
+            const filteredKinkList: string[] = []
+            const filteredDescriptions: string[] = []
+
+            category.kinks.forEach((kinkName, index) => {
+              const hasFilledOrCommentedField = category.fields.some(
+                (field) => {
+                  const selectionItem = selection.find(
+                    (item) =>
+                      item.category === categoryName &&
+                      item.kink === kinkName &&
+                      item.field === field
+                  )
+
+                  return (
+                    selectionItem &&
+                    (selectionItem.value !== 'Not Entered' ||
+                      (selectionItem.comment &&
+                        selectionItem.comment.trim().length > 0))
+                  )
+                }
+              )
+
+              if (hasFilledOrCommentedField) {
+                filteredKinkList.push(kinkName)
+                filteredDescriptions.push(category.descriptions?.[index] || '')
+              }
+            })
+
+            if (filteredKinkList.length > 0) {
+              filtered[categoryName] = {
+                ...category,
+                kinks: filteredKinkList,
+                descriptions: filteredDescriptions,
+              }
+            }
+
+            return filtered
+          },
+          {} as typeof kinks
+        )
+
+        categories = Object.entries(retryFilteredKinks)
+
+        if (categories.length === 0) {
           // Erstelle Fallback-Canvas mit Fehlermeldung
           const canvas = document.createElement('canvas')
           canvas.width = 800
@@ -157,9 +250,8 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
         }
       }
 
-      // Verwende retry-Kategorien falls verfügbar
-      const finalCategories =
-        categories.length > 0 ? categories : Object.entries(kinks)
+      // Verwende die final categories
+      const finalCategories = categories
 
       const gridColumns = Math.min(
         3,
