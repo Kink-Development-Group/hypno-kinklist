@@ -2,6 +2,7 @@ import React, { memo, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
+import { Selection } from '../types'
 import { strToClass } from '../utils'
 import Choice from './Choice'
 
@@ -20,7 +21,13 @@ const KinkRow: React.FC<KinkRowProps> = ({
   description,
   forceInlineTooltip = false,
 }) => {
-  const { selection, setIsCommentOverlayOpen, setSelectedKink } = useKinklist()
+  const {
+    selection,
+    setSelection,
+    levels,
+    setIsCommentOverlayOpen,
+    setSelectedKink,
+  } = useKinklist()
   const { t } = useTranslation()
 
   const rowId = `kink-row-${strToClass(categoryName)}-${strToClass(kinkName)}`
@@ -36,14 +43,29 @@ const KinkRow: React.FC<KinkRowProps> = ({
 
   // Handle opening comment overlay
   const handleOpenComment = (field: string) => {
-    const kinkSelection = selection.find(
+    let kinkSelection = selection.find(
       (s) =>
         s.category === categoryName && s.kink === kinkName && s.field === field
     )
-    if (kinkSelection) {
-      setSelectedKink(kinkSelection)
-      setIsCommentOverlayOpen(true)
+
+    // If selection doesn't exist, create it
+    if (!kinkSelection) {
+      const newSelection: Selection = {
+        category: categoryName,
+        kink: kinkName,
+        field: field,
+        value: Object.keys(levels)[0], // Default to first level
+        showField: true,
+      }
+      kinkSelection = newSelection
+
+      // Add it to the selection array
+      const updatedSelection = [...selection, newSelection]
+      setSelection(updatedSelection)
     }
+
+    setSelectedKink(kinkSelection)
+    setIsCommentOverlayOpen(true)
   }
 
   // Tooltip-Portal-Logik

@@ -7,6 +7,7 @@ import React, {
 } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
+import { Selection } from '../types'
 
 interface ChoiceProps {
   field: string
@@ -34,22 +35,39 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
       setSelectedLevel(currentSelection.value)
     }
   }, [selection, categoryName, kinkName, field])
-
   const handleClick = useCallback(
     (levelName: string) => {
       setSelectedLevel(levelName)
 
-      // Update the global selection state
-      const updatedSelection = selection.map((item) => {
-        if (
+      // Find existing selection item or create a new one
+      const existingIndex = selection.findIndex(
+        (item) =>
           item.category === categoryName &&
           item.kink === kinkName &&
           item.field === field
-        ) {
-          return { ...item, value: levelName }
+      )
+
+      let updatedSelection: Selection[]
+
+      if (existingIndex >= 0) {
+        // Update existing selection
+        updatedSelection = selection.map((item, index) => {
+          if (index === existingIndex) {
+            return { ...item, value: levelName }
+          }
+          return item
+        })
+      } else {
+        // Create new selection item if it doesn't exist
+        const newItem = {
+          category: categoryName,
+          kink: kinkName,
+          field: field,
+          value: levelName,
+          showField: true,
         }
-        return item
-      })
+        updatedSelection = [...selection, newItem]
+      }
 
       setSelection(updatedSelection)
     },
