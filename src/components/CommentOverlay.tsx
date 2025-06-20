@@ -27,11 +27,21 @@ const CommentOverlay: React.FC = () => {
   const handleSave = useCallback(() => {
     if (selectedKink) {
       const updatedSelection = selection.map((item) => {
-        if (
+        // Use stable IDs for comparison if available, fallback to translated names
+        const matchesStableIds =
+          selectedKink.categoryId &&
+          selectedKink.kinkId &&
+          selectedKink.fieldId &&
+          item.categoryId === selectedKink.categoryId &&
+          item.kinkId === selectedKink.kinkId &&
+          item.fieldId === selectedKink.fieldId
+
+        const matchesTranslatedNames =
           item.category === selectedKink.category &&
           item.kink === selectedKink.kink &&
           item.field === selectedKink.field
-        ) {
+
+        if (matchesStableIds || matchesTranslatedNames) {
           return { ...item, comment: comment.trim() || undefined }
         }
         return item

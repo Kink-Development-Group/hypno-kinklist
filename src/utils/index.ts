@@ -244,60 +244,42 @@ export const updateHash = (
     return ''
   }
 
-  // Debug: Log what we're trying to hash
-  console.log(
-    '🔧 updateHash: Starting with selection:',
-    selection.length,
-    'items'
-  )
-
-  // New approach: Use ID-based encoding instead of position-based
-  const selectionData: { [stableId: string]: number } = {}
+  // New approach: Use ID-based encoding for both values and comments
+  const selectionData: {
+    [stableId: string]: {
+      level: number
+      comment?: string
+    }
+  } = {}
   const levelNames = Object.keys(levels)
 
-  selection.forEach((item, index) => {
+  selection.forEach((item) => {
     // Generate stable key
     const stableKey =
       item.categoryId && item.kinkId && item.fieldId
         ? `${item.categoryId}-${item.kinkId}-${item.fieldId}`
         : `${item.category}-${item.kink}-${item.field}`
 
-    // Only include non-default values in hash to keep it compact
+    // Only include non-default values or items with comments in hash to keep it compact
     const levelIndex = levelNames.indexOf(item.value)
     const finalIndex = levelIndex >= 0 ? levelIndex : 0
+    const hasComment = item.comment && item.comment.trim().length > 0
 
-    // Debug: Log each item processing
-    if (index < 5) {
-      // Only log first 5 to avoid spam
-      console.log(`🔧 updateHash item ${index}:`, {
-        stableKey,
-        value: item.value,
-        levelIndex,
-        finalIndex,
-        willStore: finalIndex > 0,
-      })
-    }
-
-    if (finalIndex > 0) {
-      // Only store non-default values
-      selectionData[stableKey] = finalIndex
+    // Store if it has a non-default value OR has a comment
+    if (finalIndex > 0 || hasComment) {
+      const data: { level: number; comment?: string } = { level: finalIndex }
+      if (hasComment) {
+        data.comment = item.comment!.trim()
+      }
+      selectionData[stableKey] = data
     }
   })
-
-  // Debug: Log what will be stored
-  console.log('🔧 updateHash: Selection data to store:', selectionData)
-  console.log(
-    '🔧 updateHash: Number of non-default values:',
-    Object.keys(selectionData).length
-  )
 
   // Create a compact JSON representation for non-default values
   const compactData = JSON.stringify(selectionData)
 
   // Encode using base64 to make it URL-safe
   const hash = btoa(encodeURIComponent(compactData))
-
-  console.log('🔧 updateHash: Generated hash:', hash.substring(0, 50) + '...')
 
   window.location.hash = hash
   return hash
@@ -309,10 +291,8 @@ export const parseHash = (
   enhancedKinks?: EnhancedKinksData | null
 ): Selection[] | null => {
   const fullHash = window.location.hash.substring(1)
-  console.log('🔍 parseHash: Parsing hash:', fullHash.substring(0, 50) + '...')
 
   if (fullHash.length < 10) {
-    console.log('🔍 parseHash: Hash too short, returning null')
     return null
   }
 
@@ -320,71 +300,54 @@ export const parseHash = (
     // Decode the new ID-based hash format
     const decodedData = decodeURIComponent(atob(fullHash))
     const selectionData = JSON.parse(decodedData) as {
-      [stableId: string]: number
+      [stableId: string]: { level: number; comment?: string } | number
     }
-
-    console.log('🔍 parseHash: Decoded selection data:', selectionData)
-    console.log(
-      '🔍 parseHash: Number of stored selections:',
-      Object.keys(selectionData).length
-    )
 
     // Use getAllKinksEnhanced to get the current kink structure
     const allKinks = getAllKinksEnhanced(kinks, levels, enhancedKinks)
-    console.log(
-      '🔍 parseHash: Generated kinks structure:',
-      allKinks.length,
-      'items'
-    )
 
     const updatedSelection: Selection[] = []
 
     // Map the stored selections back to the current kink structure
     const levelNames = Object.keys(levels)
 
-    allKinks.forEach((kink, index) => {
+    allKinks.forEach((kink) => {
       const stableKey =
         kink.categoryId && kink.kinkId && kink.fieldId
           ? `${kink.categoryId}-${kink.kinkId}-${kink.fieldId}`
           : `${kink.category}-${kink.kink}-${kink.field}`
 
       // Check if we have a stored value for this kink
-      const storedLevelIndex = selectionData[stableKey]
+      const storedData = selectionData[stableKey]
       let value = Object.keys(levels)[0] // Default value
+      let comment: string | undefined = undefined
 
-      if (
-        storedLevelIndex !== undefined &&
-        storedLevelIndex < levelNames.length
-      ) {
-        value = levelNames[storedLevelIndex]
-      }
-
-      // Debug: Log first few restorations
-      if (index < 5 && storedLevelIndex !== undefined) {
-        console.log(`🔍 parseHash restored item ${index}:`, {
-          stableKey,
-          storedLevelIndex,
-          value,
-          category: kink.category,
-          kink: kink.kink,
-          field: kink.field,
-        })
+      if (storedData !== undefined) {
+        // Handle both old format (number) and new format (object)
+        if (typeof storedData === 'number') {
+          // Old format: just the level index
+          if (storedData < levelNames.length) {
+            value = levelNames[storedData]
+          }
+        } else {
+          // New format: object with level and comment
+          if (storedData.level < levelNames.length) {
+            value = levelNames[storedData.level]
+          }
+          comment = storedData.comment
+        }
       }
 
       updatedSelection.push({
         ...kink,
         value,
-        comment: undefined, // TODO: Add comment support to new format
+        comment,
       })
     })
 
-    console.log(
-      '🔍 parseHash: Final selection length:',
-      updatedSelection.length
-    )
     return updatedSelection
   } catch (error) {
-    console.error('🔍 parseHash: Error parsing new format:', error)
+    console.error('parseHash: Error parsing new format:', error)
 
     // Fallback to old format if new format fails
     return parseHashLegacy(levels, kinks, enhancedKinks, fullHash)

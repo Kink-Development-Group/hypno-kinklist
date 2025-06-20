@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import { Selection } from '../types'
 import { strToClass } from '../utils'
+import { getStableIdsFromOriginal } from '../utils/multilingualTemplates'
 import Choice from './Choice'
 
 interface KinkRowProps {
@@ -27,6 +28,8 @@ const KinkRow: React.FC<KinkRowProps> = ({
     levels,
     setIsCommentOverlayOpen,
     setSelectedKink,
+    kinks,
+    enhancedKinks,
   } = useKinklist()
   const { t } = useTranslation()
 
@@ -43,9 +46,20 @@ const KinkRow: React.FC<KinkRowProps> = ({
 
   // Handle opening comment overlay
   const handleOpenComment = (field: string) => {
+    // Generate stable IDs using the language-independent method
+    const stableIds = getStableIdsFromOriginal(
+      enhancedKinks,
+      kinks,
+      categoryName,
+      kinkName,
+      field
+    )
+
     let kinkSelection = selection.find(
       (s) =>
-        s.category === categoryName && s.kink === kinkName && s.field === field
+        s.categoryId === stableIds.categoryId &&
+        s.kinkId === stableIds.kinkId &&
+        s.fieldId === stableIds.fieldId
     )
 
     // If selection doesn't exist, create it
@@ -56,6 +70,9 @@ const KinkRow: React.FC<KinkRowProps> = ({
         field: field,
         value: Object.keys(levels)[0], // Default to first level
         showField: true,
+        categoryId: stableIds.categoryId,
+        kinkId: stableIds.kinkId,
+        fieldId: stableIds.fieldId,
       }
       kinkSelection = newSelection
 

@@ -231,6 +231,31 @@ export const KinklistProvider: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kinks, levels, errorHandler, enhancedKinks])
 
+  // Update selectedKink after language change to ensure comments are preserved in modals
+  useEffect(() => {
+    // Only update if we have a selectedKink and modals are open
+    if (selectedKink && (isCommentOverlayOpen || isInputOverlayOpen)) {
+      // Find the corresponding selection in the current selection array using stable IDs
+      const updatedSelection = selection.find(
+        (s) =>
+          s.categoryId === selectedKink.categoryId &&
+          s.kinkId === selectedKink.kinkId &&
+          s.fieldId === selectedKink.fieldId
+      )
+
+      if (updatedSelection) {
+        // Update selectedKink with the current selection data (preserving comments)
+        setSelectedKink(updatedSelection)
+      }
+    }
+  }, [
+    selection,
+    selectedKink,
+    isCommentOverlayOpen,
+    isInputOverlayOpen,
+    i18n.language,
+  ])
+
   // Update hash when selection changes (but not during language changes)
   useEffect(() => {
     // Skip hash updates if:

@@ -449,22 +449,11 @@ export const getStableIdsFromOriginal = (
 
       if (fieldIndex >= 0 && kinkIndex >= 0) {
         // Use stable, language-independent IDs based on category key and indices
-        const stableIds = {
+        return {
           categoryId: strToClass(categoryKey), // Use the original category key
           kinkId: `${strToClass(categoryKey)}-kink-${kinkIndex}`, // Use category + index for stable kink ID
           fieldId: `${strToClass(categoryKey)}-field-${fieldIndex}`, // Use category + index for stable field ID
         }
-        console.log('🔧 Generated stable IDs (multi-lang):', {
-          categoryName,
-          kinkName,
-          fieldName,
-          categoryKey,
-          kinkIndex,
-          fieldIndex,
-          stableIds,
-          currentLanguage: i18n.language,
-        })
-        return stableIds
       }
     }
   }
