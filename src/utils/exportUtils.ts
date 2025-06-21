@@ -467,7 +467,7 @@ export const exportAsPDF = async (
     pdf.setFontSize(12)
     pdf.setFont('helvetica', 'bold')
     pdf.setTextColor(44, 62, 80)
-    pdf.text(t('legend.title') || 'Legend:', margin, currentY)
+    pdf.text(t('legend.titleSimple') || 'Legend:', margin, currentY)
     currentY += 8
 
     // Legende in kompakter Form (ähnlich Canvas-Grid)
