@@ -48,7 +48,8 @@ const AsyncKinklistProvider: React.FC<AsyncKinklistProviderProps> = ({
     return (
       <div className="template-loading">
         <div className="loading-spinner">
-          <p>Lade Kinklist-Template...</p>
+          <div className="spinner-circle"></div>
+          <p>Lade Kinklist-Template</p>
         </div>
       </div>
     )

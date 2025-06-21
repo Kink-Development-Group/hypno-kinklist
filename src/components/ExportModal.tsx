@@ -936,7 +936,9 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
         <div className="overlay visible">
           <div className="modal-content loading-modal">
             <h2>{t('export.preparing')}</h2>
-            <div className="loading-spinner"></div>
+            <div className="loading-spinner">
+              <div className="spinner-circle"></div>
+            </div>
             <p>{t('export.pleaseWait')}</p>
           </div>
         </div>

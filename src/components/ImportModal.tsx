@@ -276,7 +276,9 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
         <div className="overlay visible">
           <div className="modal-content loading-modal">
             <h2>{t('import.processing')}</h2>
-            <div className="loading-spinner"></div>
+            <div className="loading-spinner">
+              <div className="spinner-circle"></div>
+            </div>
             <p>{t('import.pleaseWait')}</p>
           </div>
         </div>
