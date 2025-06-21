@@ -285,7 +285,8 @@
     "canvas": {
       "title": "Kinklista {{username}}",
       "defaultFilename": "export",
-      "downloadError": "Fel vid nedladdning av bild:"
+      "downloadError": "Fel vid nedladdning av bild:",
+      "completedSelections": "slutförda"
     },
     "actions": {
       "exportAs": "Exportera som {{format}}",
@@ -404,9 +405,18 @@
     "successMessage": "Modalstatus har återställts. Du kan nu använda startmodulen normalt igen."
   },
   "kinks": {
-    "basics": "Grunder",
+    "basics": "Grundläggande",
+    "safetyandconsent": "Säkerhet och samtycke",
     "safety": "Säkerhet och samtycke",
     "types": "Typer av hypnos",
+    "typesofhypnosis": "Typer av hypnos",
+    "preferences": "Preferenser",
+    "stimuli": "Stimuli",
+    "inductions": "Induktioner",
+    "emotionplay": "Känslospel",
+    "comingoutoftrance": "Komma ur trans",
+    "suggestions1": "Förslag 1",
+    "suggestions2": "Förslag 2",
     "categoryLabel": "Kinks i kategori {{categoryName}}"
   },
   "comments": {

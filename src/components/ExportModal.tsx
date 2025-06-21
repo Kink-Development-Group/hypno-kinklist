@@ -27,7 +27,7 @@ interface ExportModalProps {
 }
 
 const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { kinks, levels, selection } = useKinklist()
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isSuccess, setIsSuccess] = useState<boolean>(false)
@@ -100,6 +100,9 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
   // Canvas-Erstellung für Bildexporte mit kompaktem Grid-Layout
   const createExportCanvas = useCallback(
     async (username: string): Promise<HTMLCanvasElement> => {
+      // Sicherstellen, dass aktuelle Übersetzungen verwendet werden
+      const currentT = t
+
       // Filtere die Kinks, um nur ausgefüllte oder kommentierte zu zeigen
       const filteredKinks = Object.keys(kinks).reduce(
         (filtered, categoryName) => {
@@ -228,12 +231,20 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
           ctx.fillStyle = '#2c3e50'
           ctx.font = 'bold 32px "Segoe UI", Arial, sans-serif'
           ctx.textAlign = 'center'
-          ctx.fillText(t('export.errors.noData'), canvas.width / 2, 200)
+          ctx.fillText(currentT('export.errors.noData'), canvas.width / 2, 200)
 
           ctx.font = '18px "Segoe UI", Arial, sans-serif'
           ctx.fillStyle = '#6c757d'
-          ctx.fillText(t('export.errors.loadKinklist'), canvas.width / 2, 250)
-          ctx.fillText(t('export.errors.dataLoading'), canvas.width / 2, 280)
+          ctx.fillText(
+            currentT('export.errors.loadKinklist'),
+            canvas.width / 2,
+            250
+          )
+          ctx.fillText(
+            currentT('export.errors.dataLoading'),
+            canvas.width / 2,
+            280
+          )
 
           // Hilfetext
           ctx.font = '14px "Segoe UI", Arial, sans-serif'
@@ -384,10 +395,17 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
         : '🔗 Kink List'
       ctx.fillText(headerText, margin, yPosition + 20)
 
-      // Datum rechts oben
+      // Datum rechts oben - verwende aktuelle Sprache für Formatierung
       ctx.font = '12px "Segoe UI", Arial, sans-serif'
       ctx.fillStyle = '#6c757d'
-      const exportDate = new Date().toLocaleDateString('de-DE')
+      const currentLanguage = i18n.language || 'de'
+      const localeMap: { [key: string]: string } = {
+        de: 'de-DE',
+        en: 'en-US',
+        sv: 'sv-SE',
+      }
+      const locale = localeMap[currentLanguage] || 'de-DE'
+      const exportDate = new Date().toLocaleDateString(locale)
       const dateText = `📅 ${exportDate}`
       const dateWidth = ctx.measureText(dateText).width
       ctx.fillText(dateText, canvas.width - dateWidth - margin, yPosition + 15)
@@ -397,7 +415,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
       // Kompakte horizontale Legende
       ctx.fillStyle = '#2c3e50'
       ctx.font = 'bold 14px "Segoe UI", Arial, sans-serif'
-      ctx.fillText(t('legend.title'), margin, yPosition)
+      ctx.fillText(currentT('legend.title'), margin, yPosition)
 
       const legendItems = Object.entries(levels).filter(
         ([key]) => key !== 'Not Entered'
@@ -417,8 +435,15 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
 
         ctx.fillStyle = '#000000'
         ctx.font = '10px "Segoe UI", Arial, sans-serif'
-        ctx.fillText(levelName, legendX + 15, legendY + 3)
-        legendX += Math.max(60, ctx.measureText(levelName).width + 25)
+        // Verwende den übersetzten Namen statt des Schlüsselnamens
+        const levelKey = levelName.toLowerCase().replace(/\s+/g, '')
+        // Spezielle Behandlung für "Not Entered" -> "notEntered"
+        const translationKey =
+          levelKey === 'notentered' ? 'notEntered' : levelKey
+        const translatedLevelName =
+          currentT(`legend.${translationKey}`) || level.name
+        ctx.fillText(translatedLevelName, legendX + 15, legendY + 3)
+        legendX += Math.max(60, ctx.measureText(translatedLevelName).width + 25)
       })
 
       yPosition += 40
@@ -446,7 +471,35 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
 
         ctx.fillStyle = '#495057'
         ctx.font = 'bold 14px "Segoe UI", Arial, sans-serif'
-        const categoryText = `📂 ${categoryName}`
+
+        // Versuche den Kategorienamen zu übersetzen
+        const translateCategoryName = (name: string): string => {
+          // Normalisiere den Namen für die Übersetzungssuche
+          const normalizedName = name
+            .toLowerCase()
+            .replace(/\s+/g, '')
+            .replace(/[^a-z]/g, '')
+
+          // Versuche verschiedene Übersetzungsschlüssel
+          const possibleKeys = [
+            `kinks.${normalizedName}`,
+            `categories.${normalizedName}`,
+            normalizedName,
+          ]
+
+          for (const key of possibleKeys) {
+            const translated = currentT(key)
+            if (translated && translated !== key) {
+              return translated
+            }
+          }
+
+          // Fallback: verwende den ursprünglichen Namen
+          return name
+        }
+
+        const translatedCategoryName = translateCategoryName(categoryName)
+        const categoryText = `📂 ${translatedCategoryName}`
         ctx.fillText(categoryText, gridX + 10, gridY + 10)
 
         // Fields-Header kompakt
@@ -675,13 +728,13 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
       const totalSelections = selection.filter(
         (s) => s.value !== 'Not Entered'
       ).length
-      const statsText = `📊 ${totalSelections}/${totalKinks} ausgefüllt`
+      const statsText = `📊 ${totalSelections}/${totalKinks} ${currentT('export.canvas.completedSelections') || 'ausgefüllt'}`
       const statsWidth = ctx.measureText(statsText).width
       ctx.fillText(statsText, baseWidth - statsWidth - margin, footerY)
 
       return canvas
     },
-    [kinks, levels, selection, t]
+    [kinks, levels, selection, t, i18n.language]
   )
 
   const performExport = useCallback(async () => {
@@ -700,6 +753,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
         ...exportOptions,
         format,
         filename: `${baseFilename}.${format.toLowerCase()}`,
+        t: t, // Übersetzungsfunktion hinzufügen
       }
 
       let result
