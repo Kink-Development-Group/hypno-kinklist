@@ -408,7 +408,6 @@ export const resolveEnhancedKinksData = (
 // Helper function to get stable IDs from original data (language-independent)
 export const getStableIdsFromOriginal = (
   enhancedKinks: EnhancedKinksData | null,
-  kinks: import('../types').KinksData,
   categoryName: string,
   kinkName: string,
   fieldName: string

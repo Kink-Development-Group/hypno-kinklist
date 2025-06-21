@@ -516,7 +516,6 @@ export const getAllKinksEnhanced = (
         // Generate stable IDs using original/language-independent data
         const stableIds = getStableIdsFromOriginal(
           enhancedKinks,
-          kinks,
           category,
           kink,
           field

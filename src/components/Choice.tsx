@@ -17,8 +17,7 @@ interface ChoiceProps {
 }
 
 const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
-  const { levels, selection, setSelection, kinks, enhancedKinks } =
-    useKinklist()
+  const { levels, selection, setSelection, enhancedKinks } = useKinklist()
   const { t } = useTranslation()
   const [selectedLevel, setSelectedLevel] = useState<string>(
     Object.keys(levels)[0]
@@ -29,7 +28,6 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
     // Get stable IDs for consistent matching across languages
     const stableIds = getStableIdsFromOriginal(
       enhancedKinks,
-      kinks,
       categoryName,
       kinkName,
       field
@@ -55,7 +53,7 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
     if (currentSelection) {
       setSelectedLevel(currentSelection.value)
     }
-  }, [selection, categoryName, kinkName, field, enhancedKinks, kinks])
+  }, [selection, categoryName, kinkName, field, enhancedKinks])
   const handleClick = useCallback(
     (levelName: string) => {
       setSelectedLevel(levelName)
@@ -63,7 +61,6 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
       // Get stable IDs for consistent matching across languages
       const stableIds = getStableIdsFromOriginal(
         enhancedKinks,
-        kinks,
         categoryName,
         kinkName,
         field
@@ -109,7 +106,6 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
         // Generate stable IDs for new items
         const stableIds = getStableIdsFromOriginal(
           enhancedKinks,
-          kinks,
           categoryName,
           kinkName,
           field
@@ -131,15 +127,7 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
 
       setSelection(updatedSelection)
     },
-    [
-      categoryName,
-      kinkName,
-      field,
-      selection,
-      setSelection,
-      enhancedKinks,
-      kinks,
-    ]
+    [categoryName, kinkName, field, selection, setSelection, enhancedKinks]
   )
 
   // Handled keyboard events for accessibility

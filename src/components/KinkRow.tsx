@@ -28,7 +28,6 @@ const KinkRow: React.FC<KinkRowProps> = ({
     levels,
     setIsCommentOverlayOpen,
     setSelectedKink,
-    kinks,
     enhancedKinks,
   } = useKinklist()
   const { t } = useTranslation()
@@ -49,7 +48,6 @@ const KinkRow: React.FC<KinkRowProps> = ({
     // Generate stable IDs using the language-independent method
     const stableIds = getStableIdsFromOriginal(
       enhancedKinks,
-      kinks,
       categoryName,
       kinkName,
       field
