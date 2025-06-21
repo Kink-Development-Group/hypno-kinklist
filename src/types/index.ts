@@ -27,4 +27,8 @@ export interface Selection {
   $choices?: any
   showField: boolean
   comment?: string // Optional comment for each selection
+  // Stable IDs for multilingual support - these don't change with language
+  categoryId?: string
+  kinkId?: string
+  fieldId?: string
 }

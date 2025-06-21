@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Hypno Kinklist - Beta",
+    "title": "Hypno Kinklist",
     "subtitle": "Your personalized kink preference list",
     "version": "App Version"
   },
@@ -285,7 +285,8 @@
     "canvas": {
       "title": "Kinklist {{username}}",
       "defaultFilename": "export",
-      "downloadError": "Error downloading image:"
+      "downloadError": "Error downloading image:",
+      "completedSelections": "completed"
     },
     "actions": {
       "exportAs": "Export as {{format}}",
@@ -405,8 +406,17 @@
   },
   "kinks": {
     "basics": "Basics",
+    "safetyandconsent": "Safety and consent",
     "safety": "Safety and consent",
     "types": "Types of Hypnosis",
+    "typesofhypnosis": "Types of Hypnosis",
+    "preferences": "Preferences",
+    "stimuli": "Stimuli",
+    "inductions": "Inductions",
+    "emotionplay": "Emotion Play",
+    "comingoutoftrance": "Coming Out Of Trance",
+    "suggestions1": "Suggestions 1",
+    "suggestions2": "Suggestions 2",
     "categoryLabel": "Kinks in category {{categoryName}}"
   },
   "comments": {

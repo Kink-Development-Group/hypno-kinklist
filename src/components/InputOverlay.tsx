@@ -117,7 +117,14 @@ const InputOverlay: React.FC = () => {
             item.kink === currentKink.kink &&
             item.field === currentKink.field
           ) {
-            return { ...item, value: levelName }
+            return {
+              ...item,
+              value: levelName,
+              // Ensure stable IDs are preserved
+              categoryId: item.categoryId,
+              kinkId: item.kinkId,
+              fieldId: item.fieldId,
+            }
           }
           return item
         })

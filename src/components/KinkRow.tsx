@@ -2,7 +2,9 @@ import React, { memo, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
+import { Selection } from '../types'
 import { strToClass } from '../utils'
+import { getStableIdsFromOriginal } from '../utils/multilingualTemplates'
 import Choice from './Choice'
 
 interface KinkRowProps {
@@ -20,7 +22,14 @@ const KinkRow: React.FC<KinkRowProps> = ({
   description,
   forceInlineTooltip = false,
 }) => {
-  const { selection, setIsCommentOverlayOpen, setSelectedKink } = useKinklist()
+  const {
+    selection,
+    setSelection,
+    levels,
+    setIsCommentOverlayOpen,
+    setSelectedKink,
+    enhancedKinks,
+  } = useKinklist()
   const { t } = useTranslation()
 
   const rowId = `kink-row-${strToClass(categoryName)}-${strToClass(kinkName)}`
@@ -36,14 +45,42 @@ const KinkRow: React.FC<KinkRowProps> = ({
 
   // Handle opening comment overlay
   const handleOpenComment = (field: string) => {
-    const kinkSelection = selection.find(
-      (s) =>
-        s.category === categoryName && s.kink === kinkName && s.field === field
+    // Generate stable IDs using the language-independent method
+    const stableIds = getStableIdsFromOriginal(
+      enhancedKinks,
+      categoryName,
+      kinkName,
+      field
     )
-    if (kinkSelection) {
-      setSelectedKink(kinkSelection)
-      setIsCommentOverlayOpen(true)
+
+    let kinkSelection = selection.find(
+      (s) =>
+        s.categoryId === stableIds.categoryId &&
+        s.kinkId === stableIds.kinkId &&
+        s.fieldId === stableIds.fieldId
+    )
+
+    // If selection doesn't exist, create it
+    if (!kinkSelection) {
+      const newSelection: Selection = {
+        category: categoryName,
+        kink: kinkName,
+        field: field,
+        value: Object.keys(levels)[0], // Default to first level
+        showField: true,
+        categoryId: stableIds.categoryId,
+        kinkId: stableIds.kinkId,
+        fieldId: stableIds.fieldId,
+      }
+      kinkSelection = newSelection
+
+      // Add it to the selection array
+      const updatedSelection = [...selection, newSelection]
+      setSelection(updatedSelection)
     }
+
+    setSelectedKink(kinkSelection)
+    setIsCommentOverlayOpen(true)
   }
 
   // Tooltip-Portal-Logik

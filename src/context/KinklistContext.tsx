@@ -3,12 +3,13 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react'
 import { useTranslation } from 'react-i18next'
 import { KinksData, LevelsData, Selection } from '../types'
 import {
-  getAllKinks,
+  getAllKinksEnhanced,
   hasMultilingualContent,
   parseHash,
   parseKinksTextEnhanced,
@@ -84,6 +85,13 @@ export const KinklistProvider: React.FC<{
   const { i18n } = useTranslation()
   const errorHandler = useErrorHandler()
 
+  // Use ref to track initialization state to avoid dependency loops
+  const isInitialized = useRef(false)
+  const lastLanguage = useRef(i18n.language)
+  const isLanguageChanging = useRef(false)
+  const originalHash = useRef<string>('')
+  const allowHashUpdates = useRef(true)
+
   // Function to refresh kinks for current language
   const refreshKinksForLanguage = useCallback(() => {
     if (enhancedKinks) {
@@ -141,17 +149,72 @@ export const KinklistProvider: React.FC<{
     }
   }, [i18n.language, enhancedKinks, refreshKinksForLanguage])
 
-  // Parse hash from URL
+  // Parse hash from URL and preserve existing selections during language changes
   useEffect(() => {
     if (Object.keys(kinks).length === 0) return
 
+    // Skip this effect entirely if we're currently changing language
+    if (isLanguageChanging.current) {
+      return
+    }
+
+    // If this is a language change and we already have selections, don't re-parse hash
+    if (
+      isInitialized.current &&
+      lastLanguage.current !== i18n.language &&
+      selection.length > 0
+    ) {
+      // IMPORTANT: Update lastLanguage FIRST, before setting other flags
+      lastLanguage.current = i18n.language
+
+      // Disable hash updates during language change
+      allowHashUpdates.current = false
+      isLanguageChanging.current = true
+      setTimeout(() => {
+        isLanguageChanging.current = false
+        allowHashUpdates.current = true
+
+        // Force hash update after language change is complete
+        setTimeout(() => {
+          // Get current selection and update hash directly
+          setSelection((currentSelection) => {
+            if (currentSelection.length > 0) {
+              updateHash(currentSelection, levels)
+            }
+            return currentSelection
+          })
+        }, 50)
+      }, 300) // Increased timeout to ensure completion
+
+      setSelection((prevSelection) => {
+        const newSelection = getAllKinksEnhanced(
+          kinks,
+          levels,
+          enhancedKinks,
+          prevSelection
+        )
+
+        return newSelection
+      })
+      return // IMPORTANT: Exit early to avoid hash parsing
+    }
+
     try {
-      const hashSelection = parseHash(levels, kinks)
+      const hashSelection = parseHash(levels, kinks, enhancedKinks)
       if (hashSelection) {
+        // Store the original hash to restore later if needed
+        originalHash.current = window.location.hash
         setSelection(hashSelection)
+        isInitialized.current = true
+        lastLanguage.current = i18n.language
       } else {
         // If no hash, initialize with default selection
-        setSelection(getAllKinks(kinks, levels))
+        // But only if we're not currently changing language and not already initialized
+        if (!isInitialized.current && !isLanguageChanging.current) {
+          setSelection(getAllKinksEnhanced(kinks, levels, enhancedKinks))
+          isInitialized.current = true
+          lastLanguage.current = i18n.language
+        }
       }
     } catch (e) {
       console.error('Error parsing hash:', e)
@@ -159,21 +222,62 @@ export const KinklistProvider: React.FC<{
         `Fehler beim Laden des URL-Hashes: ${e instanceof Error ? e.message : String(e)}`,
         e
       )
-      // Initialize with default selection on error
-      setSelection(getAllKinks(kinks, levels))
+      // Initialize with default selection on error - but only if not during language change
+      if (!isInitialized.current && !isLanguageChanging.current) {
+        setSelection(getAllKinksEnhanced(kinks, levels, enhancedKinks))
+        isInitialized.current = true
+      }
     }
-  }, [kinks, levels, errorHandler])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kinks, levels, errorHandler, enhancedKinks])
 
-  // Update hash when selection changes
+  // Update selectedKink after language change to ensure comments are preserved in modals
   useEffect(() => {
-    if (selection.length > 0) {
+    // Only update if we have a selectedKink and modals are open
+    if (selectedKink && (isCommentOverlayOpen || isInputOverlayOpen)) {
+      // Find the corresponding selection in the current selection array using stable IDs
+      const updatedSelection = selection.find(
+        (s) =>
+          s.categoryId === selectedKink.categoryId &&
+          s.kinkId === selectedKink.kinkId &&
+          s.fieldId === selectedKink.fieldId
+      )
+
+      if (updatedSelection) {
+        // Update selectedKink with the current selection data (preserving comments)
+        setSelectedKink(updatedSelection)
+      }
+    }
+  }, [
+    selection,
+    selectedKink,
+    isCommentOverlayOpen,
+    isInputOverlayOpen,
+    i18n.language,
+  ])
+
+  // Update hash when selection changes (but not during language changes)
+  useEffect(() => {
+    // Skip hash updates if:
+    // 1. Not initialized yet
+    // 2. Empty selection
+    // 3. Currently changing language (detected by lastLanguage mismatch)
+    const currentLanguageMatches = lastLanguage.current === i18n.language
+
+    if (
+      selection.length > 0 &&
+      isInitialized.current &&
+      currentLanguageMatches &&
+      !isLanguageChanging.current &&
+      allowHashUpdates.current
+    ) {
       try {
         updateHash(selection, levels)
       } catch (e) {
         console.error('Error updating hash:', e)
       }
     }
-  }, [selection, levels])
+  }, [selection, levels, i18n.language])
 
   return (
     <KinklistContext.Provider

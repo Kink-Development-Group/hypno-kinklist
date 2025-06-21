@@ -1,6 +1,8 @@
 import i18n from '../i18n'
 import { KinksData, LevelsData, Selection } from '../types'
 import {
+  EnhancedKinksData,
+  getStableIdsFromOriginal,
   parseEnhancedKinksText,
   resolveEnhancedKinksData,
 } from './multilingualTemplates'
@@ -238,42 +240,46 @@ export const updateHash = (
   selection: Selection[],
   levels: LevelsData
 ): string => {
-  const hashValues: number[] = []
-  const comments: string[] = []
-  let hasComments = false
+  if (selection.length === 0) {
+    return ''
+  }
 
-  // Erfasse alle Auswahloptionen und Kommentare
+  // New approach: Use ID-based encoding for both values and comments
+  const selectionData: {
+    [stableId: string]: {
+      level: number
+      comment?: string
+    }
+  } = {}
+  const levelNames = Object.keys(levels)
+
   selection.forEach((item) => {
-    // Finde den Level-Index
-    const levelNames = Object.keys(levels)
+    // Generate stable key
+    const stableKey =
+      item.categoryId && item.kinkId && item.fieldId
+        ? `${item.categoryId}-${item.kinkId}-${item.fieldId}`
+        : `${item.category}-${item.kink}-${item.field}`
+
+    // Only include non-default values or items with comments in hash to keep it compact
     const levelIndex = levelNames.indexOf(item.value)
-    hashValues.push(levelIndex >= 0 ? levelIndex : 0)
+    const finalIndex = levelIndex >= 0 ? levelIndex : 0
+    const hasComment = item.comment && item.comment.trim().length > 0
 
-    // Sammle Kommentare, leere Strings für Einträge ohne Kommentar
-    const itemComment = item.comment?.trim() || ''
-    comments.push(itemComment)
-
-    // Prüfe, ob es mindestens einen nicht-leeren Kommentar gibt
-    if (itemComment !== '') {
-      hasComments = true
+    // Store if it has a non-default value OR has a comment
+    if (finalIndex > 0 || hasComment) {
+      const data: { level: number; comment?: string } = { level: finalIndex }
+      if (hasComment) {
+        data.comment = item.comment!.trim()
+      }
+      selectionData[stableKey] = data
     }
   })
 
-  // Generiere den Hash für die Auswahlen
-  let hash = encode(Object.keys(levels).length, hashValues)
+  // Create a compact JSON representation for non-default values
+  const compactData = JSON.stringify(selectionData)
 
-  // Füge die Kommentare zum Hash hinzu, wenn welche vorhanden sind
-  if (hasComments) {
-    // Kodiere die Kommentare mit URL-sicherer Base64
-    try {
-      const commentsJson = JSON.stringify(comments)
-      // Verwende encodeURIComponent, um Sonderzeichen für URLs sicher zu machen
-      const encodedComments = btoa(encodeURIComponent(commentsJson))
-      hash += '|' + encodedComments
-    } catch (error) {
-      console.error(i18n.t('utils.commentEncodeError'), error)
-    }
-  }
+  // Encode using base64 to make it URL-safe
+  const hash = btoa(encodeURIComponent(compactData))
 
   window.location.hash = hash
   return hash
@@ -281,11 +287,80 @@ export const updateHash = (
 
 export const parseHash = (
   levels: LevelsData,
-  kinks: KinksData
+  kinks: KinksData,
+  enhancedKinks?: EnhancedKinksData | null
 ): Selection[] | null => {
   const fullHash = window.location.hash.substring(1)
-  if (fullHash.length < 10) return null
 
+  if (fullHash.length < 10) {
+    return null
+  }
+
+  try {
+    // Decode the new ID-based hash format
+    const decodedData = decodeURIComponent(atob(fullHash))
+    const selectionData = JSON.parse(decodedData) as {
+      [stableId: string]: { level: number; comment?: string } | number
+    }
+
+    // Use getAllKinksEnhanced to get the current kink structure
+    const allKinks = getAllKinksEnhanced(kinks, levels, enhancedKinks)
+
+    const updatedSelection: Selection[] = []
+
+    // Map the stored selections back to the current kink structure
+    const levelNames = Object.keys(levels)
+
+    allKinks.forEach((kink) => {
+      const stableKey =
+        kink.categoryId && kink.kinkId && kink.fieldId
+          ? `${kink.categoryId}-${kink.kinkId}-${kink.fieldId}`
+          : `${kink.category}-${kink.kink}-${kink.field}`
+
+      // Check if we have a stored value for this kink
+      const storedData = selectionData[stableKey]
+      let value = Object.keys(levels)[0] // Default value
+      let comment: string | undefined = undefined
+
+      if (storedData !== undefined) {
+        // Handle both old format (number) and new format (object)
+        if (typeof storedData === 'number') {
+          // Old format: just the level index
+          if (storedData < levelNames.length) {
+            value = levelNames[storedData]
+          }
+        } else {
+          // New format: object with level and comment
+          if (storedData.level < levelNames.length) {
+            value = levelNames[storedData.level]
+          }
+          comment = storedData.comment
+        }
+      }
+
+      updatedSelection.push({
+        ...kink,
+        value,
+        comment,
+      })
+    })
+
+    return updatedSelection
+  } catch (error) {
+    console.error('parseHash: Error parsing new format:', error)
+
+    // Fallback to old format if new format fails
+    return parseHashLegacy(levels, kinks, enhancedKinks, fullHash)
+  }
+}
+
+// Legacy hash parsing function for backward compatibility
+function parseHashLegacy(
+  levels: LevelsData,
+  kinks: KinksData,
+  enhancedKinks: EnhancedKinksData | null | undefined,
+  fullHash: string
+): Selection[] | null {
   // Trenne die Kommentare von den Auswahlen
   const parts = fullHash.split('|')
   const hash = parts[0]
@@ -305,20 +380,42 @@ export const parseHash = (
   const levelCount = Object.keys(levels).length
   const levelValues = decode(levelCount, hash)
 
-  // Konvertiere Level-Werte (Indizes) in vollständige Selection-Objekte
-  const allKinks = getAllKinks(kinks, levels)
+  // Use getAllKinksEnhanced to ensure proper stable ID handling
+  const allKinks = getAllKinksEnhanced(kinks, levels, enhancedKinks)
   const updatedSelection: Selection[] = []
 
-  for (let i = 0; i < Math.min(levelValues.length, allKinks.length); i++) {
+  // IMPORTANT: Only process up to the minimum of available values and kinks
+  const maxItems = Math.min(levelValues.length, allKinks.length)
+
+  for (let i = 0; i < maxItems; i++) {
     const levelIndex = levelValues[i]
     const levelNames = Object.keys(levels)
     const levelName = levelNames[levelIndex] || levelNames[0]
+    const baseSelection = allKinks[i]
 
     updatedSelection.push({
-      ...allKinks[i],
+      ...baseSelection,
       value: levelName,
       comment: comments[i] || undefined,
+      categoryId: baseSelection.categoryId,
+      kinkId: baseSelection.kinkId,
+      fieldId: baseSelection.fieldId,
     })
+  }
+
+  // If there are more kinks than hash values, add them with default values
+  if (allKinks.length > levelValues.length) {
+    for (let i = levelValues.length; i < allKinks.length; i++) {
+      const baseSelection = allKinks[i]
+      updatedSelection.push({
+        ...baseSelection,
+        value: Object.keys(levels)[0],
+        comment: undefined,
+        categoryId: baseSelection.categoryId,
+        kinkId: baseSelection.kinkId,
+        fieldId: baseSelection.fieldId,
+      })
+    }
   }
 
   return updatedSelection
@@ -330,12 +427,78 @@ export const getAllKinks = (
   existingSelection: Selection[] = []
 ): Selection[] => {
   const list: Selection[] = []
-  const selectionMap = new Map<string, string>()
+  const selectionMap = new Map<string, { value: string; comment?: string }>()
 
-  // Create a map of existing selections for fast lookup
+  // Create a map of existing selections using stable IDs when available, fallback to names
   existingSelection.forEach((item) => {
-    const key = `${item.category}-${item.kink}-${item.field}`
-    selectionMap.set(key, item.value)
+    const stableKey =
+      item.categoryId && item.kinkId && item.fieldId
+        ? `${item.categoryId}-${item.kinkId}-${item.fieldId}`
+        : `${item.category}-${item.kink}-${item.field}`
+    selectionMap.set(stableKey, { value: item.value, comment: item.comment })
+  })
+
+  const categories = Object.keys(kinks)
+  for (let i = 0; i < categories.length; i++) {
+    const category = categories[i]
+    const categoryId = strToClass(category) // Use normalized category name as stable ID
+    const fields = kinks[category].fields
+    const kinkArr = kinks[category].kinks
+
+    for (let j = 0; j < fields.length; j++) {
+      const field = fields[j]
+      const fieldId = strToClass(field) // Use normalized field name as stable ID
+      for (let k = 0; k < kinkArr.length; k++) {
+        const kink = kinkArr[k]
+        const kinkId = strToClass(kink) // Use normalized kink name as stable ID
+
+        // Try stable key first, then fallback to current names
+        const stableKey = `${categoryId}-${kinkId}-${fieldId}`
+        const fallbackKey = `${category}-${kink}-${field}`
+
+        const existingData =
+          selectionMap.get(stableKey) || selectionMap.get(fallbackKey)
+        const value = existingData?.value || Object.keys(levels)[0]
+
+        const obj: Selection = {
+          category,
+          kink,
+          field,
+          value,
+          showField: fields.length >= 2,
+          comment: existingData?.comment,
+          // Add stable IDs for future language switches
+          categoryId,
+          kinkId,
+          fieldId,
+        }
+
+        list.push(obj)
+      }
+    }
+  }
+
+  return list
+}
+
+// Enhanced version of getAllKinks that supports stable IDs for multilingual content
+export const getAllKinksEnhanced = (
+  kinks: KinksData,
+  levels: LevelsData,
+  enhancedKinks: EnhancedKinksData | null = null,
+  existingSelection: Selection[] = []
+): Selection[] => {
+  const list: Selection[] = []
+  const selectionMap = new Map<string, { value: string; comment?: string }>()
+
+  // Create a map of existing selections using stable IDs when available, fallback to names
+  existingSelection.forEach((item) => {
+    const stableKey =
+      item.categoryId && item.kinkId && item.fieldId
+        ? `${item.categoryId}-${item.kinkId}-${item.fieldId}`
+        : `${item.category}-${item.kink}-${item.field}`
+
+    selectionMap.set(stableKey, { value: item.value, comment: item.comment })
   })
 
   const categories = Object.keys(kinks)
@@ -346,10 +509,25 @@ export const getAllKinks = (
 
     for (let j = 0; j < fields.length; j++) {
       const field = fields[j]
+
       for (let k = 0; k < kinkArr.length; k++) {
         const kink = kinkArr[k]
-        const key = `${category}-${kink}-${field}`
-        const value = selectionMap.get(key) || Object.keys(levels)[0]
+
+        // Generate stable IDs using original/language-independent data
+        const stableIds = getStableIdsFromOriginal(
+          enhancedKinks,
+          category,
+          kink,
+          field
+        )
+
+        // Try stable key first, then fallback to current names
+        const stableKey = `${stableIds.categoryId}-${stableIds.kinkId}-${stableIds.fieldId}`
+        const fallbackKey = `${category}-${kink}-${field}`
+
+        const existingData =
+          selectionMap.get(stableKey) || selectionMap.get(fallbackKey)
+        const value = existingData?.value || Object.keys(levels)[0]
 
         const obj: Selection = {
           category,
@@ -357,6 +535,11 @@ export const getAllKinks = (
           field,
           value,
           showField: fields.length >= 2,
+          comment: existingData?.comment,
+          // Use language-independent stable IDs
+          categoryId: stableIds.categoryId,
+          kinkId: stableIds.kinkId,
+          fieldId: stableIds.fieldId,
         }
 
         list.push(obj)

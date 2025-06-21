@@ -12,7 +12,61 @@ import {
 import { getAppVersion } from './version'
 
 /**
+ * Filtert Kinks und Kategorien, um nur ausgefüllte oder kommentierte Einträge zu behalten
+ */
+const filterFilledOrCommentedKinks = (
+  kinks: KinksData,
+  selection: Selection[]
+): KinksData => {
+  const filteredKinks: KinksData = {}
+
+  Object.keys(kinks).forEach((categoryName) => {
+    const category = kinks[categoryName]
+    const filteredKinkList: string[] = []
+    const filteredDescriptions: string[] = []
+
+    category.kinks.forEach((kinkName, index) => {
+      // Prüfe, ob mindestens ein Field für diesen Kink ausgefüllt oder kommentiert ist
+      const hasFilledOrCommentedField = category.fields.some((field) => {
+        const selectionItem = selection.find(
+          (item) =>
+            item.category === categoryName &&
+            item.kink === kinkName &&
+            item.field === field
+        )
+
+        // Kink ist relevant, wenn:
+        // 1. Es eine Auswahl gibt und sie nicht "Not Entered" ist
+        // 2. Oder es einen Kommentar gibt
+        return (
+          selectionItem &&
+          (selectionItem.value !== 'Not Entered' ||
+            (selectionItem.comment && selectionItem.comment.trim().length > 0))
+        )
+      })
+
+      if (hasFilledOrCommentedField) {
+        filteredKinkList.push(kinkName)
+        filteredDescriptions.push(category.descriptions?.[index] || '')
+      }
+    })
+
+    // Nur Kategorien mit mindestens einem relevanten Kink hinzufügen
+    if (filteredKinkList.length > 0) {
+      filteredKinks[categoryName] = {
+        ...category,
+        kinks: filteredKinkList,
+        descriptions: filteredDescriptions,
+      }
+    }
+  })
+
+  return filteredKinks
+}
+
+/**
  * Konvertiert Kinklist-Daten in ein standardisiertes Export-Format
+ * Exportiert nur ausgefüllte oder kommentierte Kinks
  */
 export const convertToExportData = (
   kinks: KinksData,
@@ -20,8 +74,11 @@ export const convertToExportData = (
   selection: Selection[],
   username?: string
 ): ExportData => {
-  const categories = Object.keys(kinks).map((categoryName) => {
-    const category = kinks[categoryName]
+  // Filtere zuerst die Kinks, um nur ausgefüllte oder kommentierte zu behalten
+  const filteredKinks = filterFilledOrCommentedKinks(kinks, selection)
+
+  const categories = Object.keys(filteredKinks).map((categoryName) => {
+    const category = filteredKinks[categoryName]
     const categoryKinks = category.kinks.map((kinkName, index) => {
       const kinkSelections: {
         [field: string]: { level: string; comment?: string }
@@ -60,8 +117,8 @@ export const convertToExportData = (
       exportDate: new Date().toISOString(),
       version: getAppVersion(),
       username,
-      totalCategories: Object.keys(kinks).length,
-      totalKinks: Object.values(kinks).reduce(
+      totalCategories: Object.keys(filteredKinks).length,
+      totalKinks: Object.values(filteredKinks).reduce(
         (sum, cat) => sum + cat.kinks.length,
         0
       ),
@@ -268,6 +325,35 @@ export const exportAsPDF = async (
   try {
     const filename = options.filename || `kinklist_${Date.now()}.pdf`
 
+    // Übersetzungsfunktion mit Fallback
+    const t = options.t || ((key: string) => key)
+
+    // Hilfsfunktion für Kategorienamen-Übersetzung
+    const translateCategoryName = (name: string): string => {
+      // Normalisiere den Namen für die Übersetzungssuche
+      const normalizedName = name
+        .toLowerCase()
+        .replace(/\s+/g, '')
+        .replace(/[^a-z]/g, '')
+
+      // Versuche verschiedene Übersetzungsschlüssel
+      const possibleKeys = [
+        `kinks.${normalizedName}`,
+        `categories.${normalizedName}`,
+        normalizedName,
+      ]
+
+      for (const key of possibleKeys) {
+        const translated = t(key)
+        if (translated && translated !== key) {
+          return translated
+        }
+      }
+
+      // Fallback: verwende den ursprünglichen Namen
+      return name
+    }
+
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -296,8 +382,9 @@ export const exportAsPDF = async (
     pdf.setFontSize(20)
     pdf.setFont('helvetica', 'bold')
     const title = data.metadata.username
-      ? i18n.t('export.pdf.userTitle', { username: data.metadata.username })
-      : i18n.t('export.pdf.title')
+      ? t('export.pdf.userTitle', { username: data.metadata.username }) ||
+        `${data.metadata.username}'s Kink List`
+      : t('export.pdf.title') || 'Kink List'
     const titleWidth = pdf.getTextWidth(title)
     const titleX = (pageWidth - titleWidth) / 2
     pdf.text(title, titleX, 25)
@@ -317,10 +404,12 @@ export const exportAsPDF = async (
     pdf.text(infoText, margin, currentY)
 
     // Statistiken rechts (ohne Emojis)
-    const statsText = i18n.t('export.pdf.completedSelections', {
-      completed: data.metadata.totalSelections,
-      total: data.metadata.totalKinks,
-    })
+    const statsText =
+      t('export.pdf.completedSelections', {
+        completed: data.metadata.totalSelections,
+        total: data.metadata.totalKinks,
+      }) ||
+      `${data.metadata.totalSelections}/${data.metadata.totalKinks} completed`
     const statsWidth = pdf.getTextWidth(statsText)
     pdf.text(statsText, pageWidth - margin - statsWidth, currentY)
 
@@ -330,7 +419,7 @@ export const exportAsPDF = async (
     pdf.setFontSize(12)
     pdf.setFont('helvetica', 'bold')
     pdf.setTextColor(44, 62, 80)
-    pdf.text(i18n.t('export.pdf.legend'), margin, currentY)
+    pdf.text(t('legend.title') || 'Legend:', margin, currentY)
     currentY += 8
 
     // Legende in kompakter Form (ähnlich Canvas-Grid)
@@ -340,7 +429,7 @@ export const exportAsPDF = async (
     let legendRowCount = 0
 
     Object.entries(data.levels).forEach(([levelName, level]) => {
-      if (levelName === i18n.t('levels.notEntered')) return
+      if (levelName === 'Not Entered') return
 
       // Moderner Farbkreis (wie im Canvas-Export)
       const hexColor = level.color
@@ -352,12 +441,20 @@ export const exportAsPDF = async (
         pdf.circle(legendX + 3, currentY - 1, 2, 'FD') // Gefüllter Kreis mit Rahmen
       }
 
-      // Kompakte Label-Darstellung
+      // Kompakte Label-Darstellung mit Übersetzung
       pdf.setFontSize(7)
       pdf.setFont('helvetica', 'normal')
       pdf.setTextColor(33, 37, 41) // #212529
+
+      // Übersetze den Level-Namen
+      const levelKey = levelName.toLowerCase().replace(/\s+/g, '')
+      const translationKey = levelKey === 'notentered' ? 'notEntered' : levelKey
+      const translatedLevelName = t(`legend.${translationKey}`) || levelName
+
       const truncatedName =
-        levelName.length > 12 ? levelName.substring(0, 12) + '...' : levelName
+        translatedLevelName.length > 12
+          ? translatedLevelName.substring(0, 12) + '...'
+          : translatedLevelName
       pdf.text(truncatedName, legendX + 8, currentY)
 
       legendX += legendItemWidth
@@ -396,7 +493,10 @@ export const exportAsPDF = async (
       pdf.setFontSize(11)
       pdf.setFont('helvetica', 'bold')
       pdf.setTextColor(73, 80, 87) // #495057
-      pdf.text(`[${category.name}]`, margin + 3, currentY + 4)
+
+      // Übersetze den Kategorienamen
+      const translatedCategoryName = translateCategoryName(category.name)
+      pdf.text(`[${translatedCategoryName}]`, margin + 3, currentY + 4)
       currentY += 12
 
       // Kompakte Fields-Anzeige (wie im Canvas)
@@ -447,7 +547,7 @@ export const exportAsPDF = async (
         let choiceX = margin + 105
         category.fields.slice(0, 4).forEach((field) => {
           const selection = kink.selections[field]
-          if (selection && selection.level !== i18n.t('levels.notEntered')) {
+          if (selection && selection.level !== 'Not Entered') {
             const level = data.levels[selection.level]
             if (level) {
               const rgb = hexToRgb(level.color)
@@ -459,7 +559,7 @@ export const exportAsPDF = async (
               }
             }
           } else {
-            // Leerer Kreis für i18n.t('levels.notEntered')
+            // Leerer Kreis für Not Entered
             pdf.setDrawColor(222, 226, 230) // #dee2e6
             pdf.setLineWidth(0.3)
             pdf.circle(choiceX + 2, currentY + 2, 1.5, 'D')
@@ -470,7 +570,7 @@ export const exportAsPDF = async (
             pdf.setFontSize(6)
             pdf.setTextColor(255, 193, 7) // #ffc107
             pdf.text(
-              i18n.t('export.pdf.commentIndicator'),
+              t('export.pdf.commentIndicator') || 'C',
               choiceX + 4,
               currentY + 3
             )
@@ -631,7 +731,12 @@ export const exportAsPDF = async (
     return {
       success: false,
       filename: '',
-      error: i18n.t('export.errors.pdfExportFailed', { error: String(error) }),
+      error:
+        (options.t &&
+          options.t('export.errors.pdfExportFailed', {
+            error: String(error),
+          })) ||
+        `PDF export failed: ${error}`,
     }
   }
 }

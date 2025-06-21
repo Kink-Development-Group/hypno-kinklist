@@ -745,7 +745,9 @@ const AdvancedExport: React.FC<AdvancedExportProps> = () => {
 
       {isLoading && (
         <div className="loading-overlay">
-          <div className="loading-spinner"></div>
+          <div className="loading-spinner">
+            <div className="spinner-circle"></div>
+          </div>
           <p>
             {selectedFormat ? t('export.preparing') : t('import.processing')}
           </p>

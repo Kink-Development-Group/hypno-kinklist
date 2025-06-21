@@ -37,6 +37,7 @@ export interface ExportOptions {
   includeDescriptions: boolean
   includeMetadata: boolean
   compress?: boolean
+  t?: (key: string, options?: any) => string // Übersetzungsfunktion
 }
 
 export type ExportFormat =
