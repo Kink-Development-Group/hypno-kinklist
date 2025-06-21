@@ -17,6 +17,7 @@ import {
   exportAsXML,
   exportCanvasAsImage,
 } from '../utils/exportUtils'
+import { getStableIdsFromOriginal } from '../utils/multilingualTemplates'
 import { getAppVersion } from '../utils/version'
 import ErrorModal from './ErrorModal'
 import NameModal from './NameModal'
@@ -28,7 +29,7 @@ interface ExportModalProps {
 
 const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
   const { t, i18n } = useTranslation()
-  const { kinks, levels, selection } = useKinklist()
+  const { kinks, levels, selection, enhancedKinks } = useKinklist()
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isSuccess, setIsSuccess] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
@@ -45,6 +46,36 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
     format: ExportFormat
     username: string
   } | null>(null)
+
+  // Helper function to find selection item using stable IDs
+  const findSelectionItem = useCallback(
+    (categoryName: string, kinkName: string, field: string) => {
+      const stableIds = getStableIdsFromOriginal(
+        enhancedKinks,
+        categoryName,
+        kinkName,
+        field
+      )
+
+      return selection.find((item) => {
+        // First try to match by stable IDs if available
+        if (item.categoryId && item.kinkId && item.fieldId) {
+          return (
+            item.categoryId === stableIds.categoryId &&
+            item.kinkId === stableIds.kinkId &&
+            item.fieldId === stableIds.fieldId
+          )
+        }
+        // Fallback to name matching
+        return (
+          item.category === categoryName &&
+          item.kink === kinkName &&
+          item.field === field
+        )
+      })
+    },
+    [selection, enhancedKinks]
+  )
 
   // Export-Modi definieren
   const exportModes: ExportModeOption[] = [
@@ -113,11 +144,10 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
           category.kinks.forEach((kinkName, index) => {
             // Prüfe, ob mindestens ein Field für diesen Kink ausgefüllt oder kommentiert ist
             const hasFilledOrCommentedField = category.fields.some((field) => {
-              const selectionItem = selection.find(
-                (item) =>
-                  item.category === categoryName &&
-                  item.kink === kinkName &&
-                  item.field === field
+              const selectionItem = findSelectionItem(
+                categoryName,
+                kinkName,
+                field
               )
 
               // Kink ist relevant, wenn:
@@ -168,11 +198,10 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
             category.kinks.forEach((kinkName, index) => {
               const hasFilledOrCommentedField = category.fields.some(
                 (field) => {
-                  const selectionItem = selection.find(
-                    (item) =>
-                      item.category === categoryName &&
-                      item.kink === kinkName &&
-                      item.field === field
+                  const selectionItem = findSelectionItem(
+                    categoryName,
+                    kinkName,
+                    field
                   )
 
                   return (
@@ -288,15 +317,12 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
         let categoryHeight = 100 // Header + Fields base height
 
         categoryData.kinks.forEach((kinkName) => {
-          let kinkHeight = 22 // Base Kink height
-
-          // Berechne Kommentar-Höhen basierend auf vollständigem Text
+          let kinkHeight = 22 // Base Kink height          // Berechne Kommentar-Höhen basierend auf vollständigem Text
           categoryData.fields.forEach((field) => {
-            const selectionItem = selection.find(
-              (item) =>
-                item.category === categoryName &&
-                item.kink === kinkName &&
-                item.field === field
+            const selectionItem = findSelectionItem(
+              categoryName,
+              kinkName,
+              field
             )
 
             if (selectionItem?.comment) {
@@ -537,18 +563,15 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
             ctx.font = `${fontSize}px "Segoe UI", Arial, sans-serif`
           }
 
-          ctx.fillText(displayName, gridX + 10, kinkY)
-
-          // Kompakte Auswahl-Punkte horizontal - aligned mit Kink-Text
+          ctx.fillText(displayName, gridX + 10, kinkY) // Kompakte Auswahl-Punkte horizontal - aligned mit Kink-Text
           let choiceX = gridX + maxKinkWidth + 20
           categoryData.fields.forEach((field, fieldIndex) => {
             if (fieldIndex < 4) {
               // Maximal 4 Fields
-              const selectionItem = selection.find(
-                (item) =>
-                  item.category === categoryName &&
-                  item.kink === kinkName &&
-                  item.field === field
+              const selectionItem = findSelectionItem(
+                categoryName,
+                kinkName,
+                field
               )
 
               const levelKey = selectionItem?.value || 'Not Entered'
@@ -585,9 +608,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
           })
 
           // Standard Kink-Höhe - wird durch Kommentare erweitert
-          let kinkContentHeight = 22 // Basis-Höhe für Kink-Name und Choice-Punkte
-
-          // Prüfe ob Kommentare vorhanden sind und berechne deren Höhe
+          let kinkContentHeight = 22 // Basis-Höhe für Kink-Name und Choice-Punkte          // Prüfe ob Kommentare vorhanden sind und berechne deren Höhe
           const commentsData: Array<{
             field: string
             comment: string
@@ -596,11 +617,10 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
           }> = []
 
           categoryData.fields.forEach((field) => {
-            const selectionItem = selection.find(
-              (item) =>
-                item.category === categoryName &&
-                item.kink === kinkName &&
-                item.field === field
+            const selectionItem = findSelectionItem(
+              categoryName,
+              kinkName,
+              field
             )
 
             if (selectionItem?.comment) {
@@ -734,7 +754,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
 
       return canvas
     },
-    [kinks, levels, selection, t, i18n.language]
+    [kinks, levels, selection, findSelectionItem, t, i18n.language]
   )
 
   const performExport = useCallback(async () => {
@@ -748,7 +768,13 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
       const timestamp = new Date().toISOString().slice(0, 10)
       const baseFilename = `kinklist_${username ? username.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'export'}_${timestamp}`
 
-      const exportData = convertToExportData(kinks, levels, selection, username)
+      const exportData = convertToExportData(
+        kinks,
+        levels,
+        selection,
+        username,
+        enhancedKinks
+      )
       const options: ExportOptions = {
         ...exportOptions,
         format,
@@ -817,6 +843,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ open, onClose }) => {
     kinks,
     levels,
     selection,
+    enhancedKinks,
     createExportCanvas,
     onClose,
     t,
