@@ -9,14 +9,55 @@ import {
   ExportResult,
   ImportResult,
 } from '../types/export'
+import { getStableIdsFromOriginal } from './multilingualTemplates'
 import { getAppVersion } from './version'
+
+/**
+ * Filtert Kinks und Kategorien, um nur ausgefüllte oder kommentierte Einträge zu behalten
+ */
+/**
+ * Helper function to find a selection item using stable IDs first, then fallback to names
+ */
+const findSelectionItem = (
+  selection: Selection[],
+  categoryName: string,
+  kinkName: string,
+  field: string,
+  enhancedKinks?: any
+): Selection | undefined => {
+  // Generate stable IDs for consistent matching
+  const stableIds = getStableIdsFromOriginal(
+    enhancedKinks,
+    categoryName,
+    kinkName,
+    field
+  )
+
+  return selection.find((item) => {
+    // First try to match by stable IDs if available
+    if (item.categoryId && item.kinkId && item.fieldId) {
+      return (
+        item.categoryId === stableIds.categoryId &&
+        item.kinkId === stableIds.kinkId &&
+        item.fieldId === stableIds.fieldId
+      )
+    }
+    // Fallback to name matching
+    return (
+      item.category === categoryName &&
+      item.kink === kinkName &&
+      item.field === field
+    )
+  })
+}
 
 /**
  * Filtert Kinks und Kategorien, um nur ausgefüllte oder kommentierte Einträge zu behalten
  */
 const filterFilledOrCommentedKinks = (
   kinks: KinksData,
-  selection: Selection[]
+  selection: Selection[],
+  enhancedKinks?: any
 ): KinksData => {
   const filteredKinks: KinksData = {}
 
@@ -28,11 +69,12 @@ const filterFilledOrCommentedKinks = (
     category.kinks.forEach((kinkName, index) => {
       // Prüfe, ob mindestens ein Field für diesen Kink ausgefüllt oder kommentiert ist
       const hasFilledOrCommentedField = category.fields.some((field) => {
-        const selectionItem = selection.find(
-          (item) =>
-            item.category === categoryName &&
-            item.kink === kinkName &&
-            item.field === field
+        const selectionItem = findSelectionItem(
+          selection,
+          categoryName,
+          kinkName,
+          field,
+          enhancedKinks
         )
 
         // Kink ist relevant, wenn:
@@ -72,10 +114,15 @@ export const convertToExportData = (
   kinks: KinksData,
   levels: LevelsData,
   selection: Selection[],
-  username?: string
+  username?: string,
+  enhancedKinks?: any
 ): ExportData => {
   // Filtere zuerst die Kinks, um nur ausgefüllte oder kommentierte zu behalten
-  const filteredKinks = filterFilledOrCommentedKinks(kinks, selection)
+  const filteredKinks = filterFilledOrCommentedKinks(
+    kinks,
+    selection,
+    enhancedKinks
+  )
 
   const categories = Object.keys(filteredKinks).map((categoryName) => {
     const category = filteredKinks[categoryName]
@@ -85,11 +132,12 @@ export const convertToExportData = (
       } = {}
 
       category.fields.forEach((field) => {
-        const selectionItem = selection.find(
-          (item) =>
-            item.category === categoryName &&
-            item.kink === kinkName &&
-            item.field === field
+        const selectionItem = findSelectionItem(
+          selection,
+          categoryName,
+          kinkName,
+          field,
+          enhancedKinks
         )
 
         kinkSelections[field] = {
@@ -419,7 +467,7 @@ export const exportAsPDF = async (
     pdf.setFontSize(12)
     pdf.setFont('helvetica', 'bold')
     pdf.setTextColor(44, 62, 80)
-    pdf.text(t('legend.title') || 'Legend:', margin, currentY)
+    pdf.text(t('legend.titleSimple') || 'Legend:', margin, currentY)
     currentY += 8
 
     // Legende in kompakter Form (ähnlich Canvas-Grid)

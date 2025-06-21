@@ -183,14 +183,33 @@ const KinkRow: React.FC<KinkRowProps> = ({
         <td id={kinkNameId} className="kink-name" role="cell">
           {kinkName}
           <div className="kink-actions">
+            {' '}
             {fields.map((field) => {
               // Check if comment exists for this field
-              const kinkSelection = selection.find(
-                (s) =>
+              // Generate stable IDs for consistent matching
+              const stableIds = getStableIdsFromOriginal(
+                enhancedKinks,
+                categoryName,
+                kinkName,
+                field
+              )
+
+              const kinkSelection = selection.find((s) => {
+                // First try to match by stable IDs if available
+                if (s.categoryId && s.kinkId && s.fieldId) {
+                  return (
+                    s.categoryId === stableIds.categoryId &&
+                    s.kinkId === stableIds.kinkId &&
+                    s.fieldId === stableIds.fieldId
+                  )
+                }
+                // Fallback to name matching
+                return (
                   s.category === categoryName &&
                   s.kink === kinkName &&
                   s.field === field
-              )
+                )
+              })
               const hasComment =
                 kinkSelection?.comment &&
                 kinkSelection.comment.trim().length > 0

@@ -112,18 +112,41 @@ const InputOverlay: React.FC = () => {
       if (currentKink) {
         // Update the selection in the context
         const updatedSelection = selection.map((item) => {
+          // Use stable IDs for matching if available
           if (
-            item.category === currentKink.category &&
-            item.kink === currentKink.kink &&
-            item.field === currentKink.field
+            currentKink.categoryId &&
+            currentKink.kinkId &&
+            currentKink.fieldId
           ) {
-            return {
-              ...item,
-              value: levelName,
-              // Ensure stable IDs are preserved
-              categoryId: item.categoryId,
-              kinkId: item.kinkId,
-              fieldId: item.fieldId,
+            if (
+              item.categoryId === currentKink.categoryId &&
+              item.kinkId === currentKink.kinkId &&
+              item.fieldId === currentKink.fieldId
+            ) {
+              return {
+                ...item,
+                value: levelName,
+                // Ensure stable IDs are preserved
+                categoryId: item.categoryId,
+                kinkId: item.kinkId,
+                fieldId: item.fieldId,
+              }
+            }
+          } else {
+            // Fallback to name matching
+            if (
+              item.category === currentKink.category &&
+              item.kink === currentKink.kink &&
+              item.field === currentKink.field
+            ) {
+              return {
+                ...item,
+                value: levelName,
+                // Ensure stable IDs are preserved
+                categoryId: item.categoryId,
+                kinkId: item.kinkId,
+                fieldId: item.fieldId,
+              }
             }
           }
           return item
