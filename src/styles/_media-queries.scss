@@ -36,8 +36,57 @@
   }
 }
 
-// Tablets
+// Tablets - Enhanced header support
 @media (max-width: 799px) and (min-width: 600px) {
+  .header-controls {
+    margin-bottom: 18px;
+
+    h1 {
+      font-size: clamp(20px, 4vw, 24px);
+
+      .version-display {
+        font-size: 0.55em;
+        margin-left: 6px;
+      }
+    }
+  }
+
+  .header-actions {
+    gap: 8px;
+  }
+
+  #Edit {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+
+  #ThemeToggle {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    font-size: 20px;
+  }
+
+  .language-toggle {
+    min-width: 46px;
+    height: 42px;
+    padding: 0 32px 0 10px;
+    font-size: 13px;
+    border-radius: 12px;
+
+    // Match header glassmorphism design for tablets
+    background-color: rgba(255, 255, 255, 0.15);
+    color: var(--header-text-color);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+
+    &:active {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+
   .legend-container {
     margin-top: 5px;
     margin-bottom: 15px;
@@ -69,7 +118,7 @@
   }
 }
 
-// Mobilgeräte
+// Mobilgeräte - Enhanced header support
 @media (max-width: 599px) {
   body {
     font-size: 14px;
@@ -77,7 +126,61 @@
   }
 
   .header-controls {
-    flex-wrap: wrap;
+    margin-bottom: 16px;
+
+    h1 {
+      font-size: clamp(16px, 5vw, 20px);
+
+      .version-display {
+        font-size: 0.5em;
+        margin-left: 4px;
+      }
+    }
+  }
+
+  .header-actions {
+    gap: 6px;
+  }
+
+  #Edit {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+
+  #ThemeToggle {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    font-size: 18px;
+  }
+
+  .language-toggle {
+    min-width: 40px;
+    height: 40px;
+    padding: 0 28px 0 8px;
+    font-size: 12px;
+    border-radius: 10px;
+
+    // Match header glassmorphism design on mobile
+    background-color: rgba(255, 255, 255, 0.15);
+    color: var(--header-text-color);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+
+    &:active {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    option {
+      padding: 10px 12px;
+      font-size: 14px;
+      line-height: 1.4;
+      // Keep solid colors for options readability
+      background-color: var(--input-bg-color);
+      color: var(--text-color);
+    }
   }
 
   h1 {
@@ -266,6 +369,73 @@
     width: 50px !important;
     min-width: 45px !important;
     max-width: 50px !important;
+  }
+}
+
+// Extra small devices (landscape phones, less than 480px)
+@media (max-width: 479px) {
+  .header-controls {
+    margin-bottom: 12px;
+
+    h1 {
+      font-size: clamp(14px, 6vw, 18px);
+
+      .version-display {
+        font-size: 0.45em;
+        margin-left: 3px;
+      }
+    }
+  }
+
+  .header-actions {
+    gap: 4px;
+  }
+
+  #Edit {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background-size: 18px 18px;
+  }
+
+  #ThemeToggle {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+
+  .language-toggle {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 24px 0 6px;
+    font-size: 11px;
+    border-radius: 8px;
+
+    // Match header glassmorphism design for very small screens
+    background-color: rgba(255, 255, 255, 0.15);
+    color: var(--header-text-color);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+
+    &:hover,
+    &:focus {
+      background-color: rgba(255, 255, 255, 0.25);
+    }
+
+    &:active {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    option {
+      padding: 8px 10px;
+      font-size: 13px;
+      font-weight: 500;
+      // Keep solid colors for options readability
+      background-color: var(--input-bg-color);
+      color: var(--text-color);
+    }
   }
 }
 
