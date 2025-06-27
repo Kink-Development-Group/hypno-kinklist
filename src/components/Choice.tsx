@@ -3,12 +3,14 @@ import React, {
   memo,
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import { Selection } from '../types'
 import { getStableIdsFromOriginal } from '../utils/multilingualTemplates'
+import Tooltip from './Tooltip'
 
 interface ChoiceProps {
   field: string
@@ -22,6 +24,7 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
   const [selectedLevel, setSelectedLevel] = useState<string>(
     Object.keys(levels)[0]
   )
+  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   // Find the current selection for this choice
   useEffect(() => {
@@ -54,6 +57,7 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
       setSelectedLevel(currentSelection.value)
     }
   }, [selection, categoryName, kinkName, field, enhancedKinks])
+
   const handleClick = useCallback(
     (levelName: string) => {
       setSelectedLevel(levelName)
@@ -150,21 +154,36 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
     >
       {Object.entries(levels).map(([levelName, level], index) => {
         const isSelected = selectedLevel === levelName
+        // Übersetze den Level-Namen für Tooltip und aria-label über den neuen Key
+        let translatedLevelName = t(`legend.${level.key}`)
+        if (translatedLevelName === `legend.${level.key}`)
+          translatedLevelName = levelName
         return (
-          <button
-            key={levelName}
-            className={`choice ${level.class} ${isSelected ? 'selected' : ''}`}
-            data-level={levelName}
-            data-level-int={index}
-            title={t('choice.levelFor', { levelName, kinkName, field })}
-            onClick={() => handleClick(levelName)}
-            onKeyDown={(e) => handleKeyDown(e, levelName)}
-            type="button"
-            role="radio"
-            aria-checked={isSelected ? true : false}
-            aria-label={t('choice.levelFor', { levelName, kinkName, field })}
-            tabIndex={isSelected ? 0 : -1}
-          />
+          <Tooltip
+            content={t('choice.levelFor', {
+              levelName: translatedLevelName,
+              kinkName,
+              field,
+            })}
+          >
+            <button
+              ref={(el) => (buttonRefs.current[index] = el)}
+              className={`choice ${level.class} ${isSelected ? 'selected' : ''}`}
+              data-level={levelName}
+              data-level-int={index}
+              onClick={() => handleClick(levelName)}
+              onKeyDown={(e) => handleKeyDown(e, levelName)}
+              type="button"
+              role="radio"
+              aria-checked={isSelected ? true : false}
+              aria-label={t('choice.levelFor', {
+                levelName: translatedLevelName,
+                kinkName,
+                field,
+              })}
+              tabIndex={isSelected ? 0 : -1}
+            />
+          </Tooltip>
         )
       })}
     </div>

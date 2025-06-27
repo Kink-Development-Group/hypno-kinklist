@@ -1731,180 +1731,37 @@ table {
   transition:
     opacity 0.18s cubic-bezier(0.4, 1.4, 0.6, 1),
     visibility 0.18s;
-}
 
-.kink-tooltip-text.left {
-  left: auto;
-  right: 50%;
-  transform: translateX(50%) translateY(0);
-  @media (max-width: 600px) {
-    left: 0;
-    right: 0;
-    transform: none;
-  }
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-#InputPrevious .kink-simple {
-  border-top-left-radius: 2px;
-  border-top-right-radius: 2px;
-}
-
-#InputNext .kink-simple {
-  border-bottom-left-radius: 2px;
-  border-bottom-right-radius: 2px;
-}
-
-// Kink simple styles
-.kink-simple {
-  display: flex;
-  align-items: center;
-  padding: 8px; // Konsistentes Padding
-  margin-bottom: 5px;
-  cursor: pointer;
-
-  .choice {
-    margin-right: 10px;
-    min-width: 18px;
-    min-height: 18px;
-    flex-shrink: 0; // Wichtig: Verhindert Kompression
-  }
-
-  .txt-category,
-  .txt-field {
-    font-weight: bold;
-    margin-right: 8px;
-  }
-
-  .txt-field {
-    font-style: italic;
-    color: var(--text-color);
-  }
-}
-
-// Big choice styles
-.big-choice {
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  margin-bottom: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-  }
-
-  &.selected {
-    background-color: rgba(0, 0, 0, 0.1);
-    font-weight: bold;
-  }
-
-  .choice {
-    width: 24px;
-    height: 24px;
-    min-width: 24px; // Verhindert Verzerrung
-    min-height: 24px; // Verhindert Verzerrung
-    margin-right: 15px;
-    flex-shrink: 0; // Verhindert, dass der Kreis zusammengedrückt wird
-  }
-
-  .btn-num-text {
-    margin-left: auto;
-    color: var(--text-color);
-    font-size: 12px;
-  }
-}
-
-// Tooltip Styles für Kink-Beschreibungen
-.kink-tooltip {
-  position: relative;
-  display: inline-block;
-  margin-left: 8px;
-  vertical-align: middle;
-
-  .kink-tooltip-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    background: var(--button-bg-color);
-    color: #fff;
-    border-radius: 50%;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-left: 2px;
-    transition:
-      background 0.2s,
-      box-shadow 0.2s;
-    outline: none;
-    border: none;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-    -webkit-user-select: none;
-    user-select: none;
-    z-index: 2;
-    &:hover,
-    &:focus {
-      background: var(--button-hover-color);
-      box-shadow: 0 2px 8px rgba(73, 128, 174, 0.12);
-    }
-  }
-
-  .kink-tooltip-text {
-    visibility: hidden;
-    opacity: 0;
-    width: max-content;
-    min-width: 180px;
-    max-width: 320px;
-    background: var(--popup-bg-color);
-    color: var(--text-color);
-    text-align: left;
-    border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
-    padding: 12px 16px;
+  // Pfeil für bessere visuelle Verbindung
+  &::before {
+    content: '';
     position: absolute;
-    left: 50%;
-    top: 120%;
-    transform: translateX(-50%) translateY(0);
-    z-index: 10;
-    font-size: 0.98em;
-    font-weight: 400;
-    pointer-events: none;
-    transition:
-      opacity 0.18s cubic-bezier(0.4, 1.4, 0.6, 1),
-      visibility 0.18s;
-    line-height: 1.5;
-    box-sizing: border-box;
-    @media (max-width: 600px) {
-      min-width: 120px;
-      max-width: 90vw;
-      left: 0;
-      right: 0;
-      transform: none;
-    }
+    top: -6px;
+    left: var(--arrow-left, 50%);
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid var(--popup-bg-color);
+    filter: drop-shadow(0 -2px 2px rgba(0, 0, 0, 0.1));
   }
 
-  // Tooltip sichtbar bei Hover oder Fokus auf das Icon
-  .kink-tooltip-icon:hover + .kink-tooltip-text,
-  .kink-tooltip-icon:focus + .kink-tooltip-text,
-  .kink-tooltip-text:focus {
-    visibility: visible;
-    opacity: 1;
-    pointer-events: auto;
+  // Spezielle Styles für Header-Tooltips (Theme und Language Toggle)
+  &.header-tooltip {
+    max-width: 200px;
+    font-size: 0.9em;
+    padding: 10px 14px;
+
+    @media (max-width: 768px) {
+      max-width: 180px;
+      font-size: 0.85em;
+      padding: 8px 12px;
+    }
+
+    @media (max-width: 480px) {
+      max-width: 160px;
+      font-size: 0.8em;
+      padding: 6px 10px;
+    }
   }
 }
 
@@ -1928,6 +1785,7 @@ table {
   min-height: initial;
   background-color: transparent;
   &:hover {
+    color: var(--text-color);
     transform: scale(1.2);
   }
   &:active {

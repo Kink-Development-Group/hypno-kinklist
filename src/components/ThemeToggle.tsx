@@ -1,5 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import Tooltip from './Tooltip'
 
 interface ThemeToggleProps {
   theme: string
@@ -8,19 +9,19 @@ interface ThemeToggleProps {
 
 const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, toggleTheme }) => {
   const { t } = useTranslation()
-
+  const tooltipText =
+    theme === 'light' ? t('theme.toggleDark') : t('theme.toggleLight')
   return (
-    <button
-      type="button"
-      id="ThemeToggle"
-      onClick={toggleTheme}
-      title={theme === 'light' ? t('theme.toggleDark') : t('theme.toggleLight')}
-      aria-label={
-        theme === 'light' ? t('theme.toggleDark') : t('theme.toggleLight')
-      }
-    >
-      {theme === 'light' ? '🌙' : '☀️'}
-    </button>
+    <Tooltip content={tooltipText}>
+      <button
+        type="button"
+        id="ThemeToggle"
+        onClick={toggleTheme}
+        aria-label={tooltipText}
+      >
+        {theme === 'light' ? '🌙' : '☀️'}
+      </button>
+    </Tooltip>
   )
 }
 

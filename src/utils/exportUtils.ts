@@ -60,12 +60,11 @@ const filterFilledOrCommentedKinks = (
   enhancedKinks?: any
 ): KinksData => {
   const filteredKinks: KinksData = {}
-
+  const notEntered = i18n.t('legend.notEntered')
   Object.keys(kinks).forEach((categoryName) => {
     const category = kinks[categoryName]
     const filteredKinkList: string[] = []
     const filteredDescriptions: string[] = []
-
     category.kinks.forEach((kinkName, index) => {
       // Prüfe, ob mindestens ein Field für diesen Kink ausgefüllt oder kommentiert ist
       const hasFilledOrCommentedField = category.fields.some((field) => {
@@ -76,23 +75,20 @@ const filterFilledOrCommentedKinks = (
           field,
           enhancedKinks
         )
-
         // Kink ist relevant, wenn:
         // 1. Es eine Auswahl gibt und sie nicht "Not Entered" ist
         // 2. Oder es einen Kommentar gibt
         return (
           selectionItem &&
-          (selectionItem.value !== 'Not Entered' ||
+          (selectionItem.value !== notEntered ||
             (selectionItem.comment && selectionItem.comment.trim().length > 0))
         )
       })
-
       if (hasFilledOrCommentedField) {
         filteredKinkList.push(kinkName)
         filteredDescriptions.push(category.descriptions?.[index] || '')
       }
     })
-
     // Nur Kategorien mit mindestens einem relevanten Kink hinzufügen
     if (filteredKinkList.length > 0) {
       filteredKinks[categoryName] = {
@@ -102,7 +98,6 @@ const filterFilledOrCommentedKinks = (
       }
     }
   })
-
   return filteredKinks
 }
 
@@ -117,20 +112,18 @@ export const convertToExportData = (
   username?: string,
   enhancedKinks?: any
 ): ExportData => {
-  // Filtere zuerst die Kinks, um nur ausgefüllte oder kommentierte zu behalten
   const filteredKinks = filterFilledOrCommentedKinks(
     kinks,
     selection,
     enhancedKinks
   )
-
+  const notEntered = i18n.t('legend.notEntered')
   const categories = Object.keys(filteredKinks).map((categoryName) => {
     const category = filteredKinks[categoryName]
     const categoryKinks = category.kinks.map((kinkName, index) => {
       const kinkSelections: {
         [field: string]: { level: string; comment?: string }
       } = {}
-
       category.fields.forEach((field) => {
         const selectionItem = findSelectionItem(
           selection,
@@ -139,27 +132,23 @@ export const convertToExportData = (
           field,
           enhancedKinks
         )
-
         kinkSelections[field] = {
-          level: selectionItem?.value || i18n.t('levels.notEntered'),
+          level: selectionItem?.value || notEntered,
           comment: selectionItem?.comment || undefined,
         }
       })
-
       return {
         name: kinkName,
         description: category.descriptions?.[index],
         selections: kinkSelections,
       }
     })
-
     return {
       name: categoryName,
       fields: category.fields,
       kinks: categoryKinks,
     }
   })
-
   return {
     metadata: {
       exportDate: new Date().toISOString(),
@@ -170,9 +159,7 @@ export const convertToExportData = (
         (sum, cat) => sum + cat.kinks.length,
         0
       ),
-      totalSelections: selection.filter(
-        (s) => s.value !== i18n.t('levels.notEntered')
-      ).length,
+      totalSelections: selection.filter((s) => s.value !== notEntered).length,
     },
     levels,
     categories,
@@ -477,7 +464,7 @@ export const exportAsPDF = async (
     let legendRowCount = 0
 
     Object.entries(data.levels).forEach(([levelName, level]) => {
-      if (levelName === 'Not Entered') return
+      if (levelName === i18n.t('legend.notEntered')) return
 
       // Moderner Farbkreis (wie im Canvas-Export)
       const hexColor = level.color
@@ -595,7 +582,7 @@ export const exportAsPDF = async (
         let choiceX = margin + 105
         category.fields.slice(0, 4).forEach((field) => {
           const selection = kink.selections[field]
-          if (selection && selection.level !== 'Not Entered') {
+          if (selection && selection.level !== i18n.t('legend.notEntered')) {
             const level = data.levels[selection.level]
             if (level) {
               const rgb = hexToRgb(level.color)
@@ -1125,20 +1112,10 @@ export const importFromXML = (xmlString: string): ImportResult => {
 
     // Falls keine Levels gefunden wurden, erstelle Standard-Levels
     if (Object.keys(levels).length === 0) {
-      levels[i18n.t('levels.notEntered')] = {
-        name: i18n.t('levels.notEntered'),
-        color: '#FFFFFF',
-        class: 'notEntered',
-      }
-      levels['Favorite'] = {
-        name: 'Favorite',
-        color: '#6DB5FE',
-        class: 'favorite',
-      }
-      levels['Like'] = { name: 'Like', color: '#23FD22', class: 'like' }
-      levels['Okay'] = { name: 'Okay', color: '#FDFD6B', class: 'okay' }
-      levels['Maybe'] = { name: 'Maybe', color: '#DB6C00', class: 'maybe' }
-      levels['No'] = { name: 'No', color: '#920000', class: 'no' }
+      const defaultLevels = getInitialLevels(i18n)
+      Object.entries(defaultLevels).forEach(([key, value]) => {
+        levels[key] = value
+      })
     }
 
     // Parse categories
@@ -1444,3 +1421,43 @@ export const importFromCSV = (csvString: string): ImportResult => {
     }
   }
 }
+
+// Helper to get translated level names (copied from KinklistContext)
+export const getInitialLevels = (i18n: any): LevelsData => ({
+  [i18n.t('legend.notEntered')]: {
+    key: 'notEntered',
+    name: i18n.t('legend.notEntered'),
+    color: '#FFFFFF',
+    class: 'notEntered',
+  },
+  [i18n.t('legend.favorite')]: {
+    key: 'favorite',
+    name: i18n.t('legend.favorite'),
+    color: '#6DB5FE',
+    class: 'favorite',
+  },
+  [i18n.t('legend.like')]: {
+    key: 'like',
+    name: i18n.t('legend.like'),
+    color: '#23FD22',
+    class: 'like',
+  },
+  [i18n.t('legend.okay')]: {
+    key: 'okay',
+    name: i18n.t('legend.okay'),
+    color: '#FDFD6B',
+    class: 'okay',
+  },
+  [i18n.t('legend.maybe')]: {
+    key: 'maybe',
+    name: i18n.t('legend.maybe'),
+    color: '#DB6C00',
+    class: 'maybe',
+  },
+  [i18n.t('legend.no')]: {
+    key: 'no',
+    name: i18n.t('legend.no'),
+    color: '#920000',
+    class: 'no',
+  },
+})

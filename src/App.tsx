@@ -10,6 +10,7 @@ import InputOverlay from './components/InputOverlay'
 import LanguageToggle from './components/LanguageToggle'
 import Legend from './components/Legend'
 import ThemeToggle from './components/ThemeToggle'
+import Tooltip from './components/Tooltip'
 import { useKinklist } from './context/KinklistContext'
 import { ThemeProvider, useTheme } from './context/ThemeContext'
 import './styles/main.scss'
@@ -40,13 +41,14 @@ const AppContent: React.FC = () => {
   return (
     <div className="container" data-theme={theme}>
       <div className="header-controls">
-        <button
-          type="button"
-          title={t('buttons.edit')}
-          id="Edit"
-          onClick={handleEditClick}
-          aria-label={t('buttons.edit')}
-        ></button>
+        <Tooltip content={t('buttons.edit')}>
+          <button
+            type="button"
+            id="Edit"
+            onClick={handleEditClick}
+            aria-label={t('buttons.edit')}
+          ></button>
+        </Tooltip>
         <h1>{t('app.title')}</h1>
         <div className="header-actions">
           <LanguageToggle />
@@ -58,17 +60,17 @@ const AppContent: React.FC = () => {
         <div className="export-container">
           <Export />
         </div>
-
-        <button
-          type="button"
-          title={t('buttons.start')}
-          id="StartBtn"
-          onClick={handleStartClick}
-          aria-label={t('buttons.start')}
-          className="start-button"
-        >
-          <span className="button-label">{t('buttons.start')}</span>
-        </button>
+        <Tooltip content={t('buttons.start')}>
+          <button
+            type="button"
+            id="StartBtn"
+            onClick={handleStartClick}
+            aria-label={t('buttons.start')}
+            className="start-button"
+          >
+            <span className="button-label">{t('buttons.start')}</span>
+          </button>
+        </Tooltip>
       </div>{' '}
       <div className="grid-container">
         <div className="grid-row">

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import Tooltip from '../Tooltip'
 import {
   getBlocksByCategory,
   getPasteableBlocks,
@@ -112,24 +113,26 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
             {filteredBlocks.map((block) => (
               <li key={block.id} className="block-item">
                 <div className="block-item-header">
-                  <button
-                    type="button"
-                    className="block-title"
-                    onClick={() => handleSelectBlock(block)}
-                    title={`Klicken zum Einfügen: ${block.name}`}
-                  >
-                    {block.name}
-                  </button>
-                  <div className="block-actions">
+                  <Tooltip content={`Klicken zum Einfügen: ${block.name}`}>
                     <button
                       type="button"
-                      className="block-preview-toggle"
-                      onClick={() => toggleBlockPreview(block.id)}
-                      aria-expanded={expandedBlockId === block.id}
-                      title="Vorschau anzeigen/ausblenden"
+                      className="block-title"
+                      onClick={() => handleSelectBlock(block)}
                     >
-                      {expandedBlockId === block.id ? '▼' : '▶'}
+                      {block.name}
                     </button>
+                  </Tooltip>
+                  <div className="block-actions">
+                    <Tooltip content="Vorschau anzeigen/ausblenden">
+                      <button
+                        type="button"
+                        className="block-preview-toggle"
+                        onClick={() => toggleBlockPreview(block.id)}
+                        aria-expanded={expandedBlockId === block.id}
+                      >
+                        {expandedBlockId === block.id ? '▼' : '▶'}
+                      </button>
+                    </Tooltip>
                   </div>
                 </div>
 

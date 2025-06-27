@@ -69,34 +69,35 @@
   }
 }
 
-// Kleinerer Kommentarbutton für Tabellenzeilen
-.comment-button-small {
-  font-size: 16px; // Größere Schriftgröße für bessere Sichtbarkeit
+// Gemeinsame Basisklasse für Kommentar-Buttons
+.comment-button-base {
+  font-size: 16px;
   padding: 2px;
   background: none;
-  border: none; // Kein Rahmen
+  border: none;
   cursor: pointer;
-  opacity: 1; // Immer vollständig sichtbar
+  opacity: 1;
   transition: all 0.2s ease;
-  display: inline-flex; // Änderung zu flex für bessere Ausrichtung
-  align-items: center; // Zentriert vertikal
-  justify-content: center; // Zentriert horizontal
-  visibility: visible; // Erzwingt Sichtbarkeit
-  color: var(--text-color); // Setzt Textfarbe explizit
-  width: 20px; // Feste Breite für konsistente Ausrichtung
-  height: 20px; // Feste Höhe für konsistente Ausrichtung
-  min-width: 20px; // Verhindert Schrumpfung
-  min-height: 20px; // Verhindert Schrumpfung
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color);
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  min-height: 22px;
+  border-radius: 50%;
+  position: relative;
+  z-index: 2;
 
   .comment-icon {
     display: flex;
     align-items: center;
     justify-content: center;
     transition: color 0.2s ease;
-    color: inherit; // Erbt die Farbe vom Button
+    color: inherit;
     width: 16px;
     height: 16px;
-
     svg {
       width: 16px;
       height: 16px;
@@ -105,24 +106,40 @@
     }
   }
 
-  &:hover {
-    transform: scale(1.2); // Leichte Vergrößerung beim Hover
+  &:hover,
+  &:focus {
+    background-color: transparent !important;
+    outline: none !important;
+    border: none !important;
+    color: var(--text-color);
+    .comment-icon {
+      color: var(--text-color);
+      svg {
+        fill: var(--text-color);
+      }
+    }
   }
 
-  &:focus {
-    outline: 2px solid var(--button-bg-color);
-    outline-offset: 2px;
-    border-radius: 4px;
+  &:active {
+    background-color: transparent !important;
+    color: var(--button-text-color);
+    transform: scale(0.95);
+    .comment-icon {
+      color: var(--button-text-color);
+      svg {
+        fill: var(--button-text-color);
+      }
+    }
   }
 
   &.has-comment {
-    color: var(
-      --button-bg-color
-    ); // Farblicher Hinweis auf vorhandenen Kommentar
-    text-shadow: 0 0 2px rgba(0, 0, 0, 0.2); // Leichter Schatten für bessere Sichtbarkeit
-
+    background-color: transparent;
+    color: var(--button-bg-color);
     .comment-icon {
       color: var(--button-bg-color);
+      svg {
+        fill: var(--button-bg-color);
+      }
     }
   }
 
@@ -131,27 +148,28 @@
     cursor: not-allowed;
     transform: none;
   }
-}
 
-// Zusätzliche spezifische Regel für has-comment
-.comment-button-small.has-comment {
-  color: var(--button-bg-color);
-  text-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-
-  .comment-icon {
-    color: var(--button-bg-color);
+  [data-theme='dark'] & {
+    &:hover,
+    &:focus {
+      color: var(--button-text-color);
+      .comment-icon {
+        color: var(--button-text-color);
+        svg {
+          fill: var(--button-text-color);
+        }
+      }
+    }
   }
 }
 
-// Spezifische Regel für Modal-Kommentar-Buttons
-.modal-comment-button.has-comment {
-  background-color: var(--button-bg-color);
-  color: var(--button-text-color);
-  opacity: 1;
-
-  .comment-icon {
-    color: var(--button-text-color);
-  }
+// Alte Klassen auf die Basisklasse umleiten
+.comment-button-small,
+.modal-comment-button {
+  @extend .comment-button-base;
+  margin-left: 8px;
+  top: 0;
+  box-shadow: none;
 }
 
 // Spezielle Stile für Kommentar-Tooltips in Modals
