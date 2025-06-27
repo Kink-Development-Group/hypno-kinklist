@@ -51,32 +51,38 @@ interface KinklistContextType {
 
 // Helper to get translated level names
 const getInitialLevels = (i18n: any): LevelsData => ({
-  [i18n.t('legend.notEntered')]: {
+  NotEntered: {
+    key: 'notEntered',
     name: i18n.t('legend.notEntered'),
     color: '#FFFFFF',
     class: 'notEntered',
   },
-  [i18n.t('legend.favorite')]: {
+  Favorite: {
+    key: 'favorite',
     name: i18n.t('legend.favorite'),
     color: '#6DB5FE',
     class: 'favorite',
   },
-  [i18n.t('legend.like')]: {
+  Like: {
+    key: 'like',
     name: i18n.t('legend.like'),
     color: '#23FD22',
     class: 'like',
   },
-  [i18n.t('legend.okay')]: {
+  Okay: {
+    key: 'okay',
     name: i18n.t('legend.okay'),
     color: '#FDFD6B',
     class: 'okay',
   },
-  [i18n.t('legend.maybe')]: {
+  Maybe: {
+    key: 'maybe',
     name: i18n.t('legend.maybe'),
     color: '#DB6C00',
     class: 'maybe',
   },
-  [i18n.t('legend.no')]: {
+  No: {
+    key: 'no',
     name: i18n.t('legend.no'),
     color: '#920000',
     class: 'no',

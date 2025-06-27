@@ -11,6 +11,7 @@ export interface KinkCategory {
 }
 
 export interface LevelDefinition {
+  key: string
   name: string
   color: string
   class: string

@@ -226,10 +226,9 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
     >
       {Object.entries(levels).map(([levelName, level], index) => {
         const isSelected = selectedLevel === levelName
-        // Übersetze den Level-Namen für Tooltip und aria-label
-        const levelTranslationKey = getLevelTranslationKey(levelName)
-        let translatedLevelName = t(levelTranslationKey)
-        if (translatedLevelName === levelTranslationKey)
+        // Übersetze den Level-Namen für Tooltip und aria-label über den neuen Key
+        let translatedLevelName = t(`legend.${level.key}`)
+        if (translatedLevelName === `legend.${level.key}`)
           translatedLevelName = levelName
         return (
           <Tooltip
