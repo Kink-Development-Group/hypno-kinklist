@@ -60,12 +60,25 @@ const Tooltip: React.FC<TooltipProps> = ({
     }
   }
 
+  // Prüfe, ob es sich um ein Header-Element handelt
+  const isHeaderElement = useCallback(() => {
+    if (!triggerRef.current) return false
+    const element = triggerRef.current
+    return (
+      element.id === 'ThemeToggle' ||
+      element.classList.contains('language-toggle') ||
+      element.closest('.header-actions') !== null
+    )
+  }, [])
+
   // Tooltip-Node als Portal
   const tooltipNode =
     show && tooltipPos
       ? ReactDOM.createPortal(
           <div
-            className={`kink-tooltip-text kink-tooltip-portal ${className}`}
+            className={`kink-tooltip-text kink-tooltip-portal ${
+              isHeaderElement() ? 'header-tooltip' : ''
+            } ${className}`}
             style={
               {
                 position: 'fixed',

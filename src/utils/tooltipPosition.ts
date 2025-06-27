@@ -10,8 +10,15 @@ export function calculateTooltipPosition(
   arrowLeft: number
 } {
   const viewportWidth = window.innerWidth
+  const viewportHeight = window.innerHeight
   const tooltipWidth = 320 // max-width aus CSS
+  const tooltipHeight = 60 // geschätzte Tooltip-Höhe
   const spaceRight = viewportWidth - rect.right
+  const spaceBelow = viewportHeight - rect.bottom
+  const spaceAbove = rect.top
+
+  // Prüfe, ob es sich um Header-Elemente handelt (Theme-Toggle oder Language-Toggle)
+  const isHeaderElement = rect.top < 100 // Header-Elemente sind normalerweise im oberen Bereich
 
   // Prüfe, ob der Button ein margin-left besitzt (optional)
   let marginLeft = 0
@@ -34,29 +41,57 @@ export function calculateTooltipPosition(
   const buttonCenter = rect.left + rect.width / 2 - marginLeft
   let left = buttonCenter - tooltipWidth / 2
 
-  // Wenn nicht genug Platz rechts, positioniere links vom Element
-  if (spaceRight < tooltipWidth / 2 + 20) {
-    left = rect.right - tooltipWidth
+  // Spezielle Behandlung für Header-Elemente
+  if (isHeaderElement) {
+    // Für Header-Elemente: Position direkt unter dem Element, zentriert
+    left = buttonCenter - Math.min(tooltipWidth, 200) / 2
+
+    // Stelle sicher, dass der Tooltip nicht über den Bildschirmrand hinausgeht
     if (left < 10) {
       left = 10
+    } else if (left + Math.min(tooltipWidth, 200) > viewportWidth - 10) {
+      left = viewportWidth - Math.min(tooltipWidth, 200) - 10
+    }
+  } else {
+    // Normale Positionierung für andere Elemente
+    // Wenn nicht genug Platz rechts, positioniere links vom Element
+    if (spaceRight < tooltipWidth / 2 + 20) {
+      left = rect.right - tooltipWidth
+      if (left < 10) {
+        left = 10
+      }
+    }
+
+    if (left < 10) {
+      left = rect.left
+      if (left + tooltipWidth > viewportWidth - 10) {
+        left = viewportWidth - tooltipWidth - 10
+      }
     }
   }
 
-  if (left < 10) {
-    left = rect.left
-    if (left + tooltipWidth > viewportWidth - 10) {
-      left = viewportWidth - tooltipWidth - 10
-    }
+  // Berechne die vertikale Position
+  let top = rect.bottom + 8 // Standard: unter dem Element
+
+  // Wenn nicht genug Platz unten und genug Platz oben, zeige über dem Element
+  if (spaceBelow < tooltipHeight + 20 && spaceAbove > tooltipHeight + 20) {
+    top = rect.top - tooltipHeight - 8
   }
 
   const arrowLeft = buttonCenter - left
 
   return {
-    top: rect.bottom + 6,
+    top: top,
     left: left,
     width: rect.width,
     height: rect.height,
-    arrowLeft: arrowLeft,
+    arrowLeft: Math.max(
+      10,
+      Math.min(
+        arrowLeft,
+        (isHeaderElement ? Math.min(tooltipWidth, 200) : tooltipWidth) - 10
+      )
+    ),
   }
 }
 
