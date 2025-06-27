@@ -10,7 +10,7 @@ const Footer: React.FC = () => {
       <span>
         <VersionDisplay />
       </span>
-      <span style={{ margin: '0 1em' }}>
+      <span className="footer-link">
         <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
           GitHub
         </a>
