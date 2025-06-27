@@ -254,6 +254,8 @@ const KinkRow: React.FC<KinkRowProps> = ({
     showCommentTooltip && commentTooltipPos
       ? ReactDOM.createPortal(
           <div
+            id={`comment-tooltip-${categoryName}-${kinkName}-${showCommentTooltip}`}
+            role="tooltip"
             className="kink-tooltip-text kink-tooltip-portal comment-tooltip"
             style={
               {
@@ -387,6 +389,11 @@ const KinkRow: React.FC<KinkRowProps> = ({
                       handleCommentTooltipHide()
                     }
                   }}
+                  aria-describedby={
+                    hasComment && showCommentTooltip === field
+                      ? `comment-tooltip-${categoryName}-${kinkName}-${field}`
+                      : undefined
+                  }
                   aria-label={t('comments.forField', {
                     kinkName,
                     field,
