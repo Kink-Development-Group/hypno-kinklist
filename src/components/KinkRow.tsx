@@ -41,6 +41,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
     left: number
     width: number
     height: number
+    arrowLeft?: number
   }>()
 
   // State für Kommentar-Tooltips
@@ -186,9 +187,11 @@ const KinkRow: React.FC<KinkRowProps> = ({
                 top: tooltipPos.top,
                 left: tooltipPos.left,
                 zIndex: 99999 as const,
-                '--arrow-left': tooltipPos.width
-                  ? `${tooltipPos.width / 2}px`
-                  : '50%',
+                '--arrow-left': tooltipPos.arrowLeft
+                  ? `${tooltipPos.arrowLeft}px`
+                  : tooltipPos.width
+                    ? `${tooltipPos.width / 2}px`
+                    : '50%',
               } as React.CSSProperties
             }
             tabIndex={-1}
