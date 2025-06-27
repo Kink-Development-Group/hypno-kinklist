@@ -49,14 +49,39 @@ interface KinklistContextType {
   refreshKinksForLanguage: () => void
 }
 
-const initialLevels: LevelsData = {
-  'Not Entered': { name: 'Not Entered', color: '#FFFFFF', class: 'notEntered' },
-  Favorite: { name: 'Favorite', color: '#6DB5FE', class: 'favorite' },
-  Like: { name: 'Like', color: '#23FD22', class: 'like' },
-  Okay: { name: 'Okay', color: '#FDFD6B', class: 'okay' },
-  Maybe: { name: 'Maybe', color: '#DB6C00', class: 'maybe' },
-  No: { name: 'No', color: '#920000', class: 'no' },
-}
+// Helper to get translated level names
+const getInitialLevels = (i18n: any): LevelsData => ({
+  [i18n.t('legend.notEntered')]: {
+    name: i18n.t('legend.notEntered'),
+    color: '#FFFFFF',
+    class: 'notEntered',
+  },
+  [i18n.t('legend.favorite')]: {
+    name: i18n.t('legend.favorite'),
+    color: '#6DB5FE',
+    class: 'favorite',
+  },
+  [i18n.t('legend.like')]: {
+    name: i18n.t('legend.like'),
+    color: '#23FD22',
+    class: 'like',
+  },
+  [i18n.t('legend.okay')]: {
+    name: i18n.t('legend.okay'),
+    color: '#FDFD6B',
+    class: 'okay',
+  },
+  [i18n.t('legend.maybe')]: {
+    name: i18n.t('legend.maybe'),
+    color: '#DB6C00',
+    class: 'maybe',
+  },
+  [i18n.t('legend.no')]: {
+    name: i18n.t('legend.no'),
+    color: '#920000',
+    class: 'no',
+  },
+})
 
 export const KinklistContext = createContext<KinklistContextType | undefined>(
   undefined
@@ -67,7 +92,18 @@ export const KinklistProvider: React.FC<{
   initialKinksText: string
 }> = ({ children, initialKinksText }) => {
   const [kinks, setKinks] = useState<KinksData>({})
-  const [levels, setLevels] = useState<LevelsData>(initialLevels)
+  const { i18n } = useTranslation()
+  const errorHandler = useErrorHandler()
+
+  // Use ref to track initialization state to avoid dependency loops
+  const isInitialized = useRef(false)
+  const lastLanguage = useRef(i18n.language)
+  const isLanguageChanging = useRef(false)
+  const originalHash = useRef<string>('')
+  const allowHashUpdates = useRef(true)
+
+  // Use translated levels for initial state
+  const [levels, setLevels] = useState<LevelsData>(() => getInitialLevels(i18n))
   const [selection, setSelection] = useState<Selection[]>([])
   const [selectedKink, setSelectedKink] = useState<Selection | null>(null)
   const [originalKinksText, setOriginalKinksText] =
@@ -82,15 +118,6 @@ export const KinklistProvider: React.FC<{
   const [enhancedKinks, setEnhancedKinks] = useState<EnhancedKinksData | null>(
     null
   )
-  const { i18n } = useTranslation()
-  const errorHandler = useErrorHandler()
-
-  // Use ref to track initialization state to avoid dependency loops
-  const isInitialized = useRef(false)
-  const lastLanguage = useRef(i18n.language)
-  const isLanguageChanging = useRef(false)
-  const originalHash = useRef<string>('')
-  const allowHashUpdates = useRef(true)
 
   // Function to refresh kinks for current language
   const refreshKinksForLanguage = useCallback(() => {
@@ -278,6 +305,11 @@ export const KinklistProvider: React.FC<{
       }
     }
   }, [selection, levels, i18n.language])
+
+  // Update levels when language changes
+  useEffect(() => {
+    setLevels(getInitialLevels(i18n))
+  }, [i18n.language])
 
   return (
     <KinklistContext.Provider
