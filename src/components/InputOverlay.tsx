@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import { Selection } from '../types'
-import { calculateTooltipPosition } from '../utils/tooltipPosition'
 import Tooltip from './Tooltip'
 
 const InputOverlay: React.FC = () => {
@@ -26,25 +25,9 @@ const InputOverlay: React.FC = () => {
   const [currentKink, setCurrentKink] = useState<Selection | null>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
 
-  // State für Tooltip-Anzeige im Modal
-  const [showTooltip, setShowTooltip] = useState(false)
-  const [tooltipPosition, setTooltipPosition] = useState<'right' | 'left'>(
-    'right'
-  )
-  const tooltipRef = useRef<HTMLSpanElement>(null)
-
   // State für Kommentar-Tooltips im Modal
   const [showCommentTooltip, setShowCommentTooltip] = useState(false)
-  const [commentTooltipPos, setCommentTooltipPos] = useState<{
-    top: number
-    left: number
-    width: number
-    height: number
-    arrowLeft: number
-  }>()
-
-  // Tooltip-Positionierungslogik für Beschreibung (wie in KinkRow)
-  const [descTooltipPos, setDescTooltipPos] = useState<{
+  const [commentTooltipPos] = useState<{
     top: number
     left: number
     width: number
@@ -53,20 +36,6 @@ const InputOverlay: React.FC = () => {
   }>()
 
   // Handle Tooltip anzeigen mit Positionsberechnung
-  const handleShowTooltip = useCallback(
-    (
-      e: React.MouseEvent<HTMLSpanElement> | React.FocusEvent<HTMLSpanElement>
-    ) => {
-      setShowTooltip(true)
-    },
-    []
-  )
-
-  // Handle Tooltip verstecken
-  const handleHideTooltip = useCallback(() => {
-    setShowTooltip(false)
-  }, [])
-
   // Number of kinks to show in previous/next sections
   const numPrev = 3
   const numNext = 3
@@ -335,30 +304,6 @@ const InputOverlay: React.FC = () => {
     handleShowNext,
   ])
 
-  // Handle comment tooltip show in modal
-  const handleCommentTooltipShow = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      const rect2 = (e.currentTarget as HTMLElement).getBoundingClientRect()
-      setCommentTooltipPos(
-        calculateTooltipPosition(rect2, 'comment-button-base')
-      )
-      setShowCommentTooltip(true)
-    },
-    []
-  )
-
-  // Handle comment tooltip show for focus events in modal
-  const handleCommentTooltipShowFocus = useCallback(
-    (e: React.FocusEvent<HTMLButtonElement>) => {
-      const rect2 = (e.currentTarget as HTMLElement).getBoundingClientRect()
-      setCommentTooltipPos(
-        calculateTooltipPosition(rect2, 'comment-button-base')
-      )
-      setShowCommentTooltip(true)
-    },
-    []
-  )
-
   const handleCommentTooltipHide = useCallback(() => {
     setShowCommentTooltip(false)
   }, [])
@@ -390,18 +335,6 @@ const InputOverlay: React.FC = () => {
           document.body
         )
       : null
-
-  // Handle Tooltip anzeigen für Beschreibung
-  const handleShowDescTooltip = useCallback(
-    (
-      e: React.MouseEvent<HTMLSpanElement> | React.FocusEvent<HTMLSpanElement>
-    ) => {
-      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-      setDescTooltipPos(calculateTooltipPosition(rect, 'kink-tooltip-icon'))
-      setShowTooltip(true)
-    },
-    []
-  )
 
   if (!currentKink) return null
 

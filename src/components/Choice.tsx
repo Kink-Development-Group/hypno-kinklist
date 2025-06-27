@@ -24,14 +24,6 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
   const [selectedLevel, setSelectedLevel] = useState<string>(
     Object.keys(levels)[0]
   )
-  const [showTooltip, setShowTooltip] = useState<string | null>(null)
-  const [tooltipPos, setTooltipPos] = useState<{
-    top: number
-    left: number
-    width: number
-    height: number
-    arrowLeft?: number
-  }>()
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   // Find the current selection for this choice
@@ -152,70 +144,6 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
     },
     [handleClick]
   )
-
-  // Tooltip-Positionierungslogik (wie in KinkRow)
-  const calculateTooltipPosition = (rect: DOMRect) => {
-    const viewportWidth = window.innerWidth
-    const tooltipWidth = 320 // max-width aus CSS
-    const spaceRight = viewportWidth - rect.right
-
-    // Berechne die horizontale Position basierend auf der Button-Mitte
-    const buttonCenter = rect.left + rect.width / 2
-    let left = buttonCenter - tooltipWidth / 2
-
-    // Wenn nicht genug Platz rechts, positioniere links vom Element
-    if (spaceRight < tooltipWidth / 2 + 20) {
-      left = rect.right - tooltipWidth
-      if (left < 10) {
-        left = 10
-      }
-    }
-
-    // Wenn nicht genug Platz links, positioniere rechts vom Element
-    if (left < 10) {
-      left = rect.left
-      if (left + tooltipWidth > viewportWidth - 10) {
-        left = viewportWidth - tooltipWidth - 10
-      }
-    }
-
-    // Berechne die Pfeil-Position relativ zum Tooltip
-    const arrowLeft = buttonCenter - left
-
-    return {
-      top: rect.bottom + 6,
-      left: left,
-      width: rect.width,
-      height: rect.height,
-      arrowLeft: arrowLeft,
-    }
-  }
-
-  // Tooltip-Handler
-  const handleShowTooltip = (index: number) => {
-    const btn = buttonRefs.current[index]
-    if (!btn) return
-    const rect = btn.getBoundingClientRect()
-    setTooltipPos(calculateTooltipPosition(rect))
-    setShowTooltip(index.toString())
-  }
-  const handleHideTooltip = () => setShowTooltip(null)
-
-  // Mapping von Level-Namen zu i18n-Schlüsseln (wie in Legend)
-  const getLevelTranslationKey = (levelName: string): string => {
-    const keyMap: Record<string, string> = {
-      'Not Entered': 'legend.notEntered',
-      Favorite: 'legend.favorite',
-      Like: 'legend.like',
-      Okay: 'legend.okay',
-      Maybe: 'legend.maybe',
-      No: 'legend.no',
-    }
-    return (
-      keyMap[levelName] ||
-      `legend.${levelName.toLowerCase().replace(/\s+/g, '')}`
-    )
-  }
 
   return (
     <div

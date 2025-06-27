@@ -22,7 +22,6 @@ const Tooltip: React.FC<TooltipProps> = ({
   content,
   children,
   className = '',
-  preferredPosition = 'right',
   delay = 0,
 }) => {
   const triggerRef = useRef<HTMLElement | null>(null)

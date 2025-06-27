@@ -1,11 +1,10 @@
-import React, { memo, useRef, useState } from 'react'
+import React, { memo, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import { Selection } from '../types'
 import { strToClass } from '../utils'
 import { getStableIdsFromOriginal } from '../utils/multilingualTemplates'
-import { calculateTooltipPosition } from '../utils/tooltipPosition'
 import Choice from './Choice'
 import Tooltip from './Tooltip'
 
@@ -36,9 +35,8 @@ const KinkRow: React.FC<KinkRowProps> = ({
 
   const rowId = `kink-row-${strToClass(categoryName)}-${strToClass(kinkName)}`
   const kinkNameId = `kink-name-${strToClass(kinkName)}`
-  const tooltipRef = useRef<HTMLSpanElement>(null)
   const [showTooltip, setShowTooltip] = useState(false)
-  const [tooltipPos, setTooltipPos] = useState<{
+  const [tooltipPos] = useState<{
     top: number
     left: number
     width: number
@@ -50,7 +48,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
   const [showCommentTooltip, setShowCommentTooltip] = useState<string | null>(
     null
   )
-  const [commentTooltipPos, setCommentTooltipPos] = useState<{
+  const [commentTooltipPos] = useState<{
     top: number
     left: number
     width: number
@@ -98,23 +96,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
     setIsCommentOverlayOpen(true)
   }
 
-  // Tooltip-Portal-Logik
-  const handleTooltipShow = (_e: React.MouseEvent | React.FocusEvent) => {
-    if (!tooltipRef.current) return
-    const rect = tooltipRef.current.getBoundingClientRect()
-    const pos = calculateTooltipPosition(rect, 'kink-tooltip-icon')
-    setTooltipPos(pos)
-    setShowTooltip(true)
-  }
   const handleTooltipHide = () => setShowTooltip(false)
-
-  // Accessibility: Tooltip per ESC schließen
-  const handleTooltipKeyDown = (e: React.KeyboardEvent<HTMLSpanElement>) => {
-    if (e.key === 'Escape') {
-      ;(e.target as HTMLElement).blur()
-      setShowTooltip(false)
-    }
-  }
 
   // Tooltip-Element als Portal oder Inline
   const tooltipNode =
@@ -143,30 +125,6 @@ const KinkRow: React.FC<KinkRowProps> = ({
           document.body
         )
       : null
-
-  // Handle comment tooltip show
-  const handleCommentTooltipShow = (
-    e: React.MouseEvent<HTMLButtonElement>,
-    field: string
-  ) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const position = calculateTooltipPosition(rect, 'comment-button-base')
-
-    setCommentTooltipPos(position)
-    setShowCommentTooltip(field)
-  }
-
-  // Handle comment tooltip show for focus events
-  const handleCommentTooltipShowFocus = (
-    e: React.FocusEvent<HTMLButtonElement>,
-    field: string
-  ) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const position = calculateTooltipPosition(rect, 'comment-button-base')
-
-    setCommentTooltipPos(position)
-    setShowCommentTooltip(field)
-  }
 
   const handleCommentTooltipHide = () => {
     setShowCommentTooltip(null)

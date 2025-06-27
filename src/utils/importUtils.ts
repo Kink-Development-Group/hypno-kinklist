@@ -12,7 +12,15 @@ export const convertFromExportData = (
   selection: Selection[]
 } => {
   // Konvertiere Levels
-  const levels: LevelsData = exportData.levels
+  const levels: LevelsData = {}
+  Object.entries(exportData.levels).forEach(([levelName, levelData]) => {
+    levels[levelName] = {
+      key: levelData.class, // Use class as key since it's stable
+      name: levelData.name,
+      color: levelData.color,
+      class: levelData.class,
+    }
+  })
 
   // Konvertiere Categories zu KinksData
   const kinks: KinksData = {}
