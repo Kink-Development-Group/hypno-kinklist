@@ -43,6 +43,58 @@ const KinkRow: React.FC<KinkRowProps> = ({
     height: number
   }>()
 
+  // State für Kommentar-Tooltips
+  const [showCommentTooltip, setShowCommentTooltip] = useState<string | null>(
+    null
+  )
+  const [commentTooltipPos, setCommentTooltipPos] = useState<{
+    top: number
+    left: number
+    width: number
+    height: number
+    arrowLeft: number
+  }>()
+
+  // Shared helper function for tooltip positioning
+  const calculateTooltipPosition = (rect: DOMRect) => {
+    const viewportWidth = window.innerWidth
+    const tooltipWidth = 320 // max-width aus CSS
+    const spaceRight = viewportWidth - rect.right
+
+    // Berechne die horizontale Position basierend auf der Button-Mitte
+    const buttonCenter = rect.left + rect.width / 2
+    let left = buttonCenter - tooltipWidth / 2
+
+    // Wenn nicht genug Platz rechts, positioniere links vom Element
+    if (spaceRight < tooltipWidth / 2 + 20) {
+      left = rect.right - tooltipWidth
+      // Stelle sicher, dass es nicht zu weit links geht
+      if (left < 10) {
+        left = 10
+      }
+    }
+
+    // Wenn nicht genug Platz links, positioniere rechts vom Element
+    if (left < 10) {
+      left = rect.left
+      // Stelle sicher, dass es nicht über den rechten Rand hinausgeht
+      if (left + tooltipWidth > viewportWidth - 10) {
+        left = viewportWidth - tooltipWidth - 10
+      }
+    }
+
+    // Berechne die Pfeil-Position relativ zum Tooltip
+    const arrowLeft = buttonCenter - left
+
+    return {
+      top: rect.bottom + 6,
+      left: left,
+      width: rect.width,
+      height: rect.height,
+      arrowLeft: arrowLeft,
+    }
+  }
+
   // Handle opening comment overlay
   const handleOpenComment = (field: string) => {
     // Generate stable IDs using the language-independent method
@@ -143,9 +195,86 @@ const KinkRow: React.FC<KinkRowProps> = ({
         )
       : null
 
+  // Handle comment tooltip show
+  const handleCommentTooltipShow = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    field: string
+  ) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const position = calculateTooltipPosition(rect)
+
+    setCommentTooltipPos(position)
+    setShowCommentTooltip(field)
+  }
+
+  // Handle comment tooltip show for focus events
+  const handleCommentTooltipShowFocus = (
+    e: React.FocusEvent<HTMLButtonElement>,
+    field: string
+  ) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const position = calculateTooltipPosition(rect)
+
+    setCommentTooltipPos(position)
+    setShowCommentTooltip(field)
+  }
+
+  const handleCommentTooltipHide = () => {
+    setShowCommentTooltip(null)
+  }
+
+  // Comment tooltip element as portal
+  const commentTooltipNode =
+    showCommentTooltip && commentTooltipPos
+      ? ReactDOM.createPortal(
+          <div
+            id={`comment-tooltip-${categoryName}-${kinkName}-${showCommentTooltip}`}
+            role="tooltip"
+            className="kink-tooltip-text kink-tooltip-portal comment-tooltip"
+            style={
+              {
+                position: 'fixed' as const,
+                top: commentTooltipPos.top,
+                left: commentTooltipPos.left,
+                zIndex: 99999 as const,
+                '--arrow-left': `${commentTooltipPos.arrowLeft}px`,
+              } as React.CSSProperties
+            }
+            tabIndex={-1}
+            onMouseLeave={handleCommentTooltipHide}
+          >
+            {(() => {
+              const stableIds = getStableIdsFromOriginal(
+                enhancedKinks,
+                categoryName,
+                kinkName,
+                showCommentTooltip
+              )
+              const kinkSelection = selection.find((s) => {
+                if (s.categoryId && s.kinkId && s.fieldId) {
+                  return (
+                    s.categoryId === stableIds.categoryId &&
+                    s.kinkId === stableIds.kinkId &&
+                    s.fieldId === stableIds.fieldId
+                  )
+                }
+                return (
+                  s.category === categoryName &&
+                  s.kink === kinkName &&
+                  s.field === showCommentTooltip
+                )
+              })
+              return kinkSelection?.comment || ''
+            })()}
+          </div>,
+          document.body
+        )
+      : null
+
   return (
     <>
       {tooltipNode}
+      {commentTooltipNode}
       <tr
         className={`kinkRow kink-${strToClass(kinkName)}`}
         data-kink={kinkName}
@@ -218,22 +347,51 @@ const KinkRow: React.FC<KinkRowProps> = ({
                 <button
                   key={`comment-${field}`}
                   className={`comment-button-small${hasComment ? ' has-comment' : ''}`}
+                  data-has-comment={hasComment ? 'true' : 'false'}
+                  data-comment-length={kinkSelection?.comment?.length || 0}
                   onClick={() => handleOpenComment(field)}
+                  onMouseEnter={(e) =>
+                    hasComment && handleCommentTooltipShow(e, field)
+                  }
+                  onMouseLeave={handleCommentTooltipHide}
+                  onFocus={(e) =>
+                    hasComment && handleCommentTooltipShowFocus(e, field)
+                  }
+                  onBlur={handleCommentTooltipHide}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      handleCommentTooltipHide()
+                    }
+                  }}
+                  aria-describedby={
+                    hasComment && showCommentTooltip === field
+                      ? `comment-tooltip-${categoryName}-${kinkName}-${field}`
+                      : undefined
+                  }
                   aria-label={t('comments.forField', {
                     kinkName,
                     field,
                     action: hasComment
-                      ? t('comments.editComment')
+                      ? t('comments.showComment')
                       : t('comments.addComment'),
                   })}
                   title={
                     hasComment
-                      ? t('comments.editComment')
+                      ? t('comments.showComment')
                       : t('comments.addComment')
                   }
                   type="button"
                 >
-                  💬
+                  <span className="comment-icon">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
+                    </svg>
+                  </span>
                 </button>
               )
             })}

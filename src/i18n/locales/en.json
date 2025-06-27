@@ -433,7 +433,8 @@
     "toSave": "to save",
     "forField": "for {{kinkName}} - {{field}} {{action}}",
     "fieldFor": "{{field}} for {{kinkName}}",
-    "showDescription": "Show description"
+    "showDescription": "Show description",
+    "showComment": "Show comment"
   },
   "choice": {
     "selectionFor": "Selection for {{kinkName}} ({{field}})",

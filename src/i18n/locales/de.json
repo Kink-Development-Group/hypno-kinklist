@@ -433,7 +433,8 @@
     "toSave": "zum Speichern",
     "forField": "für {{kinkName}} - {{field}} {{action}}",
     "fieldFor": "{{field}} für {{kinkName}}",
-    "showDescription": "Beschreibung anzeigen"
+    "showDescription": "Beschreibung anzeigen",
+    "showComment": "Kommentar anzeigen"
   },
   "choice": {
     "selectionFor": "Auswahl für {{kinkName}} ({{field}})",

@@ -1,4 +1,5 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react'
+import ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import { Selection } from '../types'
@@ -29,6 +30,15 @@ const InputOverlay: React.FC = () => {
     'right'
   )
   const tooltipRef = useRef<HTMLSpanElement>(null)
+
+  // State für Kommentar-Tooltips im Modal
+  const [showCommentTooltip, setShowCommentTooltip] = useState(false)
+  const [commentTooltipPos, setCommentTooltipPos] = useState<{
+    top: number
+    left: number
+    width: number
+    height: number
+  }>()
 
   // Berechne die optimale Tooltip-Position
   const calculateTooltipPosition = useCallback((iconElement: HTMLElement) => {
@@ -331,113 +341,225 @@ const InputOverlay: React.FC = () => {
     handleShowNext,
   ])
 
+  // Handle comment tooltip show in modal
+  const handleCommentTooltipShow = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      const rect = e.currentTarget.getBoundingClientRect()
+      const viewportWidth = window.innerWidth
+      const tooltipWidth = 320 // max-width aus CSS
+      const spaceRight = viewportWidth - rect.right
+
+      let left = rect.left
+
+      // Wenn nicht genug Platz rechts, positioniere links vom Element
+      if (spaceRight < tooltipWidth + 20) {
+        left = rect.right - tooltipWidth
+        // Stelle sicher, dass es nicht zu weit links geht
+        if (left < 10) {
+          left = 10
+        }
+      }
+
+      setCommentTooltipPos({
+        top: rect.bottom + 6,
+        left: left,
+        width: rect.width,
+        height: rect.height,
+      })
+      setShowCommentTooltip(true)
+    },
+    []
+  )
+
+  // Handle comment tooltip show for focus events in modal
+  const handleCommentTooltipShowFocus = useCallback(
+    (e: React.FocusEvent<HTMLButtonElement>) => {
+      const rect = e.currentTarget.getBoundingClientRect()
+      const viewportWidth = window.innerWidth
+      const tooltipWidth = 320 // max-width aus CSS
+      const spaceRight = viewportWidth - rect.right
+
+      let left = rect.left
+
+      // Wenn nicht genug Platz rechts, positioniere links vom Element
+      if (spaceRight < tooltipWidth + 20) {
+        left = rect.right - tooltipWidth
+        // Stelle sicher, dass es nicht zu weit links geht
+        if (left < 10) {
+          left = 10
+        }
+      }
+
+      setCommentTooltipPos({
+        top: rect.bottom + 6,
+        left: left,
+        width: rect.width,
+        height: rect.height,
+      })
+      setShowCommentTooltip(true)
+    },
+    []
+  )
+
+  const handleCommentTooltipHide = useCallback(() => {
+    setShowCommentTooltip(false)
+  }, [])
+
+  // Comment tooltip element as portal for modal
+  const commentTooltipNode =
+    showCommentTooltip && commentTooltipPos && currentKink?.comment
+      ? ReactDOM.createPortal(
+          <div
+            className="kink-tooltip-text kink-tooltip-portal comment-tooltip"
+            style={{
+              position: 'fixed' as const,
+              top: commentTooltipPos.top,
+              left: commentTooltipPos.left,
+              zIndex: 99999 as const,
+            }}
+            tabIndex={-1}
+            onMouseLeave={handleCommentTooltipHide}
+          >
+            {currentKink.comment}
+          </div>,
+          document.body
+        )
+      : null
+
   if (!currentKink) return null
 
   return (
-    <div
-      id="InputOverlay"
-      className={`overlay ${isInputOverlayOpen ? 'visible' : ''}`}
-      onClick={handleOverlayClick}
-      ref={overlayRef}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Kink-Auswahl"
-      tabIndex={-1}
-    >
-      <div className="widthWrapper" role="region">
-        <div id="InputPrevious" aria-label="Vorherige Kinks">
-          {previousKinks}
-        </div>
-        <div id="InputCurrent" aria-live="polite">
-          <h2 id="InputCategory">{currentKink.category}</h2>
-          <h3 id="InputField" className="input-kink-with-tooltip">
-            {currentKink.showField ? `(${currentKink.field}) ` : ''}
-            <span>{currentKink.kink}</span>
+    <>
+      {commentTooltipNode}
+      <div
+        id="InputOverlay"
+        className={`overlay ${isInputOverlayOpen ? 'visible' : ''}`}
+        onClick={handleOverlayClick}
+        ref={overlayRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Kink-Auswahl"
+        tabIndex={-1}
+      >
+        <div className="widthWrapper" role="region">
+          <div id="InputPrevious" aria-label="Vorherige Kinks">
+            {previousKinks}
+          </div>
+          <div id="InputCurrent" aria-live="polite">
+            <h2 id="InputCategory">{currentKink.category}</h2>
+            <h3 id="InputField" className="input-kink-with-tooltip">
+              {currentKink.showField ? `(${currentKink.field}) ` : ''}
+              <span>{currentKink.kink}</span>
 
-            {/* Kommentar-Button */}
-            {(() => {
-              const hasComment =
-                currentKink.comment && currentKink.comment.trim().length > 0
-              return (
-                <button
-                  className={`comment-button-small modal-comment-button ${hasComment ? 'has-comment' : ''}`}
-                  onClick={handleOpenComment}
-                  aria-label={t('comments.forField', {
-                    kinkName: currentKink.kink,
-                    field: currentKink.field,
-                    action: hasComment
-                      ? t('comments.editComment')
-                      : t('comments.addComment'),
-                  })}
-                  title={
-                    hasComment
-                      ? t('comments.editComment')
-                      : t('comments.addComment')
-                  }
-                  type="button"
-                >
-                  💬
-                </button>
-              )
-            })()}
-
-            {/* Tooltip für Beschreibung, falls vorhanden */}
-            {(() => {
-              const cat = kinks[currentKink.category]
-              const kinkIdx = cat?.kinks?.indexOf(currentKink.kink)
-              const description =
-                cat &&
-                kinkIdx !== undefined &&
-                kinkIdx >= 0 &&
-                cat.descriptions &&
-                cat.descriptions[kinkIdx]
-                  ? cat.descriptions[kinkIdx]
-                  : undefined
-              if (description) {
+              {/* Kommentar-Button */}
+              {(() => {
+                const hasComment =
+                  currentKink.comment && currentKink.comment.trim().length > 0
                 return (
-                  <span className="kink-tooltip kink-tooltip-overlay">
-                    <span
-                      className="kink-tooltip-icon"
-                      tabIndex={0}
-                      aria-label="Beschreibung anzeigen"
-                      onMouseEnter={handleShowTooltip}
-                      onFocus={handleShowTooltip}
-                      onMouseLeave={handleHideTooltip}
-                      onBlur={handleHideTooltip}
-                      ref={tooltipRef}
-                    >
-                      ?
-                    </span>
-                    {showTooltip && (
-                      <span
-                        className={`kink-tooltip-text kink-tooltip-text-overlay ${
-                          tooltipPosition === 'left' ? 'left' : ''
-                        }`}
-                        tabIndex={-1}
+                  <button
+                    className={`comment-button-small modal-comment-button ${hasComment ? 'has-comment' : ''}`}
+                    data-has-comment={hasComment ? 'true' : 'false'}
+                    data-comment-length={currentKink.comment?.length || 0}
+                    onClick={handleOpenComment}
+                    onMouseEnter={(e) =>
+                      hasComment && handleCommentTooltipShow(e)
+                    }
+                    onMouseLeave={handleCommentTooltipHide}
+                    onFocus={(e) =>
+                      hasComment && handleCommentTooltipShowFocus(e)
+                    }
+                    onBlur={handleCommentTooltipHide}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        handleCommentTooltipHide()
+                      }
+                    }}
+                    aria-label={t('comments.forField', {
+                      kinkName: currentKink.kink,
+                      field: currentKink.field,
+                      action: hasComment
+                        ? t('comments.showComment')
+                        : t('comments.addComment'),
+                    })}
+                    title={
+                      hasComment
+                        ? t('comments.showComment')
+                        : t('comments.addComment')
+                    }
+                    type="button"
+                  >
+                    <span className="comment-icon">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
                       >
-                        {description}
-                      </span>
-                    )}
-                  </span>
+                        <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
+                      </svg>
+                    </span>
+                  </button>
                 )
-              }
-              return null
-            })()}
-          </h3>
-          <button
-            className="closePopup"
-            onClick={handleClose}
-            aria-label={t('input.actions.close')}
-          >
-            &times;
-          </button>
-          <div id="InputValues">{generatePrimary(currentKink)}</div>
-        </div>
-        <div id="InputNext" aria-label="Nächste Kinks">
-          {nextKinks}
+              })()}
+
+              {/* Tooltip für Beschreibung, falls vorhanden */}
+              {(() => {
+                const cat = kinks[currentKink.category]
+                const kinkIdx = cat?.kinks?.indexOf(currentKink.kink)
+                const description =
+                  cat &&
+                  kinkIdx !== undefined &&
+                  kinkIdx >= 0 &&
+                  cat.descriptions &&
+                  cat.descriptions[kinkIdx]
+                    ? cat.descriptions[kinkIdx]
+                    : undefined
+                if (description) {
+                  return (
+                    <span className="kink-tooltip kink-tooltip-overlay">
+                      <span
+                        className="kink-tooltip-icon"
+                        tabIndex={0}
+                        aria-label="Beschreibung anzeigen"
+                        onMouseEnter={handleShowTooltip}
+                        onFocus={handleShowTooltip}
+                        onMouseLeave={handleHideTooltip}
+                        onBlur={handleHideTooltip}
+                        ref={tooltipRef}
+                      >
+                        ?
+                      </span>
+                      {showTooltip && (
+                        <span
+                          className={`kink-tooltip-text kink-tooltip-text-overlay ${
+                            tooltipPosition === 'left' ? 'left' : ''
+                          }`}
+                          tabIndex={-1}
+                        >
+                          {description}
+                        </span>
+                      )}
+                    </span>
+                  )
+                }
+                return null
+              })()}
+            </h3>
+            <button
+              className="closePopup"
+              onClick={handleClose}
+              aria-label={t('input.actions.close')}
+            >
+              &times;
+            </button>
+            <div id="InputValues">{generatePrimary(currentKink)}</div>
+          </div>
+          <div id="InputNext" aria-label="Nächste Kinks">
+            {nextKinks}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 
