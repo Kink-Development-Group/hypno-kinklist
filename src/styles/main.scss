@@ -1946,18 +1946,18 @@ table {
 
 // Comment tooltip specific styles
 .comment-tooltip {
-  background: var(--popup-bg-color) !important;
-  color: var(--text-color) !important;
-  border: 2px solid var(--button-bg-color) !important;
-  border-radius: 8px !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18) !important;
-  padding: 12px 16px !important;
-  font-size: 0.95em !important;
-  line-height: 1.5 !important;
-  white-space: pre-line !important;
-  max-width: 320px !important;
-  min-width: 180px !important;
-  z-index: 99999 !important;
+  background: var(--popup-bg-color);
+  color: var(--text-color);
+  border: 2px solid var(--button-bg-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  padding: 12px 16px;
+  font-size: 0.95em;
+  line-height: 1.5;
+  white-space: pre-line;
+  max-width: 320px;
+  min-width: 180px;
+  z-index: 99999;
 
   // Spezielle Styling für Kommentar-Tooltips
   &::before {
@@ -1975,11 +1975,11 @@ table {
 
   // Responsive Design für Kommentar-Tooltips
   @media (max-width: 600px) {
-    min-width: 120px !important;
-    max-width: 90vw !important;
-    left: 0 !important;
-    right: 0 !important;
-    transform: none !important;
+    min-width: 120px;
+    max-width: 90vw;
+    left: 0;
+    right: 0;
+    transform: none;
   }
 }
 
@@ -2060,7 +2060,7 @@ html {
     color: var(--text-color);
     position: relative;
     // Stelle sicher, dass der Text nicht rotiert
-    transform: none !important;
+    transform: none;
 
     &::after {
       content: '...';
