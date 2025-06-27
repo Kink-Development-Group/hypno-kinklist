@@ -30,6 +30,7 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
     left: number
     width: number
     height: number
+    arrowLeft?: number
   }>()
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([])
 
@@ -152,27 +153,41 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
     [handleClick]
   )
 
-  // Tooltip-Positionierungslogik
+  // Tooltip-Positionierungslogik (wie in KinkRow)
   const calculateTooltipPosition = (rect: DOMRect) => {
     const viewportWidth = window.innerWidth
-    const tooltipWidth = 320
+    const tooltipWidth = 320 // max-width aus CSS
     const spaceRight = viewportWidth - rect.right
-    let left = rect.left + rect.width / 2 - tooltipWidth / 2
+
+    // Berechne die horizontale Position basierend auf der Button-Mitte
+    const buttonCenter = rect.left + rect.width / 2
+    let left = buttonCenter - tooltipWidth / 2
+
+    // Wenn nicht genug Platz rechts, positioniere links vom Element
     if (spaceRight < tooltipWidth / 2 + 20) {
       left = rect.right - tooltipWidth
-      if (left < 10) left = 10
+      if (left < 10) {
+        left = 10
+      }
     }
+
+    // Wenn nicht genug Platz links, positioniere rechts vom Element
     if (left < 10) {
       left = rect.left
       if (left + tooltipWidth > viewportWidth - 10) {
         left = viewportWidth - tooltipWidth - 10
       }
     }
+
+    // Berechne die Pfeil-Position relativ zum Tooltip
+    const arrowLeft = buttonCenter - left
+
     return {
       top: rect.bottom + 6,
-      left,
+      left: left,
       width: rect.width,
       height: rect.height,
+      arrowLeft: arrowLeft,
     }
   }
 
@@ -250,9 +265,7 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
                       top: tooltipPos.top,
                       left: tooltipPos.left,
                       zIndex: 99999 as const,
-                      '--arrow-left': tooltipPos.width
-                        ? `${tooltipPos.width / 2}px`
-                        : '50%',
+                      '--arrow-left': `${'arrowLeft' in tooltipPos ? tooltipPos.arrowLeft : tooltipPos.width ? tooltipPos.width / 2 : '50%'}px`,
                     } as React.CSSProperties
                   }
                   tabIndex={-1}
