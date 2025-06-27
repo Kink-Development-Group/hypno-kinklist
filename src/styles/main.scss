@@ -1934,13 +1934,55 @@ table {
     transform: scale(0.95);
   }
   &:focus {
-    outline: none;
+    outline: 2px solid var(--button-bg-color);
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 
   &.has-comment {
     color: var(--button-bg-color);
   }
 }
+
+// Comment tooltip specific styles
+.comment-tooltip {
+  background: var(--popup-bg-color) !important;
+  color: var(--text-color) !important;
+  border: 2px solid var(--button-bg-color) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18) !important;
+  padding: 12px 16px !important;
+  font-size: 0.95em !important;
+  line-height: 1.5 !important;
+  white-space: pre-line !important;
+  max-width: 320px !important;
+  min-width: 180px !important;
+  z-index: 99999 !important;
+
+  // Spezielle Styling für Kommentar-Tooltips
+  &::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid var(--button-bg-color);
+  }
+
+  // Responsive Design für Kommentar-Tooltips
+  @media (max-width: 600px) {
+    min-width: 120px !important;
+    max-width: 90vw !important;
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
+  }
+}
+
 // Zusätzliche Stile für den deaktivierten Zustand
 .comment-button-small:disabled {
   opacity: 0.5;

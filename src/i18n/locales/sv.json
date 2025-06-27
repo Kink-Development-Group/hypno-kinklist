@@ -433,7 +433,8 @@
     "toSave": "för att spara",
     "forField": "för {{kinkName}} - {{field}} {{action}}",
     "fieldFor": "{{field}} för {{kinkName}}",
-    "showDescription": "Visa beskrivning"
+    "showDescription": "Visa beskrivning",
+    "showComment": "Visa kommentar"
   },
   "choice": {
     "selectionFor": "Val för {{kinkName}} ({{field}})",

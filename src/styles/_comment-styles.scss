@@ -48,3 +48,26 @@
     text-shadow: 0 0 2px rgba(0, 0, 0, 0.2); // Leichter Schatten für bessere Sichtbarkeit
   }
 }
+
+// Spezielle Stile für Kommentar-Tooltips in Modals
+.kink-tooltip-portal.comment-tooltip {
+  // Höherer z-index für Modals
+  z-index: 999999 !important;
+
+  // Angepasste Positionierung für Modal-Kontext
+  position: fixed !important;
+
+  // Bessere Sichtbarkeit in Modal-Overlays
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.25),
+    0 2px 8px rgba(0, 0, 0, 0.15) !important;
+
+  // Stärkere Umrandung für bessere Sichtbarkeit
+  border: 2px solid var(--button-bg-color) !important;
+
+  // Responsive Anpassungen für Modals
+  @media (max-width: 768px) {
+    max-width: 280px !important;
+    min-width: 200px !important;
+  }
+}

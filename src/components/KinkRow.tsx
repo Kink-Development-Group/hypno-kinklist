@@ -43,6 +43,17 @@ const KinkRow: React.FC<KinkRowProps> = ({
     height: number
   }>()
 
+  // State für Kommentar-Tooltips
+  const [showCommentTooltip, setShowCommentTooltip] = useState<string | null>(
+    null
+  )
+  const [commentTooltipPos, setCommentTooltipPos] = useState<{
+    top: number
+    left: number
+    width: number
+    height: number
+  }>()
+
   // Handle opening comment overlay
   const handleOpenComment = (field: string) => {
     // Generate stable IDs using the language-independent method
@@ -143,9 +154,119 @@ const KinkRow: React.FC<KinkRowProps> = ({
         )
       : null
 
+  // Handle comment tooltip show
+  const handleCommentTooltipShow = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    field: string,
+    comment: string
+  ) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const viewportWidth = window.innerWidth
+    const tooltipWidth = 320 // max-width aus CSS
+    const spaceRight = viewportWidth - rect.right
+
+    let left = rect.left
+
+    // Wenn nicht genug Platz rechts, positioniere links vom Element
+    if (spaceRight < tooltipWidth + 20) {
+      left = rect.right - tooltipWidth
+      // Stelle sicher, dass es nicht zu weit links geht
+      if (left < 10) {
+        left = 10
+      }
+    }
+
+    setCommentTooltipPos({
+      top: rect.bottom + 6,
+      left: left,
+      width: rect.width,
+      height: rect.height,
+    })
+    setShowCommentTooltip(field)
+  }
+
+  // Handle comment tooltip show for focus events
+  const handleCommentTooltipShowFocus = (
+    e: React.FocusEvent<HTMLButtonElement>,
+    field: string,
+    comment: string
+  ) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const viewportWidth = window.innerWidth
+    const tooltipWidth = 320 // max-width aus CSS
+    const spaceRight = viewportWidth - rect.right
+
+    let left = rect.left
+
+    // Wenn nicht genug Platz rechts, positioniere links vom Element
+    if (spaceRight < tooltipWidth + 20) {
+      left = rect.right - tooltipWidth
+      // Stelle sicher, dass es nicht zu weit links geht
+      if (left < 10) {
+        left = 10
+      }
+    }
+
+    setCommentTooltipPos({
+      top: rect.bottom + 6,
+      left: left,
+      width: rect.width,
+      height: rect.height,
+    })
+    setShowCommentTooltip(field)
+  }
+
+  const handleCommentTooltipHide = () => {
+    setShowCommentTooltip(null)
+  }
+
+  // Comment tooltip element as portal
+  const commentTooltipNode =
+    showCommentTooltip && commentTooltipPos
+      ? ReactDOM.createPortal(
+          <div
+            className="kink-tooltip-text kink-tooltip-portal comment-tooltip"
+            style={{
+              position: 'fixed' as const,
+              top: commentTooltipPos.top,
+              left: commentTooltipPos.left,
+              zIndex: 99999 as const,
+            }}
+            tabIndex={-1}
+            onMouseLeave={handleCommentTooltipHide}
+          >
+            {(() => {
+              const stableIds = getStableIdsFromOriginal(
+                enhancedKinks,
+                categoryName,
+                kinkName,
+                showCommentTooltip
+              )
+              const kinkSelection = selection.find((s) => {
+                if (s.categoryId && s.kinkId && s.fieldId) {
+                  return (
+                    s.categoryId === stableIds.categoryId &&
+                    s.kinkId === stableIds.kinkId &&
+                    s.fieldId === stableIds.fieldId
+                  )
+                }
+                return (
+                  s.category === categoryName &&
+                  s.kink === kinkName &&
+                  s.field === showCommentTooltip
+                )
+              })
+              return kinkSelection?.comment || ''
+            })()}
+          </div>,
+          document.body
+        )
+      : null
+
   return (
     <>
       {tooltipNode}
+      {commentTooltipNode}
       <tr
         className={`kinkRow kink-${strToClass(kinkName)}`}
         data-kink={kinkName}
@@ -219,16 +340,39 @@ const KinkRow: React.FC<KinkRowProps> = ({
                   key={`comment-${field}`}
                   className={`comment-button-small${hasComment ? ' has-comment' : ''}`}
                   onClick={() => handleOpenComment(field)}
+                  onMouseEnter={(e) =>
+                    hasComment &&
+                    handleCommentTooltipShow(
+                      e,
+                      field,
+                      kinkSelection?.comment || ''
+                    )
+                  }
+                  onMouseLeave={handleCommentTooltipHide}
+                  onFocus={(e) =>
+                    hasComment &&
+                    handleCommentTooltipShowFocus(
+                      e,
+                      field,
+                      kinkSelection?.comment || ''
+                    )
+                  }
+                  onBlur={handleCommentTooltipHide}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      handleCommentTooltipHide()
+                    }
+                  }}
                   aria-label={t('comments.forField', {
                     kinkName,
                     field,
                     action: hasComment
-                      ? t('comments.editComment')
+                      ? t('comments.showComment')
                       : t('comments.addComment'),
                   })}
                   title={
                     hasComment
-                      ? t('comments.editComment')
+                      ? t('comments.showComment')
                       : t('comments.addComment')
                   }
                   type="button"
