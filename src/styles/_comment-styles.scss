@@ -6,11 +6,39 @@
   font-size: 16px;
   padding: 3px 7px;
   opacity: 0.8; // Immer sichtbar, aber dezent
+  display: inline-flex !important; // Flex für bessere Ausrichtung
+  align-items: center !important; // Zentriert vertikal
+  justify-content: center !important; // Zentriert horizontal
+  width: 20px; // Feste Breite für konsistente Ausrichtung
+  height: 20px; // Feste Höhe für konsistente Ausrichtung
+  min-width: 20px; // Verhindert Schrumpfung
+  min-height: 20px; // Verhindert Schrumpfung
+
+  .comment-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+    color: inherit;
+    width: 16px;
+    height: 16px;
+
+    svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+      transition: fill 0.2s ease;
+    }
+  }
 
   &.has-comment {
-    background-color: var(--button-bg-color);
-    color: var(--button-text-color);
-    opacity: 1;
+    background-color: var(--button-bg-color) !important;
+    color: var(--button-text-color) !important;
+    opacity: 1 !important;
+
+    .comment-icon {
+      color: var(--button-text-color) !important;
+    }
   }
 }
 
@@ -22,6 +50,23 @@
   gap: 6px; // Etwas kleinerer Abstand
   margin-left: 10px;
   visibility: visible !important; // Erzwingt Sichtbarkeit
+
+  // Stelle sicher, dass alle Icons die gleiche Höhe haben
+  > * {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px; // Konsistente Höhe für alle Icons
+    min-height: 20px; // Verhindert Schrumpfung
+  }
+
+  // Spezielle Ausrichtung für Tooltip-Container
+  .kink-tooltip {
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
+    margin-left: 0; // Entferne den Standard-Margin
+  }
 }
 
 // Kleinerer Kommentarbutton für Tabellenzeilen
@@ -33,19 +78,79 @@
   cursor: pointer;
   opacity: 1; // Immer vollständig sichtbar
   transition: all 0.2s ease;
-  display: inline-block !important; // Erzwingt Anzeige
+  display: inline-flex !important; // Änderung zu flex für bessere Ausrichtung
+  align-items: center !important; // Zentriert vertikal
+  justify-content: center !important; // Zentriert horizontal
   visibility: visible !important; // Erzwingt Sichtbarkeit
   color: var(--text-color); // Setzt Textfarbe explizit
+  width: 20px; // Feste Breite für konsistente Ausrichtung
+  height: 20px; // Feste Höhe für konsistente Ausrichtung
+  min-width: 20px; // Verhindert Schrumpfung
+  min-height: 20px; // Verhindert Schrumpfung
+
+  .comment-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+    color: inherit; // Erbt die Farbe vom Button
+    width: 16px;
+    height: 16px;
+
+    svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+      transition: fill 0.2s ease;
+    }
+  }
 
   &:hover {
     transform: scale(1.2); // Leichte Vergrößerung beim Hover
   }
 
+  &:focus {
+    outline: 2px solid var(--button-bg-color) !important;
+    outline-offset: 2px !important;
+    border-radius: 4px !important;
+  }
+
   &.has-comment {
     color: var(
       --button-bg-color
-    ); // Farblicher Hinweis auf vorhandenen Kommentar
-    text-shadow: 0 0 2px rgba(0, 0, 0, 0.2); // Leichter Schatten für bessere Sichtbarkeit
+    ) !important; // Farblicher Hinweis auf vorhandenen Kommentar
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.2) !important; // Leichter Schatten für bessere Sichtbarkeit
+
+    .comment-icon {
+      color: var(--button-bg-color) !important;
+    }
+  }
+
+  &:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+  }
+}
+
+// Zusätzliche spezifische Regel für has-comment
+.comment-button-small.has-comment {
+  color: var(--button-bg-color) !important;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.2) !important;
+
+  .comment-icon {
+    color: var(--button-bg-color) !important;
+  }
+}
+
+// Spezifische Regel für Modal-Kommentar-Buttons
+.modal-comment-button.has-comment {
+  background-color: var(--button-bg-color) !important;
+  color: var(--button-text-color) !important;
+  opacity: 1 !important;
+
+  .comment-icon {
+    color: var(--button-text-color) !important;
   }
 }
 
@@ -70,4 +175,15 @@
     max-width: 280px !important;
     min-width: 200px !important;
   }
+}
+
+// Tooltip-Icon Ausrichtung anpassen
+.kink-tooltip .kink-tooltip-icon {
+  width: 20px !important; // Gleiche Breite wie Kommentar-Icons
+  height: 20px !important; // Gleiche Höhe wie Kommentar-Icons
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
 }
