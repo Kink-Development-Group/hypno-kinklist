@@ -7,6 +7,7 @@ import { strToClass } from '../utils'
 import { getStableIdsFromOriginal } from '../utils/multilingualTemplates'
 import { calculateTooltipPosition } from '../utils/tooltipPosition'
 import Choice from './Choice'
+import Tooltip from './Tooltip'
 
 interface KinkRowProps {
   categoryName: string
@@ -291,43 +292,48 @@ const KinkRow: React.FC<KinkRowProps> = ({
                 kinkSelection?.comment &&
                 kinkSelection.comment.trim().length > 0
 
-              return (
+              return hasComment ? (
+                <Tooltip content={kinkSelection.comment || ''}>
+                  <button
+                    key={`comment-${field}`}
+                    className={`comment-button-base comment-button-small has-comment`}
+                    data-has-comment="true"
+                    data-comment-length={
+                      kinkSelection.comment ? kinkSelection.comment.length : 0
+                    }
+                    onClick={() => handleOpenComment(field)}
+                    aria-describedby={`comment-tooltip-${categoryName}-${kinkName}-${field}`}
+                    aria-label={t('comments.forField', {
+                      kinkName,
+                      field,
+                      action: t('comments.showComment'),
+                    })}
+                    type="button"
+                  >
+                    <span className="comment-icon">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
+                      </svg>
+                    </span>
+                  </button>
+                </Tooltip>
+              ) : (
                 <button
                   key={`comment-${field}`}
-                  className={`comment-button-base comment-button-small${hasComment ? ' has-comment' : ''}`}
-                  data-has-comment={hasComment ? 'true' : 'false'}
+                  className="comment-button-base comment-button-small"
+                  data-has-comment="false"
                   data-comment-length={kinkSelection?.comment?.length || 0}
                   onClick={() => handleOpenComment(field)}
-                  onMouseEnter={(e) =>
-                    hasComment && handleCommentTooltipShow(e, field)
-                  }
-                  onMouseLeave={handleCommentTooltipHide}
-                  onFocus={(e) =>
-                    hasComment && handleCommentTooltipShowFocus(e, field)
-                  }
-                  onBlur={handleCommentTooltipHide}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Escape') {
-                      handleCommentTooltipHide()
-                    }
-                  }}
-                  aria-describedby={
-                    hasComment && showCommentTooltip === field
-                      ? `comment-tooltip-${categoryName}-${kinkName}-${field}`
-                      : undefined
-                  }
                   aria-label={t('comments.forField', {
                     kinkName,
                     field,
-                    action: hasComment
-                      ? t('comments.showComment')
-                      : t('comments.addComment'),
+                    action: t('comments.addComment'),
                   })}
-                  title={
-                    hasComment
-                      ? t('comments.showComment')
-                      : t('comments.addComment')
-                  }
                   type="button"
                 >
                   <span className="comment-icon">
@@ -344,26 +350,17 @@ const KinkRow: React.FC<KinkRowProps> = ({
               )
             })}
             {description && (
-              <span className="kink-tooltip">
-                <span
-                  className="kink-tooltip-icon"
-                  tabIndex={0}
-                  aria-label={t('comments.showDescription')}
-                  onKeyDown={handleTooltipKeyDown}
-                  ref={tooltipRef}
-                  onMouseEnter={handleTooltipShow}
-                  onFocus={handleTooltipShow}
-                  onMouseLeave={handleTooltipHide}
-                  onBlur={handleTooltipHide}
-                >
-                  ?
-                </span>
-                {forceInlineTooltip && (
-                  <span className="kink-tooltip-text" tabIndex={-1}>
-                    {description}
+              <Tooltip content={description}>
+                <span className="kink-tooltip">
+                  <span
+                    className="kink-tooltip-icon"
+                    tabIndex={0}
+                    aria-label={t('comments.showDescription')}
+                  >
+                    ?
                   </span>
-                )}
-              </span>
+                </span>
+              </Tooltip>
             )}
           </div>
         </td>

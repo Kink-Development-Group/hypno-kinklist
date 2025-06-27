@@ -6,11 +6,11 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import { Selection } from '../types'
 import { getStableIdsFromOriginal } from '../utils/multilingualTemplates'
+import Tooltip from './Tooltip'
 
 interface ChoiceProps {
   field: string
@@ -232,7 +232,13 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
         if (translatedLevelName === levelTranslationKey)
           translatedLevelName = levelName
         return (
-          <React.Fragment key={levelName}>
+          <Tooltip
+            content={t('choice.levelFor', {
+              levelName: translatedLevelName,
+              kinkName,
+              field,
+            })}
+          >
             <button
               ref={(el) => (buttonRefs.current[index] = el)}
               className={`choice ${level.class} ${isSelected ? 'selected' : ''}`}
@@ -249,37 +255,8 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
                 field,
               })}
               tabIndex={isSelected ? 0 : -1}
-              onMouseEnter={() => handleShowTooltip(index)}
-              onFocus={() => handleShowTooltip(index)}
-              onMouseLeave={handleHideTooltip}
-              onBlur={handleHideTooltip}
             />
-            {showTooltip === index.toString() &&
-              tooltipPos &&
-              ReactDOM.createPortal(
-                <div
-                  className="kink-tooltip-text kink-tooltip-portal comment-tooltip"
-                  style={
-                    {
-                      position: 'fixed' as const,
-                      top: tooltipPos.top,
-                      left: tooltipPos.left,
-                      zIndex: 99999 as const,
-                      '--arrow-left': `${'arrowLeft' in tooltipPos ? tooltipPos.arrowLeft : tooltipPos.width ? tooltipPos.width / 2 : '50%'}px`,
-                    } as React.CSSProperties
-                  }
-                  tabIndex={-1}
-                  onMouseLeave={handleHideTooltip}
-                >
-                  {t('choice.levelFor', {
-                    levelName: translatedLevelName,
-                    kinkName,
-                    field,
-                  })}
-                </div>,
-                document.body
-              )}
-          </React.Fragment>
+          </Tooltip>
         )
       })}
     </div>

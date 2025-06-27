@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import Tooltip from '../Tooltip'
 import BlockPicker from './BlockPicker'
 import {
   EditorSnippet,
@@ -124,33 +125,37 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
   return (
     <div className={`editor-toolbar ${theme}`}>
       <div className="toolbar-group">
-        <button
-          type="button"
-          className="toolbar-button"
-          onClick={handleFormatCode}
-          title={t('editor.toolbar.formatTooltip')}
-          aria-label={t('editor.toolbar.format')}
-        >
-          <span className="icon">📝</span>
-          {t('editor.toolbar.format')}
-        </button>
-
-        <div className="toolbar-dropdown" ref={dropdownRef}>
+        <Tooltip content={t('editor.toolbar.formatTooltip')}>
           <button
             type="button"
-            className="toolbar-button dropdown-toggle"
-            onClick={() => {
-              setShowSnippets(!showSnippets)
-              setShowBlocks(false)
-            }}
-            title={t('editor.toolbar.snippetsTooltip')}
-            aria-label={t('editor.toolbar.snippets')}
-            aria-expanded={showSnippets}
+            className="toolbar-button"
+            onClick={handleFormatCode}
+            aria-label={t('editor.toolbar.format')}
           >
-            <span className="icon">📋</span>
-            {t('editor.toolbar.snippets')}
-            <span className="dropdown-arrow">{showSnippets ? '▼' : '▶'}</span>
+            <span className="icon">📝</span>
+            {t('editor.toolbar.format')}
           </button>
+        </Tooltip>
+
+        <div className="toolbar-dropdown" ref={dropdownRef}>
+          <Tooltip content={t('editor.toolbar.snippetsTooltip')}>
+            <button
+              type="button"
+              className="toolbar-button dropdown-toggle"
+              onClick={() => {
+                setShowSnippets(!showSnippets)
+                setShowBlocks(false)
+              }}
+              aria-label={t('editor.toolbar.snippets')}
+              aria-expanded={showSnippets}
+            >
+              <span className="icon">📋</span>
+              {t('editor.toolbar.snippets')}
+              <span className="dropdown-arrow">
+                {showSnippets ? '▼' : '▶'}
+              </span>
+            </button>
+          </Tooltip>
 
           {showSnippets && (
             <div className="dropdown-menu">
@@ -170,63 +175,66 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
               </div>
               <div className="snippet-list">
                 {getFilteredSnippets().map((snippet, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    className="snippet-item"
-                    onClick={() => handleInsertSnippet(snippet)}
-                    title={snippet.documentation}
-                  >
-                    <div className="snippet-label">{snippet.label}</div>
-                    <div className="snippet-detail">{snippet.detail}</div>
-                  </button>
+                  <Tooltip key={index} content={snippet.documentation}>
+                    <button
+                      type="button"
+                      className="snippet-item"
+                      onClick={() => handleInsertSnippet(snippet)}
+                    >
+                      <div className="snippet-label">{snippet.label}</div>
+                      <div className="snippet-detail">{snippet.detail}</div>
+                    </button>
+                  </Tooltip>
                 ))}
               </div>
             </div>
           )}
         </div>
 
-        <button
-          type="button"
-          className="toolbar-button"
-          onClick={() => {
-            setShowBlocks(!showBlocks)
-            setShowSnippets(false)
-          }}
-          title={t('editor.toolbar.blocksTooltip')}
-          aria-label={t('editor.toolbar.blocks')}
-          aria-expanded={showBlocks}
-        >
-          <span className="icon">📦</span>
-          {t('editor.toolbar.blocks')}
-        </button>
+        <Tooltip content={t('editor.toolbar.blocksTooltip')}>
+          <button
+            type="button"
+            className="toolbar-button"
+            onClick={() => {
+              setShowBlocks(!showBlocks)
+              setShowSnippets(false)
+            }}
+            aria-label={t('editor.toolbar.blocks')}
+            aria-expanded={showBlocks}
+          >
+            <span className="icon">📦</span>
+            {t('editor.toolbar.blocks')}
+          </button>
+        </Tooltip>
 
-        <button
-          type="button"
-          className="toolbar-button"
-          onClick={() => {
-            setShowHelp(!showHelp)
-            setShowSnippets(false)
-            setShowBlocks(false)
-          }}
-          title={t('editor.toolbar.helpTooltip')}
-          aria-label={t('editor.toolbar.help')}
-          aria-expanded={showHelp}
-        >
-          <span className="icon">❓</span>
-          {t('editor.toolbar.help')}
-        </button>
+        <Tooltip content={t('editor.toolbar.helpTooltip')}>
+          <button
+            type="button"
+            className="toolbar-button"
+            onClick={() => {
+              setShowHelp(!showHelp)
+              setShowSnippets(false)
+              setShowBlocks(false)
+            }}
+            aria-label={t('editor.toolbar.help')}
+            aria-expanded={showHelp}
+          >
+            <span className="icon">❓</span>
+            {t('editor.toolbar.help')}
+          </button>
+        </Tooltip>
 
-        <button
-          type="button"
-          className="toolbar-button"
-          onClick={handleFocus}
-          title={t('editor.toolbar.focusTooltip')}
-          aria-label={t('editor.toolbar.focus')}
-        >
-          <span className="icon">🎯</span>
-          {t('editor.toolbar.focus')}
-        </button>
+        <Tooltip content={t('editor.toolbar.focusTooltip')}>
+          <button
+            type="button"
+            className="toolbar-button"
+            onClick={handleFocus}
+            aria-label={t('editor.toolbar.focus')}
+          >
+            <span className="icon">🎯</span>
+            {t('editor.toolbar.focus')}
+          </button>
+        </Tooltip>
       </div>
 
       {/* Erweiterte Block-Auswahl */}

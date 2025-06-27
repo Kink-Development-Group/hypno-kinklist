@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import { Selection } from '../types'
 import { calculateTooltipPosition } from '../utils/tooltipPosition'
+import Tooltip from './Tooltip'
 
 const InputOverlay: React.FC = () => {
   const {
@@ -343,7 +344,7 @@ const InputOverlay: React.FC = () => {
       )
       setShowCommentTooltip(true)
     },
-    [calculateTooltipPosition]
+    []
   )
 
   // Handle comment tooltip show for focus events in modal
@@ -355,7 +356,7 @@ const InputOverlay: React.FC = () => {
       )
       setShowCommentTooltip(true)
     },
-    [calculateTooltipPosition]
+    []
   )
 
   const handleCommentTooltipHide = useCallback(() => {
@@ -399,7 +400,7 @@ const InputOverlay: React.FC = () => {
       setDescTooltipPos(calculateTooltipPosition(rect, 'kink-tooltip-icon'))
       setShowTooltip(true)
     },
-    [calculateTooltipPosition]
+    []
   )
 
   if (!currentKink) return null
@@ -431,37 +432,45 @@ const InputOverlay: React.FC = () => {
               {(() => {
                 const hasComment =
                   currentKink.comment && currentKink.comment.trim().length > 0
-                return (
+                return hasComment ? (
+                  <Tooltip content={currentKink.comment || ''}>
+                    <button
+                      className={`comment-button-base modal-comment-button has-comment`}
+                      data-has-comment="true"
+                      data-comment-length={
+                        currentKink.comment ? currentKink.comment.length : 0
+                      }
+                      onClick={handleOpenComment}
+                      aria-label={t('comments.forField', {
+                        kinkName: currentKink.kink,
+                        field: currentKink.field,
+                        action: t('comments.showComment'),
+                      })}
+                      type="button"
+                    >
+                      <span className="comment-icon">
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
+                        </svg>
+                      </span>
+                    </button>
+                  </Tooltip>
+                ) : (
                   <button
-                    className={`comment-button-base modal-comment-button${hasComment ? ' has-comment' : ''}`}
-                    data-has-comment={hasComment ? 'true' : 'false'}
+                    className="comment-button-base modal-comment-button"
+                    data-has-comment="false"
                     data-comment-length={currentKink.comment?.length || 0}
                     onClick={handleOpenComment}
-                    onMouseEnter={(e) =>
-                      hasComment && handleCommentTooltipShow(e)
-                    }
-                    onMouseLeave={handleCommentTooltipHide}
-                    onFocus={(e) =>
-                      hasComment && handleCommentTooltipShowFocus(e)
-                    }
-                    onBlur={handleCommentTooltipHide}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Escape') {
-                        handleCommentTooltipHide()
-                      }
-                    }}
                     aria-label={t('comments.forField', {
                       kinkName: currentKink.kink,
                       field: currentKink.field,
-                      action: hasComment
-                        ? t('comments.showComment')
-                        : t('comments.addComment'),
+                      action: t('comments.addComment'),
                     })}
-                    title={
-                      hasComment
-                        ? t('comments.showComment')
-                        : t('comments.addComment')
-                    }
                     type="button"
                   >
                     <span className="comment-icon">
@@ -492,45 +501,17 @@ const InputOverlay: React.FC = () => {
                     : undefined
                 if (description) {
                   return (
-                    <span className="kink-tooltip kink-tooltip-overlay">
-                      <span
-                        className="kink-tooltip-icon"
-                        tabIndex={0}
-                        aria-label="Beschreibung anzeigen"
-                        onMouseEnter={handleShowDescTooltip}
-                        onFocus={handleShowDescTooltip}
-                        onMouseLeave={handleHideTooltip}
-                        onBlur={handleHideTooltip}
-                        ref={tooltipRef}
-                      >
-                        ?
+                    <Tooltip content={description}>
+                      <span className="kink-tooltip kink-tooltip-overlay">
+                        <span
+                          className="kink-tooltip-icon"
+                          tabIndex={0}
+                          aria-label="Beschreibung anzeigen"
+                        >
+                          ?
+                        </span>
                       </span>
-                      {showTooltip &&
-                        descTooltipPos &&
-                        ReactDOM.createPortal(
-                          <div
-                            className="kink-tooltip-text kink-tooltip-portal comment-tooltip"
-                            style={
-                              {
-                                position: 'fixed' as const,
-                                top: descTooltipPos.top,
-                                left: descTooltipPos.left,
-                                zIndex: 99999 as const,
-                                '--arrow-left': descTooltipPos.arrowLeft
-                                  ? `${descTooltipPos.arrowLeft}px`
-                                  : descTooltipPos.width
-                                    ? `${descTooltipPos.width / 2}px`
-                                    : '50%',
-                              } as React.CSSProperties
-                            }
-                            tabIndex={-1}
-                            onMouseLeave={handleHideTooltip}
-                          >
-                            {description}
-                          </div>,
-                          document.body
-                        )}
-                    </span>
+                    </Tooltip>
                   )
                 }
                 return null

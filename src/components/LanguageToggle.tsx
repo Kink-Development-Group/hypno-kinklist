@@ -1,6 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import i18n from '../i18n'
+import Tooltip from './Tooltip'
 
 const LanguageToggle: React.FC = () => {
   const { t } = useTranslation()
@@ -13,19 +14,20 @@ const LanguageToggle: React.FC = () => {
   }
 
   return (
-    <select
-      className="language-toggle"
-      value={i18n.language}
-      onChange={handleChange}
-      title={t('language.select')}
-      aria-label={t('language.select')}
-    >
-      {languages.map((lang) => (
-        <option key={lang} value={lang}>
-          {t(`language.${lang}`, lang.toUpperCase())}
-        </option>
-      ))}
-    </select>
+    <Tooltip content={t('language.select')}>
+      <select
+        className="language-toggle"
+        value={i18n.language}
+        onChange={handleChange}
+        aria-label={t('language.select')}
+      >
+        {languages.map((lang) => (
+          <option key={lang} value={lang}>
+            {t(`language.${lang}`, lang.toUpperCase())}
+          </option>
+        ))}
+      </select>
+    </Tooltip>
   )
 }
 
