@@ -315,7 +315,7 @@ export const KinklistProvider: React.FC<{
   // Update levels when language changes
   useEffect(() => {
     setLevels(getInitialLevels(i18n))
-  }, [i18n.language])
+  }, [i18n, i18n.language])
 
   return (
     <KinklistContext.Provider
