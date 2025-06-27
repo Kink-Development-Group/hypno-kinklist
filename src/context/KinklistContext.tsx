@@ -262,7 +262,7 @@ export const KinklistProvider: React.FC<{
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kinks, levels, errorHandler, enhancedKinks, i18n.language])
+  }, [kinks, levels, errorHandler, enhancedKinks, i18n.language, i18n])
 
   // Update selectedKink after language change to ensure comments are preserved in modals
   useEffect(() => {
