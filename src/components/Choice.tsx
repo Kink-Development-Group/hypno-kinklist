@@ -3,8 +3,10 @@ import React, {
   memo,
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from 'react'
+import ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import { Selection } from '../types'
@@ -22,6 +24,14 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
   const [selectedLevel, setSelectedLevel] = useState<string>(
     Object.keys(levels)[0]
   )
+  const [showTooltip, setShowTooltip] = useState<string | null>(null)
+  const [tooltipPos, setTooltipPos] = useState<{
+    top: number
+    left: number
+    width: number
+    height: number
+  }>()
+  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   // Find the current selection for this choice
   useEffect(() => {
@@ -54,6 +64,7 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
       setSelectedLevel(currentSelection.value)
     }
   }, [selection, categoryName, kinkName, field, enhancedKinks])
+
   const handleClick = useCallback(
     (levelName: string) => {
       setSelectedLevel(levelName)
@@ -141,6 +152,56 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
     [handleClick]
   )
 
+  // Tooltip-Positionierungslogik
+  const calculateTooltipPosition = (rect: DOMRect) => {
+    const viewportWidth = window.innerWidth
+    const tooltipWidth = 320
+    const spaceRight = viewportWidth - rect.right
+    let left = rect.left + rect.width / 2 - tooltipWidth / 2
+    if (spaceRight < tooltipWidth / 2 + 20) {
+      left = rect.right - tooltipWidth
+      if (left < 10) left = 10
+    }
+    if (left < 10) {
+      left = rect.left
+      if (left + tooltipWidth > viewportWidth - 10) {
+        left = viewportWidth - tooltipWidth - 10
+      }
+    }
+    return {
+      top: rect.bottom + 6,
+      left,
+      width: rect.width,
+      height: rect.height,
+    }
+  }
+
+  // Tooltip-Handler
+  const handleShowTooltip = (index: number) => {
+    const btn = buttonRefs.current[index]
+    if (!btn) return
+    const rect = btn.getBoundingClientRect()
+    setTooltipPos(calculateTooltipPosition(rect))
+    setShowTooltip(index.toString())
+  }
+  const handleHideTooltip = () => setShowTooltip(null)
+
+  // Mapping von Level-Namen zu i18n-Schlüsseln (wie in Legend)
+  const getLevelTranslationKey = (levelName: string): string => {
+    const keyMap: Record<string, string> = {
+      'Not Entered': 'legend.notEntered',
+      Favorite: 'legend.favorite',
+      Like: 'legend.like',
+      Okay: 'legend.okay',
+      Maybe: 'legend.maybe',
+      No: 'legend.no',
+    }
+    return (
+      keyMap[levelName] ||
+      `legend.${levelName.toLowerCase().replace(/\s+/g, '')}`
+    )
+  }
+
   return (
     <div
       className={`choices choice-${field.toLowerCase().replace(/\s+/g, '')}`}
@@ -150,21 +211,62 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
     >
       {Object.entries(levels).map(([levelName, level], index) => {
         const isSelected = selectedLevel === levelName
+        // Übersetze den Level-Namen für Tooltip und aria-label
+        const levelTranslationKey = getLevelTranslationKey(levelName)
+        let translatedLevelName = t(levelTranslationKey)
+        if (translatedLevelName === levelTranslationKey)
+          translatedLevelName = levelName
         return (
-          <button
-            key={levelName}
-            className={`choice ${level.class} ${isSelected ? 'selected' : ''}`}
-            data-level={levelName}
-            data-level-int={index}
-            title={t('choice.levelFor', { levelName, kinkName, field })}
-            onClick={() => handleClick(levelName)}
-            onKeyDown={(e) => handleKeyDown(e, levelName)}
-            type="button"
-            role="radio"
-            aria-checked={isSelected ? true : false}
-            aria-label={t('choice.levelFor', { levelName, kinkName, field })}
-            tabIndex={isSelected ? 0 : -1}
-          />
+          <React.Fragment key={levelName}>
+            <button
+              ref={(el) => (buttonRefs.current[index] = el)}
+              className={`choice ${level.class} ${isSelected ? 'selected' : ''}`}
+              data-level={levelName}
+              data-level-int={index}
+              onClick={() => handleClick(levelName)}
+              onKeyDown={(e) => handleKeyDown(e, levelName)}
+              type="button"
+              role="radio"
+              aria-checked={isSelected ? true : false}
+              aria-label={t('choice.levelFor', {
+                levelName: translatedLevelName,
+                kinkName,
+                field,
+              })}
+              tabIndex={isSelected ? 0 : -1}
+              onMouseEnter={() => handleShowTooltip(index)}
+              onFocus={() => handleShowTooltip(index)}
+              onMouseLeave={handleHideTooltip}
+              onBlur={handleHideTooltip}
+            />
+            {showTooltip === index.toString() &&
+              tooltipPos &&
+              ReactDOM.createPortal(
+                <div
+                  className="kink-tooltip-text kink-tooltip-portal comment-tooltip"
+                  style={
+                    {
+                      position: 'fixed' as const,
+                      top: tooltipPos.top,
+                      left: tooltipPos.left,
+                      zIndex: 99999 as const,
+                      '--arrow-left': tooltipPos.width
+                        ? `${tooltipPos.width / 2}px`
+                        : '50%',
+                    } as React.CSSProperties
+                  }
+                  tabIndex={-1}
+                  onMouseLeave={handleHideTooltip}
+                >
+                  {t('choice.levelFor', {
+                    levelName: translatedLevelName,
+                    kinkName,
+                    field,
+                  })}
+                </div>,
+                document.body
+              )}
+          </React.Fragment>
         )
       })}
     </div>

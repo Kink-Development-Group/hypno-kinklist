@@ -179,13 +179,18 @@ const KinkRow: React.FC<KinkRowProps> = ({
     !forceInlineTooltip && showTooltip && tooltipPos && description
       ? ReactDOM.createPortal(
           <div
-            className="kink-tooltip-text kink-tooltip-portal"
-            style={{
-              position: 'fixed' as const,
-              top: tooltipPos.top,
-              left: tooltipPos.left,
-              zIndex: 99999 as const,
-            }}
+            className="kink-tooltip-text kink-tooltip-portal comment-tooltip"
+            style={
+              {
+                position: 'fixed' as const,
+                top: tooltipPos.top,
+                left: tooltipPos.left,
+                zIndex: 99999 as const,
+                '--arrow-left': tooltipPos.width
+                  ? `${tooltipPos.width / 2}px`
+                  : '50%',
+              } as React.CSSProperties
+            }
             tabIndex={-1}
             onMouseLeave={handleTooltipHide}
           >
