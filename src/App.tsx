@@ -4,12 +4,12 @@ import AsyncKinklistProvider from './components/AsyncKinklistProvider'
 import CommentOverlay from './components/CommentOverlay'
 import EditOverlay from './components/EditOverlay'
 import Export from './components/Export'
+import Footer from './components/Footer'
 import InputList from './components/InputList'
 import InputOverlay from './components/InputOverlay'
 import LanguageToggle from './components/LanguageToggle'
 import Legend from './components/Legend'
 import ThemeToggle from './components/ThemeToggle'
-import VersionDisplay from './components/VersionDisplay'
 import { useKinklist } from './context/KinklistContext'
 import { ThemeProvider, useTheme } from './context/ThemeContext'
 import './styles/main.scss'
@@ -47,9 +47,7 @@ const AppContent: React.FC = () => {
           onClick={handleEditClick}
           aria-label={t('buttons.edit')}
         ></button>
-        <h1>
-          {t('app.title')} <VersionDisplay />
-        </h1>
+        <h1>{t('app.title')}</h1>
         <div className="header-actions">
           <LanguageToggle />
           <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
@@ -82,6 +80,7 @@ const AppContent: React.FC = () => {
       <EditOverlay />
       <InputOverlay />
       <CommentOverlay />
+      <Footer />
     </div>
   )
 }
