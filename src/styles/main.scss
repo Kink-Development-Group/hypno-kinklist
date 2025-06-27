@@ -825,7 +825,7 @@ table {
   max-width: 90%;
 
   .legend-title {
-    width: 100%;
+    width: auto;
     text-align: center;
     font-size: 16px;
     font-weight: 600;
@@ -2047,5 +2047,34 @@ html {
   }
   100% {
     opacity: 0.2;
+  }
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5em;
+  padding: 1em 0;
+  background: var(--background-color);
+  color: var(--text-color);
+  font-size: 0.95em;
+  border-top: 1px solid var(--border-color);
+  margin-top: 2em;
+
+  span:not(:last-child) {
+    border-right: 1px solid var(--border-color);
+    padding-right: 1.2em;
+    margin-right: 1.2em;
+  }
+
+  a {
+    color: var(--button-bg-color);
+    text-decoration: none;
+    transition: text-decoration 0.2s;
+  }
+
+  a:hover {
+    text-decoration: underline;
   }
 }
