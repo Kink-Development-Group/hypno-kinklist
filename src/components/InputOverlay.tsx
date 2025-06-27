@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import { Selection } from '../types'
+import { calculateTooltipPosition } from '../utils/tooltipPosition'
 
 const InputOverlay: React.FC = () => {
   const {
@@ -38,24 +39,17 @@ const InputOverlay: React.FC = () => {
     left: number
     width: number
     height: number
+    arrowLeft: number
   }>()
 
-  // Berechne die optimale Tooltip-Position
-  const calculateTooltipPosition = useCallback((iconElement: HTMLElement) => {
-    const iconRect = iconElement.getBoundingClientRect()
-    const viewportWidth = window.innerWidth
-
-    // Geschätzte Tooltip-Breite (basierend auf CSS max-width)
-    const tooltipWidth = 320
-    const rightSpaceNeeded = iconRect.right + tooltipWidth + 20 // 20px Puffer
-
-    // Wenn nicht genug Platz rechts, dann links positionieren
-    if (rightSpaceNeeded > viewportWidth) {
-      setTooltipPosition('left')
-    } else {
-      setTooltipPosition('right')
-    }
-  }, [])
+  // Tooltip-Positionierungslogik für Beschreibung (wie in KinkRow)
+  const [descTooltipPos, setDescTooltipPos] = useState<{
+    top: number
+    left: number
+    width: number
+    height: number
+    arrowLeft: number
+  }>()
 
   // Handle Tooltip anzeigen mit Positionsberechnung
   const handleShowTooltip = useCallback(
@@ -63,9 +57,8 @@ const InputOverlay: React.FC = () => {
       e: React.MouseEvent<HTMLSpanElement> | React.FocusEvent<HTMLSpanElement>
     ) => {
       setShowTooltip(true)
-      calculateTooltipPosition(e.currentTarget)
     },
-    [calculateTooltipPosition]
+    []
   )
 
   // Handle Tooltip verstecken
@@ -344,61 +337,25 @@ const InputOverlay: React.FC = () => {
   // Handle comment tooltip show in modal
   const handleCommentTooltipShow = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
-      const rect = e.currentTarget.getBoundingClientRect()
-      const viewportWidth = window.innerWidth
-      const tooltipWidth = 320 // max-width aus CSS
-      const spaceRight = viewportWidth - rect.right
-
-      let left = rect.left
-
-      // Wenn nicht genug Platz rechts, positioniere links vom Element
-      if (spaceRight < tooltipWidth + 20) {
-        left = rect.right - tooltipWidth
-        // Stelle sicher, dass es nicht zu weit links geht
-        if (left < 10) {
-          left = 10
-        }
-      }
-
-      setCommentTooltipPos({
-        top: rect.bottom + 6,
-        left: left,
-        width: rect.width,
-        height: rect.height,
-      })
+      const rect2 = (e.currentTarget as HTMLElement).getBoundingClientRect()
+      setCommentTooltipPos(
+        calculateTooltipPosition(rect2, 'comment-button-base')
+      )
       setShowCommentTooltip(true)
     },
-    []
+    [calculateTooltipPosition]
   )
 
   // Handle comment tooltip show for focus events in modal
   const handleCommentTooltipShowFocus = useCallback(
     (e: React.FocusEvent<HTMLButtonElement>) => {
-      const rect = e.currentTarget.getBoundingClientRect()
-      const viewportWidth = window.innerWidth
-      const tooltipWidth = 320 // max-width aus CSS
-      const spaceRight = viewportWidth - rect.right
-
-      let left = rect.left
-
-      // Wenn nicht genug Platz rechts, positioniere links vom Element
-      if (spaceRight < tooltipWidth + 20) {
-        left = rect.right - tooltipWidth
-        // Stelle sicher, dass es nicht zu weit links geht
-        if (left < 10) {
-          left = 10
-        }
-      }
-
-      setCommentTooltipPos({
-        top: rect.bottom + 6,
-        left: left,
-        width: rect.width,
-        height: rect.height,
-      })
+      const rect2 = (e.currentTarget as HTMLElement).getBoundingClientRect()
+      setCommentTooltipPos(
+        calculateTooltipPosition(rect2, 'comment-button-base')
+      )
       setShowCommentTooltip(true)
     },
-    []
+    [calculateTooltipPosition]
   )
 
   const handleCommentTooltipHide = useCallback(() => {
@@ -411,12 +368,19 @@ const InputOverlay: React.FC = () => {
       ? ReactDOM.createPortal(
           <div
             className="kink-tooltip-text kink-tooltip-portal comment-tooltip"
-            style={{
-              position: 'fixed' as const,
-              top: commentTooltipPos.top,
-              left: commentTooltipPos.left,
-              zIndex: 99999 as const,
-            }}
+            style={
+              {
+                position: 'fixed' as const,
+                top: commentTooltipPos.top,
+                left: commentTooltipPos.left,
+                zIndex: 99999 as const,
+                '--arrow-left': commentTooltipPos.arrowLeft
+                  ? `${commentTooltipPos.arrowLeft}px`
+                  : commentTooltipPos.width
+                    ? `${commentTooltipPos.width / 2}px`
+                    : '50%',
+              } as React.CSSProperties
+            }
             tabIndex={-1}
             onMouseLeave={handleCommentTooltipHide}
           >
@@ -425,6 +389,18 @@ const InputOverlay: React.FC = () => {
           document.body
         )
       : null
+
+  // Handle Tooltip anzeigen für Beschreibung
+  const handleShowDescTooltip = useCallback(
+    (
+      e: React.MouseEvent<HTMLSpanElement> | React.FocusEvent<HTMLSpanElement>
+    ) => {
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+      setDescTooltipPos(calculateTooltipPosition(rect, 'kink-tooltip-icon'))
+      setShowTooltip(true)
+    },
+    [calculateTooltipPosition]
+  )
 
   if (!currentKink) return null
 
@@ -457,7 +433,7 @@ const InputOverlay: React.FC = () => {
                   currentKink.comment && currentKink.comment.trim().length > 0
                 return (
                   <button
-                    className={`comment-button-small modal-comment-button ${hasComment ? 'has-comment' : ''}`}
+                    className={`comment-button-base modal-comment-button${hasComment ? ' has-comment' : ''}`}
                     data-has-comment={hasComment ? 'true' : 'false'}
                     data-comment-length={currentKink.comment?.length || 0}
                     onClick={handleOpenComment}
@@ -521,24 +497,39 @@ const InputOverlay: React.FC = () => {
                         className="kink-tooltip-icon"
                         tabIndex={0}
                         aria-label="Beschreibung anzeigen"
-                        onMouseEnter={handleShowTooltip}
-                        onFocus={handleShowTooltip}
+                        onMouseEnter={handleShowDescTooltip}
+                        onFocus={handleShowDescTooltip}
                         onMouseLeave={handleHideTooltip}
                         onBlur={handleHideTooltip}
                         ref={tooltipRef}
                       >
                         ?
                       </span>
-                      {showTooltip && (
-                        <span
-                          className={`kink-tooltip-text kink-tooltip-text-overlay ${
-                            tooltipPosition === 'left' ? 'left' : ''
-                          }`}
-                          tabIndex={-1}
-                        >
-                          {description}
-                        </span>
-                      )}
+                      {showTooltip &&
+                        descTooltipPos &&
+                        ReactDOM.createPortal(
+                          <div
+                            className="kink-tooltip-text kink-tooltip-portal comment-tooltip"
+                            style={
+                              {
+                                position: 'fixed' as const,
+                                top: descTooltipPos.top,
+                                left: descTooltipPos.left,
+                                zIndex: 99999 as const,
+                                '--arrow-left': descTooltipPos.arrowLeft
+                                  ? `${descTooltipPos.arrowLeft}px`
+                                  : descTooltipPos.width
+                                    ? `${descTooltipPos.width / 2}px`
+                                    : '50%',
+                              } as React.CSSProperties
+                            }
+                            tabIndex={-1}
+                            onMouseLeave={handleHideTooltip}
+                          >
+                            {description}
+                          </div>,
+                          document.body
+                        )}
                     </span>
                   )
                 }

@@ -5,6 +5,7 @@ import { useKinklist } from '../context/KinklistContext'
 import { Selection } from '../types'
 import { strToClass } from '../utils'
 import { getStableIdsFromOriginal } from '../utils/multilingualTemplates'
+import { calculateTooltipPosition } from '../utils/tooltipPosition'
 import Choice from './Choice'
 
 interface KinkRowProps {
@@ -56,46 +57,6 @@ const KinkRow: React.FC<KinkRowProps> = ({
     arrowLeft: number
   }>()
 
-  // Shared helper function for tooltip positioning
-  const calculateTooltipPosition = (rect: DOMRect) => {
-    const viewportWidth = window.innerWidth
-    const tooltipWidth = 320 // max-width aus CSS
-    const spaceRight = viewportWidth - rect.right
-
-    // Berechne die horizontale Position basierend auf der Button-Mitte
-    const buttonCenter = rect.left + rect.width / 2
-    let left = buttonCenter - tooltipWidth / 2
-
-    // Wenn nicht genug Platz rechts, positioniere links vom Element
-    if (spaceRight < tooltipWidth / 2 + 20) {
-      left = rect.right - tooltipWidth
-      // Stelle sicher, dass es nicht zu weit links geht
-      if (left < 10) {
-        left = 10
-      }
-    }
-
-    // Wenn nicht genug Platz links, positioniere rechts vom Element
-    if (left < 10) {
-      left = rect.left
-      // Stelle sicher, dass es nicht über den rechten Rand hinausgeht
-      if (left + tooltipWidth > viewportWidth - 10) {
-        left = viewportWidth - tooltipWidth - 10
-      }
-    }
-
-    // Berechne die Pfeil-Position relativ zum Tooltip
-    const arrowLeft = buttonCenter - left
-
-    return {
-      top: rect.bottom + 6,
-      left: left,
-      width: rect.width,
-      height: rect.height,
-      arrowLeft: arrowLeft,
-    }
-  }
-
   // Handle opening comment overlay
   const handleOpenComment = (field: string) => {
     // Generate stable IDs using the language-independent method
@@ -140,29 +101,8 @@ const KinkRow: React.FC<KinkRowProps> = ({
   const handleTooltipShow = (_e: React.MouseEvent | React.FocusEvent) => {
     if (!tooltipRef.current) return
     const rect = tooltipRef.current.getBoundingClientRect()
-
-    // Prüfe verfügbaren Platz und justiere Position entsprechend
-    const viewportWidth = window.innerWidth
-    const tooltipWidth = 320 // max-width aus CSS
-    const spaceRight = viewportWidth - rect.right
-
-    let left = rect.left
-
-    // Wenn nicht genug Platz rechts, positioniere links vom Element
-    if (spaceRight < tooltipWidth + 20) {
-      left = rect.right - tooltipWidth
-      // Stelle sicher, dass es nicht zu weit links geht
-      if (left < 10) {
-        left = 10
-      }
-    }
-
-    setTooltipPos({
-      top: rect.bottom + 6, // etwas Abstand nach unten
-      left: left,
-      width: rect.width,
-      height: rect.height,
-    })
+    const pos = calculateTooltipPosition(rect, 'kink-tooltip-icon')
+    setTooltipPos(pos)
     setShowTooltip(true)
   }
   const handleTooltipHide = () => setShowTooltip(false)
@@ -209,7 +149,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
     field: string
   ) => {
     const rect = e.currentTarget.getBoundingClientRect()
-    const position = calculateTooltipPosition(rect)
+    const position = calculateTooltipPosition(rect, 'comment-button-base')
 
     setCommentTooltipPos(position)
     setShowCommentTooltip(field)
@@ -221,7 +161,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
     field: string
   ) => {
     const rect = e.currentTarget.getBoundingClientRect()
-    const position = calculateTooltipPosition(rect)
+    const position = calculateTooltipPosition(rect, 'comment-button-base')
 
     setCommentTooltipPos(position)
     setShowCommentTooltip(field)
@@ -354,7 +294,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
               return (
                 <button
                   key={`comment-${field}`}
-                  className={`comment-button-small${hasComment ? ' has-comment' : ''}`}
+                  className={`comment-button-base comment-button-small${hasComment ? ' has-comment' : ''}`}
                   data-has-comment={hasComment ? 'true' : 'false'}
                   data-comment-length={kinkSelection?.comment?.length || 0}
                   onClick={() => handleOpenComment(field)}
