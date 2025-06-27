@@ -55,6 +55,46 @@ const KinkRow: React.FC<KinkRowProps> = ({
     arrowLeft: number
   }>()
 
+  // Shared helper function for tooltip positioning
+  const calculateTooltipPosition = (rect: DOMRect) => {
+    const viewportWidth = window.innerWidth
+    const tooltipWidth = 320 // max-width aus CSS
+    const spaceRight = viewportWidth - rect.right
+
+    // Berechne die horizontale Position basierend auf der Button-Mitte
+    const buttonCenter = rect.left + rect.width / 2
+    let left = buttonCenter - tooltipWidth / 2
+
+    // Wenn nicht genug Platz rechts, positioniere links vom Element
+    if (spaceRight < tooltipWidth / 2 + 20) {
+      left = rect.right - tooltipWidth
+      // Stelle sicher, dass es nicht zu weit links geht
+      if (left < 10) {
+        left = 10
+      }
+    }
+
+    // Wenn nicht genug Platz links, positioniere rechts vom Element
+    if (left < 10) {
+      left = rect.left
+      // Stelle sicher, dass es nicht über den rechten Rand hinausgeht
+      if (left + tooltipWidth > viewportWidth - 10) {
+        left = viewportWidth - tooltipWidth - 10
+      }
+    }
+
+    // Berechne die Pfeil-Position relativ zum Tooltip
+    const arrowLeft = buttonCenter - left
+
+    return {
+      top: rect.bottom + 6,
+      left: left,
+      width: rect.width,
+      height: rect.height,
+      arrowLeft: arrowLeft,
+    }
+  }
+
   // Handle opening comment overlay
   const handleOpenComment = (field: string) => {
     // Generate stable IDs using the language-independent method
@@ -161,42 +201,9 @@ const KinkRow: React.FC<KinkRowProps> = ({
     field: string
   ) => {
     const rect = e.currentTarget.getBoundingClientRect()
-    const viewportWidth = window.innerWidth
-    const tooltipWidth = 320 // max-width aus CSS
-    const spaceRight = viewportWidth - rect.right
+    const position = calculateTooltipPosition(rect)
 
-    // Berechne die horizontale Position basierend auf der Button-Mitte
-    const buttonCenter = rect.left + rect.width / 2
-    let left = buttonCenter - tooltipWidth / 2
-
-    // Wenn nicht genug Platz rechts, positioniere links vom Element
-    if (spaceRight < tooltipWidth / 2 + 20) {
-      left = rect.right - tooltipWidth
-      // Stelle sicher, dass es nicht zu weit links geht
-      if (left < 10) {
-        left = 10
-      }
-    }
-
-    // Wenn nicht genug Platz links, positioniere rechts vom Element
-    if (left < 10) {
-      left = rect.left
-      // Stelle sicher, dass es nicht über den rechten Rand hinausgeht
-      if (left + tooltipWidth > viewportWidth - 10) {
-        left = viewportWidth - tooltipWidth - 10
-      }
-    }
-
-    // Berechne die Pfeil-Position relativ zum Tooltip
-    const arrowLeft = buttonCenter - left
-
-    setCommentTooltipPos({
-      top: rect.bottom + 6,
-      left: left,
-      width: rect.width,
-      height: rect.height,
-      arrowLeft: arrowLeft, // Neue Eigenschaft für Pfeil-Position
-    })
+    setCommentTooltipPos(position)
     setShowCommentTooltip(field)
   }
 
@@ -206,42 +213,9 @@ const KinkRow: React.FC<KinkRowProps> = ({
     field: string
   ) => {
     const rect = e.currentTarget.getBoundingClientRect()
-    const viewportWidth = window.innerWidth
-    const tooltipWidth = 320 // max-width aus CSS
-    const spaceRight = viewportWidth - rect.right
+    const position = calculateTooltipPosition(rect)
 
-    // Berechne die horizontale Position basierend auf der Button-Mitte
-    const buttonCenter = rect.left + rect.width / 2
-    let left = buttonCenter - tooltipWidth / 2
-
-    // Wenn nicht genug Platz rechts, positioniere links vom Element
-    if (spaceRight < tooltipWidth / 2 + 20) {
-      left = rect.right - tooltipWidth
-      // Stelle sicher, dass es nicht zu weit links geht
-      if (left < 10) {
-        left = 10
-      }
-    }
-
-    // Wenn nicht genug Platz links, positioniere rechts vom Element
-    if (left < 10) {
-      left = rect.left
-      // Stelle sicher, dass es nicht über den rechten Rand hinausgeht
-      if (left + tooltipWidth > viewportWidth - 10) {
-        left = viewportWidth - tooltipWidth - 10
-      }
-    }
-
-    // Berechne die Pfeil-Position relativ zum Tooltip
-    const arrowLeft = buttonCenter - left
-
-    setCommentTooltipPos({
-      top: rect.bottom + 6,
-      left: left,
-      width: rect.width,
-      height: rect.height,
-      arrowLeft: arrowLeft, // Neue Eigenschaft für Pfeil-Position
-    })
+    setCommentTooltipPos(position)
     setShowCommentTooltip(field)
   }
 
