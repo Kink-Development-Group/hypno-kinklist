@@ -1928,6 +1928,7 @@ table {
   min-height: initial;
   background-color: transparent;
   &:hover {
+    color: var(--text-color);
     transform: scale(1.2);
   }
   &:active {

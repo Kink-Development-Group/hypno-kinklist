@@ -111,11 +111,11 @@
     background-color: transparent !important;
     outline: none !important;
     border: none !important;
-    color: var(--button-text-color);
+    color: var(--text-color);
     .comment-icon {
-      color: var(--button-text-color);
+      color: var(--text-color);
       svg {
-        fill: var(--button-text-color);
+        fill: var(--text-color);
       }
     }
   }
@@ -147,6 +147,19 @@
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
+  }
+
+  [data-theme='dark'] & {
+    &:hover,
+    &:focus {
+      color: var(--button-text-color);
+      .comment-icon {
+        color: var(--button-text-color);
+        svg {
+          fill: var(--button-text-color);
+        }
+      }
+    }
   }
 }
 
