@@ -158,8 +158,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
   // Handle comment tooltip show
   const handleCommentTooltipShow = (
     e: React.MouseEvent<HTMLButtonElement>,
-    field: string,
-    comment: string
+    field: string
   ) => {
     const rect = e.currentTarget.getBoundingClientRect()
     const viewportWidth = window.innerWidth
@@ -204,8 +203,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
   // Handle comment tooltip show for focus events
   const handleCommentTooltipShowFocus = (
     e: React.FocusEvent<HTMLButtonElement>,
-    field: string,
-    comment: string
+    field: string
   ) => {
     const rect = e.currentTarget.getBoundingClientRect()
     const viewportWidth = window.innerWidth
@@ -377,21 +375,11 @@ const KinkRow: React.FC<KinkRowProps> = ({
                   data-comment-length={kinkSelection?.comment?.length || 0}
                   onClick={() => handleOpenComment(field)}
                   onMouseEnter={(e) =>
-                    hasComment &&
-                    handleCommentTooltipShow(
-                      e,
-                      field,
-                      kinkSelection?.comment || ''
-                    )
+                    hasComment && handleCommentTooltipShow(e, field)
                   }
                   onMouseLeave={handleCommentTooltipHide}
                   onFocus={(e) =>
-                    hasComment &&
-                    handleCommentTooltipShowFocus(
-                      e,
-                      field,
-                      kinkSelection?.comment || ''
-                    )
+                    hasComment && handleCommentTooltipShowFocus(e, field)
                   }
                   onBlur={handleCommentTooltipHide}
                   onKeyDown={(e) => {
