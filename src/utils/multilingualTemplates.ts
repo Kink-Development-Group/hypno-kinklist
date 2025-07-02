@@ -436,7 +436,10 @@ export const getStableIdsFromOriginal = (
       const category = enhancedKinks[key]
 
       // Check all available languages plus default content
-      const allLanguages = [...(i18n.options.supportedLngs || []), i18n.language]
+      const allLanguages = [
+        ...(i18n.options.supportedLngs || []),
+        i18n.language,
+      ]
       return allLanguages.some((lang) => {
         const resolvedName = resolveMultilingualContent(category.name, lang)
         // Case-insensitive comparison

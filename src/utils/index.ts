@@ -278,15 +278,6 @@ export const updateHash = (
   } = {}
   const levelNames = Object.keys(levels)
 
-  // Debug: Log all categories in selection
-  const categoriesInSelection = new Set(selection.map((item) => item.category))
-  if (DEBUG) {
-    console.log(
-      'updateHash: Categories in selection:',
-      Array.from(categoriesInSelection)
-    );
-  }
-
   selection.forEach((item) => {
     // Generate stable key - use the same format as the hash
     let stableKey: string
