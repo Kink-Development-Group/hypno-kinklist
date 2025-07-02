@@ -372,7 +372,11 @@ export const parseHash = (
         if (!categoryKey) {
           categoryKey = Object.keys(enhancedKinks).find((key) => {
             const category = enhancedKinks[key]
-            const allLanguages = i18n.options.supportedLngs
+            const allLanguages = i18n.options.supportedLngs || [
+              'en',
+              'de',
+              'sv',
+            ]
             return allLanguages.some((lang) => {
               const resolvedName = resolveMultilingualContent(
                 category.name,
