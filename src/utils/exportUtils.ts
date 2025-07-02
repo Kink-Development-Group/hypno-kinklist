@@ -1126,27 +1126,6 @@ export const importFromXML = (xmlString: string): ImportResult => {
       ? categoriesElement.querySelectorAll('category')
       : root.querySelectorAll('category')
 
-    // Debug output for development
-    // console.log('=== XML IMPORT DEBUG ===')
-    // console.log('Root element:', root.tagName)
-    // console.log(
-    //   'Root children:',
-    //   Array.from(root.children).map((child) => child.tagName)
-    // )
-    // console.log('Categories element exists:', !!categoriesElement)
-    // console.log('Found category nodes:', categoryNodes.length)
-    console.log(
-      'Direct category query:',
-      root.querySelectorAll('category').length
-    )
-    console.log(
-      'CSS selector categories > category:',
-      root.querySelectorAll('categories > category').length
-    )
-
-    // Debug: Zeige die vollständige XML-Struktur
-    console.log('Full XML innerHTML:', root.innerHTML.substring(0, 500) + '...')
-
     categoryNodes.forEach((categoryNode, categoryIndex) => {
       // Support both <n> and <name> for category names
       const categoryNameElement =

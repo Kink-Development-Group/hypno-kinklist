@@ -420,16 +420,6 @@ export const getStableIdsFromOriginal = (
   kinkName: string,
   fieldName: string
 ): { categoryId: string; kinkId: string; fieldId: string } => {
-  // Debug: Log input parameters for "Suggestions 2"
-  if (categoryName === 'Suggestions 2') {
-    console.log('getStableIdsFromOriginal: Input for Suggestions 2:', {
-      categoryName,
-      kinkName,
-      fieldName,
-      enhancedKinks: enhancedKinks ? Object.keys(enhancedKinks) : 'null',
-    })
-  }
-
   if (enhancedKinks) {
     // For enhanced/multilingual kinks, find the category by matching the resolved name
     const categoryKey = Object.keys(enhancedKinks).find((key) => {
@@ -446,18 +436,6 @@ export const getStableIdsFromOriginal = (
         return resolvedName.toLowerCase() === categoryName.toLowerCase()
       })
     })
-
-    // Debug: Log category key search for "Suggestions 2"
-    if (categoryName === 'Suggestions 2') {
-      console.log(
-        'getStableIdsFromOriginal: Category key search for Suggestions 2:',
-        {
-          categoryName,
-          categoryKey,
-          availableKeys: Object.keys(enhancedKinks),
-        }
-      )
-    }
 
     if (categoryKey) {
       const category = enhancedKinks[categoryKey]
@@ -487,48 +465,11 @@ export const getStableIdsFromOriginal = (
         // This ensures the categoryId never changes with language
         const categoryId = categoryKey
 
-        // Debug: Log successful result for "Suggestions 2"
-        if (categoryName === 'Suggestions 2') {
-          console.log('getStableIdsFromOriginal: Success for Suggestions 2:', {
-            categoryId,
-            kinkId: `kink-${kinkIndex}`,
-            fieldId: `field-${fieldIndex}`,
-            fieldIndex,
-            kinkIndex,
-          })
-        }
-
         return {
           categoryId,
           kinkId: `kink-${kinkIndex}`, // Just the kink identifier without category
           fieldId: `field-${fieldIndex}`, // Just the field identifier without category
         }
-      } else {
-        // Debug: Log when field or kink not found for "Suggestions 2"
-        if (categoryName === 'Suggestions 2') {
-          console.log(
-            'getStableIdsFromOriginal: Field or kink not found for Suggestions 2:',
-            {
-              fieldIndex,
-              kinkIndex,
-              fieldName,
-              kinkName,
-              availableFields: category.fields,
-              availableKinks: category.kinks,
-            }
-          )
-        }
-      }
-    } else {
-      // Debug: Log when category not found for "Suggestions 2"
-      if (categoryName === 'Suggestions 2') {
-        console.log(
-          'getStableIdsFromOriginal: Category not found for Suggestions 2:',
-          {
-            categoryName,
-            availableKeys: Object.keys(enhancedKinks),
-          }
-        )
       }
     }
   }
@@ -538,14 +479,6 @@ export const getStableIdsFromOriginal = (
     categoryId: strToClass(categoryName),
     kinkId: strToClass(kinkName),
     fieldId: strToClass(fieldName),
-  }
-
-  // Debug: Log fallback result for "Suggestions 2"
-  if (categoryName === 'Suggestions 2') {
-    console.log(
-      'getStableIdsFromOriginal: Fallback result for Suggestions 2:',
-      fallbackResult
-    )
   }
 
   return fallbackResult

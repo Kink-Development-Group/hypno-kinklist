@@ -162,22 +162,6 @@ export const KinklistProvider: React.FC<{
             'parseKinks effect: Enhanced kinks set, count:',
             Object.keys(resolvedKinks).length
           )
-
-          // Debug: Log the actual category names
-          const categoryNames = Object.keys(resolvedKinks)
-          console.log(
-            'parseKinks effect: Category names:',
-            categoryNames.slice(0, 5)
-          )
-
-          // Debug: Log the first category's kink names
-          if (categoryNames.length > 0) {
-            const firstCategory = resolvedKinks[categoryNames[0]]
-            console.log(
-              'parseKinks effect: First category kink names:',
-              firstCategory.kinks.slice(0, 5)
-            )
-          }
         }
       } else {
         console.log('parseKinks effect: Parsing as standard template')

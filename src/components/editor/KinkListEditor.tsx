@@ -1,13 +1,13 @@
-import {
-  useRef,
-  useEffect,
-  useCallback,
-  forwardRef,
-  useImperativeHandle,
-} from 'react'
 import Editor, { BeforeMount, OnMount } from '@monaco-editor/react'
 import * as monaco from 'monaco-editor'
-import { getSnippets, formatKinkListText } from './EditorUtils'
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from 'react'
+import { formatKinkListText, getSnippets } from './EditorUtils'
 import {
   registerKinkListLanguage,
   registerKinkListThemes,
@@ -250,9 +250,6 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
       (editor, monaco) => {
         editorRef.current = editor
 
-        // Debug: Check if language is registered
-        console.log('Available languages:', monaco.languages.getLanguages())
-
         // Get the model and ensure language is set
         const model = editor.getModel()
         if (model) {
@@ -344,7 +341,6 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
           },
         })
 
-        // Debug: Add hover provider to show token information
         monaco.languages.registerHoverProvider('kinklist-simple', {
           provideHover: (model, position) => {
             const line = model.getLineContent(position.lineNumber)

@@ -32,26 +32,6 @@ const KinkRow: React.FC<KinkRowProps> = ({
     enhancedKinks,
   } = useKinklist()
 
-  // Debug: Log the first few category/kink names
-  if (categoryName === 'basics') {
-    console.log(`KinkRow: Rendering ${categoryName} - ${kinkName}`)
-
-    // Also log the first few selections to see what's in the array
-    if (kinkName === 'I enjoy working with cisgender people') {
-      console.log(
-        'KinkRow: First few selections:',
-        selection.slice(0, 5).map((s) => ({
-          category: s.category,
-          kink: s.kink,
-          field: s.field,
-          value: s.value,
-          categoryId: s.categoryId,
-          kinkId: s.kinkId,
-          fieldId: s.fieldId,
-        }))
-      )
-    }
-  }
   const { t } = useTranslation()
 
   const rowId = `kink-row-${strToClass(categoryName)}-${strToClass(kinkName)}`
