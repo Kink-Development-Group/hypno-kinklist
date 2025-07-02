@@ -31,6 +31,27 @@ const KinkRow: React.FC<KinkRowProps> = ({
     setSelectedKink,
     enhancedKinks,
   } = useKinklist()
+
+  // Debug: Log the first few category/kink names
+  if (categoryName === 'basics') {
+    console.log(`KinkRow: Rendering ${categoryName} - ${kinkName}`)
+
+    // Also log the first few selections to see what's in the array
+    if (kinkName === 'I enjoy working with cisgender people') {
+      console.log(
+        'KinkRow: First few selections:',
+        selection.slice(0, 5).map((s) => ({
+          category: s.category,
+          kink: s.kink,
+          field: s.field,
+          value: s.value,
+          categoryId: s.categoryId,
+          kinkId: s.kinkId,
+          fieldId: s.fieldId,
+        }))
+      )
+    }
+  }
   const { t } = useTranslation()
 
   const rowId = `kink-row-${strToClass(categoryName)}-${strToClass(kinkName)}`
@@ -251,7 +272,10 @@ const KinkRow: React.FC<KinkRowProps> = ({
                 kinkSelection.comment.trim().length > 0
 
               return hasComment ? (
-                <Tooltip content={kinkSelection.comment || ''}>
+                <Tooltip
+                  key={`tooltip-${field}`}
+                  content={kinkSelection.comment || ''}
+                >
                   <button
                     key={`comment-${field}`}
                     className={`comment-button-base comment-button-small has-comment`}
@@ -308,7 +332,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
               )
             })}
             {description && (
-              <Tooltip content={description}>
+              <Tooltip key="description-tooltip" content={description}>
                 <span className="kink-tooltip">
                   <span
                     className="kink-tooltip-icon"

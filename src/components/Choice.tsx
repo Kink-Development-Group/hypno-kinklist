@@ -1,11 +1,4 @@
-import React, {
-  KeyboardEvent,
-  memo,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import React, { KeyboardEvent, memo, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import { Selection } from '../types'
@@ -21,47 +14,39 @@ interface ChoiceProps {
 const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
   const { levels, selection, setSelection, enhancedKinks } = useKinklist()
   const { t } = useTranslation()
-  const [selectedLevel, setSelectedLevel] = useState<string>(
-    Object.keys(levels)[0]
-  )
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([])
 
+  // Get stable IDs for consistent matching across languages
+  const stableIds = getStableIdsFromOriginal(
+    enhancedKinks,
+    categoryName,
+    kinkName,
+    field
+  )
+
   // Find the current selection for this choice
-  useEffect(() => {
-    // Get stable IDs for consistent matching across languages
-    const stableIds = getStableIdsFromOriginal(
-      enhancedKinks,
-      categoryName,
-      kinkName,
-      field
-    )
-
-    const currentSelection = selection.find((item) => {
-      // First try to match by stable IDs if available
-      if (item.categoryId && item.kinkId && item.fieldId) {
-        return (
-          item.categoryId === stableIds.categoryId &&
-          item.kinkId === stableIds.kinkId &&
-          item.fieldId === stableIds.fieldId
-        )
-      }
-      // Fallback to name matching
+  const currentSelection = selection.find((item) => {
+    // First try to match by stable IDs if available
+    if (item.categoryId && item.kinkId && item.fieldId) {
       return (
-        item.category === categoryName &&
-        item.kink === kinkName &&
-        item.field === field
+        item.categoryId === stableIds.categoryId &&
+        item.kinkId === stableIds.kinkId &&
+        item.fieldId === stableIds.fieldId
       )
-    })
-
-    if (currentSelection) {
-      setSelectedLevel(currentSelection.value)
     }
-  }, [selection, categoryName, kinkName, field, enhancedKinks])
+    // Fallback to name matching
+    return (
+      item.category === categoryName &&
+      item.kink === kinkName &&
+      item.field === field
+    )
+  })
+
+  // Get the selected level directly from the selection
+  const selectedLevel = currentSelection?.value || Object.keys(levels)[0]
 
   const handleClick = useCallback(
     (levelName: string) => {
-      setSelectedLevel(levelName)
-
       // Get stable IDs for consistent matching across languages
       const stableIds = getStableIdsFromOriginal(
         enhancedKinks,
@@ -160,6 +145,7 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
           translatedLevelName = levelName
         return (
           <Tooltip
+            key={`${categoryName}-${kinkName}-${field}-${levelName}`}
             content={t('choice.levelFor', {
               levelName: translatedLevelName,
               kinkName,

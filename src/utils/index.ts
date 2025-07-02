@@ -1,10 +1,11 @@
 import i18n from '../i18n'
-import { KinksData, LevelsData, Selection } from '../types'
+import type { KinksData, LevelsData, Selection } from '../types'
+import type { EnhancedKinksData } from './multilingualTemplates'
 import {
-  EnhancedKinksData,
   getStableIdsFromOriginal,
   parseEnhancedKinksText,
   resolveEnhancedKinksData,
+  resolveMultilingualContent,
 } from './multilingualTemplates'
 
 export const strToClass = (str: string): string => {
@@ -30,6 +31,23 @@ export const strToClass = (str: string): string => {
   return className
 }
 
+// New function to generate unique category keys
+export const generateUniqueCategoryKey = (
+  categoryName: string,
+  existingKeys: Set<string>
+): string => {
+  const baseKey = strToClass(categoryName)
+  let uniqueKey = baseKey
+  let counter = 1
+
+  while (existingKeys.has(uniqueKey)) {
+    uniqueKey = `${baseKey}${counter}`
+    counter++
+  }
+
+  return uniqueKey
+}
+
 export const log = (val: number, base: number): number => {
   return Math.log(val) / Math.log(base)
 }
@@ -40,6 +58,7 @@ export const parseKinksText = (
 ): KinksData | null => {
   const newKinks: KinksData = {}
   const lines = text.replace(/\r/g, '').split('\n')
+  const existingKeys = new Set<string>()
 
   let cat: (Partial<KinksData[string]> & { descriptions?: string[] }) | null =
     null
@@ -59,7 +78,10 @@ export const parseKinksText = (
         Array.isArray(cat.kinks) &&
         cat.kinks.length > 0
       ) {
-        newKinks[catName] = { ...cat, name: catName } as KinksData[string]
+        // Generate unique key for the category
+        const uniqueKey = generateUniqueCategoryKey(catName, existingKeys)
+        existingKeys.add(uniqueKey)
+        newKinks[uniqueKey] = { ...cat, name: catName } as KinksData[string]
       }
       catName = line.substring(1).trim()
       cat = { kinks: [], descriptions: [] }
@@ -102,7 +124,10 @@ export const parseKinksText = (
     Array.isArray(cat.kinks) &&
     cat.kinks.length > 0
   ) {
-    newKinks[catName] = { ...cat, name: catName } as KinksData[string]
+    // Generate unique key for the final category
+    const uniqueKey = generateUniqueCategoryKey(catName, existingKeys)
+    existingKeys.add(uniqueKey)
+    newKinks[uniqueKey] = { ...cat, name: catName } as KinksData[string]
   }
 
   return newKinks
@@ -244,7 +269,7 @@ export const updateHash = (
     return ''
   }
 
-  // New approach: Use ID-based encoding for both values and comments
+  // Only store non-default selections to keep hash compact
   const selectionData: {
     [stableId: string]: {
       level: number
@@ -253,29 +278,84 @@ export const updateHash = (
   } = {}
   const levelNames = Object.keys(levels)
 
-  selection.forEach((item) => {
-    // Generate stable key
-    const stableKey =
-      item.categoryId && item.kinkId && item.fieldId
-        ? `${item.categoryId}-${item.kinkId}-${item.fieldId}`
-        : `${item.category}-${item.kink}-${item.field}`
+  // Debug: Log all categories in selection
+  const categoriesInSelection = new Set(selection.map((item) => item.category))
+  console.log(
+    'updateHash: Categories in selection:',
+    Array.from(categoriesInSelection)
+  )
 
-    // Only include non-default values or items with comments in hash to keep it compact
+  selection.forEach((item) => {
+    // Generate stable key - use the same format as the hash
+    let stableKey: string
+    if (item.categoryId && item.kinkId && item.fieldId) {
+      // For enhanced kinks, use the format: categoryId-kinkId-fieldId
+      stableKey = `${item.categoryId}-${item.kinkId}-${item.fieldId}`
+
+      // Debug: Log stable key generation for "Suggestions 2"
+      if (item.category === 'Suggestions 2') {
+        console.log('updateHash: Generating stable key for Suggestions 2:', {
+          category: item.category,
+          categoryId: item.categoryId,
+          kinkId: item.kinkId,
+          fieldId: item.fieldId,
+          stableKey,
+          value: item.value,
+          comment: item.comment,
+        })
+      }
+    } else {
+      // For standard kinks, use the format: category-kink-field
+      stableKey = `${item.category}-${item.kink}-${item.field}`
+    }
+
     const levelIndex = levelNames.indexOf(item.value)
     const finalIndex = levelIndex >= 0 ? levelIndex : 0
     const hasComment = item.comment && item.comment.trim().length > 0
 
-    // Store if it has a non-default value OR has a comment
-    if (finalIndex > 0 || hasComment) {
+    // Only store if it's not the default level or has a comment
+    if (finalIndex !== 0 || hasComment) {
       const data: { level: number; comment?: string } = { level: finalIndex }
       if (hasComment) {
         data.comment = item.comment!.trim()
       }
       selectionData[stableKey] = data
+
+      // Debug: Log when storing data for "Suggestions 2"
+      if (item.category === 'Suggestions 2') {
+        console.log('updateHash: Storing data for Suggestions 2:', {
+          stableKey,
+          data,
+          finalIndex,
+          hasComment,
+        })
+      }
+    } else {
+      // Debug: Log when NOT storing data for "Suggestions 2"
+      if (item.category === 'Suggestions 2') {
+        console.log(
+          'updateHash: NOT storing data for Suggestions 2 (default level, no comment):',
+          {
+            stableKey,
+            finalIndex,
+            hasComment,
+            value: item.value,
+            comment: item.comment,
+          }
+        )
+      }
     }
   })
 
-  // Create a compact JSON representation for non-default values
+  // Debug: Log final selection data keys
+  const finalKeys = Object.keys(selectionData)
+  console.log('updateHash: Final selection data keys:', finalKeys)
+  console.log(
+    'updateHash: Keys containing "suggestions":',
+    finalKeys.filter((key) => key.includes('suggestions'))
+  )
+
+  // Create a JSON representation for non-default selections
   const compactData = JSON.stringify(selectionData)
 
   // Encode using base64 to make it URL-safe
@@ -288,23 +368,59 @@ export const updateHash = (
 export const parseHash = (
   levels: LevelsData,
   kinks: KinksData,
-  enhancedKinks?: EnhancedKinksData | null
+  enhancedKinks?: EnhancedKinksData | null,
+  existingSelection?: Selection[]
 ): Selection[] | null => {
   const fullHash = window.location.hash.substring(1)
 
   if (fullHash.length < 10) {
+    console.log('parseHash: Hash too short, returning null')
     return null
   }
 
+  console.log('parseHash: Parsing hash:', fullHash)
+
+  // First try the new ID-based format
   try {
     // Decode the new ID-based hash format
     const decodedData = decodeURIComponent(atob(fullHash))
+    console.log('parseHash: Decoded data:', decodedData)
+
     const selectionData = JSON.parse(decodedData) as {
       [stableId: string]: { level: number; comment?: string } | number
     }
 
-    // Use getAllKinksEnhanced to get the current kink structure
-    const allKinks = getAllKinksEnhanced(kinks, levels, enhancedKinks)
+    console.log('parseHash: Parsed selection data:', selectionData)
+
+    // Debug: Log all unique categories in the hash
+    const hashCategories = new Set(
+      Object.keys(selectionData).map((key) => {
+        const parts = key.split('-')
+        return parts[0] // Get the category part
+      })
+    )
+    console.log(
+      'parseHash: Categories found in hash:',
+      Array.from(hashCategories)
+    )
+
+    // Debug: Log available enhanced kinks categories
+    if (enhancedKinks) {
+      console.log(
+        'parseHash: Available enhanced kinks categories:',
+        Object.keys(enhancedKinks)
+      )
+    }
+
+    // Use getAllKinksEnhanced to get the current kink structure, but preserve existing selection
+    const allKinks = getAllKinksEnhanced(
+      kinks,
+      levels,
+      enhancedKinks,
+      existingSelection || []
+    )
+
+    console.log('parseHash: All kinks:', allKinks.length)
 
     const updatedSelection: Selection[] = []
 
@@ -312,14 +428,78 @@ export const parseHash = (
     const levelNames = Object.keys(levels)
 
     allKinks.forEach((kink) => {
-      const stableKey =
-        kink.categoryId && kink.kinkId && kink.fieldId
-          ? `${kink.categoryId}-${kink.kinkId}-${kink.fieldId}`
-          : `${kink.category}-${kink.kink}-${kink.field}`
+      // For hash parsing, we need to match the hash format which uses numeric indices
+      // The hash contains keys like "basics-kink-0-field-0"
+      // So we need to find the kink and field indices in the current structure
+
+      let stableKey: string
+
+      if (enhancedKinks) {
+        // For enhanced kinks, find the category by matching the resolved name
+        // First try exact key match, then try resolved name match
+        let categoryKey = Object.keys(enhancedKinks).find(
+          (key) => key === kink.category
+        )
+
+        if (!categoryKey) {
+          categoryKey = Object.keys(enhancedKinks).find((key) => {
+            const category = enhancedKinks[key]
+            const allLanguages = ['en', 'de', 'sv']
+            return allLanguages.some((lang) => {
+              const resolvedName = resolveMultilingualContent(
+                category.name,
+                lang
+              )
+              return resolvedName === kink.category
+            })
+          })
+        }
+
+        // Additional fallback: try to find by the strToClass version of the category name
+        if (!categoryKey) {
+          const strToClassCategory = strToClass(kink.category)
+          categoryKey = Object.keys(enhancedKinks).find(
+            (key) => key === strToClassCategory
+          )
+        }
+
+        if (categoryKey) {
+          const category = enhancedKinks[categoryKey]
+
+          // Find field index by checking all languages
+          const fieldIndex = category.fields.findIndex((field) => {
+            const allLanguages = ['en', 'de', 'sv']
+            return allLanguages.some((lang) => {
+              const resolvedField = resolveMultilingualContent(field, lang)
+              return resolvedField === kink.field
+            })
+          })
+
+          // Find kink index by checking all languages
+          const kinkIndex = category.kinks.findIndex((kinkItem) => {
+            const allLanguages = ['en', 'de', 'sv']
+            return allLanguages.some((lang) => {
+              const resolvedKink = resolveMultilingualContent(kinkItem, lang)
+              return resolvedKink === kink.kink
+            })
+          })
+
+          if (fieldIndex >= 0 && kinkIndex >= 0) {
+            stableKey = `${categoryKey}-kink-${kinkIndex}-field-${fieldIndex}`
+          } else {
+            stableKey = `${kink.category}-${kink.kink}-${kink.field}`
+          }
+        } else {
+          stableKey = `${kink.category}-${kink.kink}-${kink.field}`
+        }
+      } else {
+        // For standard kinks, use the current format
+        stableKey = `${kink.category}-${kink.kink}-${kink.field}`
+      }
 
       // Check if we have a stored value for this kink
       const storedData = selectionData[stableKey]
-      let value = Object.keys(levels)[0] // Default value
+      let value = levelNames[0] // Default value
       let comment: string | undefined = undefined
 
       if (storedData !== undefined) {
@@ -336,21 +516,176 @@ export const parseHash = (
           }
           comment = storedData.comment
         }
-      }
 
-      updatedSelection.push({
-        ...kink,
-        value,
-        comment,
-      })
+        // Debug: Log successful restoration for "Suggestions 2"
+        if (kink.category === 'Suggestions 2') {
+          console.log('parseHash: Successfully restored Suggestions 2:', {
+            category: kink.category,
+            stableKey,
+            value,
+            comment,
+            storedData,
+          })
+        }
+
+        updatedSelection.push({
+          category: kink.category,
+          kink: kink.kink,
+          field: kink.field,
+          value,
+          showField: kink.showField,
+          comment,
+          categoryId: kink.categoryId,
+          kinkId: kink.kinkId,
+          fieldId: kink.fieldId,
+        })
+      } else {
+        // Special debug for "Suggestions 2" to understand what's happening
+        if (kink.category === 'Suggestions 2') {
+          console.log(
+            'parseHash: Special debug for Suggestions 2 - no data found:',
+            {
+              category: kink.category,
+              categoryId: kink.categoryId,
+              kinkId: kink.kinkId,
+              fieldId: kink.fieldId,
+              stableKey,
+              availableKeys: Object.keys(selectionData).filter((key) =>
+                key.includes('suggestions')
+              ),
+              allKeys: Object.keys(selectionData),
+            }
+          )
+        }
+
+        // Try all possible key formats for enhanced kinks
+        if (enhancedKinks && kink.categoryId && kink.kinkId && kink.fieldId) {
+          const alternativeStableKey = `${kink.categoryId}-${kink.kinkId}-${kink.fieldId}`
+          const categoryIdStableKey = `${kink.categoryId}-kink-${kink.kinkId.replace('kink-', '')}-field-${kink.fieldId.replace('field-', '')}`
+
+          const alternativeData =
+            selectionData[alternativeStableKey] ||
+            selectionData[categoryIdStableKey]
+
+          if (alternativeData) {
+            // Handle both old format (number) and new format (object)
+            if (typeof alternativeData === 'number') {
+              if (alternativeData < levelNames.length) {
+                value = levelNames[alternativeData]
+              }
+            } else {
+              if (alternativeData.level < levelNames.length) {
+                value = levelNames[alternativeData.level]
+              }
+              comment = alternativeData.comment
+            }
+
+            // Debug: Log successful restoration with alternative key for "Suggestions 2"
+            if (kink.category === 'Suggestions 2') {
+              console.log(
+                'parseHash: Successfully restored Suggestions 2 with alternative key:',
+                {
+                  category: kink.category,
+                  alternativeStableKey,
+                  categoryIdStableKey,
+                  value,
+                  comment,
+                  alternativeData,
+                }
+              )
+            }
+
+            updatedSelection.push({
+              category: kink.category,
+              kink: kink.kink,
+              field: kink.field,
+              value,
+              showField: kink.showField,
+              comment,
+              categoryId: kink.categoryId,
+              kinkId: kink.kinkId,
+              fieldId: kink.fieldId,
+            })
+          } else {
+            // Debug: Log when no alternative key works for "Suggestions 2"
+            if (kink.category === 'Suggestions 2') {
+              console.log(
+                'parseHash: No alternative key found for Suggestions 2:',
+                {
+                  category: kink.category,
+                  alternativeStableKey,
+                  categoryIdStableKey,
+                  availableKeys: Object.keys(selectionData).filter((key) =>
+                    key.includes('suggestions')
+                  ),
+                }
+              )
+            }
+
+            // Add with default value
+            updatedSelection.push({
+              category: kink.category,
+              kink: kink.kink,
+              field: kink.field,
+              value,
+              showField: kink.showField,
+              comment,
+              categoryId: kink.categoryId,
+              kinkId: kink.kinkId,
+              fieldId: kink.fieldId,
+            })
+          }
+        } else {
+          // Add with default value
+          updatedSelection.push({
+            category: kink.category,
+            kink: kink.kink,
+            field: kink.field,
+            value,
+            showField: kink.showField,
+            comment,
+            categoryId: kink.categoryId,
+            kinkId: kink.kinkId,
+            fieldId: kink.fieldId,
+          })
+        }
+      }
     })
+
+    console.log(
+      'parseHash: Successfully parsed new format, returning',
+      updatedSelection.length,
+      'items'
+    )
+
+    // Debug: Log the first few items to see what's in the selection array
+    const firstFew = updatedSelection.slice(0, 3).map((s) => ({
+      category: s.category,
+      kink: s.kink,
+      field: s.field,
+      value: s.value,
+      categoryId: s.categoryId,
+      kinkId: s.kinkId,
+      fieldId: s.fieldId,
+    }))
+    console.log(
+      'parseHash: First few selection items:',
+      JSON.stringify(firstFew, null, 2)
+    )
 
     return updatedSelection
   } catch (error) {
     console.error('parseHash: Error parsing new format:', error)
 
     // Fallback to old format if new format fails
-    return parseHashLegacy(levels, kinks, enhancedKinks, fullHash)
+    console.log('parseHash: Falling back to legacy format')
+    return parseHashLegacy(
+      levels,
+      kinks,
+      enhancedKinks,
+      fullHash,
+      existingSelection
+    )
   }
 }
 
@@ -359,33 +694,52 @@ function parseHashLegacy(
   levels: LevelsData,
   kinks: KinksData,
   enhancedKinks: EnhancedKinksData | null | undefined,
-  fullHash: string
+  fullHash: string,
+  existingSelection?: Selection[]
 ): Selection[] | null {
+  console.log('parseHashLegacy: Parsing legacy hash:', fullHash)
+
   // Trenne die Kommentare von den Auswahlen
   const parts = fullHash.split('|')
   const hash = parts[0]
   let comments: string[] = []
+
+  console.log('parseHashLegacy: Hash part:', hash)
+  console.log('parseHashLegacy: Parts count:', parts.length)
 
   // Dekodiere die Kommentare, falls vorhanden
   if (parts.length > 1) {
     try {
       const decodedComments = decodeURIComponent(atob(parts[1]))
       comments = JSON.parse(decodedComments)
+      console.log('parseHashLegacy: Decoded comments:', comments)
     } catch (e) {
-      console.error(i18n.t('utils.commentDecodeError'), e)
+      console.error('parseHashLegacy: Comment decode error:', e)
       comments = []
     }
   }
 
   const levelCount = Object.keys(levels).length
-  const levelValues = decode(levelCount, hash)
+  console.log('parseHashLegacy: Level count:', levelCount)
 
-  // Use getAllKinksEnhanced to ensure proper stable ID handling
-  const allKinks = getAllKinksEnhanced(kinks, levels, enhancedKinks)
+  const levelValues = decode(levelCount, hash)
+  console.log('parseHashLegacy: Decoded level values:', levelValues)
+
+  // Use getAllKinksEnhanced to ensure proper stable ID handling, but preserve existing selection
+  const allKinks = getAllKinksEnhanced(
+    kinks,
+    levels,
+    enhancedKinks,
+    existingSelection || []
+  )
+
+  console.log('parseHashLegacy: All kinks count:', allKinks.length)
+
   const updatedSelection: Selection[] = []
 
   // IMPORTANT: Only process up to the minimum of available values and kinks
   const maxItems = Math.min(levelValues.length, allKinks.length)
+  console.log('parseHashLegacy: Processing', maxItems, 'items')
 
   for (let i = 0; i < maxItems; i++) {
     const levelIndex = levelValues[i]
@@ -405,6 +759,11 @@ function parseHashLegacy(
 
   // If there are more kinks than hash values, add them with default values
   if (allKinks.length > levelValues.length) {
+    console.log(
+      'parseHashLegacy: Adding',
+      allKinks.length - levelValues.length,
+      'default items'
+    )
     for (let i = levelValues.length; i < allKinks.length; i++) {
       const baseSelection = allKinks[i]
       updatedSelection.push({
@@ -418,6 +777,11 @@ function parseHashLegacy(
     }
   }
 
+  console.log(
+    'parseHashLegacy: Successfully parsed legacy format, returning',
+    updatedSelection.length,
+    'items'
+  )
   return updatedSelection
 }
 
@@ -441,7 +805,10 @@ export const getAllKinks = (
   const categories = Object.keys(kinks)
   for (let i = 0; i < categories.length; i++) {
     const category = categories[i]
-    const categoryId = strToClass(category) // Use normalized category name as stable ID
+    // Use the category key directly as the stable categoryId
+    // This ensures the categoryId never changes with language
+    const categoryId = category
+
     const fields = kinks[category].fields
     const kinkArr = kinks[category].kinks
 
@@ -491,6 +858,16 @@ export const getAllKinksEnhanced = (
   const list: Selection[] = []
   const selectionMap = new Map<string, { value: string; comment?: string }>()
 
+  // Debug: Log input data
+  console.log(
+    'getAllKinksEnhanced: Input kinks categories:',
+    Object.keys(kinks)
+  )
+  console.log(
+    'getAllKinksEnhanced: Enhanced kinks categories:',
+    enhancedKinks ? Object.keys(enhancedKinks) : 'null'
+  )
+
   // Create a map of existing selections using stable IDs when available, fallback to names
   existingSelection.forEach((item) => {
     const stableKey =
@@ -501,11 +878,21 @@ export const getAllKinksEnhanced = (
     selectionMap.set(stableKey, { value: item.value, comment: item.comment })
   })
 
+  // Process categories from kinks (resolved data)
   const categories = Object.keys(kinks)
   for (let i = 0; i < categories.length; i++) {
     const category = categories[i]
     const fields = kinks[category].fields
     const kinkArr = kinks[category].kinks
+
+    // Debug: Log each category being processed
+    if (category === 'Suggestions 2') {
+      console.log('getAllKinksEnhanced: Processing Suggestions 2 from kinks:', {
+        category,
+        fields,
+        kinks: kinkArr,
+      })
+    }
 
     for (let j = 0; j < fields.length; j++) {
       const field = fields[j]
@@ -520,6 +907,16 @@ export const getAllKinksEnhanced = (
           kink,
           field
         )
+
+        // Debug: Log stable IDs for "Suggestions 2"
+        if (category === 'Suggestions 2') {
+          console.log('getAllKinksEnhanced: Stable IDs for Suggestions 2:', {
+            category,
+            kink,
+            field,
+            stableIds,
+          })
+        }
 
         // Try stable key first, then fallback to current names
         const stableKey = `${stableIds.categoryId}-${stableIds.kinkId}-${stableIds.fieldId}`
@@ -542,10 +939,130 @@ export const getAllKinksEnhanced = (
           fieldId: stableIds.fieldId,
         }
 
+        // Debug: Log created Selection object for "Suggestions 2"
+        if (category === 'Suggestions 2') {
+          console.log(
+            'getAllKinksEnhanced: Created Selection for Suggestions 2:',
+            obj
+          )
+        }
+
         list.push(obj)
       }
     }
   }
+
+  // Process categories from enhancedKinks that are not in kinks
+  if (enhancedKinks) {
+    const enhancedCategories = Object.keys(enhancedKinks)
+    for (const categoryKey of enhancedCategories) {
+      const category = enhancedKinks[categoryKey]
+
+      // Check if this category is already processed from kinks
+      const resolvedCategoryName = resolveMultilingualContent(
+        category.name,
+        i18n.language || 'en'
+      )
+      const alreadyProcessed = categories.some(
+        (cat) => cat === resolvedCategoryName
+      )
+
+      if (!alreadyProcessed) {
+        // Debug: Log processing enhanced category
+        if (resolvedCategoryName === 'Suggestions 2') {
+          console.log(
+            'getAllKinksEnhanced: Processing Suggestions 2 from enhancedKinks:',
+            {
+              categoryKey,
+              resolvedCategoryName,
+              fields: category.fields,
+              kinks: category.kinks,
+            }
+          )
+        }
+
+        // Process this category from enhancedKinks
+        for (let j = 0; j < category.fields.length; j++) {
+          const field = category.fields[j]
+          const resolvedField = resolveMultilingualContent(
+            field,
+            i18n.language || 'en'
+          )
+
+          for (let k = 0; k < category.kinks.length; k++) {
+            const kink = category.kinks[k]
+            const resolvedKink = resolveMultilingualContent(
+              kink,
+              i18n.language || 'en'
+            )
+
+            // Generate stable IDs using original/language-independent data
+            const stableIds = getStableIdsFromOriginal(
+              enhancedKinks,
+              resolvedCategoryName,
+              resolvedKink,
+              resolvedField
+            )
+
+            // Debug: Log stable IDs for "Suggestions 2"
+            if (resolvedCategoryName === 'Suggestions 2') {
+              console.log(
+                'getAllKinksEnhanced: Stable IDs for Suggestions 2 from enhancedKinks:',
+                {
+                  category: resolvedCategoryName,
+                  kink: resolvedKink,
+                  field: resolvedField,
+                  stableIds,
+                }
+              )
+            }
+
+            // Try stable key first, then fallback to current names
+            const stableKey = `${stableIds.categoryId}-${stableIds.kinkId}-${stableIds.fieldId}`
+            const fallbackKey = `${resolvedCategoryName}-${resolvedKink}-${resolvedField}`
+
+            const existingData =
+              selectionMap.get(stableKey) || selectionMap.get(fallbackKey)
+            const value = existingData?.value || Object.keys(levels)[0]
+
+            const obj: Selection = {
+              category: resolvedCategoryName,
+              kink: resolvedKink,
+              field: resolvedField,
+              value,
+              showField: category.fields.length >= 2,
+              comment: existingData?.comment,
+              // Use language-independent stable IDs
+              categoryId: stableIds.categoryId,
+              kinkId: stableIds.kinkId,
+              fieldId: stableIds.fieldId,
+            }
+
+            // Debug: Log created Selection object for "Suggestions 2"
+            if (resolvedCategoryName === 'Suggestions 2') {
+              console.log(
+                'getAllKinksEnhanced: Created Selection for Suggestions 2 from enhancedKinks:',
+                obj
+              )
+            }
+
+            list.push(obj)
+          }
+        }
+      }
+    }
+  }
+
+  // Debug: Log final list categories
+  const finalCategories = new Set(list.map((item) => item.category))
+  console.log(
+    'getAllKinksEnhanced: Final list categories:',
+    Array.from(finalCategories)
+  )
+  console.log(
+    'getAllKinksEnhanced: Suggestions 2 in final list:',
+    finalCategories.has('Suggestions 2')
+  )
 
   return list
 }

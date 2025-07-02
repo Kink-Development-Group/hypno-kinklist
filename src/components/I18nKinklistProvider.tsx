@@ -1,31 +1,40 @@
-import React from 'react'
-import { useTranslation } from 'react-i18next'
+import React, { useEffect, useState } from 'react'
 import { KinklistProvider } from '../context/KinklistContext'
-import {
-  getEnhancedKinkTemplate,
-  getKinkTemplate,
-} from '../utils/kinkTemplates'
+import { getDefaultKinklistTemplate } from '../utils/defaultTemplate'
 
 interface I18nKinklistProviderProps {
   children: React.ReactNode
-  useEnhancedTemplate?: boolean
 }
 
 const I18nKinklistProvider: React.FC<I18nKinklistProviderProps> = ({
   children,
-  useEnhancedTemplate = false,
 }) => {
-  const { i18n } = useTranslation()
+  const [template, setTemplate] = useState<string>('')
+  const [loading, setLoading] = useState(true)
 
-  // Choose template based on setting and current language
-  const currentTemplate = useEnhancedTemplate
-    ? getEnhancedKinkTemplate()
-    : getKinkTemplate(i18n.language)
+  useEffect(() => {
+    const loadTemplate = async () => {
+      try {
+        const templateText = await getDefaultKinklistTemplate()
+        setTemplate(templateText)
+      } catch (error) {
+        console.error('Failed to load template:', error)
+        // Fallback to empty template
+        setTemplate('')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadTemplate()
+  }, [])
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
 
   return (
-    <KinklistProvider initialKinksText={currentTemplate}>
-      {children}
-    </KinklistProvider>
+    <KinklistProvider initialKinksText={template}>{children}</KinklistProvider>
   )
 }
 
