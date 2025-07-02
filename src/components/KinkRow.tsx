@@ -31,6 +31,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
     setSelectedKink,
     enhancedKinks,
   } = useKinklist()
+
   const { t } = useTranslation()
 
   const rowId = `kink-row-${strToClass(categoryName)}-${strToClass(kinkName)}`
@@ -251,7 +252,10 @@ const KinkRow: React.FC<KinkRowProps> = ({
                 kinkSelection.comment.trim().length > 0
 
               return hasComment ? (
-                <Tooltip content={kinkSelection.comment || ''}>
+                <Tooltip
+                  key={`tooltip-${field}`}
+                  content={kinkSelection.comment || ''}
+                >
                   <button
                     key={`comment-${field}`}
                     className={`comment-button-base comment-button-small has-comment`}
@@ -308,7 +312,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
               )
             })}
             {description && (
-              <Tooltip content={description}>
+              <Tooltip key="description-tooltip" content={description}>
                 <span className="kink-tooltip">
                   <span
                     className="kink-tooltip-icon"

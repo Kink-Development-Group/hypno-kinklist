@@ -2,7 +2,7 @@
 // Supports the new + [LANG] content syntax alongside existing format
 
 import i18n from '../i18n'
-import { strToClass } from './index'
+import { generateUniqueCategoryKey, strToClass } from './index'
 
 // Interface for multilingual content
 export interface MultilingualContent {
@@ -131,6 +131,7 @@ export const parseEnhancedKinksText = (
 ): EnhancedKinksData | null => {
   const newKinks: EnhancedKinksData = {}
   const lines = text.replace(/\r/g, '').split('\n')
+  const existingKeys = new Set<string>()
 
   let cat: Partial<EnhancedKinkCategory> | null = null
   let catName: string | null = null
@@ -244,7 +245,10 @@ export const parseEnhancedKinksText = (
         Array.isArray(cat.kinks) &&
         cat.kinks.length > 0
       ) {
-        newKinks[catName] = {
+        // Generate unique key for the category
+        const uniqueKey = generateUniqueCategoryKey(catName, existingKeys)
+        existingKeys.add(uniqueKey)
+        newKinks[uniqueKey] = {
           ...cat,
           name: cat.name || catName,
         } as EnhancedKinkCategory
@@ -298,7 +302,10 @@ export const parseEnhancedKinksText = (
     Array.isArray(cat.kinks) &&
     cat.kinks.length > 0
   ) {
-    newKinks[catName] = {
+    // Generate unique key for the final category
+    const uniqueKey = generateUniqueCategoryKey(catName, existingKeys)
+    existingKeys.add(uniqueKey)
+    newKinks[uniqueKey] = {
       ...cat,
       name: cat.name || catName,
     } as EnhancedKinkCategory
@@ -386,6 +393,7 @@ export const resolveEnhancedKinksData = (
   const resolvedKinks: import('../types').KinksData = {}
 
   Object.entries(kinks).forEach(([categoryKey, category]) => {
+    // Preserve the unique category key instead of using the resolved name
     const resolvedCategory = {
       name: resolveMultilingualContent(category.name, currentLanguage),
       fields: category.fields.map((field) =>
@@ -413,15 +421,19 @@ export const getStableIdsFromOriginal = (
   fieldName: string
 ): { categoryId: string; kinkId: string; fieldId: string } => {
   if (enhancedKinks) {
-    // For enhanced/multilingual kinks, use the original keys and indices
+    // For enhanced/multilingual kinks, find the category by matching the resolved name
     const categoryKey = Object.keys(enhancedKinks).find((key) => {
       const category = enhancedKinks[key]
 
       // Check all available languages plus default content
-      const allLanguages = ['en', 'de', 'sv', i18n.language]
+      const allLanguages = [
+        ...(i18n.options.supportedLngs || []),
+        i18n.language,
+      ]
       return allLanguages.some((lang) => {
         const resolvedName = resolveMultilingualContent(category.name, lang)
-        return resolvedName === categoryName
+        // Case-insensitive comparison
+        return resolvedName.toLowerCase() === categoryName.toLowerCase()
       })
     })
 
@@ -433,7 +445,8 @@ export const getStableIdsFromOriginal = (
         const allLanguages = ['en', 'de', 'sv', i18n.language]
         return allLanguages.some((lang) => {
           const resolvedField = resolveMultilingualContent(field, lang)
-          return resolvedField === fieldName
+          // Case-insensitive comparison
+          return resolvedField.toLowerCase() === fieldName.toLowerCase()
         })
       })
 
@@ -442,25 +455,31 @@ export const getStableIdsFromOriginal = (
         const allLanguages = ['en', 'de', 'sv', i18n.language]
         return allLanguages.some((lang) => {
           const resolvedKink = resolveMultilingualContent(kink, lang)
-          return resolvedKink === kinkName
+          // Case-insensitive comparison
+          return resolvedKink.toLowerCase() === kinkName.toLowerCase()
         })
       })
 
       if (fieldIndex >= 0 && kinkIndex >= 0) {
-        // Use stable, language-independent IDs based on category key and indices
+        // Use the categoryKey directly as the stable categoryId
+        // This ensures the categoryId never changes with language
+        const categoryId = categoryKey
+
         return {
-          categoryId: strToClass(categoryKey), // Use the original category key
-          kinkId: `${strToClass(categoryKey)}-kink-${kinkIndex}`, // Use category + index for stable kink ID
-          fieldId: `${strToClass(categoryKey)}-field-${fieldIndex}`, // Use category + index for stable field ID
+          categoryId,
+          kinkId: `kink-${kinkIndex}`, // Just the kink identifier without category
+          fieldId: `field-${fieldIndex}`, // Just the field identifier without category
         }
       }
     }
   }
 
   // Fallback for standard templates - use current names
-  return {
+  const fallbackResult = {
     categoryId: strToClass(categoryName),
     kinkId: strToClass(kinkName),
     fieldId: strToClass(fieldName),
   }
+
+  return fallbackResult
 }
