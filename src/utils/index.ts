@@ -280,10 +280,12 @@ export const updateHash = (
 
   // Debug: Log all categories in selection
   const categoriesInSelection = new Set(selection.map((item) => item.category))
-  console.log(
-    'updateHash: Categories in selection:',
-    Array.from(categoriesInSelection)
-  )
+  if (DEBUG) {
+    console.log(
+      'updateHash: Categories in selection:',
+      Array.from(categoriesInSelection)
+    );
+  }
 
   selection.forEach((item) => {
     // Generate stable key - use the same format as the hash
