@@ -206,7 +206,6 @@ export const KinklistProvider: React.FC<{
   }, [originalKinksText, errorHandler])
 
   // Handle language changes for enhanced templates - ONLY update kinks, not selection
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     console.log('language change effect: Language changed to:', i18n.language)
     console.log(
