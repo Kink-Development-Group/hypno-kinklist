@@ -202,9 +202,11 @@ export const KinklistProvider: React.FC<{
         e
       )
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [originalKinksText, errorHandler])
 
   // Handle language changes for enhanced templates - ONLY update kinks, not selection
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     console.log('language change effect: Language changed to:', i18n.language)
     console.log(
@@ -220,6 +222,14 @@ export const KinklistProvider: React.FC<{
       console.log('language change effect: Skipping - no enhanced kinks')
     }
   }, [i18n.language, enhancedKinks, refreshKinksForLanguage])
+
+  // Internal setSelection that bypasses tracking (for initialization)
+  const setSelectionInternal = useCallback(
+    (newSelection: Selection[] | ((prev: Selection[]) => Selection[])) => {
+      setSelection(newSelection)
+    },
+    []
+  )
 
   // Parse hash from URL - only on initial load
   useEffect(() => {
@@ -318,7 +328,14 @@ export const KinklistProvider: React.FC<{
     }, 50) // Small delay to ensure kinks are loaded
 
     return () => clearTimeout(timeoutId)
-  }, [kinks, levels, errorHandler, enhancedKinks])
+  }, [
+    kinks,
+    levels,
+    errorHandler,
+    enhancedKinks,
+    selection,
+    setSelectionInternal,
+  ])
 
   // Update selectedKink after language change to ensure comments are preserved in modals
   useEffect(() => {
@@ -337,7 +354,13 @@ export const KinklistProvider: React.FC<{
         setSelectedKink(updatedSelection)
       }
     }
-  }, [selection, selectedKink, isCommentOverlayOpen, isInputOverlayOpen])
+  }, [
+    selection,
+    selectedKink,
+    isCommentOverlayOpen,
+    isInputOverlayOpen,
+    setSelectedKink,
+  ])
 
   // Update hash when selection changes - but only for user interactions
   useEffect(() => {
@@ -380,7 +403,7 @@ export const KinklistProvider: React.FC<{
   // Update levels when language changes
   useEffect(() => {
     setLevels(getInitialLevels(i18n))
-  }, [i18n.language])
+  }, [i18n])
 
   // Custom setSelection that tracks user interactions
   const setSelectionWithTracking = useCallback(
@@ -395,14 +418,6 @@ export const KinklistProvider: React.FC<{
       setTimeout(() => {
         isUserInteraction.current = false
       }, 100)
-    },
-    []
-  )
-
-  // Internal setSelection that bypasses tracking (for initialization)
-  const setSelectionInternal = useCallback(
-    (newSelection: Selection[] | ((prev: Selection[]) => Selection[])) => {
-      setSelection(newSelection)
     },
     []
   )
