@@ -902,18 +902,219 @@ export const exportAsSVG = async (
  */
 export const importFromJSON = (jsonString: string): ImportResult => {
   try {
-    const data: ExportData = JSON.parse(jsonString)
+    console.log('Starting JSON import...')
+    console.log('JSON String length:', jsonString.length)
 
-    // Validierung der Datenstruktur
-    if (!data.metadata || !data.levels || !data.categories) {
-      throw new Error(i18n.t('export.errors.invalidDataFormat'))
+    // Bereinige den JSON-String
+    const cleanedJsonString = jsonString.trim()
+
+    if (!cleanedJsonString) {
+      throw new Error('JSON-String ist leer')
     }
+
+    // Grundlegende JSON-Validierung
+    if (
+      !cleanedJsonString.startsWith('{') &&
+      !cleanedJsonString.startsWith('[')
+    ) {
+      throw new Error('Ungültiges JSON-Format - muss mit { oder [ beginnen')
+    }
+
+    console.log('Parsing JSON...')
+    const data: ExportData = JSON.parse(cleanedJsonString)
+
+    console.log('JSON parsed successfully, validating structure...')
+
+    // Grundlegende Validierung der Datenstruktur
+    if (!data || typeof data !== 'object') {
+      throw new Error('Ungültiges JSON-Format: Root ist kein Objekt')
+    }
+
+    if (!data.metadata || typeof data.metadata !== 'object') {
+      throw new Error(
+        'Ungültiges JSON-Format: Fehlende oder ungültige Metadata'
+      )
+    }
+
+    if (!data.levels || typeof data.levels !== 'object') {
+      throw new Error('Ungültiges JSON-Format: Fehlende oder ungültige Levels')
+    }
+
+    if (!data.categories || !Array.isArray(data.categories)) {
+      throw new Error(
+        'Ungültiges JSON-Format: Fehlende oder ungültige Categories'
+      )
+    }
+
+    // Stelle sicher, dass metadata vollständig ist
+    if (
+      !data.metadata.exportDate ||
+      typeof data.metadata.exportDate !== 'string'
+    ) {
+      data.metadata.exportDate = new Date().toISOString()
+    }
+
+    if (!data.metadata.version || typeof data.metadata.version !== 'string') {
+      data.metadata.version = '1.0.0'
+    }
+
+    // Validiere und bereinige Levels
+    const cleanedLevels: typeof data.levels = {}
+    let hasValidLevels = false
+
+    Object.entries(data.levels).forEach(([levelKey, levelData]) => {
+      if (levelData && typeof levelData === 'object' && levelData.name) {
+        cleanedLevels[levelKey] = {
+          name: levelData.name,
+          color: levelData.color || '#000000',
+          class: levelData.class || levelKey.toLowerCase().replace(/\s+/g, '-'),
+        }
+        hasValidLevels = true
+      }
+    })
+
+    if (!hasValidLevels) {
+      console.log('No valid levels found, using default levels')
+      const defaultLevels = getInitialLevels(i18n)
+      Object.entries(defaultLevels).forEach(([key, value]) => {
+        cleanedLevels[key] = value
+      })
+    }
+
+    data.levels = cleanedLevels
+
+    // Validiere und bereinige Categories
+    const cleanedCategories: typeof data.categories = []
+
+    data.categories.forEach((category, categoryIndex) => {
+      try {
+        if (!category || typeof category !== 'object') {
+          console.warn(`Skipping invalid category at index ${categoryIndex}`)
+          return
+        }
+
+        if (!category.name || typeof category.name !== 'string') {
+          console.warn(
+            `Skipping category at index ${categoryIndex}: missing or invalid name`
+          )
+          return
+        }
+
+        if (!Array.isArray(category.fields)) {
+          console.warn(
+            `Fixing fields for category "${category.name}": not an array`
+          )
+          category.fields = ['General']
+        }
+
+        if (category.fields.length === 0) {
+          console.log(`Adding default field for category "${category.name}"`)
+          category.fields = ['General']
+        }
+
+        if (!Array.isArray(category.kinks)) {
+          console.warn(
+            `Fixing kinks for category "${category.name}": not an array`
+          )
+          category.kinks = []
+        }
+
+        // Validiere und bereinige Kinks
+        const cleanedKinks: typeof category.kinks = []
+
+        category.kinks.forEach((kink, kinkIndex) => {
+          try {
+            if (!kink || typeof kink !== 'object') {
+              console.warn(
+                `Skipping invalid kink at index ${kinkIndex} in category "${category.name}"`
+              )
+              return
+            }
+
+            if (!kink.name || typeof kink.name !== 'string') {
+              console.warn(
+                `Skipping kink at index ${kinkIndex} in category "${category.name}": missing or invalid name`
+              )
+              return
+            }
+
+            if (!kink.selections || typeof kink.selections !== 'object') {
+              console.log(
+                `Creating default selections for kink "${kink.name}" in category "${category.name}"`
+              )
+              kink.selections = {}
+            }
+
+            // Stelle sicher, dass für jedes Field eine Selection existiert
+            category.fields.forEach((field) => {
+              if (!kink.selections[field]) {
+                kink.selections[field] = {
+                  level: 'Not Entered',
+                }
+              }
+            })
+
+            cleanedKinks.push({
+              name: kink.name,
+              description: kink.description || undefined,
+              selections: kink.selections,
+            })
+          } catch (kinkError) {
+            console.error(
+              `Error processing kink ${kinkIndex} in category "${category.name}":`,
+              kinkError
+            )
+          }
+        })
+
+        cleanedCategories.push({
+          name: category.name,
+          fields: category.fields,
+          kinks: cleanedKinks,
+        })
+      } catch (categoryError) {
+        console.error(
+          `Error processing category ${categoryIndex}:`,
+          categoryError
+        )
+      }
+    })
+
+    if (cleanedCategories.length === 0) {
+      throw new Error('Keine gültigen Kategorien im JSON gefunden')
+    }
+
+    data.categories = cleanedCategories
+
+    // Aktualisiere Metadata-Statistiken
+    data.metadata.totalCategories = cleanedCategories.length
+    data.metadata.totalKinks = cleanedCategories.reduce(
+      (total, cat) => total + cat.kinks.length,
+      0
+    )
+    data.metadata.totalSelections = cleanedCategories.reduce(
+      (total, cat) =>
+        total +
+        cat.kinks.reduce(
+          (kinkTotal, kink) => kinkTotal + Object.keys(kink.selections).length,
+          0
+        ),
+      0
+    )
+
+    console.log('JSON import successful:', {
+      categories: data.metadata.totalCategories,
+      kinks: data.metadata.totalKinks,
+      selections: data.metadata.totalSelections,
+      levels: Object.keys(data.levels).length,
+    })
 
     return {
       success: true,
       data,
     }
   } catch (error) {
+    console.error('JSON import error:', error)
     return {
       success: false,
       error: i18n.t('export.errors.importFailed', { error: String(error) }),
@@ -1042,11 +1243,30 @@ export const exportAsXMLFull = async (
  */
 export const importFromXML = (xmlString: string): ImportResult => {
   try {
+    console.log('Starting XML import...')
+    console.log('XML String length:', xmlString.length)
+
     // Normalisiere Line Endings und entferne potentielle BOM
     const cleanedXmlString = xmlString
       .replace(/\r\n/g, '\n')
       .replace(/^\uFEFF/, '')
+      .trim()
 
+    if (!cleanedXmlString) {
+      throw new Error('XML-Datei ist leer')
+    }
+
+    // Grundlegende XML-Validierung
+    if (
+      !cleanedXmlString.includes('<kinklist') &&
+      !cleanedXmlString.includes('<?xml')
+    ) {
+      throw new Error(
+        'Ungültiges XML-Format - weder kinklist-Element noch XML-Deklaration gefunden'
+      )
+    }
+
+    console.log('Parsing XML with DOMParser...')
     const parser = new DOMParser()
     const xmlDoc = parser.parseFromString(cleanedXmlString, 'text/xml')
 
@@ -1069,6 +1289,8 @@ export const importFromXML = (xmlString: string): ImportResult => {
       console.error(i18n.t('export.errors.noRootElement'))
       throw new Error(i18n.t('export.errors.invalidXmlStructure'))
     }
+
+    console.log('XML parsed successfully, processing data...')
 
     // Parse metadata
     const metadataNode = root.querySelector('metadata')
@@ -1288,27 +1510,123 @@ export const importFromXML = (xmlString: string): ImportResult => {
  */
 export const importFromCSV = (csvString: string): ImportResult => {
   try {
-    const parsed = Papa.parse(csvString, { header: true })
+    console.log('Starting CSV import...')
+    console.log('CSV String length:', csvString.length)
+
+    // Prüfe ob Papa Parse verfügbar ist
+    if (!Papa) {
+      throw new Error('Papa Parse library is not available')
+    }
+
+    // Verbesserte Eingabevalidierung
+    const trimmedCsv = csvString.trim()
+    if (!trimmedCsv || trimmedCsv.length < 10) {
+      throw new Error('CSV-Datei ist leer oder zu kurz')
+    }
+
+    // Prüfe auf CSV-Header
+    const firstLine = trimmedCsv.split('\n')[0]
+    if (
+      !firstLine.toLowerCase().includes('category') ||
+      !firstLine.toLowerCase().includes('kink') ||
+      !firstLine.toLowerCase().includes('level')
+    ) {
+      throw new Error(
+        'CSV-Datei muss mindestens die Spalten Category, Kink und Level enthalten'
+      )
+    }
+
+    console.log('Parsing CSV with Papa Parse...')
+    const parsed = Papa.parse(trimmedCsv, {
+      header: true,
+      skipEmptyLines: true,
+      transformHeader: (header: string) => header.trim(),
+      transform: (value: string) => value.trim(),
+    })
+
+    // Prüfe auf Parse-Fehler
+    if (parsed.errors && parsed.errors.length > 0) {
+      const criticalErrors = parsed.errors.filter(
+        (error) => error.type === 'Quotes' || error.type === 'FieldMismatch'
+      )
+      if (criticalErrors.length > 0) {
+        console.error('CSV Parse critical errors:', criticalErrors)
+        throw new Error(`CSV-Parse-Fehler: ${criticalErrors[0].message}`)
+      }
+      console.warn('CSV Parse warnings:', parsed.errors)
+    }
 
     if (!parsed.data || parsed.data.length === 0) {
-      throw new Error('Keine Daten in CSV gefunden')
+      throw new Error('Keine gültigen Daten in CSV gefunden')
     }
+
+    console.log(`CSV parsed successfully, ${parsed.data.length} rows found`)
 
     const data = parsed.data as any[]
     const categoriesMap = new Map<string, any>()
     const levelsSet = new Set<string>()
+    let validRowCount = 0
+    let skippedRowCount = 0
 
-    // Parse data rows
-    data.forEach((row: any) => {
-      if (!row.Category || !row.Kink || !row.Field || !row.Level) return
+    // Parse data rows mit besserer Validierung
+    data.forEach((row: any, index: number) => {
+      // Normalisiere Spaltennamen (unterstütze verschiedene Varianten)
+      const normalizedRow: any = {}
+      Object.keys(row).forEach((key) => {
+        const normalizedKey = key.toLowerCase().trim()
+        if (normalizedKey.includes('categor')) {
+          normalizedRow.Category = row[key]
+        } else if (normalizedKey.includes('kink')) {
+          normalizedRow.Kink = row[key]
+        } else if (normalizedKey.includes('field')) {
+          normalizedRow.Field = row[key]
+        } else if (
+          normalizedKey.includes('level') ||
+          normalizedKey.includes('rating')
+        ) {
+          normalizedRow.Level = row[key]
+        } else if (normalizedKey.includes('comment')) {
+          normalizedRow.Comment = row[key]
+        } else if (normalizedKey.includes('description')) {
+          normalizedRow.Description = row[key]
+        }
+      })
 
-      const categoryName = row.Category
-      const kinkName = row.Kink
-      const field = row.Field
-      const level = row.Level
-      const comment = row.Comment || undefined
-      const description = row.Description || undefined
+      // Überspringe Zeilen mit fehlenden Pflichtfeldern
+      if (
+        !normalizedRow.Category ||
+        !normalizedRow.Kink ||
+        !normalizedRow.Level
+      ) {
+        console.log(
+          `Skipping row ${index + 1}: missing required fields`,
+          normalizedRow
+        )
+        skippedRowCount++
+        return
+      }
 
+      const categoryName = String(normalizedRow.Category).trim()
+      const kinkName = String(normalizedRow.Kink).trim()
+      const field = normalizedRow.Field
+        ? String(normalizedRow.Field).trim()
+        : 'General'
+      const level = String(normalizedRow.Level).trim()
+      const comment = normalizedRow.Comment
+        ? String(normalizedRow.Comment).trim()
+        : undefined
+      const description = normalizedRow.Description
+        ? String(normalizedRow.Description).trim()
+        : undefined
+
+      // Überspringe leere Werte
+      if (!categoryName || !kinkName || !level) {
+        console.log(`Skipping row ${index + 1}: empty values`, normalizedRow)
+        skippedRowCount++
+        return
+      }
+
+      validRowCount++
       levelsSet.add(level)
 
       if (!categoriesMap.has(categoryName)) {
@@ -1319,7 +1637,7 @@ export const importFromCSV = (csvString: string): ImportResult => {
         })
       }
 
-      const category = categoriesMap.get(categoryName)
+      const category = categoriesMap.get(categoryName)!
       category.fields.add(field)
 
       if (!category.kinks.has(kinkName)) {
@@ -1330,12 +1648,22 @@ export const importFromCSV = (csvString: string): ImportResult => {
         })
       }
 
-      const kink = category.kinks.get(kinkName)
+      const kink = category.kinks.get(kinkName)!
       kink.selections[field] = {
         level,
         comment: comment || undefined,
       }
     })
+
+    console.log(
+      `CSV Import processed: ${validRowCount} valid rows, ${skippedRowCount} skipped rows`
+    )
+
+    if (validRowCount === 0) {
+      throw new Error(
+        'Keine gültigen Datenzeilen in CSV gefunden. Stellen Sie sicher, dass die Spalten Category, Kink und Level vorhanden sind.'
+      )
+    }
 
     // Convert to ExportData format
     const categories = Array.from(categoriesMap.values()).map((cat) => ({
@@ -1346,24 +1674,84 @@ export const importFromCSV = (csvString: string): ImportResult => {
       ) as ExportData['categories'][0]['kinks'],
     }))
 
-    // Create basic levels structure
+    // Stelle sicher, dass jede Kategorie mindestens ein Field hat
+    categories.forEach((category) => {
+      if (category.fields.length === 0) {
+        category.fields = ['General']
+      }
+    })
+
+    // Erstelle vollständige Levels-Struktur mit Standard-Levels als Fallback
     const levels: {
       [key: string]: { name: string; color: string; class: string }
     } = {}
+
+    // Standard-Level-Mapping mit mehr Varianten
+    const standardLevelMapping: {
+      [key: string]: { color: string; class: string }
+    } = {
+      'Not Entered': { color: '#FFFFFF', class: 'notEntered' },
+      NotEntered: { color: '#FFFFFF', class: 'notEntered' },
+      Favorite: { color: '#6DB5FE', class: 'favorite' },
+      Like: { color: '#23FD22', class: 'like' },
+      Okay: { color: '#FDFD6B', class: 'okay' },
+      Maybe: { color: '#DB6C00', class: 'maybe' },
+      No: { color: '#920000', class: 'no' },
+      // Deutsche Varianten
+      Favorit: { color: '#6DB5FE', class: 'favorite' },
+      'Mag ich': { color: '#23FD22', class: 'like' },
+      Vielleicht: { color: '#DB6C00', class: 'maybe' },
+      Nein: { color: '#920000', class: 'no' },
+      // Numerische Bewertungen
+      '5': { color: '#6DB5FE', class: 'favorite' },
+      '4': { color: '#23FD22', class: 'like' },
+      '3': { color: '#FDFD6B', class: 'okay' },
+      '2': { color: '#DB6C00', class: 'maybe' },
+      '1': { color: '#920000', class: 'no' },
+      '0': { color: '#FFFFFF', class: 'notEntered' },
+    }
+
+    // Fallback-Farben für unbekannte Level
     const defaultColors = [
       '#ff0000',
       '#ff8800',
       '#ffff00',
       '#88ff00',
       '#00ff00',
+      '#0088ff',
+      '#8800ff',
+      '#ff0088',
+      '#888888',
+      '#444444',
     ]
-    Array.from(levelsSet).forEach((level, index) => {
-      levels[level] = {
-        name: level,
-        color: defaultColors[index % defaultColors.length] || '#888888',
-        class: level.toLowerCase().replace(/\s+/g, '-'),
+
+    let colorIndex = 0
+    Array.from(levelsSet).forEach((level) => {
+      const mapping = standardLevelMapping[level]
+      if (mapping) {
+        levels[level] = {
+          name: level,
+          color: mapping.color,
+          class: mapping.class,
+        }
+      } else {
+        levels[level] = {
+          name: level,
+          color: defaultColors[colorIndex % defaultColors.length],
+          class: level.toLowerCase().replace(/[^a-z0-9]/g, ''),
+        }
+        colorIndex++
       }
     })
+
+    // Stelle sicher, dass mindestens "Not Entered" vorhanden ist
+    if (!levels['Not Entered'] && !levels['NotEntered']) {
+      levels['Not Entered'] = {
+        name: 'Not Entered',
+        color: '#FFFFFF',
+        class: 'notEntered',
+      }
+    }
 
     const exportData: ExportData = {
       metadata: {
@@ -1389,14 +1777,24 @@ export const importFromCSV = (csvString: string): ImportResult => {
       categories,
     }
 
+    console.log('CSV Import successful:', {
+      categories: exportData.metadata.totalCategories,
+      kinks: exportData.metadata.totalKinks,
+      selections: exportData.metadata.totalSelections,
+      levels: Object.keys(levels).length,
+      validRows: validRowCount,
+      skippedRows: skippedRowCount,
+    })
+
     return {
       success: true,
       data: exportData,
     }
   } catch (error) {
+    console.error('CSV Import error:', error)
     return {
       success: false,
-      error: `CSV Import failed: ${error}`,
+      error: `CSV Import fehlgeschlagen: ${error instanceof Error ? error.message : String(error)}`,
     }
   }
 }

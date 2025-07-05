@@ -47,6 +47,8 @@ interface KinklistContextType {
     React.SetStateAction<EnhancedKinksData | null>
   >
   refreshKinksForLanguage: () => void
+  // Import-specific function to reset tracking state
+  resetImportState: () => void
 }
 
 // Helper to get translated level names
@@ -388,6 +390,14 @@ export const KinklistProvider: React.FC<{
     setLevels(getInitialLevels(i18n))
   }, [i18n])
 
+  // Function to reset import-related state tracking
+  const resetImportState = useCallback(() => {
+    console.log('Resetting import state tracking...')
+    isInitialized.current = false
+    isUserInteraction.current = false
+    hasParsedHash.current = false
+  }, [])
+
   // Custom setSelection that tracks user interactions
   const setSelectionWithTracking = useCallback(
     (newSelection: Selection[] | ((prev: Selection[]) => Selection[])) => {
@@ -429,6 +439,7 @@ export const KinklistProvider: React.FC<{
         enhancedKinks,
         setEnhancedKinks,
         refreshKinksForLanguage,
+        resetImportState,
       }}
     >
       {children}

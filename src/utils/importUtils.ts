@@ -11,44 +11,94 @@ export const convertFromExportData = (
   levels: LevelsData
   selection: Selection[]
 } => {
-  // Konvertiere Levels
+  console.log('Converting export data to internal format...')
+
+  // Konvertiere Levels mit besserer Validierung
   const levels: LevelsData = {}
   Object.entries(exportData.levels).forEach(([levelName, levelData]) => {
-    levels[levelName] = {
-      key: levelData.class, // Use class as key since it's stable
-      name: levelData.name,
-      color: levelData.color,
-      class: levelData.class,
+    if (levelData && typeof levelData === 'object') {
+      levels[levelName] = {
+        key: levelData.class || levelName.toLowerCase().replace(/\s+/g, ''),
+        name: levelData.name || levelName,
+        color: levelData.color || '#000000',
+        class: levelData.class || levelName.toLowerCase().replace(/\s+/g, ''),
+      }
     }
   })
 
-  // Konvertiere Categories zu KinksData
+  console.log(`Converted ${Object.keys(levels).length} levels`)
+
+  // Konvertiere Categories zu KinksData mit besserer Validierung
   const kinks: KinksData = {}
   exportData.categories.forEach((category) => {
-    kinks[category.name] = {
-      name: category.name,
-      fields: category.fields,
-      kinks: category.kinks.map((kink) => kink.name),
-      descriptions: category.kinks.map((kink) => kink.description || ''),
+    if (category && category.name) {
+      const categoryName = category.name
+      const fields = Array.isArray(category.fields)
+        ? category.fields
+        : ['General']
+      const kinkNames: string[] = []
+      const descriptions: string[] = []
+
+      if (Array.isArray(category.kinks)) {
+        category.kinks.forEach((kink) => {
+          if (kink && kink.name) {
+            kinkNames.push(kink.name)
+            descriptions.push(kink.description || '')
+          }
+        })
+      }
+
+      // Nur Kategorien mit mindestens einem Kink hinzufügen
+      if (kinkNames.length > 0) {
+        kinks[categoryName] = {
+          name: categoryName,
+          fields,
+          kinks: kinkNames,
+          descriptions,
+        }
+      }
     }
   })
 
-  // Konvertiere Selection
+  console.log(`Converted ${Object.keys(kinks).length} categories`)
+
+  // Konvertiere Selection mit besserer Validierung
   const selection: Selection[] = []
   exportData.categories.forEach((category) => {
-    category.kinks.forEach((kink) => {
-      Object.entries(kink.selections).forEach(([field, sel]) => {
-        selection.push({
-          category: category.name,
-          kink: kink.name,
-          field: field,
-          value: sel.level,
-          comment: sel.comment,
-          showField: category.fields.length > 1,
-        })
+    if (category && category.name && Array.isArray(category.kinks)) {
+      category.kinks.forEach((kink) => {
+        if (kink && kink.name && kink.selections) {
+          Object.entries(kink.selections).forEach(([field, sel]) => {
+            if (sel && sel.level) {
+              selection.push({
+                category: category.name,
+                kink: kink.name,
+                field: field,
+                value: sel.level,
+                comment: sel.comment || undefined,
+                showField: (category.fields?.length || 0) > 1,
+              })
+            }
+          })
+        }
       })
-    })
+    }
   })
+
+  console.log(`Converted ${selection.length} selections`)
+
+  // Validiere das Ergebnis
+  if (Object.keys(levels).length === 0) {
+    console.warn('No levels found in converted data')
+  }
+
+  if (Object.keys(kinks).length === 0) {
+    console.warn('No categories found in converted data')
+  }
+
+  if (selection.length === 0) {
+    console.warn('No selections found in converted data')
+  }
 
   return { kinks, levels, selection }
 }

@@ -18,8 +18,13 @@ interface ImportModalProps {
 
 const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
   const { t } = useTranslation()
-  const { setKinks, setLevels, setSelection, setOriginalKinksText } =
-    useKinklist()
+  const {
+    setKinks,
+    setLevels,
+    setSelection,
+    setOriginalKinksText,
+    resetImportState,
+  } = useKinklist()
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isSuccess, setIsSuccess] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
@@ -77,55 +82,157 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
       setError(null)
 
       try {
+        console.log('Starting import process for:', filename)
+        console.log('Text length:', text.length)
+        console.log('First 100 chars:', text.substring(0, 100))
+
         const extension = filename.split('.').pop()?.toLowerCase() || ''
         let result
 
+        // Verbesserte Format-Erkennung
+        const trimmedText = text.trim()
+
         switch (extension) {
           case 'json':
+            console.log('Importing as JSON')
             result = importFromJSON(text)
             break
           case 'xml':
+            console.log('Importing as XML')
             result = importFromXML(text)
             break
           case 'csv':
+            console.log('Importing as CSV')
+            // Verbesserte CSV-Validierung
+            if (!trimmedText || trimmedText.length < 10) {
+              throw new Error('CSV-Datei ist leer oder zu kurz')
+            }
             result = importFromCSV(text)
             break
           default:
             // Fallback: try to detect format by content
-            if (text.trim().startsWith('{')) {
+            console.log('Auto-detecting format')
+            if (trimmedText.startsWith('{') || trimmedText.startsWith('[')) {
+              console.log('Detected JSON format')
               result = importFromJSON(text)
-            } else if (text.trim().startsWith('<?xml')) {
+            } else if (
+              trimmedText.startsWith('<?xml') ||
+              trimmedText.includes('<kinklist')
+            ) {
+              console.log('Detected XML format')
               result = importFromXML(text)
             } else {
+              console.log('Detected CSV format')
+              if (!trimmedText || trimmedText.length < 10) {
+                throw new Error('CSV-Datei ist leer oder zu kurz')
+              }
               result = importFromCSV(text)
             }
         }
+
+        console.log('Import result:', result)
+
+        if (!result) {
+          throw new Error('Import-Funktion gab kein Ergebnis zurück')
+        }
+
         if (result.success && result.data) {
+          console.log('Validating export data...')
           if (validateExportData(result.data)) {
+            console.log('Export data is valid, converting...')
             const {
               kinks: newKinks,
               levels: newLevels,
               selection: newSelection,
             } = convertFromExportData(result.data)
 
-            // Setze alle Daten im Context
-            setKinks(newKinks)
-            setLevels(newLevels)
-            setSelection(newSelection) // Aktualisiere auch den originalKinksText für den Editor
-            const newKinksText = kinksToText(newKinks)
-            setOriginalKinksText(newKinksText)
+            console.log('Converted data:', {
+              kinks: Object.keys(newKinks).length + ' categories',
+              levels: Object.keys(newLevels).length + ' levels',
+              selection: newSelection.length + ' selections',
+            })
 
-            setIsSuccess(true)
-            setTimeout(() => setIsSuccess(false), 3000)
-            // Schließe Modal nach erfolgreichem Import
-            setTimeout(() => onClose(), 1000)
+            // Validiere konvertierte Daten
+            if (Object.keys(newKinks).length === 0) {
+              throw new Error(
+                'Keine Kategorien in den importierten Daten gefunden'
+              )
+            }
+            if (Object.keys(newLevels).length === 0) {
+              throw new Error('Keine Level in den importierten Daten gefunden')
+            }
+
+            // Verwende React's unstable_batchedUpdates für atomare State-Updates
+            // Dies verhindert Race Conditions und stellt sicher, dass alle Updates zusammen verarbeitet werden
+            try {
+              console.log('Starting atomic state update...')
+
+              // Reset import tracking state vor dem Update
+              resetImportState()
+
+              // Verwende React's Batching für atomare Updates
+              const { unstable_batchedUpdates } = await import('react-dom')
+
+              unstable_batchedUpdates(() => {
+                // Setze alle States in einem Batch
+                setLevels(newLevels)
+                setKinks(newKinks)
+                setSelection(newSelection)
+                const newKinksText = kinksToText(newKinks)
+                setOriginalKinksText(newKinksText)
+              })
+
+              // Warte kurz, damit React die Updates verarbeiten kann
+              await new Promise((resolve) => setTimeout(resolve, 100))
+
+              console.log('All states updated successfully in batched update')
+
+              setIsSuccess(true)
+              setTimeout(() => setIsSuccess(false), 3000)
+              // Schließe Modal nach erfolgreichem Import
+              setTimeout(() => onClose(), 1000)
+            } catch (stateUpdateError) {
+              console.error('Error during state updates:', stateUpdateError)
+
+              // Versuche einzelne State-Updates als Fallback
+              console.log('Falling back to individual state updates...')
+              try {
+                setLevels(newLevels)
+                await new Promise((resolve) => setTimeout(resolve, 50))
+
+                setKinks(newKinks)
+                await new Promise((resolve) => setTimeout(resolve, 50))
+
+                setSelection(newSelection)
+                await new Promise((resolve) => setTimeout(resolve, 50))
+
+                const newKinksText = kinksToText(newKinks)
+                setOriginalKinksText(newKinksText)
+
+                console.log('Fallback state updates completed successfully')
+              } catch (fallbackError) {
+                console.error(
+                  'Fallback state updates also failed:',
+                  fallbackError
+                )
+                setError(
+                  t('import.errors.failedWithMessage', {
+                    message: 'Fehler beim Aktualisieren der Anwendungsdaten',
+                  })
+                )
+                return
+              }
+            }
           } else {
+            console.error('Export data validation failed')
             setError(t('import.errors.invalidFormat'))
           }
         } else {
+          console.error('Import failed:', result.error)
           setError(result.error || t('import.errors.importFailed'))
         }
       } catch (error) {
+        console.error('Import process error:', error)
         if (error instanceof Error) {
           setError(
             t('import.errors.failedWithMessage', { message: error.message })
