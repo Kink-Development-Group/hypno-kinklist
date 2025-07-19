@@ -105,7 +105,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
             console.log('Importing as CSV')
             // Verbesserte CSV-Validierung
             if (!trimmedText || trimmedText.length < 10) {
-              throw new Error('CSV-Datei ist leer oder zu kurz')
+              throw new Error(t('import.errors.csvTooShort'))
             }
             result = importFromCSV(text)
             break
@@ -124,7 +124,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
             } else {
               console.log('Detected CSV format')
               if (!trimmedText || trimmedText.length < 10) {
-                throw new Error('CSV-Datei ist leer oder zu kurz')
+                throw new Error(t('import.errors.csvTooShort'))
               }
               result = importFromCSV(text)
             }
@@ -133,7 +133,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
         console.log('Import result:', result)
 
         if (!result) {
-          throw new Error('Import-Funktion gab kein Ergebnis zurück')
+          throw new Error(t('import.errors.noResult'))
         }
 
         if (result.success && result.data) {
@@ -154,12 +154,10 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
 
             // Validiere konvertierte Daten
             if (Object.keys(newKinks).length === 0) {
-              throw new Error(
-                'Keine Kategorien in den importierten Daten gefunden'
-              )
+              throw new Error(t('import.errors.noCategories'))
             }
             if (Object.keys(newLevels).length === 0) {
-              throw new Error('Keine Level in den importierten Daten gefunden')
+              throw new Error(t('import.errors.noLevels'))
             }
 
             // Verwende React's unstable_batchedUpdates für atomare State-Updates
@@ -226,17 +224,17 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
           } else {
             console.error('Export data validation failed')
             setError(t('import.errors.invalidFormat'))
+            resetImportState() // Ensure state is reset on error
           }
         } else {
           console.error('Import failed:', result.error)
           setError(result.error || t('import.errors.importFailed'))
+          resetImportState() // Ensure state is reset on error
         }
       } catch (error) {
-        console.error('Import process error:', error)
+        resetImportState() // Always reset state on error
         if (error instanceof Error) {
-          setError(
-            t('import.errors.failedWithMessage', { message: error.message })
-          )
+          setError(error.message)
         } else {
           setError(
             t('import.errors.failedWithMessage', {

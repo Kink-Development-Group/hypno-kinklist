@@ -31,7 +31,8 @@
     "like": "Mag ich",
     "okay": "Okay",
     "maybe": "Vielleicht",
-    "no": "Nein"
+    "no": "Nein",
+    "empty": "Keine Level gefunden. Bitte importieren Sie eine gültige Datei oder starten Sie eine neue Liste."
   },
   "buttons": {
     "start": "Start",
@@ -341,6 +342,43 @@
     },
     "accessibility": {
       "selectFile": "Datei für Import auswählen"
+    },
+    "errors": {
+      "csvTooShort": "CSV-Datei ist leer oder zu kurz.",
+      "noResult": "Die Importfunktion hat kein Ergebnis zurückgegeben.",
+      "noCategories": "Keine Kategorien in den importierten Daten gefunden.",
+      "noLevels": "Keine Level in den importierten Daten gefunden.",
+      "invalidFormat": "Das importierte Dateiformat ist ungültig oder wird nicht unterstützt.",
+      "importFailed": "Import fehlgeschlagen. Bitte überprüfen Sie Ihre Datei und versuchen Sie es erneut.",
+      "failedWithMessage": "Import fehlgeschlagen: {{message}}"
+    },
+    "importSuccessful": "Import erfolgreich!",
+    "dataImported": "Ihre Daten wurden importiert.",
+    "processing": "Import wird verarbeitet...",
+    "pleaseWait": "Bitte warten Sie, während Ihre Daten importiert werden.",
+    "supportedFormats": "Unterstützte Formate: JSON, XML, CSV",
+    "heading": "Daten importieren",
+    "subtitle": "Importieren Sie Ihre Kinklist aus einer Datei oder fügen Sie die Daten unten ein.",
+    "methods": {
+      "file": {
+        "title": "Datei Hochladen",
+        "description": "Wählen Sie eine Datei zum Importieren aus (JSON, XML, CSV).",
+        "button": "Datei auswählen"
+      },
+      "text": {
+        "title": "Daten einfügen",
+        "description": "Fügen Sie Ihre Kinklist-Daten hier ein (JSON, XML, CSV).",
+        "placeholder": "Fügen Sie Ihre Daten hier ein...",
+        "button": "Daten importieren"
+      }
+    },
+    "formats": {
+      "json": { "title": "JSON", "description": "Standard-Exportformat." },
+      "xml": { "title": "XML", "description": "XML-Exportformat." },
+      "csv": { "title": "CSV", "description": "Tabellen-Exportformat." }
+    },
+    "accessibility": {
+      "selectFile": "Datei zum Importieren auswählen"
     }
   },
   "input": {

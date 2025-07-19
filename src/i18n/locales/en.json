@@ -31,7 +31,8 @@
     "like": "Like",
     "okay": "Okay",
     "maybe": "Maybe",
-    "no": "No"
+    "no": "No",
+    "empty": "No levels found. Please import a valid file or start a new list."
   },
   "buttons": {
     "start": "Start",
@@ -337,7 +338,12 @@
       "unsupportedFileType": "Unsupported file type: {{extension}}. Allowed: {{allowed}}",
       "invalidFormat": "Invalid data format",
       "importFailed": "Import failed",
-      "failedWithMessage": "Import failed: {{message}}"
+      "failedWithMessage": "Import failed: {{message}}",
+      "csvTooShort": "CSV file is empty or too short.",
+      "noResult": "Import function did not return a result.",
+      "noCategories": "No categories found in the imported data.",
+      "noLevels": "No levels found in the imported data.",
+      "invalidFormat": "The imported file format is invalid or not supported."
     },
     "accessibility": {
       "selectFile": "Select file for import"

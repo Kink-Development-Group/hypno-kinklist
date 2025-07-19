@@ -74,35 +74,39 @@ const InputList: React.FC = () => {
 
   return (
     <div id="InputList" className="grid-container">
-      <div className="grid-row">
-        {columns.map((columnCategories, index) => (
-          <div
-            key={index}
-            className={getColClass(columnCount)}
-            role="region"
-            aria-label={`Spalte ${index + 1} von ${columnCount}`}
-          >
-            {columnCategories.map((catName) => {
-              const cat = kinks[catName]
-              if (
-                !cat ||
-                !Array.isArray(cat.fields) ||
-                !Array.isArray(cat.kinks)
-              )
-                return null
-              return (
-                <KinkCategory
-                  key={catName}
-                  name={cat.name}
-                  fields={cat.fields}
-                  kinks={cat.kinks}
-                  descriptions={cat.descriptions}
-                />
-              )
-            })}
-          </div>
-        ))}
-      </div>
+      {Object.keys(kinks).length === 0 ? (
+        <div className="inputlist-empty">{`😕 ${'No categories found. Please import a valid file or start a new list.'}`}</div>
+      ) : (
+        <div className="grid-row">
+          {columns.map((columnCategories, index) => (
+            <div
+              key={index}
+              className={getColClass(columnCount)}
+              role="region"
+              aria-label={`Spalte ${index + 1} von ${columnCount}`}
+            >
+              {columnCategories.map((catName) => {
+                const cat = kinks[catName]
+                if (
+                  !cat ||
+                  !Array.isArray(cat.fields) ||
+                  !Array.isArray(cat.kinks)
+                )
+                  return null
+                return (
+                  <KinkCategory
+                    key={catName}
+                    name={cat.name}
+                    fields={cat.fields}
+                    kinks={cat.kinks}
+                    descriptions={cat.descriptions}
+                  />
+                )
+              })}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
