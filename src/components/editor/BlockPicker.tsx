@@ -89,7 +89,7 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
               placeholder={t('editor.blocks.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              aria-label="Blöcke durchsuchen"
+              aria-label={t('editor.blocks.search')}
             />
           </div>
         )}
@@ -98,7 +98,7 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            aria-label="Kategorie auswählen"
+            aria-label={t('editor.snippets.selectCategory')}
           >
             {categoryOptions.map((category) => (
               <option key={category.value} value={category.value}>

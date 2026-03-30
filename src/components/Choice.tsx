@@ -1,4 +1,4 @@
-import React, { KeyboardEvent, memo, useCallback, useRef } from 'react'
+import React, { KeyboardEvent, memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import { Selection } from '../types'
@@ -19,7 +19,6 @@ const Choice: React.FC<ChoiceProps> = ({
 }) => {
   const { levels, selection, setSelection, enhancedKinks } = useKinklist()
   const { t } = useTranslation()
-  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   // Get stable IDs for consistent matching across languages
   const stableIds = getStableIdsFromOriginal(
@@ -28,24 +27,45 @@ const Choice: React.FC<ChoiceProps> = ({
     kinkName,
     field
   )
+  const hasStableIds =
+    stableIds.categoryId !== undefined &&
+    stableIds.kinkId !== undefined &&
+    stableIds.fieldId !== undefined
+
+  const matchesSelection = useCallback(
+    (item: Selection) => {
+      const hasSelectionIds =
+        item.categoryId !== undefined &&
+        item.kinkId !== undefined &&
+        item.fieldId !== undefined
+
+      if (hasStableIds && hasSelectionIds) {
+        return (
+          item.categoryId === stableIds.categoryId &&
+          item.kinkId === stableIds.kinkId &&
+          item.fieldId === stableIds.fieldId
+        )
+      }
+
+      return (
+        item.category === categoryName &&
+        item.kink === kinkName &&
+        item.field === field
+      )
+    },
+    [
+      categoryName,
+      field,
+      hasStableIds,
+      kinkName,
+      stableIds.categoryId,
+      stableIds.fieldId,
+      stableIds.kinkId,
+    ]
+  )
 
   // Find the current selection for this choice
-  const currentSelection = selection.find((item) => {
-    // First try to match by stable IDs if available
-    if (item.categoryId && item.kinkId && item.fieldId) {
-      return (
-        item.categoryId === stableIds.categoryId &&
-        item.kinkId === stableIds.kinkId &&
-        item.fieldId === stableIds.fieldId
-      )
-    }
-    // Fallback to name matching
-    return (
-      item.category === categoryName &&
-      item.kink === kinkName &&
-      item.field === field
-    )
-  })
+  const currentSelection = selection.find(matchesSelection)
 
   // Get the selected level directly from the selection
   const selectedLevel = currentSelection?.value || Object.keys(levels)[0]
@@ -61,36 +81,20 @@ const Choice: React.FC<ChoiceProps> = ({
       )
 
       // Find existing selection item or create a new one
-      const existingIndex = selection.findIndex((item) => {
-        // First try to match by stable IDs if available
-        if (item.categoryId && item.kinkId && item.fieldId) {
-          return (
-            item.categoryId === stableIds.categoryId &&
-            item.kinkId === stableIds.kinkId &&
-            item.fieldId === stableIds.fieldId
-          )
-        }
-        // Fallback to name matching
-        return (
-          item.category === categoryName &&
-          item.kink === kinkName &&
-          item.field === field
-        )
-      })
+      const existingIndex = selection.findIndex(matchesSelection)
 
       let updatedSelection: Selection[]
 
       if (existingIndex >= 0) {
-        // Update existing selection - preserve stable IDs
+        // Update existing selection - preserve or populate stable IDs
         updatedSelection = selection.map((item, index) => {
           if (index === existingIndex) {
             return {
               ...item,
               value: levelName,
-              // Ensure stable IDs are preserved
-              categoryId: item.categoryId,
-              kinkId: item.kinkId,
-              fieldId: item.fieldId,
+              categoryId: item.categoryId ?? stableIds.categoryId,
+              kinkId: item.kinkId ?? stableIds.kinkId,
+              fieldId: item.fieldId ?? stableIds.fieldId,
             }
           }
           return item
@@ -128,6 +132,7 @@ const Choice: React.FC<ChoiceProps> = ({
       selection,
       setSelection,
       enhancedKinks,
+      matchesSelection,
       showField,
     ]
   )
@@ -159,9 +164,6 @@ const Choice: React.FC<ChoiceProps> = ({
         return (
           <button
             key={`${categoryName}-${kinkName}-${field}-${levelName}`}
-            ref={(el) => {
-              buttonRefs.current[index] = el
-            }}
             className={`choice ${level.class} ${isSelected ? 'selected' : ''}`}
             data-level={levelName}
             data-level-int={index}

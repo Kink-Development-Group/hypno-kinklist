@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import React, { memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import { Selection } from '../types'
@@ -34,6 +34,40 @@ const KinkRow: React.FC<KinkRowProps> = ({
   const rowId = `kink-row-${strToClass(categoryName)}-${strToClass(kinkName)}`
   const kinkNameId = `kink-name-${strToClass(kinkName)}`
 
+  const matchesSelection = useCallback(
+    (item: Selection, field: string) => {
+      const stableIds = getStableIdsFromOriginal(
+        enhancedKinks,
+        categoryName,
+        kinkName,
+        field
+      )
+      const hasStableIds =
+        stableIds.categoryId !== undefined &&
+        stableIds.kinkId !== undefined &&
+        stableIds.fieldId !== undefined
+      const hasSelectionIds =
+        item.categoryId !== undefined &&
+        item.kinkId !== undefined &&
+        item.fieldId !== undefined
+
+      if (hasStableIds && hasSelectionIds) {
+        return (
+          item.categoryId === stableIds.categoryId &&
+          item.kinkId === stableIds.kinkId &&
+          item.fieldId === stableIds.fieldId
+        )
+      }
+
+      return (
+        item.category === categoryName &&
+        item.kink === kinkName &&
+        item.field === field
+      )
+    },
+    [categoryName, enhancedKinks, kinkName]
+  )
+
   const handleOpenComment = (field: string) => {
     const stableIds = getStableIdsFromOriginal(
       enhancedKinks,
@@ -42,12 +76,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
       field
     )
 
-    let kinkSelection = selection.find(
-      (s) =>
-        s.categoryId === stableIds.categoryId &&
-        s.kinkId === stableIds.kinkId &&
-        s.fieldId === stableIds.fieldId
-    )
+    let kinkSelection = selection.find((s) => matchesSelection(s, field))
 
     if (!kinkSelection) {
       const newSelection: Selection = {
@@ -97,28 +126,9 @@ const KinkRow: React.FC<KinkRowProps> = ({
         <div className="kink-actions">
           {' '}
           {fields.map((field) => {
-            const stableIds = getStableIdsFromOriginal(
-              enhancedKinks,
-              categoryName,
-              kinkName,
-              field
+            const kinkSelection = selection.find((s) =>
+              matchesSelection(s, field)
             )
-
-            const kinkSelection = selection.find((s) => {
-              if (s.categoryId && s.kinkId && s.fieldId) {
-                return (
-                  s.categoryId === stableIds.categoryId &&
-                  s.kinkId === stableIds.kinkId &&
-                  s.fieldId === stableIds.fieldId
-                )
-              }
-
-              return (
-                s.category === categoryName &&
-                s.kink === kinkName &&
-                s.field === field
-              )
-            })
 
             const hasComment =
               kinkSelection?.comment && kinkSelection.comment.trim().length > 0

@@ -197,9 +197,12 @@ const MonacoKinkListEditor = forwardRef<
       },
       formatCode: () => {
         if (editorRef.current) {
-          const formatted = formatKinkListText(value)
+          const currentValue = editorRef.current.getValue()
+          const formatted = formatKinkListText(currentValue)
           onChange(formatted)
-          editorRef.current.setValue(formatted)
+          if (formatted !== currentValue) {
+            editorRef.current.setValue(formatted)
+          }
         }
       },
       insertSnippet: (snippet: string) => {

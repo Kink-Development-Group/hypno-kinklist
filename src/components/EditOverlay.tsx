@@ -32,30 +32,46 @@ const EditOverlay: React.FC = () => {
 
   const [kinksText, setKinksText] = useState<string>(originalKinksText)
   const editorRef = useRef<AdvancedKinkListEditorRef>(null)
+  const previousBodyStylesRef = useRef<{
+    overflow: string
+    touchAction: string
+  } | null>(null)
   const errorHandler = useErrorHandler()
   const { theme } = useTheme()
 
+  const restoreBodyStyles = useCallback(() => {
+    if (!previousBodyStylesRef.current) {
+      return
+    }
+
+    document.body.style.overflow = previousBodyStylesRef.current.overflow
+    document.body.style.touchAction = previousBodyStylesRef.current.touchAction
+    previousBodyStylesRef.current = null
+  }, [])
+
   // Focus management & Body-Scroll-Lock für mobiles Overlay
   useEffect(() => {
-    if (isEditOverlayOpen) {
-      // Fokus auf Editor setzen
-      if (editorRef.current) {
-        editorRef.current.focus()
-      }
-      // Body-Scroll verhindern (z.B. auf Mobilgeräten)
-      document.body.style.overflow = 'hidden'
-      document.body.style.touchAction = 'none'
-    } else {
-      // Body-Scroll wieder erlauben
-      document.body.style.overflow = ''
-      document.body.style.touchAction = ''
+    if (!isEditOverlayOpen) {
+      restoreBodyStyles()
+      return
     }
-    // Cleanup falls Komponente unmounted wird
-    return () => {
-      document.body.style.overflow = ''
-      document.body.style.touchAction = ''
+
+    // Fokus auf Editor setzen
+    if (editorRef.current) {
+      editorRef.current.focus()
     }
-  }, [isEditOverlayOpen])
+
+    previousBodyStylesRef.current = {
+      overflow: document.body.style.overflow,
+      touchAction: document.body.style.touchAction,
+    }
+
+    // Body-Scroll verhindern (z.B. auf Mobilgeräten)
+    document.body.style.overflow = 'hidden'
+    document.body.style.touchAction = 'none'
+
+    return restoreBodyStyles
+  }, [isEditOverlayOpen, restoreBodyStyles])
 
   const handleClose = useCallback(() => {
     setIsEditOverlayOpen(false)

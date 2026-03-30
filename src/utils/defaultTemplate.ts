@@ -20,29 +20,26 @@ const ensureMultilingualTemplate = (template: string): string => {
  * @throws Error wenn das Laden fehlschlägt
  */
 export const loadDefaultKinklistFromServer = async (): Promise<string> => {
-  try {
-    // In tests or when window.location is not available, fail fast
-    if (typeof window === 'undefined' || !window.location) {
-      throw new Error('Not running in browser environment')
-    }
-
-    const defaultTemplateUrl = new URL(
-      'defaultList/kinks.klist',
-      `${window.location.origin}${import.meta.env.BASE_URL}`
-    )
-
-    const response = await fetch(defaultTemplateUrl)
-    if (!response.ok) {
-      throw new Error(
-        `Failed to load default template: ${response.status} ${response.statusText}`
-      )
-    }
-    const text = await response.text()
-    debugLog('Successfully loaded default kinks.klist from server')
-    return text
-  } catch (error) {
-    throw error
+  // In tests or when window.location is not available, fail fast
+  if (typeof window === 'undefined' || !window.location) {
+    throw new Error('Not running in browser environment')
   }
+
+  const defaultTemplateUrl = new URL(
+    'defaultList/kinks.klist',
+    `${window.location.origin}${import.meta.env.BASE_URL}`
+  )
+
+  const response = await fetch(defaultTemplateUrl)
+  if (!response.ok) {
+    throw new Error(
+      `Failed to load default template: ${response.status} ${response.statusText}`
+    )
+  }
+
+  const text = await response.text()
+  debugLog('Successfully loaded default kinks.klist from server')
+  return text
 }
 
 /**
