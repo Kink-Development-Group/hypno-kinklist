@@ -372,6 +372,11 @@
 }
 
 // Extra small devices (landscape phones, less than 480px)
+// HINWEIS:
+// Dieser zweite @media (max-width: 479px)-Block ergänzt bewusst den früheren
+// Abschnitt weiter oben in der Datei mit zusätzlichen Header-/Control-Anpassungen.
+// Bitte neue <480px-Regeln möglichst in einem der beiden bestehenden Blöcke
+// thematisch einordnen, damit die Reihenfolge und Überschreibungen nachvollziehbar bleiben.
 @media (max-width: 479px) {
   .header-controls {
     margin-bottom: 12px;

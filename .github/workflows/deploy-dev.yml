@@ -77,8 +77,8 @@ jobs:
           set cmd:fail-exit yes
           # WICHTIG: Verwende ftp:// für explizites TLS auf Port 21
           open -u "$FTP_USER_DEV","$FTP_PASS_DEV" ftp://$FTP_HOST:21
-          mkdir -p kinklist_hypno
-          cd kinklist_hypno
+          mkdir -p kinklist_hypno_dev
+          cd kinklist_hypno_dev
           mirror -R --delete --verbose ./dist/ .
           bye
           EOF

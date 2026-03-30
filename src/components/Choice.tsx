@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import { Selection } from '../types'
 import { getStableIdsFromOriginal } from '../utils/multilingualTemplates'
-import Tooltip from './Tooltip'
 
 interface ChoiceProps {
   field: string
@@ -158,34 +157,31 @@ const Choice: React.FC<ChoiceProps> = ({
         if (translatedLevelName === `legend.${level.key}`)
           translatedLevelName = levelName
         return (
-          <Tooltip
+          <button
             key={`${categoryName}-${kinkName}-${field}-${levelName}`}
-            content={t('choice.levelFor', {
+            ref={(el) => {
+              buttonRefs.current[index] = el
+            }}
+            className={`choice ${level.class} ${isSelected ? 'selected' : ''}`}
+            data-level={levelName}
+            data-level-int={index}
+            onClick={() => handleClick(levelName)}
+            onKeyDown={(e) => handleKeyDown(e, levelName)}
+            type="button"
+            role="radio"
+            aria-checked={isSelected ? true : false}
+            aria-label={t('choice.levelFor', {
               levelName: translatedLevelName,
               kinkName,
               field,
             })}
-          >
-            <button
-              ref={(el) => {
-                buttonRefs.current[index] = el
-              }}
-              className={`choice ${level.class} ${isSelected ? 'selected' : ''}`}
-              data-level={levelName}
-              data-level-int={index}
-              onClick={() => handleClick(levelName)}
-              onKeyDown={(e) => handleKeyDown(e, levelName)}
-              type="button"
-              role="radio"
-              aria-checked={isSelected ? true : false}
-              aria-label={t('choice.levelFor', {
-                levelName: translatedLevelName,
-                kinkName,
-                field,
-              })}
-              tabIndex={isSelected ? 0 : -1}
-            />
-          </Tooltip>
+            title={t('choice.levelFor', {
+              levelName: translatedLevelName,
+              kinkName,
+              field,
+            })}
+            tabIndex={isSelected ? 0 : -1}
+          />
         )
       })}
     </div>

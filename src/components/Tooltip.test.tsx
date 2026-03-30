@@ -1,0 +1,90 @@
+import { fireEvent, render, screen } from '@testing-library/react'
+import { act } from 'react'
+import { afterEach, describe, expect, test, vi } from 'vitest'
+import Tooltip from './Tooltip'
+
+describe('Tooltip', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  test('appears on focus after the configured delay', () => {
+    vi.useFakeTimers()
+
+    render(
+      <Tooltip content="Tooltip content" delay={100}>
+        <button type="button">Trigger</button>
+      </Tooltip>
+    )
+
+    const trigger = screen.getByRole('button', { name: 'Trigger' })
+    fireEvent.focus(trigger)
+
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
+
+    act(() => {
+      vi.advanceTimersByTime(100)
+    })
+
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Tooltip content')
+    expect(trigger).toHaveAttribute('aria-describedby')
+  })
+
+  test('closes on blur and mouseleave', () => {
+    render(
+      <Tooltip content="Tooltip content">
+        <button type="button">Trigger</button>
+      </Tooltip>
+    )
+
+    const trigger = screen.getByRole('button', { name: 'Trigger' })
+
+    fireEvent.mouseEnter(trigger)
+    expect(screen.getByRole('tooltip')).toBeInTheDocument()
+
+    fireEvent.mouseLeave(trigger)
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
+
+    fireEvent.focus(trigger)
+    expect(screen.getByRole('tooltip')).toBeInTheDocument()
+
+    fireEvent.blur(trigger)
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
+  })
+
+  test('closes on escape and removes aria-describedby', () => {
+    render(
+      <Tooltip content="Tooltip content">
+        <button type="button">Trigger</button>
+      </Tooltip>
+    )
+
+    const trigger = screen.getByRole('button', { name: 'Trigger' })
+
+    fireEvent.focus(trigger)
+    expect(screen.getByRole('tooltip')).toBeInTheDocument()
+    expect(trigger).toHaveAttribute('aria-describedby')
+
+    fireEvent.keyDown(trigger, { key: 'Escape' })
+
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
+    expect(trigger).not.toHaveAttribute('aria-describedby')
+  })
+
+  test('renders portal content into document.body', () => {
+    render(
+      <div data-testid="wrapper">
+        <Tooltip content="Tooltip content">
+          <button type="button">Trigger</button>
+        </Tooltip>
+      </div>
+    )
+
+    fireEvent.mouseEnter(screen.getByRole('button', { name: 'Trigger' }))
+
+    const tooltip = screen.getByRole('tooltip')
+
+    expect(document.body).toContainElement(tooltip)
+    expect(screen.getByTestId('wrapper')).not.toContainElement(tooltip)
+  })
+})

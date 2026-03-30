@@ -159,4 +159,49 @@ describe('importUtils', () => {
       },
     ])
   })
+
+  test('convertFromExportData normalizes imported selection levels from stable class values', () => {
+    const exportDataWithStableLevelValues: ExportData = {
+      ...validExportData,
+      levels: {
+        Favorite: {
+          name: 'Favorite',
+          color: '#00ff00',
+          class: 'favorite',
+        },
+        Maybe: {
+          name: 'Maybe',
+          color: '#ffff00',
+          class: 'maybe',
+        },
+      },
+      categories: [
+        {
+          name: 'Category A',
+          fields: ['Self'],
+          kinks: [
+            {
+              name: 'Kink A',
+              selections: {
+                Self: { level: 'favorite' },
+              },
+            },
+          ],
+        },
+      ],
+    }
+
+    const converted = convertFromExportData(exportDataWithStableLevelValues)
+
+    expect(converted.selection).toEqual([
+      {
+        category: 'Category A',
+        kink: 'Kink A',
+        field: 'Self',
+        value: 'Favorite',
+        comment: undefined,
+        showField: false,
+      },
+    ])
+  })
 })

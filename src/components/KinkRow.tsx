@@ -12,7 +12,6 @@ interface KinkRowProps {
   kinkName: string
   fields: string[]
   description?: string
-  forceInlineTooltip?: boolean // Neu: für Modals/Overlays
 }
 
 const KinkRow: React.FC<KinkRowProps> = ({

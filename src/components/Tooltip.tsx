@@ -3,6 +3,7 @@ import React, {
   ReactElement,
   ReactNode,
   useCallback,
+  useEffect,
   useId,
   useRef,
   useState,
@@ -87,6 +88,14 @@ const Tooltip: React.FC<TooltipProps> = ({
     },
     [childProps]
   )
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [])
 
   // ESC schließt Tooltip
   const handleKeyDown = (e: React.KeyboardEvent) => {

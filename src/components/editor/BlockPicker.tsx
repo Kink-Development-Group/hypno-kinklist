@@ -1,12 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Tooltip from '../Tooltip'
-import {
-  getBlocksByCategory,
-  getPasteableBlocks,
-  PasteableBlock,
-  searchBlocks,
-} from './EditorUtils'
+import { getPasteableBlocks, PasteableBlock } from './EditorUtils'
 
 const ALL_CATEGORY_VALUE = 'all'
 
@@ -44,20 +39,23 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
 
     // Nach Kategorie filtern
     if (selectedCategory !== ALL_CATEGORY_VALUE) {
-      result = getBlocksByCategory(selectedCategory)
+      result = result.filter((block) => block.category === selectedCategory)
     }
 
     // Nach Suchbegriff filtern
     if (searchQuery) {
-      result = searchBlocks(searchQuery).filter(
+      const lowerQuery = searchQuery.toLowerCase()
+      result = result.filter(
         (block) =>
-          selectedCategory === ALL_CATEGORY_VALUE ||
-          block.category === selectedCategory
+          block.name.toLowerCase().includes(lowerQuery) ||
+          block.description.toLowerCase().includes(lowerQuery) ||
+          block.category.toLowerCase().includes(lowerQuery) ||
+          block.tags.some((tag) => tag.toLowerCase().includes(lowerQuery))
       )
     }
 
     setFilteredBlocks(result)
-  }, [selectedCategory, searchQuery, blocks, t])
+  }, [selectedCategory, searchQuery, blocks])
 
   // Eindeutige Kategorien für Filter
   const categoryOptions = [

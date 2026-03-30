@@ -22,6 +22,9 @@ export const convertFromExportData = (
     }
   })
 
+  const levelEntries = Object.entries(levels)
+  const defaultLevel = levelEntries[0]?.[0] ?? ''
+
   // Konvertiere Categories zu KinksData
   const kinks: KinksData = {}
   exportData.categories.forEach((category) => {
@@ -38,11 +41,19 @@ export const convertFromExportData = (
   exportData.categories.forEach((category) => {
     category.kinks.forEach((kink) => {
       Object.entries(kink.selections).forEach(([field, sel]) => {
+        const normalizedLevel =
+          levelEntries.find(
+            ([levelName, level]) =>
+              levelName === sel.level ||
+              level.key === sel.level ||
+              level.class === sel.level
+          )?.[0] ?? defaultLevel
+
         selection.push({
           category: category.name,
           kink: kink.name,
           field: field,
-          value: sel.level,
+          value: normalizedLevel,
           comment: sel.comment,
           showField: category.fields.length > 1,
         })
