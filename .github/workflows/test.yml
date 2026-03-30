@@ -6,8 +6,6 @@ on:
       - main
       - dev
   push:
-    branches:
-      - '**'
     branches-ignore:
       - main
       - dev

@@ -88,6 +88,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
               field={field}
               categoryName={categoryName}
               kinkName={kinkName}
+              showField={fields.length > 1}
             />
           </div>
         </td>

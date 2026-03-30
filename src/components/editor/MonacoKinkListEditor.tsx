@@ -304,7 +304,6 @@ const MonacoKinkListEditor = forwardRef<
         <Editor
           height={height}
           defaultLanguage={languageId}
-          defaultValue={value}
           value={value}
           onChange={(newValue) => onChange(newValue || '')}
           onMount={handleEditorDidMount}

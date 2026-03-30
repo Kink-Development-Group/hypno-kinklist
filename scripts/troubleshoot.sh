@@ -9,8 +9,19 @@ echo "======================================"
 # Check build directory
 echo ""
 echo "📁 Checking build directory..."
-if [ -d "./build" ]; then
-    echo "✅ Build directory exists"
+if [ -d "./dist" ]; then
+    echo "✅ Build directory exists (./dist)"
+    echo "📋 Build contents:"
+    ls -la ./dist/
+    
+    if [ -f "./dist/index.html" ]; then
+        echo "✅ index.html found"
+        echo "📏 Size: $(du -h ./dist/index.html | cut -f1)"
+    else
+        echo "❌ index.html NOT found in ./dist"
+    fi
+elif [ -d "./build" ]; then
+    echo "✅ Build directory exists (./build)"
     echo "📋 Build contents:"
     ls -la ./build/
     
@@ -18,10 +29,10 @@ if [ -d "./build" ]; then
         echo "✅ index.html found"
         echo "📏 Size: $(du -h ./build/index.html | cut -f1)"
     else
-        echo "❌ index.html NOT found"
+        echo "❌ index.html NOT found in ./build"
     fi
 else
-    echo "❌ Build directory does not exist"
+    echo "❌ Build directory does not exist (checked ./dist and ./build)"
     echo "💡 Run 'npm run build' first"
 fi
 

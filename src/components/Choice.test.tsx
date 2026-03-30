@@ -7,6 +7,7 @@ const mockProps = {
   field: 'TestField',
   categoryName: 'TestCategory',
   kinkName: 'TestKink',
+  showField: false,
 }
 
 describe('Choice Component', () => {

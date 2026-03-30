@@ -7,9 +7,9 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 export default defineConfig([
   globalIgnores(['dist/', '**/*.d.ts']),
   ...typescriptEslint.configs['flat/recommended'],
+  eslintConfigPrettier,
   {
     files: ['**/*.{ts,tsx,mts,cts}'],
-    extends: [eslintConfigPrettier],
     plugins: {
       'react-hooks': reactHooks,
       prettier: prettierPlugin,

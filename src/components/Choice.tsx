@@ -9,9 +9,15 @@ interface ChoiceProps {
   field: string
   categoryName: string
   kinkName: string
+  showField: boolean
 }
 
-const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
+const Choice: React.FC<ChoiceProps> = ({
+  field,
+  categoryName,
+  kinkName,
+  showField,
+}) => {
   const { levels, selection, setSelection, enhancedKinks } = useKinklist()
   const { t } = useTranslation()
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([])
@@ -105,7 +111,7 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
           kink: kinkName,
           field: field,
           value: levelName,
-          showField: true,
+          showField,
           // Set stable IDs for new items
           categoryId: stableIds.categoryId,
           kinkId: stableIds.kinkId,
@@ -116,7 +122,15 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
 
       setSelection(updatedSelection)
     },
-    [categoryName, kinkName, field, selection, setSelection, enhancedKinks]
+    [
+      categoryName,
+      kinkName,
+      field,
+      selection,
+      setSelection,
+      enhancedKinks,
+      showField,
+    ]
   )
 
   // Handled keyboard events for accessibility

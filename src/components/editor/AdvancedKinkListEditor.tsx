@@ -1,5 +1,6 @@
 import React, {
   forwardRef,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -80,52 +81,60 @@ const AdvancedKinkListEditor = forwardRef<
     }, [initialValue])
 
     // Validierungsresultate aktualisieren
-    const handleValidationComplete = (errors: string[], warnings: string[]) => {
-      setValidationErrors(errors)
-      setValidationWarnings(warnings)
-    }
+    const handleValidationComplete = useCallback(
+      (errors: string[], warnings: string[]) => {
+        setValidationErrors(errors)
+        setValidationWarnings(warnings)
+      },
+      []
+    )
 
     // Änderungen im Editor verarbeiten
-    const handleChange = (newValue: string) => {
-      setValue(newValue)
+    const handleChange = useCallback(
+      (newValue: string) => {
+        setValue(newValue)
 
-      // Validierung durchführen
-      if (showValidation) {
-        const validation = validateKinkListText(newValue)
-        setValidationErrors(validation.errors)
-        setValidationWarnings(validation.warnings)
-      }
+        // Validierung durchführen
+        if (showValidation) {
+          const validation = validateKinkListText(newValue)
+          setValidationErrors(validation.errors)
+          setValidationWarnings(validation.warnings)
+        }
 
-      // Callback aufrufen
-      if (onChange) {
-        onChange(newValue)
-      }
-    }
-
-    // Tastaturkürzel für Speichern und andere Aktionen
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Strg+Enter zum Speichern
-      if (e.ctrlKey && e.key === 'Enter' && onSave) {
-        e.preventDefault()
-        onSave(value)
-      }
-
-      // Alt+Shift+F zum Formatieren
-      if (e.altKey && e.shiftKey && e.key === 'F') {
-        e.preventDefault()
-        handleFormat()
-      }
-    }
+        // Callback aufrufen
+        if (onChange) {
+          onChange(newValue)
+        }
+      },
+      [onChange, showValidation]
+    )
 
     // Formatierung durchführen
-    const handleFormat = () => {
+    const handleFormat = useCallback(() => {
       const formatted = formatKinkListText(value)
       setValue(formatted)
       if (onChange) {
         onChange(formatted)
       }
-    }
+    }, [onChange, value])
+
+    // Tastaturkürzel für Speichern und andere Aktionen
+    const handleKeyDown = useCallback(
+      (e: KeyboardEvent) => {
+        // Strg+Enter zum Speichern
+        if (e.ctrlKey && e.key === 'Enter' && onSave) {
+          e.preventDefault()
+          onSave(value)
+        }
+
+        // Alt+Shift+F zum Formatieren
+        if (e.altKey && e.shiftKey && e.key === 'F') {
+          e.preventDefault()
+          handleFormat()
+        }
+      },
+      [handleFormat, onSave, value]
+    )
 
     // Keydown-Event-Listener hinzufügen/entfernen
     useEffect(() => {

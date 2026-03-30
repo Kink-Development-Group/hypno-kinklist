@@ -75,6 +75,18 @@ export const validateExportData = (data: any): data is ExportData => {
     return false
   }
 
+  for (const level of Object.values(data.levels)) {
+    if (
+      !level ||
+      typeof level !== 'object' ||
+      typeof (level as any).name !== 'string' ||
+      typeof (level as any).color !== 'string' ||
+      typeof (level as any).class !== 'string'
+    ) {
+      return false
+    }
+  }
+
   // Prüfe Categories
   if (!Array.isArray(data.categories)) {
     return false
