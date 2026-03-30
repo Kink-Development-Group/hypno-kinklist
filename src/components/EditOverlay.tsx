@@ -84,9 +84,7 @@ const EditOverlay: React.FC = () => {
           const newSelection = getAllKinks(resolvedKinks, levels, selection)
           setSelection(newSelection)
         } else {
-          errorHandler(
-            'Failed to parse multilingual template - no data returned'
-          )
+          errorHandler(t('editor.errors.multilingualParseFailed'))
           return
         }
       } else {
@@ -102,15 +100,12 @@ const EditOverlay: React.FC = () => {
           const newSelection = getAllKinks(parsedKinks, levels, selection)
           setSelection(newSelection)
         } else {
-          errorHandler('Failed to parse standard template - no data returned')
+          errorHandler(t('editor.errors.standardParseFailed'))
           return
         }
       }
     } catch (error) {
-      errorHandler(
-        'Ein Fehler ist beim Versuch, den eingegebenen Text zu analysieren, aufgetreten. Bitte korrigieren Sie ihn und versuchen Sie es erneut.',
-        error
-      )
+      errorHandler(t('editor.errors.parseFailed'), error)
       return
     }
 
@@ -126,6 +121,7 @@ const EditOverlay: React.FC = () => {
     setEnhancedKinks,
     i18n.language,
     errorHandler,
+    t,
   ])
 
   const handleOverlayClick = useCallback(

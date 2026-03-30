@@ -100,6 +100,11 @@
       "warnings": "Varningar",
       "moreItems": "fler objekt"
     },
+    "errors": {
+      "multilingualParseFailed": "Den flerspråkiga mallen kunde inte tolkas. Kontrollera syntaxen och försök igen.",
+      "standardParseFailed": "Mallen kunde inte tolkas. Kontrollera syntaxen och försök igen.",
+      "parseFailed": "Den inmatade texten kunde inte tolkas. Kontrollera syntaxen eller öppna valideringspanelen och försök igen."
+    },
     "shortcuts": {
       "description": "Kortkommandon:",
       "autocomplete": "Autokomplettering",

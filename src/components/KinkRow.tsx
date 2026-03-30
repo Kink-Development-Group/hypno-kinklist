@@ -56,7 +56,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
         kink: kinkName,
         field: field,
         value: Object.keys(levels)[0],
-        showField: true,
+        showField: fields.length > 1,
         categoryId: stableIds.categoryId,
         kinkId: stableIds.kinkId,
         fieldId: stableIds.fieldId,
@@ -136,7 +136,6 @@ const KinkRow: React.FC<KinkRowProps> = ({
                     kinkSelection.comment ? kinkSelection.comment.length : 0
                   }
                   onClick={() => handleOpenComment(field)}
-                  aria-describedby={`comment-tooltip-${categoryName}-${kinkName}-${field}`}
                   aria-label={t('comments.forField', {
                     kinkName,
                     field,

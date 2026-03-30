@@ -26,7 +26,12 @@ export const loadDefaultKinklistFromServer = async (): Promise<string> => {
       throw new Error('Not running in browser environment')
     }
 
-    const response = await fetch('/defaultList/kinks.klist')
+    const defaultTemplateUrl = new URL(
+      'defaultList/kinks.klist',
+      `${window.location.origin}${import.meta.env.BASE_URL}`
+    )
+
+    const response = await fetch(defaultTemplateUrl)
     if (!response.ok) {
       throw new Error(
         `Failed to load default template: ${response.status} ${response.statusText}`

@@ -7,9 +7,10 @@ on:
       - dev
   push:
     branches:
-      - "**"
-      - "!main"
-      - "!dev"
+      - '**'
+    branches-ignore:
+      - main
+      - dev
 
 concurrency:
   group: quality-${{ github.workflow }}-${{ github.ref }}

@@ -100,6 +100,11 @@
       "warnings": "Warnings",
       "moreItems": "more items"
     },
+    "errors": {
+      "multilingualParseFailed": "The multilingual template could not be parsed. Check the syntax and try again.",
+      "standardParseFailed": "The template could not be parsed. Check the syntax and try again.",
+      "parseFailed": "The entered text could not be parsed. Check the syntax or open the validation panel, then try again."
+    },
     "shortcuts": {
       "description": "Shortcuts:",
       "autocomplete": "Autocomplete",

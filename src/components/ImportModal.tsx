@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
@@ -46,29 +45,6 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
     if (!e.currentTarget.contains(e.relatedTarget as Node)) {
       setShowDropzone(false)
     }
-  }, [])
-
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setShowDropzone(false)
-
-    const files = Array.from(e.dataTransfer.files)
-    if (files.length === 0) return
-
-    const file = files[0]
-    const allowedTypes = ['.json', '.xml', '.csv']
-    const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase()
-
-    if (!allowedTypes.includes(fileExtension)) {
-      setError(
-        `${t('import.errors.unsupportedFileType', { extension: fileExtension, allowed: allowedTypes.join(', ') })}`
-      )
-      return
-    }
-
-    const text = await file.text()
-    await processImportText(text, file.name)
   }, [])
 
   const processImportText = useCallback(
@@ -144,6 +120,35 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
     [setKinks, setLevels, setSelection, setOriginalKinksText, onClose, t]
   )
 
+  const handleDrop = useCallback(
+    async (e: React.DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      setShowDropzone(false)
+
+      const files = Array.from(e.dataTransfer.files)
+      if (files.length === 0) return
+
+      const file = files[0]
+      const allowedTypes = ['.json', '.xml', '.csv']
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase()
+
+      if (!allowedTypes.includes(fileExtension)) {
+        setError(
+          t('import.errors.unsupportedFileType', {
+            extension: fileExtension,
+            allowed: allowedTypes.join(', '),
+          })
+        )
+        return
+      }
+
+      const text = await file.text()
+      await processImportText(text, file.name)
+    },
+    [processImportText, t]
+  )
+
   const handleFileSelect = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0]
@@ -154,7 +159,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
 
       event.target.value = ''
     },
-    [processImportText, t]
+    [processImportText]
   )
 
   const handleTextImport = useCallback(async () => {

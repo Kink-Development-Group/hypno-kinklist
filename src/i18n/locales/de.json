@@ -100,6 +100,11 @@
       "warnings": "Warnungen",
       "moreItems": "weitere"
     },
+    "errors": {
+      "multilingualParseFailed": "Die mehrsprachige Vorlage konnte nicht analysiert werden. Bitte prüfen Sie die Syntax und versuchen Sie es erneut.",
+      "standardParseFailed": "Die Vorlage konnte nicht analysiert werden. Bitte prüfen Sie die Syntax und versuchen Sie es erneut.",
+      "parseFailed": "Der eingegebene Text konnte nicht analysiert werden. Bitte prüfen Sie die Syntax oder öffnen Sie das Validierungspanel und versuchen Sie es erneut."
+    },
     "shortcuts": {
       "description": "Shortcuts:",
       "autocomplete": "Autocomplete",

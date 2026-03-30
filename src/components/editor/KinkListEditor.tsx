@@ -251,22 +251,6 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
           }, 200)
         }
 
-        // Test syntax highlighting with a sample text
-        if (model && value.length === 0) {
-          const testText = `#Test Category
-(Test Field)
-* Test neutral kink
-+ Test positive kink
-- Test negative kink
-? Test maybe kink without space
-? This is a description with space after question mark
-// This is a comment`
-          setTimeout(() => {
-            editor.setValue(testText)
-            onChange(testText)
-          }, 300)
-        }
-
         // Configure editor options
         editor.updateOptions({
           minimap: { enabled: false },
@@ -299,30 +283,34 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
           },
         })
 
-        monaco.languages.registerHoverProvider(KINK_LIST_LANGUAGE_ID, {
-          provideHover: (model, position) => {
-            const line = model.getLineContent(position.lineNumber)
-            const tokens = monaco.editor.tokenize(line, KINK_LIST_LANGUAGE_ID)
+        if (import.meta.env.DEV) {
+          monaco.languages.registerHoverProvider(KINK_LIST_LANGUAGE_ID, {
+            provideHover: (model, position) => {
+              const line = model.getLineContent(position.lineNumber)
+              const tokens = monaco.editor.tokenize(line, KINK_LIST_LANGUAGE_ID)
 
-            return {
-              range: new monaco.Range(
-                position.lineNumber,
-                1,
-                position.lineNumber,
-                line.length + 1
-              ),
-              contents: [
-                { value: `**Line:** ${line}` },
-                {
-                  value: `**Position:** ${position.lineNumber}:${position.column}`,
-                },
-                {
-                  value: `**Tokens:** ${JSON.stringify(tokens[0] || [], null, 2)}`,
-                },
-              ],
-            }
-          },
-        }) // Add keyboard shortcuts
+              return {
+                range: new monaco.Range(
+                  position.lineNumber,
+                  1,
+                  position.lineNumber,
+                  line.length + 1
+                ),
+                contents: [
+                  { value: `**Line:** ${line}` },
+                  {
+                    value: `**Position:** ${position.lineNumber}:${position.column}`,
+                  },
+                  {
+                    value: `**Tokens:** ${JSON.stringify(tokens[0] || [], null, 2)}`,
+                  },
+                ],
+              }
+            },
+          })
+        }
+
+        // Add keyboard shortcuts
         editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, () => {
           editor.trigger('keyboard', 'editor.action.triggerSuggest', {})
         })
@@ -345,7 +333,7 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
         }) // Focus the editor
         editor.focus()
       },
-      [validateContent, onChange, getTheme, value.length]
+      [validateContent, onChange, getTheme]
     )
 
     // Update validation when value changes externally

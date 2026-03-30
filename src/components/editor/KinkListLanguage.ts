@@ -145,7 +145,9 @@ let themesRegistered = false
 export const registerKinkListLanguage = (monaco) => {
   const languageId = 'kinklist'
   if (isLanguageRegistered) {
-    console.log('Language already registered:', languageId)
+    if (import.meta.env.DEV) {
+      console.log('Language already registered:', languageId)
+    }
     return languageId
   }
 

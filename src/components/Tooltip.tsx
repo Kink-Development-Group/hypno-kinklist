@@ -3,6 +3,7 @@ import React, {
   ReactElement,
   ReactNode,
   useCallback,
+  useId,
   useRef,
   useState,
 } from 'react'
@@ -36,6 +37,7 @@ const Tooltip: React.FC<TooltipProps> = ({
   delay = 0,
 }) => {
   const triggerRef = useRef<HTMLElement | null>(null)
+  const tooltipId = useId()
   const [show, setShow] = useState(false)
   const [tooltipPos, setTooltipPos] = useState<{
     top: number
@@ -46,6 +48,9 @@ const Tooltip: React.FC<TooltipProps> = ({
   }>()
   const timeoutRef = useRef<number | null>(null)
   const childProps = children.props
+  const describedBy = [childProps['aria-describedby'], show ? tooltipId : null]
+    .filter(Boolean)
+    .join(' ')
 
   const showTooltip = useCallback(() => {
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current)
@@ -107,6 +112,8 @@ const Tooltip: React.FC<TooltipProps> = ({
     show && tooltipPos
       ? ReactDOM.createPortal(
           <div
+            id={tooltipId}
+            role="tooltip"
             className={`kink-tooltip-text kink-tooltip-portal ${
               isHeaderElement() ? 'header-tooltip' : ''
             } ${className}`}
@@ -156,7 +163,7 @@ const Tooltip: React.FC<TooltipProps> = ({
       childProps.onKeyDown?.(e)
     },
     tabIndex: childProps.tabIndex ?? 0,
-    'aria-describedby': show ? 'custom-tooltip' : undefined,
+    'aria-describedby': describedBy || undefined,
   })
 
   return (

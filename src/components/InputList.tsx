@@ -5,7 +5,6 @@ import KinkCategory from './KinkCategory'
 const InputList: React.FC = () => {
   const { kinks } = useKinklist()
   const [columnCount, setColumnCount] = useState<number>(1)
-  const [columns, setColumns] = useState<string[][]>([])
 
   // Calculate column count based on screen width
   useEffect(() => {
@@ -29,10 +28,10 @@ const InputList: React.FC = () => {
     }
   }, [])
 
-  // Distributor for categories into columns - more React way
-  // This avoids direct DOM manipulation
-  useMemo(() => {
-    if (Object.keys(kinks).length === 0 || columnCount <= 0) return
+  const columns = useMemo(() => {
+    if (Object.keys(kinks).length === 0 || columnCount <= 0) {
+      return []
+    }
 
     // Estimate heights of categories based on number of rows
     const categoryEstimates: Record<string, number> = {}
@@ -58,8 +57,9 @@ const InputList: React.FC = () => {
       columnHeights[minHeightColIndex] += categoryEstimates[catName]
     })
 
-    setColumns(newColumns)
+    return newColumns
   }, [kinks, columnCount])
+
   // Helper function to get column class based on number of columns
   const getColClass = (cols: number): string => {
     const colClasses: Record<number, string> = {
