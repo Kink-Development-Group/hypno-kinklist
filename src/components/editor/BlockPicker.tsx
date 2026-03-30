@@ -8,6 +8,8 @@ import {
   searchBlocks,
 } from './EditorUtils'
 
+const ALL_CATEGORY_VALUE = 'all'
+
 interface BlockPickerProps {
   onSelectBlock: (block: PasteableBlock) => void
   position?: 'bottom' | 'right'
@@ -24,7 +26,8 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
   const { t } = useTranslation()
   const [blocks, setBlocks] = useState<PasteableBlock[]>([])
   const [filteredBlocks, setFilteredBlocks] = useState<PasteableBlock[]>([])
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [selectedCategory, setSelectedCategory] =
+    useState<string>(ALL_CATEGORY_VALUE)
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [expandedBlockId, setExpandedBlockId] = useState<string | null>(null)
 
@@ -40,7 +43,7 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
     let result = blocks
 
     // Nach Kategorie filtern
-    if (selectedCategory !== 'all') {
+    if (selectedCategory !== ALL_CATEGORY_VALUE) {
       result = getBlocksByCategory(selectedCategory)
     }
 
@@ -48,7 +51,7 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
     if (searchQuery) {
       result = searchBlocks(searchQuery).filter(
         (block) =>
-          selectedCategory === t('editor.blocks.all') ||
+          selectedCategory === ALL_CATEGORY_VALUE ||
           block.category === selectedCategory
       )
     }
@@ -57,9 +60,12 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
   }, [selectedCategory, searchQuery, blocks, t])
 
   // Eindeutige Kategorien für Filter
-  const uniqueCategories = [
-    t('editor.blocks.all'),
-    ...new Set(blocks.map((block) => block.category)),
+  const categoryOptions = [
+    { value: ALL_CATEGORY_VALUE, label: t('editor.blocks.all') },
+    ...[...new Set(blocks.map((block) => block.category))].map((category) => ({
+      value: category,
+      label: category,
+    })),
   ]
 
   // Block-Auswahl-Handler
@@ -96,9 +102,9 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
             onChange={(e) => setSelectedCategory(e.target.value)}
             aria-label="Kategorie auswählen"
           >
-            {uniqueCategories.map((category) => (
-              <option key={category} value={category}>
-                {category}
+            {categoryOptions.map((category) => (
+              <option key={category.value} value={category.value}>
+                {category.label}
               </option>
             ))}
           </select>

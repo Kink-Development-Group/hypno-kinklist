@@ -7,7 +7,13 @@ const getThemeStorage = (): Pick<Storage, 'getItem' | 'setItem'> | null => {
     return null
   }
 
-  const storage = window.localStorage
+  let storage: Storage | null = null
+
+  try {
+    storage = window.localStorage
+  } catch {
+    return null
+  }
 
   if (
     storage &&

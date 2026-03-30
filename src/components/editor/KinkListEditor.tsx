@@ -13,6 +13,10 @@ import {
   registerKinkListThemes,
 } from './KinkListLanguage'
 
+const KINK_LIST_LANGUAGE_ID = 'kinklist'
+const KINK_LIST_LIGHT_THEME = 'kink-list-light'
+const KINK_LIST_DARK_THEME = 'kink-list-dark'
+
 export interface KinkListEditorProps {
   value: string
   onChange: (value: string) => void
@@ -128,39 +132,23 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
     const handleBeforeMount: BeforeMount = useCallback(
       (monaco) => {
         if (!isInitializedRef.current) {
-          console.log('=== MONACO EDITOR INITIALIZATION ===')
-
           // Register the kinklist language
-          console.log('1. Registering kinklist language...')
           const languageId = registerKinkListLanguage(monaco)
           registerKinkListThemes(monaco)
-          console.log('Language registered:', languageId)
 
           // Force theme setting immediately after registration
           const currentTheme =
-            theme === 'dark' ? 'kink-list-dark' : 'kink-list-light'
+            theme === 'dark' ? KINK_LIST_DARK_THEME : KINK_LIST_LIGHT_THEME
           if (theme === 'auto') {
             const prefersDark = window.matchMedia(
               '(prefers-color-scheme: dark)'
             ).matches
             monaco.editor.setTheme(
-              prefersDark ? 'kink-list-dark' : 'kink-list-light'
+              prefersDark ? KINK_LIST_DARK_THEME : KINK_LIST_LIGHT_THEME
             )
           } else {
             monaco.editor.setTheme(currentTheme)
           }
-          console.log('2. Theme set to:', currentTheme)
-
-          // Verify language is registered
-          const languages = monaco.languages.getLanguages()
-          console.log(
-            '3. Available languages:',
-            languages.map((l) => l.id)
-          )
-          console.log(
-            'KinkList simple language found:',
-            languages.find((l) => l.id === languageId)
-          )
 
           // Register completion provider for snippets
           monaco.languages.registerCompletionItemProvider(languageId, {
@@ -213,7 +201,6 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
             },
           })
 
-          console.log('=== MONACO EDITOR INITIALIZATION COMPLETE ===')
           isInitializedRef.current = true
         }
       },
@@ -233,16 +220,14 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
     // Determine theme based on system preference if auto
     const getTheme = useCallback(() => {
       if (theme !== 'auto') {
-        return theme === 'dark'
-          ? 'kinklist-simple-dark'
-          : 'kinklist-simple-light'
+        return theme === 'dark' ? KINK_LIST_DARK_THEME : KINK_LIST_LIGHT_THEME
       }
 
       // Auto-detect system theme
       const prefersDark = window.matchMedia(
         '(prefers-color-scheme: dark)'
       ).matches
-      return prefersDark ? 'kinklist-simple-dark' : 'kinklist-simple-light'
+      return prefersDark ? KINK_LIST_DARK_THEME : KINK_LIST_LIGHT_THEME
     }, [theme])
 
     // After editor mount - configure editor
@@ -253,29 +238,16 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
         // Get the model and ensure language is set
         const model = editor.getModel()
         if (model) {
-          console.log('Current model language:', model.getLanguageId())
-
-          // Force set language to kinklist-simple
-          monaco.editor.setModelLanguage(model, 'kinklist-simple')
-          console.log('Set model language to kinklist-simple')
+          monaco.editor.setModelLanguage(model, KINK_LIST_LANGUAGE_ID)
 
           // Set theme AFTER setting the language
-          const currentTheme = getTheme()
-          console.log('Setting theme:', currentTheme)
-          monaco.editor.setTheme(currentTheme)
+          monaco.editor.setTheme(getTheme())
 
           // Force re-tokenization by triggering a model change
           setTimeout(() => {
             const currentValue = model.getValue()
             model.setValue('')
             model.setValue(currentValue)
-
-            // Test tokenization
-            const tokens = monaco.editor.tokenize(
-              currentValue,
-              'kinklist-simple'
-            )
-            console.log('Forced tokenization result:', tokens)
           }, 200)
         }
 
@@ -289,23 +261,9 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
 ? Test maybe kink without space
 ? This is a description with space after question mark
 // This is a comment`
-          console.log('Testing syntax highlighting with sample text')
-          console.log('Sample text:', testText)
-
-          // Immediate test of tokenization
-          const tokens = monaco.editor.tokenize(testText, 'kinklist-simple')
-          console.log('Tokenization test:', tokens)
-
           setTimeout(() => {
             editor.setValue(testText)
             onChange(testText)
-
-            // Check tokenization after setting text
-            const modelTokens = monaco.editor.tokenize(
-              model.getValue(),
-              'kinklist-simple'
-            )
-            console.log('Model tokenization after setValue:', modelTokens)
           }, 300)
         }
 
@@ -341,13 +299,10 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
           },
         })
 
-        monaco.languages.registerHoverProvider('kinklist-simple', {
+        monaco.languages.registerHoverProvider(KINK_LIST_LANGUAGE_ID, {
           provideHover: (model, position) => {
             const line = model.getLineContent(position.lineNumber)
-            const tokens = monaco.editor.tokenize(line, 'kinklist-simple')
-
-            console.log('Hover debug - Line:', line)
-            console.log('Hover debug - Tokens:', tokens)
+            const tokens = monaco.editor.tokenize(line, KINK_LIST_LANGUAGE_ID)
 
             return {
               range: new monaco.Range(
@@ -402,7 +357,7 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
       <div className="kink-list-editor">
         <Editor
           height={height}
-          language="kinklist-simple"
+          language={KINK_LIST_LANGUAGE_ID}
           value={value}
           onChange={handleChange}
           beforeMount={handleBeforeMount}
