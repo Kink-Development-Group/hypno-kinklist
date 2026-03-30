@@ -26,9 +26,7 @@ import { getAppVersion } from '../utils/version'
 import ErrorModal from './ErrorModal'
 import NameModal from './NameModal'
 
-interface AdvancedExportProps {}
-
-const AdvancedExport: React.FC<AdvancedExportProps> = () => {
+const AdvancedExport: React.FC = () => {
   const { t } = useTranslation()
   const { kinks, levels, selection, setKinks, setLevels, setSelection } =
     useKinklist()

@@ -153,7 +153,9 @@ const Choice: React.FC<ChoiceProps> = ({ field, categoryName, kinkName }) => {
             })}
           >
             <button
-              ref={(el) => (buttonRefs.current[index] = el)}
+              ref={(el) => {
+                buttonRefs.current[index] = el
+              }}
               className={`choice ${level.class} ${isSelected ? 'selected' : ''}`}
               data-level={levelName}
               data-level-int={index}

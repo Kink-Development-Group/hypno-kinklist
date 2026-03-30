@@ -151,9 +151,7 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
             >
               <span className="icon">📋</span>
               {t('editor.toolbar.snippets')}
-              <span className="dropdown-arrow">
-                {showSnippets ? '▼' : '▶'}
-              </span>
+              <span className="dropdown-arrow">{showSnippets ? '▼' : '▶'}</span>
             </button>
           </Tooltip>
 

@@ -1,6 +1,44 @@
-import React, { createContext, useState, useContext, useEffect } from 'react'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 
 type ThemeType = 'light' | 'dark'
+
+const getThemeStorage = (): Pick<Storage, 'getItem' | 'setItem'> | null => {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  const storage = window.localStorage
+
+  if (
+    storage &&
+    typeof storage.getItem === 'function' &&
+    typeof storage.setItem === 'function'
+  ) {
+    return storage
+  }
+
+  return null
+}
+
+const getStoredTheme = (): ThemeType | null => {
+  try {
+    const savedTheme = getThemeStorage()?.getItem('theme')
+
+    return savedTheme === 'dark' || savedTheme === 'light'
+      ? (savedTheme as ThemeType)
+      : null
+  } catch {
+    return null
+  }
+}
+
+const persistTheme = (theme: ThemeType): void => {
+  try {
+    getThemeStorage()?.setItem('theme', theme)
+  } catch {
+    // Ignore storage access issues in tests/SSR/private mode.
+  }
+}
 
 interface ThemeContextType {
   theme: ThemeType
@@ -14,17 +52,14 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   // Lese gespeichertes Theme aus dem localStorage oder verwende 'light' als Fallback
   const [theme, setTheme] = useState<ThemeType>(() => {
-    const savedTheme = localStorage.getItem('theme')
-    return savedTheme === 'dark' || savedTheme === 'light'
-      ? (savedTheme as ThemeType)
-      : 'light'
+    return getStoredTheme() ?? 'light'
   })
 
   // Theme wechseln
   const toggleTheme = () => {
     setTheme((prevTheme) => {
       const newTheme = prevTheme === 'light' ? 'dark' : 'light'
-      localStorage.setItem('theme', newTheme)
+      persistTheme(newTheme)
       return newTheme
     })
   }
@@ -39,13 +74,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
 
     const handleChange = () => {
-      if (!localStorage.getItem('theme')) {
+      if (!getStoredTheme()) {
         setTheme(mediaQuery.matches ? 'dark' : 'light')
       }
     }
 
     // Initialisieren
-    if (!localStorage.getItem('theme')) {
+    if (!getStoredTheme()) {
       handleChange()
     }
 

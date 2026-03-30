@@ -21,6 +21,8 @@ const AsyncKinklistProvider: React.FC<AsyncKinklistProviderProps> = ({
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    let isActive = true
+
     const loadTemplate = async () => {
       try {
         setIsLoading(true)
@@ -28,6 +30,10 @@ const AsyncKinklistProvider: React.FC<AsyncKinklistProviderProps> = ({
 
         // Versuche, das Standard-Template vom Server zu laden
         const defaultTemplate = await getDefaultKinklistTemplate()
+
+        if (!isActive) {
+          return
+        }
 
         // Check if the loaded template has multilingual content
         if (hasMultilingualContent(defaultTemplate)) {
@@ -42,6 +48,10 @@ const AsyncKinklistProvider: React.FC<AsyncKinklistProviderProps> = ({
           setTemplate(enhancedTemplate)
         }
       } catch (err) {
+        if (!isActive) {
+          return
+        }
+
         console.error('Fehler beim Laden des Templates:', err)
         setError('Fehler beim Laden des Templates')
 
@@ -49,11 +59,17 @@ const AsyncKinklistProvider: React.FC<AsyncKinklistProviderProps> = ({
         const fallbackTemplate = getEnhancedKinkTemplate()
         setTemplate(fallbackTemplate)
       } finally {
-        setIsLoading(false)
+        if (isActive) {
+          setIsLoading(false)
+        }
       }
     }
 
-    loadTemplate()
+    void loadTemplate()
+
+    return () => {
+      isActive = false
+    }
   }, [])
 
   // Ladezustand anzeigen

@@ -102,7 +102,9 @@ const MonacoKinkListEditor = forwardRef<
 
         // Force tokenization
         setTimeout(() => {
-          model.getLineContent(1) // This triggers tokenization
+          if (model) {
+            model.getLineContent(1) // This triggers tokenization
+          }
         }, 100)
       } catch (error) {
         console.error('Error setting up Monaco editor:', error)

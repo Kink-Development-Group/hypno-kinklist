@@ -11,11 +11,22 @@ import { calculateTooltipPosition } from '../utils/tooltipPosition'
 
 interface TooltipProps {
   content: ReactNode
-  children: ReactElement
+  children: ReactElement<TooltipChildProps>
   className?: string
   preferredPosition?: 'right' | 'left'
   delay?: number
   // Weitere Props nach Bedarf
+}
+
+interface TooltipChildProps {
+  ref?: React.Ref<HTMLElement>
+  onMouseEnter?: (event: React.MouseEvent<HTMLElement>) => void
+  onFocus?: (event: React.FocusEvent<HTMLElement>) => void
+  onMouseLeave?: (event: React.MouseEvent<HTMLElement>) => void
+  onBlur?: (event: React.FocusEvent<HTMLElement>) => void
+  onKeyDown?: (event: React.KeyboardEvent<HTMLElement>) => void
+  tabIndex?: number
+  'aria-describedby'?: string
 }
 
 const Tooltip: React.FC<TooltipProps> = ({
@@ -34,6 +45,7 @@ const Tooltip: React.FC<TooltipProps> = ({
     arrowLeft?: number
   }>()
   const timeoutRef = useRef<number | null>(null)
+  const childProps = children.props
 
   const showTooltip = useCallback(() => {
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current)
@@ -51,6 +63,25 @@ const Tooltip: React.FC<TooltipProps> = ({
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current)
     setShow(false)
   }, [])
+
+  const setTriggerRef = useCallback(
+    (element: HTMLElement | null) => {
+      triggerRef.current = element
+
+      const childRef = childProps.ref
+
+      if (typeof childRef === 'function') {
+        childRef(element)
+        return
+      }
+
+      if (childRef) {
+        ;(childRef as React.MutableRefObject<HTMLElement | null>).current =
+          element
+      }
+    },
+    [childProps]
+  )
 
   // ESC schließt Tooltip
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -103,36 +134,28 @@ const Tooltip: React.FC<TooltipProps> = ({
 
   // Das Trigger-Element mit Tooltip-Events wrappen
   const trigger = cloneElement(children, {
-    ref: (el: HTMLElement | null) => {
-      triggerRef.current = el
-      // children.ref kann ein Ref-Objekt oder eine Callback-Funktion sein
-      const childRef = (children as any).ref
-      if (typeof childRef === 'function') childRef(el)
-      else if (childRef && typeof childRef === 'object') {
-        childRef.current = el
-      }
-    },
-    onMouseEnter: (e: React.MouseEvent) => {
+    ref: setTriggerRef,
+    onMouseEnter: (e: React.MouseEvent<HTMLElement>) => {
       showTooltip()
-      if (children.props.onMouseEnter) children.props.onMouseEnter(e)
+      childProps.onMouseEnter?.(e)
     },
-    onFocus: (e: React.FocusEvent) => {
+    onFocus: (e: React.FocusEvent<HTMLElement>) => {
       showTooltip()
-      if (children.props.onFocus) children.props.onFocus(e)
+      childProps.onFocus?.(e)
     },
-    onMouseLeave: (e: React.MouseEvent) => {
+    onMouseLeave: (e: React.MouseEvent<HTMLElement>) => {
       hideTooltip()
-      if (children.props.onMouseLeave) children.props.onMouseLeave(e)
+      childProps.onMouseLeave?.(e)
     },
-    onBlur: (e: React.FocusEvent) => {
+    onBlur: (e: React.FocusEvent<HTMLElement>) => {
       hideTooltip()
-      if (children.props.onBlur) children.props.onBlur(e)
+      childProps.onBlur?.(e)
     },
-    onKeyDown: (e: React.KeyboardEvent) => {
+    onKeyDown: (e: React.KeyboardEvent<HTMLElement>) => {
       handleKeyDown(e)
-      if (children.props.onKeyDown) children.props.onKeyDown(e)
+      childProps.onKeyDown?.(e)
     },
-    tabIndex: children.props.tabIndex ?? 0,
+    tabIndex: childProps.tabIndex ?? 0,
     'aria-describedby': show ? 'custom-tooltip' : undefined,
   })
 
