@@ -11,6 +11,7 @@ import { KinksData, LevelsData, Selection } from '../types'
 import {
   getAllKinksEnhanced,
   hasMultilingualContent,
+  kinklistDraftStore,
   parseHash,
   parseKinksTextEnhanced,
   updateHash,
@@ -47,6 +48,9 @@ interface KinklistContextType {
     React.SetStateAction<EnhancedKinksData | null>
   >
   refreshKinksForLanguage: () => void
+  hasSavedDraft: boolean
+  savedDraftAt: string | null
+  clearSavedDraft: () => void
 }
 
 // Helper to get translated level names
@@ -100,28 +104,52 @@ export const KinklistProvider: React.FC<{
   const [kinks, setKinks] = useState<KinksData>({})
   const { i18n } = useTranslation()
   const errorHandler = useErrorHandler()
+  const hasHashOnLoad =
+    typeof window !== 'undefined' && window.location.hash.length > 1
+  const initialDraft = useRef(kinklistDraftStore.load())
 
   // Use refs to track state
   const isInitialized = useRef(false)
   const isUserInteraction = useRef(false)
   const hasParsedHash = useRef(false)
+  const userInteractionTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null)
 
   // Use translated levels for initial state
   const [levels, setLevels] = useState<LevelsData>(() => getInitialLevels(i18n))
   const [selection, setSelection] = useState<Selection[]>([])
   const [selectedKink, setSelectedKink] = useState<Selection | null>(null)
-  const [originalKinksText, setOriginalKinksText] =
-    useState<string>(initialKinksText)
+  const [originalKinksText, setOriginalKinksText] = useState<string>(() => {
+    if (hasHashOnLoad) {
+      return initialKinksText
+    }
+
+    return initialDraft.current?.originalKinksText ?? initialKinksText
+  })
   const [isEditOverlayOpen, setIsEditOverlayOpen] = useState<boolean>(false)
   const [isInputOverlayOpen, setIsInputOverlayOpen] = useState<boolean>(false)
   const [isCommentOverlayOpen, setIsCommentOverlayOpen] =
     useState<boolean>(false)
   const [popupIndex, setPopupIndex] = useState<number>(0)
+  const [hasSavedDraft, setHasSavedDraft] = useState<boolean>(
+    () => initialDraft.current !== null
+  )
+  const [savedDraftAt, setSavedDraftAt] = useState<string | null>(
+    () => initialDraft.current?.savedAt ?? null
+  )
 
   // Enhanced multilingual support
   const [enhancedKinks, setEnhancedKinks] = useState<EnhancedKinksData | null>(
     null
   )
+
+  const clearSavedDraft = useCallback(() => {
+    kinklistDraftStore.clear()
+    initialDraft.current = null
+    setHasSavedDraft(false)
+    setSavedDraftAt(null)
+  }, [])
 
   // Function to refresh kinks for current language - ONLY update kinks, never selection
   const refreshKinksForLanguage = useCallback(() => {
@@ -137,14 +165,9 @@ export const KinklistProvider: React.FC<{
 
   // Parse initial kinks
   useEffect(() => {
-    console.log(
-      'parseKinks effect: Starting with text length:',
-      originalKinksText.length
-    )
     try {
       // Check if the text contains multilingual content
       if (hasMultilingualContent(originalKinksText)) {
-        console.log('parseKinks effect: Parsing as enhanced template')
         // Parse as enhanced template
         const enhancedData = parseEnhancedKinksText(
           originalKinksText,
@@ -158,13 +181,8 @@ export const KinklistProvider: React.FC<{
             i18n.language
           )
           setKinks(resolvedKinks)
-          console.log(
-            'parseKinks effect: Enhanced kinks set, count:',
-            Object.keys(resolvedKinks).length
-          )
         }
       } else {
-        console.log('parseKinks effect: Parsing as standard template')
         // Parse as standard template
         const parsedKinks = parseKinksTextEnhanced(
           originalKinksText,
@@ -173,14 +191,9 @@ export const KinklistProvider: React.FC<{
         if (parsedKinks) {
           setKinks(parsedKinks)
           setEnhancedKinks(null) // Clear enhanced data for standard templates
-          console.log(
-            'parseKinks effect: Standard kinks set, count:',
-            Object.keys(parsedKinks).length
-          )
         }
       }
     } catch (e) {
-      console.error('parseKinks effect: Error parsing kinks text:', e)
       errorHandler(
         `Fehler beim Parsen des Kink-Textes: ${e instanceof Error ? e.message : String(e)}`,
         e
@@ -191,20 +204,19 @@ export const KinklistProvider: React.FC<{
 
   // Handle language changes for enhanced templates - ONLY update kinks, not selection
   useEffect(() => {
-    console.log('language change effect: Language changed to:', i18n.language)
-    console.log(
-      'language change effect: Enhanced kinks available:',
-      !!enhancedKinks
-    )
-
     if (enhancedKinks) {
-      console.log('language change effect: Starting language change process')
       // Refresh kinks for new language
       refreshKinksForLanguage()
-    } else {
-      console.log('language change effect: Skipping - no enhanced kinks')
     }
   }, [i18n.language, enhancedKinks, refreshKinksForLanguage])
+
+  useEffect(() => {
+    return () => {
+      if (userInteractionTimeoutRef.current) {
+        clearTimeout(userInteractionTimeoutRef.current)
+      }
+    }
+  }, [])
 
   // Internal setSelection that bypasses tracking (for initialization)
   const setSelectionInternal = useCallback(
@@ -218,91 +230,53 @@ export const KinklistProvider: React.FC<{
   useEffect(() => {
     // Add a small delay to ensure kinks are fully loaded
     const timeoutId = setTimeout(() => {
-      console.log(
-        'parseHash effect: Starting with kinks length:',
-        Object.keys(kinks).length
-      )
-      console.log('parseHash effect: Current hash:', window.location.hash)
-      console.log('parseHash effect: hasParsedHash:', hasParsedHash.current)
-
       if (Object.keys(kinks).length === 0) {
-        console.log('parseHash effect: No kinks available, skipping')
         return
       }
 
       // Only parse hash once, not on every kinks change
       if (hasParsedHash.current) {
-        console.log('parseHash effect: Already parsed hash, skipping')
         return
       }
 
-      console.log('parseHash effect: Starting hash parsing')
-      console.log('parseHash effect: Current hash:', window.location.hash)
-
       try {
+        const hasUrlHash = window.location.hash.length > 1
         const hashSelection = parseHash(levels, kinks, enhancedKinks, selection)
 
         if (hashSelection) {
-          console.log(
-            'parseHash effect: Hash parsed successfully, setting selection with',
-            hashSelection.length,
-            'items'
-          )
-          console.log(
-            'parseHash effect: First few selection items:',
-            hashSelection.slice(0, 3).map((s) => ({
-              categoryId: s.categoryId,
-              kinkId: s.kinkId,
-              fieldId: s.fieldId,
-              value: s.value,
-              hashKey:
-                s.categoryId && s.kinkId && s.fieldId
-                  ? `${s.categoryId}-${s.kinkId}-${s.fieldId}`
-                  : 'missing-ids',
-            }))
-          )
           setSelectionInternal(hashSelection)
           hasParsedHash.current = true
           isInitialized.current = true
         } else {
-          console.log('parseHash effect: No hash selection returned')
-          // If no hash, initialize with default selection
-          console.log('parseHash effect: Initializing with default selection')
-          const defaultSelection = getAllKinksEnhanced(
-            kinks,
-            levels,
-            enhancedKinks,
-            selection
+          const draftSelection =
+            !hasUrlHash && initialDraft.current?.selection.length
+              ? getAllKinksEnhanced(
+                  kinks,
+                  levels,
+                  enhancedKinks,
+                  initialDraft.current.selection
+                )
+              : null
+
+          setSelectionInternal(
+            draftSelection && draftSelection.length > 0
+              ? draftSelection
+              : getAllKinksEnhanced(kinks, levels, enhancedKinks, selection)
           )
-          console.log(
-            'parseHash effect: Default selection has',
-            defaultSelection.length,
-            'items'
-          )
-          setSelectionInternal(defaultSelection)
           hasParsedHash.current = true
           isInitialized.current = true
         }
       } catch (e) {
-        console.error('parseHash effect: Error parsing hash:', e)
         errorHandler(
           `Fehler beim Laden des URL-Hashes: ${e instanceof Error ? e.message : String(e)}`,
           e
         )
         // Initialize with default selection on error
-        console.log(
-          'parseHash effect: Error fallback - initializing with default selection'
-        )
         const defaultSelection = getAllKinksEnhanced(
           kinks,
           levels,
           enhancedKinks,
           selection
-        )
-        console.log(
-          'parseHash effect: Error fallback selection has',
-          defaultSelection.length,
-          'items'
         )
         setSelectionInternal(defaultSelection)
         hasParsedHash.current = true
@@ -347,16 +321,6 @@ export const KinklistProvider: React.FC<{
 
   // Update hash when selection changes - but only for user interactions
   useEffect(() => {
-    console.log(
-      'hash update effect: Selection changed, length:',
-      selection.length
-    )
-    console.log('hash update effect: isInitialized:', isInitialized.current)
-    console.log(
-      'hash update effect: isUserInteraction:',
-      isUserInteraction.current
-    )
-
     // Only update hash if:
     // 1. We're initialized
     // 2. Selection has actual content
@@ -367,21 +331,42 @@ export const KinklistProvider: React.FC<{
       isUserInteraction.current
     ) {
       try {
-        console.log(
-          'hash update effect: Updating hash with',
-          selection.length,
-          'items'
-        )
         updateHash(selection, levels)
-      } catch (e) {
-        console.error('hash update effect: Error updating hash:', e)
+      } catch {
+        // Ignore hash update failures silently; the current in-memory state remains intact.
       }
-    } else {
-      console.log(
-        'hash update effect: Skipping hash update - conditions not met'
-      )
     }
   }, [selection, levels])
+
+  useEffect(() => {
+    if (!isInitialized.current) {
+      return
+    }
+
+    const defaultLevel = Object.keys(levels)[0]
+
+    if (!defaultLevel) {
+      return
+    }
+
+    const hasSelectionChanges = selection.some((item) => {
+      return item.value !== defaultLevel || Boolean(item.comment?.trim())
+    })
+    const hasTemplateChanges = originalKinksText !== initialKinksText
+
+    if (!hasSelectionChanges && !hasTemplateChanges) {
+      clearSavedDraft()
+      return
+    }
+
+    if (!isUserInteraction.current && !hasTemplateChanges) {
+      return
+    }
+
+    const draft = kinklistDraftStore.save(originalKinksText, selection)
+    setHasSavedDraft(true)
+    setSavedDraftAt(draft.savedAt)
+  }, [clearSavedDraft, initialKinksText, levels, originalKinksText, selection])
 
   // Update levels when language changes
   useEffect(() => {
@@ -398,8 +383,13 @@ export const KinklistProvider: React.FC<{
       setSelection(newSelection)
 
       // Reset the flag after a short delay
-      setTimeout(() => {
+      if (userInteractionTimeoutRef.current) {
+        clearTimeout(userInteractionTimeoutRef.current)
+      }
+
+      userInteractionTimeoutRef.current = setTimeout(() => {
         isUserInteraction.current = false
+        userInteractionTimeoutRef.current = null
       }, 100)
     },
     []
@@ -429,6 +419,9 @@ export const KinklistProvider: React.FC<{
         enhancedKinks,
         setEnhancedKinks,
         refreshKinksForLanguage,
+        hasSavedDraft,
+        savedDraftAt,
+        clearSavedDraft,
       }}
     >
       {children}

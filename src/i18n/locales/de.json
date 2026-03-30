@@ -388,9 +388,16 @@
   },
   "loading": {
     "default": "Lädt...",
+    "template": "Lade Kinklist-Template",
     "export": "Exportiert...",
     "import": "Importiert...",
     "save": "Speichert..."
+  },
+  "draft": {
+    "savedLocally": "Lokaler Entwurf gespeichert",
+    "savedAt": "Lokaler Entwurf gespeichert {{date}}",
+    "clear": "Entwurf vergessen",
+    "clearAria": "Lokal gespeicherten Entwurf löschen"
   },
   "language": {
     "select": "Sprache auswählen",

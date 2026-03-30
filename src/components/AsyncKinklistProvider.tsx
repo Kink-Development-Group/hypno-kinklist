@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { KinklistProvider } from '../context/KinklistContext'
-import { hasMultilingualContent } from '../utils'
+import { debugWarn } from '../utils'
 import { getDefaultKinklistTemplate } from '../utils/defaultTemplate'
-import { getEnhancedKinkTemplate } from '../utils/kinkTemplates'
 
 interface AsyncKinklistProviderProps {
   children: React.ReactNode
@@ -16,9 +16,9 @@ interface AsyncKinklistProviderProps {
 const AsyncKinklistProvider: React.FC<AsyncKinklistProviderProps> = ({
   children,
 }) => {
+  const { t } = useTranslation()
   const [template, setTemplate] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     let isActive = true
@@ -26,38 +26,19 @@ const AsyncKinklistProvider: React.FC<AsyncKinklistProviderProps> = ({
     const loadTemplate = async () => {
       try {
         setIsLoading(true)
-        setError(null)
-
-        // Versuche, das Standard-Template vom Server zu laden
         const defaultTemplate = await getDefaultKinklistTemplate()
 
         if (!isActive) {
           return
         }
 
-        // Check if the loaded template has multilingual content
-        if (hasMultilingualContent(defaultTemplate)) {
-          // Use the loaded template if it has multilingual content
-          setTemplate(defaultTemplate)
-        } else {
-          // Use enhanced template if the loaded template doesn't have multilingual content
-          console.log(
-            'Loaded template does not have multilingual content, using enhanced template'
-          )
-          const enhancedTemplate = getEnhancedKinkTemplate()
-          setTemplate(enhancedTemplate)
-        }
+        setTemplate(defaultTemplate)
       } catch (err) {
         if (!isActive) {
           return
         }
 
-        console.error('Fehler beim Laden des Templates:', err)
-        setError('Fehler beim Laden des Templates')
-
-        // Fallback auf das verbesserte Template
-        const fallbackTemplate = getEnhancedKinkTemplate()
-        setTemplate(fallbackTemplate)
+        debugWarn('Fehler beim Laden des Templates:', err)
       } finally {
         if (isActive) {
           setIsLoading(false)
@@ -78,15 +59,10 @@ const AsyncKinklistProvider: React.FC<AsyncKinklistProviderProps> = ({
       <div className="template-loading">
         <div className="loading-spinner">
           <div className="spinner-circle"></div>
-          <p>Lade Kinklist-Template</p>
+          <p>{t('loading.template')}</p>
         </div>
       </div>
     )
-  }
-
-  // Fehlerzustand anzeigen (aber trotzdem mit Fallback-Template rendern)
-  if (error) {
-    console.warn('Template-Ladefehler (verwende Fallback):', error)
   }
 
   return (

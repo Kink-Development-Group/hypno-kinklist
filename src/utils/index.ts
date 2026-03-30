@@ -48,6 +48,195 @@ export const generateUniqueCategoryKey = (
   return uniqueKey
 }
 
+const isDebugLoggingEnabled = (): boolean => {
+  return Boolean(
+    import.meta.env.DEV && import.meta.env.VITE_DEBUG_KINKLIST === 'true'
+  )
+}
+
+const writeDebugLog = (
+  method: 'log' | 'warn',
+  ...args: readonly unknown[]
+): void => {
+  if (!isDebugLoggingEnabled()) {
+    return
+  }
+
+  if (method === 'warn') {
+    console.warn(...args)
+    return
+  }
+
+  console.log(...args)
+}
+
+export const debugLog = (...args: readonly unknown[]): void => {
+  writeDebugLog('log', ...args)
+}
+
+export const debugWarn = (...args: readonly unknown[]): void => {
+  writeDebugLog('warn', ...args)
+}
+
+export const reportError = (message: string, error?: unknown): void => {
+  if (typeof error === 'undefined') {
+    console.error(message)
+    return
+  }
+
+  console.error(message, error)
+}
+
+export interface KinklistDraft {
+  version: 1
+  originalKinksText: string
+  selection: Selection[]
+  savedAt: string
+}
+
+type StorageLike = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>
+
+class SafeLocalStorageAdapter {
+  private getStorage(): StorageLike | null {
+    if (typeof window === 'undefined') {
+      return null
+    }
+
+    try {
+      const storage = window.localStorage
+
+      if (
+        storage &&
+        typeof storage.getItem === 'function' &&
+        typeof storage.setItem === 'function' &&
+        typeof storage.removeItem === 'function'
+      ) {
+        return storage
+      }
+    } catch {
+      return null
+    }
+
+    return null
+  }
+
+  getItem(key: string): string | null {
+    try {
+      return this.getStorage()?.getItem(key) ?? null
+    } catch {
+      return null
+    }
+  }
+
+  setItem(key: string, value: string): void {
+    try {
+      this.getStorage()?.setItem(key, value)
+    } catch {
+      // Ignore storage access issues in private mode, tests or locked-down browsers.
+    }
+  }
+
+  removeItem(key: string): void {
+    try {
+      this.getStorage()?.removeItem(key)
+    } catch {
+      // Ignore storage access issues in private mode, tests or locked-down browsers.
+    }
+  }
+}
+
+const DRAFT_STORAGE_KEY = 'hypno-kinklist:draft'
+const DRAFT_VERSION = 1 as const
+
+const isStoredSelection = (value: unknown): value is Selection => {
+  if (!value || typeof value !== 'object') {
+    return false
+  }
+
+  const candidate = value as Partial<Selection>
+
+  return (
+    typeof candidate.category === 'string' &&
+    typeof candidate.kink === 'string' &&
+    typeof candidate.field === 'string' &&
+    typeof candidate.value === 'string' &&
+    typeof candidate.showField === 'boolean' &&
+    (typeof candidate.comment === 'undefined' ||
+      typeof candidate.comment === 'string') &&
+    (typeof candidate.categoryId === 'undefined' ||
+      typeof candidate.categoryId === 'string') &&
+    (typeof candidate.kinkId === 'undefined' ||
+      typeof candidate.kinkId === 'string') &&
+    (typeof candidate.fieldId === 'undefined' ||
+      typeof candidate.fieldId === 'string')
+  )
+}
+
+const isKinklistDraft = (value: unknown): value is KinklistDraft => {
+  if (!value || typeof value !== 'object') {
+    return false
+  }
+
+  const candidate = value as Partial<KinklistDraft>
+
+  return (
+    candidate.version === DRAFT_VERSION &&
+    typeof candidate.originalKinksText === 'string' &&
+    typeof candidate.savedAt === 'string' &&
+    Array.isArray(candidate.selection) &&
+    candidate.selection.every(isStoredSelection)
+  )
+}
+
+class KinklistDraftStore {
+  constructor(
+    private readonly storageKey: string = DRAFT_STORAGE_KEY,
+    private readonly storage: StorageLike = new SafeLocalStorageAdapter()
+  ) {}
+
+  load(): KinklistDraft | null {
+    const rawValue = this.storage.getItem(this.storageKey)
+
+    if (!rawValue) {
+      return null
+    }
+
+    try {
+      const parsedValue = JSON.parse(rawValue) as unknown
+      return isKinklistDraft(parsedValue) ? parsedValue : null
+    } catch {
+      return null
+    }
+  }
+
+  save(originalKinksText: string, selection: Selection[]): KinklistDraft {
+    const draft: KinklistDraft = {
+      version: DRAFT_VERSION,
+      originalKinksText,
+      selection,
+      savedAt: new Date().toISOString(),
+    }
+
+    this.storage.setItem(this.storageKey, JSON.stringify(draft))
+
+    return draft
+  }
+
+  clear(): void {
+    this.storage.removeItem(this.storageKey)
+  }
+
+  resolveInitialTemplate(defaultTemplate: string, hasHash: boolean): string {
+    if (hasHash) {
+      return defaultTemplate
+    }
+
+    return this.load()?.originalKinksText ?? defaultTemplate
+  }
+}
+
+export const kinklistDraftStore = new KinklistDraftStore()
+
 export const log = (val: number, base: number): number => {
   return Math.log(val) / Math.log(base)
 }
@@ -322,23 +511,17 @@ export const parseHash = (
   const fullHash = window.location.hash.substring(1)
 
   if (fullHash.length < 10) {
-    console.log('parseHash: Hash too short, returning null')
     return null
   }
-
-  console.log('parseHash: Parsing hash:', fullHash)
 
   // First try the new ID-based format
   try {
     // Decode the new ID-based hash format
     const decodedData = decodeURIComponent(atob(fullHash))
-    console.log('parseHash: Decoded data:', decodedData)
 
     const selectionData = JSON.parse(decodedData) as {
       [stableId: string]: { level: number; comment?: string } | number
     }
-
-    console.log('parseHash: Parsed selection data:', selectionData)
 
     // Use getAllKinksEnhanced to get the current kink structure, but preserve existing selection
     const allKinks = getAllKinksEnhanced(
@@ -347,8 +530,6 @@ export const parseHash = (
       enhancedKinks,
       existingSelection || []
     )
-
-    console.log('parseHash: All kinks:', allKinks.length)
 
     const updatedSelection: Selection[] = []
 
@@ -461,24 +642,6 @@ export const parseHash = (
           fieldId: kink.fieldId,
         })
       } else {
-        // Special debug for "Suggestions 2" to understand what's happening
-        if (kink.category === 'Suggestions 2') {
-          console.log(
-            'parseHash: Special debug for Suggestions 2 - no data found:',
-            {
-              category: kink.category,
-              categoryId: kink.categoryId,
-              kinkId: kink.kinkId,
-              fieldId: kink.fieldId,
-              stableKey,
-              availableKeys: Object.keys(selectionData).filter((key) =>
-                key.includes('suggestions')
-              ),
-              allKeys: Object.keys(selectionData),
-            }
-          )
-        }
-
         // Try all possible key formats for enhanced kinks
         if (enhancedKinks && kink.categoryId && kink.kinkId && kink.fieldId) {
           const alternativeStableKey = `${kink.categoryId}-${kink.kinkId}-${kink.fieldId}`
@@ -544,11 +707,8 @@ export const parseHash = (
     })
 
     return updatedSelection
-  } catch (error) {
-    console.error('parseHash: Error parsing new format:', error)
-
+  } catch {
     // Fallback to old format if new format fails
-    console.log('parseHash: Falling back to legacy format')
     return parseHashLegacy(
       levels,
       kinks,
@@ -567,33 +727,24 @@ function parseHashLegacy(
   fullHash: string,
   existingSelection?: Selection[]
 ): Selection[] | null {
-  console.log('parseHashLegacy: Parsing legacy hash:', fullHash)
-
   // Trenne die Kommentare von den Auswahlen
   const parts = fullHash.split('|')
   const hash = parts[0]
   let comments: string[] = []
-
-  console.log('parseHashLegacy: Hash part:', hash)
-  console.log('parseHashLegacy: Parts count:', parts.length)
 
   // Dekodiere die Kommentare, falls vorhanden
   if (parts.length > 1) {
     try {
       const decodedComments = decodeURIComponent(atob(parts[1]))
       comments = JSON.parse(decodedComments)
-      console.log('parseHashLegacy: Decoded comments:', comments)
-    } catch (e) {
-      console.error('parseHashLegacy: Comment decode error:', e)
+    } catch {
       comments = []
     }
   }
 
   const levelCount = Object.keys(levels).length
-  console.log('parseHashLegacy: Level count:', levelCount)
 
   const levelValues = decode(levelCount, hash)
-  console.log('parseHashLegacy: Decoded level values:', levelValues)
 
   // Use getAllKinksEnhanced to ensure proper stable ID handling, but preserve existing selection
   const allKinks = getAllKinksEnhanced(
@@ -603,13 +754,10 @@ function parseHashLegacy(
     existingSelection || []
   )
 
-  console.log('parseHashLegacy: All kinks count:', allKinks.length)
-
   const updatedSelection: Selection[] = []
 
   // IMPORTANT: Only process up to the minimum of available values and kinks
   const maxItems = Math.min(levelValues.length, allKinks.length)
-  console.log('parseHashLegacy: Processing', maxItems, 'items')
 
   for (let i = 0; i < maxItems; i++) {
     const levelIndex = levelValues[i]
@@ -629,11 +777,6 @@ function parseHashLegacy(
 
   // If there are more kinks than hash values, add them with default values
   if (allKinks.length > levelValues.length) {
-    console.log(
-      'parseHashLegacy: Adding',
-      allKinks.length - levelValues.length,
-      'default items'
-    )
     for (let i = levelValues.length; i < allKinks.length; i++) {
       const baseSelection = allKinks[i]
       updatedSelection.push({
@@ -646,12 +789,6 @@ function parseHashLegacy(
       })
     }
   }
-
-  console.log(
-    'parseHashLegacy: Successfully parsed legacy format, returning',
-    updatedSelection.length,
-    'items'
-  )
   return updatedSelection
 }
 
@@ -1012,7 +1149,7 @@ export const parseKinksTextEnhanced = (
         return resolveEnhancedKinksData(enhancedKinks, i18n.language)
       }
     } catch (error) {
-      console.warn(
+      debugWarn(
         'Enhanced parsing failed, falling back to standard parser:',
         error
       )

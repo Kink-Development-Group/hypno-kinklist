@@ -388,9 +388,16 @@
   },
   "loading": {
     "default": "Laddar...",
+    "template": "Laddar kinklist-mall",
     "export": "Exporterar...",
     "import": "Importerar...",
     "save": "Sparar..."
+  },
+  "draft": {
+    "savedLocally": "Lokalt utkast sparat",
+    "savedAt": "Lokalt utkast sparat {{date}}",
+    "clear": "Glöm utkast",
+    "clearAria": "Ta bort lokalt sparat utkast"
   },
   "language": {
     "select": "Välj språk",

@@ -15,7 +15,12 @@ const ErrorModal: React.FC<ErrorModalProps> = ({ message, onClose }) => {
         <h2>{t('error.title')}</h2>
         <p>{message}</p>
         <div className="modal-actions">
-          <button className="btn btn-primary" onClick={onClose} autoFocus>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={onClose}
+            autoFocus
+          >
             {t('buttons.close')}
           </button>
         </div>

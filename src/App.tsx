@@ -1,12 +1,9 @@
-import React from 'react'
+import React, { Suspense, lazy } from 'react'
 import { useTranslation } from 'react-i18next'
 import AsyncKinklistProvider from './components/AsyncKinklistProvider'
-import CommentOverlay from './components/CommentOverlay'
-import EditOverlay from './components/EditOverlay'
 import Export from './components/Export'
 import Footer from './components/Footer'
 import InputList from './components/InputList'
-import InputOverlay from './components/InputOverlay'
 import LanguageToggle from './components/LanguageToggle'
 import Legend from './components/Legend'
 import ThemeToggle from './components/ThemeToggle'
@@ -14,20 +11,49 @@ import Tooltip from './components/Tooltip'
 import { useKinklist } from './context/KinklistContext'
 import { ThemeProvider, useTheme } from './context/ThemeContext'
 import './styles/main.scss'
+import { AppErrorProvider } from './utils/useErrorHandler'
+
+const EditOverlay = lazy(() => import('./components/EditOverlay'))
+const InputOverlay = lazy(() => import('./components/InputOverlay'))
+const CommentOverlay = lazy(() => import('./components/CommentOverlay'))
+
+const OverlayLoadingFallback: React.FC<{ label: string }> = ({ label }) => {
+  return (
+    <div
+      className="overlay visible lazy-overlay-fallback"
+      role="status"
+      aria-live="polite"
+      aria-label={label}
+    >
+      <div className="loading-spinner">
+        <div className="spinner-circle"></div>
+        <p>{label}</p>
+      </div>
+    </div>
+  )
+}
 
 const App: React.FC = () => {
   return (
-    <ThemeProvider>
-      <AsyncKinklistProvider>
-        <AppContent />
-      </AsyncKinklistProvider>
-    </ThemeProvider>
+    <AppErrorProvider>
+      <ThemeProvider>
+        <AsyncKinklistProvider>
+          <AppContent />
+        </AsyncKinklistProvider>
+      </ThemeProvider>
+    </AppErrorProvider>
   )
 }
 
 // Separate component to use context
 const AppContent: React.FC = () => {
-  const { setIsEditOverlayOpen, setIsInputOverlayOpen } = useKinklist()
+  const {
+    setIsEditOverlayOpen,
+    setIsInputOverlayOpen,
+    isEditOverlayOpen,
+    isInputOverlayOpen,
+    isCommentOverlayOpen,
+  } = useKinklist()
   const { theme, toggleTheme } = useTheme()
   const { t } = useTranslation()
 
@@ -71,7 +97,7 @@ const AppContent: React.FC = () => {
             <span className="button-label">{t('buttons.start')}</span>
           </button>
         </Tooltip>
-      </div>{' '}
+      </div>
       <div className="grid-container">
         <div className="grid-row">
           <div className="grid-col-12">
@@ -79,9 +105,27 @@ const AppContent: React.FC = () => {
           </div>
         </div>
       </div>
-      <EditOverlay />
-      <InputOverlay />
-      <CommentOverlay />
+      {isEditOverlayOpen && (
+        <Suspense
+          fallback={<OverlayLoadingFallback label={t('common.loading')} />}
+        >
+          <EditOverlay />
+        </Suspense>
+      )}
+      {isInputOverlayOpen && (
+        <Suspense
+          fallback={<OverlayLoadingFallback label={t('common.loading')} />}
+        >
+          <InputOverlay />
+        </Suspense>
+      )}
+      {isCommentOverlayOpen && (
+        <Suspense
+          fallback={<OverlayLoadingFallback label={t('common.loading')} />}
+        >
+          <CommentOverlay />
+        </Suspense>
+      )}
       <Footer />
     </div>
   )

@@ -1,4 +1,18 @@
 // Utility functions for loading default templates
+import { debugLog, debugWarn, hasMultilingualContent } from './index'
+import { getEnhancedKinkTemplate } from './kinkTemplates'
+
+const ensureMultilingualTemplate = (template: string): string => {
+  if (hasMultilingualContent(template)) {
+    return template
+  }
+
+  debugWarn(
+    'Loaded template did not contain multilingual content. Falling back to built-in enhanced template.'
+  )
+
+  return getEnhancedKinkTemplate()
+}
 
 /**
  * Lädt die Standard-Kinks-Liste vom Server
@@ -19,10 +33,9 @@ export const loadDefaultKinklistFromServer = async (): Promise<string> => {
       )
     }
     const text = await response.text()
-    console.log('Successfully loaded default kinks.klist from server')
+    debugLog('Successfully loaded default kinks.klist from server')
     return text
   } catch (error) {
-    console.error('Error loading default kinks.klist from server:', error)
     throw error
   }
 }
@@ -36,15 +49,15 @@ export const loadDefaultKinklistFromServer = async (): Promise<string> => {
 export const getDefaultKinklistTemplate = async (): Promise<string> => {
   try {
     // Try to load the default kinks.klist file from server
-    return await loadDefaultKinklistFromServer()
+    const template = await loadDefaultKinklistFromServer()
+    return ensureMultilingualTemplate(template)
   } catch (error) {
-    console.warn(
+    debugWarn(
       'Failed to load default template from server, falling back to built-in template:',
       error
     )
 
     // Fallback to the built-in enhanced template
-    const { getEnhancedKinkTemplate } = await import('./kinkTemplates')
     return getEnhancedKinkTemplate()
   }
 }

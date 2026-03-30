@@ -101,15 +101,12 @@ const EditOverlay: React.FC = () => {
           // Create a new selection based on the updated kink structure
           const newSelection = getAllKinks(parsedKinks, levels, selection)
           setSelection(newSelection)
-          console.log('Successfully set standard template')
         } else {
-          console.error('Standard parsing returned null/undefined')
           errorHandler('Failed to parse standard template - no data returned')
           return
         }
       }
     } catch (error) {
-      console.error('Exception in handleAccept:', error)
       errorHandler(
         'Ein Fehler ist beim Versuch, den eingegebenen Text zu analysieren, aufgetreten. Bitte korrigieren Sie ihn und versuchen Sie es erneut.',
         error
@@ -117,7 +114,6 @@ const EditOverlay: React.FC = () => {
       return
     }
 
-    console.log('Closing edit overlay...')
     setIsEditOverlayOpen(false)
   }, [
     kinksText,

@@ -49,6 +49,6 @@ describe('App Component', () => {
     render(<App />)
 
     // Check that loading state is shown initially
-    expect(screen.getByText(/Lade Kinklist-Template/i)).toBeInTheDocument()
+    expect(screen.getByText(/Loading kinklist template/i)).toBeInTheDocument()
   })
 })

@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { Suspense, lazy, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import ExportModal from './ExportModal'
-import ImportModal from './ImportModal'
+
+const ExportModal = lazy(() => import('./ExportModal'))
+const ImportModal = lazy(() => import('./ImportModal'))
 
 const Export: React.FC = () => {
   const { t } = useTranslation()
@@ -31,6 +32,7 @@ const Export: React.FC = () => {
           className="export-action-button"
           onClick={handleOpenExportModal}
           aria-label={t('export.export')}
+          type="button"
         >
           📤 {t('export.export')}
         </button>
@@ -39,14 +41,57 @@ const Export: React.FC = () => {
           className="import-action-button"
           onClick={handleOpenImportModal}
           aria-label={t('export.import')}
+          type="button"
         >
           📥 {t('export.import')}
         </button>
       </div>
 
-      <ExportModal open={exportModalOpen} onClose={handleCloseExportModal} />
+      {exportModalOpen && (
+        <Suspense
+          fallback={
+            <div
+              className="overlay visible lazy-overlay-fallback"
+              role="status"
+              aria-live="polite"
+              aria-label={t('common.loading')}
+            >
+              <div className="loading-spinner">
+                <div className="spinner-circle"></div>
+                <p>{t('common.loading')}</p>
+              </div>
+            </div>
+          }
+        >
+          <ExportModal
+            open={exportModalOpen}
+            onClose={handleCloseExportModal}
+          />
+        </Suspense>
+      )}
 
-      <ImportModal open={importModalOpen} onClose={handleCloseImportModal} />
+      {importModalOpen && (
+        <Suspense
+          fallback={
+            <div
+              className="overlay visible lazy-overlay-fallback"
+              role="status"
+              aria-live="polite"
+              aria-label={t('common.loading')}
+            >
+              <div className="loading-spinner">
+                <div className="spinner-circle"></div>
+                <p>{t('common.loading')}</p>
+              </div>
+            </div>
+          }
+        >
+          <ImportModal
+            open={importModalOpen}
+            onClose={handleCloseImportModal}
+          />
+        </Suspense>
+      )}
     </>
   )
 }

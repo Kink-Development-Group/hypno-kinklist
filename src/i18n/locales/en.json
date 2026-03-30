@@ -388,9 +388,16 @@
   },
   "loading": {
     "default": "Loading...",
+    "template": "Loading kinklist template",
     "export": "Exporting...",
     "import": "Importing...",
     "save": "Saving..."
+  },
+  "draft": {
+    "savedLocally": "Local draft saved",
+    "savedAt": "Local draft saved {{date}}",
+    "clear": "Forget draft",
+    "clearAria": "Delete locally saved draft"
   },
   "language": {
     "select": "Select Language",
