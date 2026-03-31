@@ -415,6 +415,9 @@
     "de": "Deutsch",
     "sv": "Svenska"
   },
+  "layout": {
+    "columnLabel": "Kolumn {{index}} av {{total}}"
+  },
   "fix": {
     "title": "Åtgärda startmodalproblem",
     "description": "Om startmodulen (kinkval) inte stängs korrekt eller inte visas kan du återställa statusen med denna knapp:",

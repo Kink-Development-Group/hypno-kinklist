@@ -415,6 +415,9 @@
     "de": "Deutsch",
     "sv": "Svenska"
   },
+  "layout": {
+    "columnLabel": "Spalte {{index}} von {{total}}"
+  },
   "fix": {
     "title": "Problem mit dem Start-Modal beheben",
     "description": "Falls das Start-Modal (Kink-Auswahl) nicht richtig schließt oder nicht angezeigt wird, können Sie mit diesem Button den Status zurücksetzen:",

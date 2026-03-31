@@ -242,13 +242,6 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
 
           // Set theme AFTER setting the language
           monaco.editor.setTheme(getTheme())
-
-          // Force re-tokenization by triggering a model change
-          setTimeout(() => {
-            const currentValue = model.getValue()
-            model.setValue('')
-            model.setValue(currentValue)
-          }, 200)
         }
 
         // Configure editor options

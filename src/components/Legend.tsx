@@ -10,15 +10,25 @@ const Legend: React.FC = () => {
     <div className="legend-container">
       <div className="legend">
         <h2 className="legend-title">{t('legend.title')}</h2>
-        {Object.entries(levels).map(([levelKey, level]) => (
-          <div className="legend-item" key={levelKey}>
-            <span
-              data-color={level.color}
-              className={`choice ${level.class}`}
-            />
-            <span className="legend-text">{t(`legend.${level.key}`)}</span>
-          </div>
-        ))}
+        {Object.entries(levels).map(([levelKey, level]) => {
+          const translatedLevel = t(`legend.${level.key}`, {
+            defaultValue: levelKey,
+          })
+          const displayLevel =
+            translatedLevel === `legend.${level.key}`
+              ? levelKey
+              : translatedLevel
+
+          return (
+            <div className="legend-item" key={levelKey}>
+              <span
+                data-color={level.color}
+                className={`choice ${level.class}`}
+              />
+              <span className="legend-text">{displayLevel}</span>
+            </div>
+          )
+        })}
       </div>
     </div>
   )

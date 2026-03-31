@@ -152,8 +152,11 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
                 </select>
               </div>
               <div className="snippet-list">
-                {getFilteredSnippets().map((snippet, index) => (
-                  <Tooltip key={index} content={snippet.documentation}>
+                {getFilteredSnippets().map((snippet) => (
+                  <Tooltip
+                    key={`${snippet.kind}-${snippet.label}`}
+                    content={snippet.documentation}
+                  >
                     <button
                       type="button"
                       className="snippet-item"

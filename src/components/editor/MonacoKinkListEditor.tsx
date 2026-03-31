@@ -99,13 +99,6 @@ const MonacoKinkListEditor = forwardRef<
           // Vorhandenes Model wiederverwenden und Sprache setzen
           monaco.editor.setModelLanguage(model, languageId)
         }
-
-        // Force tokenization
-        setTimeout(() => {
-          if (model) {
-            model.getLineContent(1) // This triggers tokenization
-          }
-        }, 100)
       } catch (error) {
         console.error('Error setting up Monaco editor:', error)
       }
@@ -113,7 +106,6 @@ const MonacoKinkListEditor = forwardRef<
       // Platzhalter einrichten
       if (placeholder && !value) {
         editor.updateOptions({
-          accessibilitySupport: 'off',
           minimap: { enabled: showMinimap },
           lineNumbers: showLineNumbers ? 'on' : 'off',
           readOnly: readOnly,

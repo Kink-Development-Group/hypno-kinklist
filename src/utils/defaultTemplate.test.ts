@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { debugWarn, hasMultilingualContent } from './index'
 import { getEnhancedKinkTemplate } from './kinkTemplates'
 import { getDefaultKinklistTemplate } from './defaultTemplate'
@@ -23,6 +23,10 @@ describe('getDefaultKinklistTemplate', () => {
     vi.clearAllMocks()
     vi.stubGlobal('fetch', vi.fn())
     vi.mocked(getEnhancedKinkTemplate).mockReturnValue('# fallback template')
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
   })
 
   test('returns fetched multilingual content when available', async () => {

@@ -415,6 +415,9 @@
     "de": "Deutsch",
     "sv": "Svenska"
   },
+  "layout": {
+    "columnLabel": "Column {{index}} of {{total}}"
+  },
   "fix": {
     "title": "Fix Start Modal Issue",
     "description": "If the start modal (kink selection) doesn't close properly or isn't displayed, you can reset the status with this button:",

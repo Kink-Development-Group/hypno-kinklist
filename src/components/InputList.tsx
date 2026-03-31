@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import KinkCategory from './KinkCategory'
 
 const InputList: React.FC = () => {
   const { kinks } = useKinklist()
+  const { t } = useTranslation()
   const [columnCount, setColumnCount] = useState<number>(1)
 
   // Calculate column count based on screen width
@@ -80,7 +82,10 @@ const InputList: React.FC = () => {
             key={index}
             className={getColClass(columnCount)}
             role="region"
-            aria-label={`Spalte ${index + 1} von ${columnCount}`}
+            aria-label={t('layout.columnLabel', {
+              index: index + 1,
+              total: columnCount,
+            })}
           >
             {columnCategories.map((catName) => {
               const cat = kinks[catName]

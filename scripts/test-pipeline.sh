@@ -5,22 +5,26 @@
 
 set -e
 
+has_bun_lockfile() {
+    [ -f "bun.lock" ] || [ -f "bun.lockb" ]
+}
+
 ENVIRONMENT=${1:-dev}
 echo "🧪 Testing pipeline for $ENVIRONMENT environment..."
 echo "=========================================="
 
 # Determine package manager commands based on available lockfiles
-if [ -f "bun.lock" ] && command -v bun >/dev/null 2>&1; then
+if has_bun_lockfile && command -v bun >/dev/null 2>&1; then
     INSTALL_CMD="bun install --frozen-lockfile"
     TEST_CMD="bun run test --run"
     BUILD_CMD="bun run build"
     PACKAGE_MANAGER_NAME="bun"
-elif [ -f "bun.lock" ]; then
+elif has_bun_lockfile; then
     INSTALL_CMD="npm install --legacy-peer-deps"
     TEST_CMD="npm test -- --run"
     BUILD_CMD="npm run build"
     PACKAGE_MANAGER_NAME="npm"
-    echo "⚠️  bun.lock found but bun is not installed; falling back to npm for local simulation."
+    echo "⚠️  Bun lockfile found but bun is not installed; falling back to npm for local simulation."
 elif [ -f "package-lock.json" ]; then
     INSTALL_CMD="npm ci"
     TEST_CMD="npm test -- --run"

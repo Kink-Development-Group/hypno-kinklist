@@ -25,7 +25,7 @@ const LanguageToggle: React.FC = () => {
       >
         {languages.map((lang) => (
           <option key={lang} value={lang}>
-            {t(`language.${lang}`, lang.toUpperCase())}
+            {t(`language.${lang}`, { defaultValue: lang.toUpperCase() })}
           </option>
         ))}
       </select>
