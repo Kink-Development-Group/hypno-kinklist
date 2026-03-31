@@ -93,7 +93,11 @@
       "all": "Alle",
       "search": "Blöcke durchsuchen...",
       "select": "Block auswählen",
-      "preview": "Vorschau"
+      "preview": "Vorschau",
+      "empty": "Keine Blöcke gefunden.",
+      "insert": "Einfügen",
+      "insertTooltip": "Klicken zum Einfügen: {{blockName}}",
+      "togglePreviewTooltip": "Vorschau anzeigen oder ausblenden"
     },
     "validation": {
       "errors": "Validierungsfehler",

@@ -6,6 +6,7 @@ import {
 
 // Interface für Snippets
 export interface EditorSnippet {
+  kind: 'category' | 'kink' | 'description' | 'template'
   label: string
   insertText: string
   detail: string
@@ -31,18 +32,21 @@ export const getHelpText = (): string => {
 export const getSnippets = (): EditorSnippet[] => {
   return [
     {
+      kind: 'category',
       label: i18n.t('editor.content.snippets.cat.label'),
       insertText: '#${1:Kategorie Name}\n(${2:General})\n',
       detail: i18n.t('editor.content.snippets.cat.detail'),
       documentation: i18n.t('editor.content.snippets.cat.documentation'),
     },
     {
+      kind: 'kink',
       label: i18n.t('editor.content.snippets.item.label'),
       insertText: '* ${1:Kink Name}\n? ${2:Beschreibung des Kinks}\n',
       detail: i18n.t('editor.content.snippets.item.detail'),
       documentation: i18n.t('editor.content.snippets.item.documentation'),
     },
     {
+      kind: 'category',
       label: i18n.t('editor.content.snippets.section.label'),
       insertText:
         '#${1:Kategorie}\n(${2:General})\n* ${3:Kink 1}\n? ${4:Beschreibung 1}\n* ${5:Kink 2}\n? ${6:Beschreibung 2}\n',
@@ -50,12 +54,14 @@ export const getSnippets = (): EditorSnippet[] => {
       documentation: i18n.t('editor.content.snippets.section.documentation'),
     },
     {
+      kind: 'template',
       label: i18n.t('editor.content.snippets.template.label'),
       insertText: getDefaultTemplate(),
       detail: i18n.t('editor.content.snippets.template.detail'),
       documentation: i18n.t('editor.content.snippets.template.documentation'),
     },
     {
+      kind: 'template',
       label: i18n.t('editor.content.snippets.basicSection.label'),
       insertText:
         "#Basics\n(General)\n* I enjoy working with cisgender people\n? I feel comfortable and positive about engaging in hypnosis with cisgender individuals.\n* I enjoy working with trans people\n? I am open to and enjoy hypnotic experiences with transgender people, respecting their identities.\n* Gender doesn't matter to me\n? The gender of my hypnosis partner is not important to me; I focus on the experience itself.\n",
@@ -65,6 +71,7 @@ export const getSnippets = (): EditorSnippet[] => {
       ),
     },
     {
+      kind: 'template',
       label: i18n.t('editor.content.snippets.safetySection.label'),
       insertText:
         "#Safety and consent\n(General)\n* Trust\n? Trust is the foundation of any hypnotic interaction; I need to feel safe with my partner.\n* Unknown play partner\n? I may feel uneasy or require extra caution when engaging with someone I don't know well.\n* A lot of safety talk / triggers\n? I prefer thorough discussions about boundaries, triggers, and safety before starting.\n",
@@ -74,12 +81,14 @@ export const getSnippets = (): EditorSnippet[] => {
       ),
     },
     {
+      kind: 'description',
       label: i18n.t('editor.content.snippets.comment.label'),
       insertText: '// ${1:Kommentar}\n',
       detail: i18n.t('editor.content.snippets.comment.detail'),
       documentation: i18n.t('editor.content.snippets.comment.documentation'),
     },
     {
+      kind: 'category',
       label: i18n.t('editor.content.snippets.multilingualCat.label'),
       insertText:
         '#${1:Category Name}\n+ [DE] #${2:Deutscher Name}\n+ [SV] #${3:Svenska namn}\n(${4:General})\n+ [DE] (${5:Allgemein})\n+ [SV] (${6:Allmänt})\n',
@@ -89,6 +98,7 @@ export const getSnippets = (): EditorSnippet[] => {
       ),
     },
     {
+      kind: 'kink',
       label: i18n.t('editor.content.snippets.multilingualItem.label'),
       insertText:
         '* ${1:Kink Name}\n+ [DE] * ${2:Deutscher Kink Name}\n+ [SV] * ${3:Svenska kink namn}\n? ${4:Description}\n+ [DE] ? ${5:Deutsche Beschreibung}\n+ [SV] ? ${6:Svenska beskrivning}\n',
@@ -98,6 +108,7 @@ export const getSnippets = (): EditorSnippet[] => {
       ),
     },
     {
+      kind: 'description',
       label: i18n.t('editor.content.snippets.translationLine.label'),
       insertText: '+ [${1:DE}] ${2:übersetzter Inhalt}\n',
       detail: i18n.t('editor.content.snippets.translationLine.detail'),
@@ -106,6 +117,7 @@ export const getSnippets = (): EditorSnippet[] => {
       ),
     },
     {
+      kind: 'template',
       label: i18n.t('editor.content.snippets.enhancedTemplate.label'),
       insertText: getEnhancedDefaultTemplate(),
       detail: i18n.t('editor.content.snippets.enhancedTemplate.detail'),

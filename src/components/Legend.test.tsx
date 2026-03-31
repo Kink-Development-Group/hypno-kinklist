@@ -1,9 +1,12 @@
 import { render, screen } from '@testing-library/react'
 import Legend from './Legend'
 import { KinklistProvider } from '../context/KinklistContext'
+import i18n from '../i18n'
 
 describe('Legend Component', () => {
-  test('renders all level definitions', () => {
+  test('renders all level definitions', async () => {
+    await i18n.changeLanguage('en')
+
     render(
       <KinklistProvider initialKinksText={''}>
         <Legend />

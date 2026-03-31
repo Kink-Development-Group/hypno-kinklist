@@ -8,6 +8,8 @@ const LanguageToggle: React.FC = () => {
 
   // Get available languages from i18n instance
   const languages = Object.keys(i18n.options.resources || {})
+  const currentLanguage =
+    i18n.resolvedLanguage?.split('-')[0] || i18n.language.split('-')[0]
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     i18n.changeLanguage(e.target.value)
@@ -17,7 +19,7 @@ const LanguageToggle: React.FC = () => {
     <Tooltip content={t('language.select')}>
       <select
         className="language-toggle"
-        value={i18n.language}
+        value={currentLanguage}
         onChange={handleChange}
         aria-label={t('language.select')}
       >

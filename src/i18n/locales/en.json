@@ -93,7 +93,11 @@
       "all": "All",
       "search": "Search blocks...",
       "select": "Select block",
-      "preview": "Preview"
+      "preview": "Preview",
+      "empty": "No blocks found.",
+      "insert": "Insert",
+      "insertTooltip": "Click to insert: {{blockName}}",
+      "togglePreviewTooltip": "Show or hide preview"
     },
     "validation": {
       "errors": "Validation Errors",

@@ -93,7 +93,11 @@
       "all": "Alla",
       "search": "Sök block...",
       "select": "Välj block",
-      "preview": "Förhandsgranska"
+      "preview": "Förhandsgranska",
+      "empty": "Inga block hittades.",
+      "insert": "Infoga",
+      "insertTooltip": "Klicka för att infoga: {{blockName}}",
+      "togglePreviewTooltip": "Visa eller dölj förhandsgranskning"
     },
     "validation": {
       "errors": "Valideringsfel",

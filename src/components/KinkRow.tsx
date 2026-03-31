@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react'
+import React, { memo, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import { Selection } from '../types'
@@ -34,15 +34,25 @@ const KinkRow: React.FC<KinkRowProps> = ({
 
   const rowId = `kink-row-${strToClass(categoryName)}-${strToClass(kinkName)}`
   const kinkNameId = `kink-name-${strToClass(kinkName)}`
+  const stableIdsByField = useMemo(
+    () =>
+      Object.fromEntries(
+        fields.map((field) => [
+          field,
+          getStableIdsFromOriginal(
+            enhancedKinks,
+            categoryName,
+            kinkName,
+            field
+          ),
+        ])
+      ),
+    [categoryName, enhancedKinks, fields, kinkName]
+  )
 
   const matchesSelection = useCallback(
     (item: Selection, field: string) => {
-      const stableIds = getStableIdsFromOriginal(
-        enhancedKinks,
-        categoryName,
-        kinkName,
-        field
-      )
+      const stableIds = stableIdsByField[field] ?? {}
       const hasStableIds =
         stableIds.categoryId !== undefined &&
         stableIds.kinkId !== undefined &&
@@ -66,16 +76,11 @@ const KinkRow: React.FC<KinkRowProps> = ({
         item.field === field
       )
     },
-    [categoryName, enhancedKinks, kinkName]
+    [categoryName, kinkName, stableIdsByField]
   )
 
   const handleOpenComment = (field: string) => {
-    const stableIds = getStableIdsFromOriginal(
-      enhancedKinks,
-      categoryName,
-      kinkName,
-      field
-    )
+    const stableIds = stableIdsByField[field] ?? {}
 
     let kinkSelection = selection.find((s) => matchesSelection(s, field))
 

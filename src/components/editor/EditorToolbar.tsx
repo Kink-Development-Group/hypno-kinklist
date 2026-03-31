@@ -59,27 +59,7 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
     if (selectedCategory === 'all') {
       return allSnippets
     }
-    // Filter basierend auf dem Label des Snippets
-    return allSnippets.filter((snippet) => {
-      const label = snippet.label.toLowerCase()
-      switch (selectedCategory) {
-        case 'category':
-          return label.includes('cat') || label.includes('section')
-        case 'kink':
-          return label.includes('item') || label.includes('kink')
-        case 'description':
-          return label.includes('desc') || label.includes('help')
-        case 'template':
-          return (
-            label.includes('template') ||
-            label.includes('basic') ||
-            label.includes('safety') ||
-            label.includes('types')
-          )
-        default:
-          return true
-      }
-    })
+    return allSnippets.filter((snippet) => snippet.kind === selectedCategory)
   }
 
   const snippetCategories = [

@@ -111,13 +111,17 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
 
       <div className="block-picker-content">
         {filteredBlocks.length === 0 ? (
-          <div className="block-picker-empty">Keine Blöcke gefunden.</div>
+          <div className="block-picker-empty">{t('editor.blocks.empty')}</div>
         ) : (
           <ul className="block-list">
             {filteredBlocks.map((block) => (
               <li key={block.id} className="block-item">
                 <div className="block-item-header">
-                  <Tooltip content={`Klicken zum Einfügen: ${block.name}`}>
+                  <Tooltip
+                    content={t('editor.blocks.insertTooltip', {
+                      blockName: block.name,
+                    })}
+                  >
                     <button
                       type="button"
                       className="block-title"
@@ -127,7 +131,7 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
                     </button>
                   </Tooltip>
                   <div className="block-actions">
-                    <Tooltip content="Vorschau anzeigen/ausblenden">
+                    <Tooltip content={t('editor.blocks.togglePreviewTooltip')}>
                       <button
                         type="button"
                         className="block-preview-toggle"
@@ -158,7 +162,7 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
                       className="block-insert-button"
                       onClick={() => handleSelectBlock(block)}
                     >
-                      Einfügen
+                      {t('editor.blocks.insert')}
                     </button>
                   </div>
                 )}

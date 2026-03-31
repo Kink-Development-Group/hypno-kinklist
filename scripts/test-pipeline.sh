@@ -137,9 +137,11 @@ echo ""
 echo "🚀 Ready for deployment!"
 
 # Optional: Cleanup
-read -p "🗑️  Delete build directory? (y/N): " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    rm -rf ./dist
-    echo "✅ Build directory cleaned up"
+if [ -t 0 ]; then
+    read -p "🗑️  Delete build directory? (y/N): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        rm -rf ./dist
+        echo "✅ Build directory cleaned up"
+    fi
 fi
