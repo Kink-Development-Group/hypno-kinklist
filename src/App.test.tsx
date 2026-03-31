@@ -1,5 +1,4 @@
-import { screen } from '@testing-library/dom'
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import App from './App'
 import { getDefaultKinklistTemplate } from './utils/defaultTemplate'

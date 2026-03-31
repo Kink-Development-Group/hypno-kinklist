@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import { Selection } from '../types'
 import { strToClass } from '../utils'
+import { getDefaultLevelKey } from '../utils/levels'
 import { getStableIdsFromOriginal } from '../utils/multilingualTemplates'
 import Choice from './Choice'
 import Tooltip from './Tooltip'
@@ -83,7 +84,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
         category: categoryName,
         kink: kinkName,
         field: field,
-        value: Object.keys(levels)[0],
+        value: getDefaultLevelKey(levels) ?? '',
         showField: fields.length > 1,
         categoryId: stableIds.categoryId,
         kinkId: stableIds.kinkId,

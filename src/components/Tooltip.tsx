@@ -50,7 +50,19 @@ const Tooltip: React.FC<TooltipProps> = ({
   }>()
   const timeoutRef = useRef<number | null>(null)
   const childProps = children.props
-  const childRef = childProps.ref as Ref<HTMLElement> | undefined
+
+  const extractChildRef = (
+    element: ReactElement<TooltipChildProps>
+  ): Ref<HTMLElement> | undefined => {
+    return (
+      (element.props.ref as Ref<HTMLElement> | undefined) ??
+      ((element as ReactElement & { ref?: Ref<HTMLElement> }).ref as
+        | Ref<HTMLElement>
+        | undefined)
+    )
+  }
+
+  const childRef = extractChildRef(children)
   const describedBy = [childProps['aria-describedby'], show ? tooltipId : null]
     .filter(Boolean)
     .join(' ')

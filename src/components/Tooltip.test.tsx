@@ -1,5 +1,4 @@
-import { fireEvent, screen } from '@testing-library/dom'
-import { render } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { act, createRef, forwardRef } from 'react'
 import { afterEach, describe, expect, test, vi } from 'vitest'
 import Tooltip from './Tooltip'

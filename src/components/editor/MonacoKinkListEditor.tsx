@@ -311,7 +311,7 @@ const MonacoKinkListEditor = forwardRef<
           onChange={(newValue) => onChange(newValue || '')}
           onMount={handleEditorDidMount}
           options={{
-            accessibilitySupport: 'off',
+            accessibilitySupport: 'auto',
             minimap: { enabled: showMinimap },
             lineNumbers: showLineNumbers ? 'on' : 'off',
             readOnly: readOnly,

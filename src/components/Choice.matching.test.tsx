@@ -1,5 +1,4 @@
-import { fireEvent, screen } from '@testing-library/dom'
-import { render } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { vi } from 'vitest'
 import { Selection } from '../types'
 import { useKinklist } from '../context/KinklistContext'
@@ -179,5 +178,37 @@ describe('Choice stable ID matching', () => {
         fieldId: 'field-1',
       },
     ])
+  })
+
+  test('defaults to the semantic notEntered level when level order differs', () => {
+    const reorderedLevels = {
+      Favorite: levels.Favorite,
+      NotEntered: levels.NotEntered,
+    }
+
+    mockUseKinklist.mockReturnValue(
+      createMockKinklistContext({
+        levels: reorderedLevels,
+        selection: [],
+        setSelection: vi.fn(),
+        enhancedKinks: {},
+      })
+    )
+
+    render(
+      <Choice
+        field="Field"
+        categoryName="Category"
+        kinkName="Kink"
+        showField={false}
+      />
+    )
+
+    const notEnteredButton = screen.getByRole('radio', { name: /not entered/i })
+    const favoriteButton = screen.getByRole('radio', { name: /favorite/i })
+
+    expect(notEnteredButton).toHaveAttribute('aria-checked', 'true')
+    expect(notEnteredButton).toHaveAttribute('tabindex', '0')
+    expect(favoriteButton).toHaveAttribute('aria-checked', 'false')
   })
 })

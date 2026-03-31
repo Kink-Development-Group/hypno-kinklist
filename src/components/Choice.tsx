@@ -2,6 +2,7 @@ import React, { KeyboardEvent, memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import { Selection } from '../types'
+import { getDefaultLevelKey } from '../utils/levels'
 import { getStableIdsFromOriginal } from '../utils/multilingualTemplates'
 
 interface ChoiceProps {
@@ -68,7 +69,8 @@ const Choice: React.FC<ChoiceProps> = ({
   const currentSelection = selection.find(matchesSelection)
 
   // Get the selected level directly from the selection
-  const selectedLevel = currentSelection?.value || Object.keys(levels)[0]
+  const selectedLevel =
+    currentSelection?.value ?? getDefaultLevelKey(levels) ?? ''
 
   const handleClick = useCallback(
     (levelName: string) => {

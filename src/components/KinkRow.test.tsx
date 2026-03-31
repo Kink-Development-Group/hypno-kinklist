@@ -1,5 +1,4 @@
-import { fireEvent, screen } from '@testing-library/dom'
-import { render } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { vi } from 'vitest'
 import { Selection } from '../types'
 import { useKinklist } from '../context/KinklistContext'
@@ -230,6 +229,61 @@ describe('KinkRow comment selection matching', () => {
 
     expect(setSelection).not.toHaveBeenCalled()
     expect(setSelectedKink).toHaveBeenCalledWith(matchingSelection)
+    expect(setIsCommentOverlayOpen).toHaveBeenCalledWith(true)
+  })
+
+  test('creates a new selection with the semantic notEntered default when levels are reordered', () => {
+    const setSelection = vi.fn()
+    const setSelectedKink = vi.fn()
+    const setIsCommentOverlayOpen = vi.fn()
+    const reorderedLevels = {
+      Favorite: {
+        key: 'favorite',
+        name: 'Favorite',
+        color: '#00f',
+        class: 'favorite',
+      },
+      NotEntered: levels.NotEntered,
+    }
+
+    mockUseKinklist.mockReturnValue(
+      createMockKinklistContext({
+        selection: [],
+        setSelection,
+        levels: reorderedLevels,
+        setIsCommentOverlayOpen,
+        setSelectedKink,
+        enhancedKinks: null,
+      })
+    )
+
+    render(
+      <table>
+        <tbody>
+          <KinkRow categoryName="Category" kinkName="Kink" fields={['Field']} />
+        </tbody>
+      </table>
+    )
+
+    fireEvent.click(screen.getByRole('button'))
+
+    const newSelection: Selection = {
+      category: 'Category',
+      kink: 'Kink',
+      field: 'Field',
+      value: 'NotEntered',
+      showField: false,
+      categoryId: 'cat-1',
+      kinkId: 'kink-1',
+      fieldId: 'field-1',
+    }
+
+    const selectionUpdater = vi.mocked(setSelection).mock.calls[0][0] as (
+      currentSelection: Selection[]
+    ) => Selection[]
+
+    expect(selectionUpdater([])).toEqual([newSelection])
+    expect(setSelectedKink).toHaveBeenCalledWith(newSelection)
     expect(setIsCommentOverlayOpen).toHaveBeenCalledWith(true)
   })
 })

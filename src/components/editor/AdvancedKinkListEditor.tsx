@@ -1,4 +1,4 @@
-import React, {
+import {
   forwardRef,
   useCallback,
   useEffect,
@@ -52,7 +52,7 @@ const AdvancedKinkListEditor = forwardRef<
     const [value, setValue] = useState(initialValue)
     const [validationErrors, setValidationErrors] = useState<string[]>([])
     const [validationWarnings, setValidationWarnings] = useState<string[]>([])
-    const editorRef = useRef<MonacoKinkListEditorRef>(null)
+    const editorRef = useRef<MonacoKinkListEditorRef | null>(null)
 
     // Use translation for placeholder if not provided
     const editorPlaceholder = placeholder || t('editor.placeholder')
@@ -146,7 +146,7 @@ const AdvancedKinkListEditor = forwardRef<
     return (
       <div className="advanced-kinklist-editor">
         <EditorToolbar
-          editorRef={editorRef as React.RefObject<any>}
+          editorRef={editorRef}
           onInsertSnippet={(snippet) => {
             handleChange(value + snippet)
           }}

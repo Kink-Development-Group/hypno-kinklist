@@ -12,7 +12,7 @@ import {
 import type { MonacoKinkListEditorRef } from './MonacoKinkListEditor'
 
 export interface EditorToolbarProps {
-  editorRef: React.RefObject<MonacoKinkListEditorRef>
+  editorRef: React.RefObject<MonacoKinkListEditorRef | null>
   onInsertSnippet?: (snippet: string) => void
   showValidation?: boolean
   validationErrors?: string[]
