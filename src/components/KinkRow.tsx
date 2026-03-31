@@ -90,7 +90,13 @@ const KinkRow: React.FC<KinkRowProps> = ({
         fieldId: stableIds.fieldId,
       }
       kinkSelection = newSelection
-      setSelection([...selection, newSelection])
+      setSelection((prevSelection) => {
+        const alreadyExists = prevSelection.some((item) =>
+          matchesSelection(item, field)
+        )
+
+        return alreadyExists ? prevSelection : [...prevSelection, newSelection]
+      })
     }
 
     setSelectedKink(kinkSelection)

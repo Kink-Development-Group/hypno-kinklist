@@ -90,13 +90,13 @@ const MonacoKinkListEditor = forwardRef<
 
         // Model-Sprache explizit setzen
         let model = editor.getModel()
-        if (!model || model.getLanguageId() !== languageId) {
-          // Falls kein Model existiert oder falsche Sprache: neues Model erzeugen
+        if (!model) {
+          // Falls kein Model existiert: neues Model erzeugen
           const value = editor.getValue()
           model = monaco.editor.createModel(value, languageId)
           editor.setModel(model)
         } else {
-          // Sprache sicherheitshalber setzen
+          // Vorhandenes Model wiederverwenden und Sprache setzen
           monaco.editor.setModelLanguage(model, languageId)
         }
 

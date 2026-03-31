@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { fireEvent, screen } from '@testing-library/dom'
+import { render } from '@testing-library/react'
 import Choice from './Choice'
 import { KinklistProvider } from '../context/KinklistContext'
 

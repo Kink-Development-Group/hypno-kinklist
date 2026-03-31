@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/react'
-import { act } from 'react'
+import { fireEvent, screen } from '@testing-library/dom'
+import { render } from '@testing-library/react'
+import { act, createRef, forwardRef } from 'react'
 import { afterEach, describe, expect, test, vi } from 'vitest'
 import Tooltip from './Tooltip'
 
@@ -18,7 +19,7 @@ describe('Tooltip', () => {
     )
 
     const trigger = screen.getByRole('button', { name: 'Trigger' })
-    fireEvent.focus(trigger)
+    fireEvent.focusIn(trigger)
 
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
 
@@ -39,16 +40,16 @@ describe('Tooltip', () => {
 
     const trigger = screen.getByRole('button', { name: 'Trigger' })
 
-    fireEvent.mouseEnter(trigger)
+    fireEvent.mouseOver(trigger)
     expect(screen.getByRole('tooltip')).toBeInTheDocument()
 
-    fireEvent.mouseLeave(trigger)
+    fireEvent.mouseOut(trigger)
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
 
-    fireEvent.focus(trigger)
+    fireEvent.focusIn(trigger)
     expect(screen.getByRole('tooltip')).toBeInTheDocument()
 
-    fireEvent.blur(trigger)
+    fireEvent.focusOut(trigger)
     expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
   })
 
@@ -61,7 +62,7 @@ describe('Tooltip', () => {
 
     const trigger = screen.getByRole('button', { name: 'Trigger' })
 
-    fireEvent.focus(trigger)
+    fireEvent.focusIn(trigger)
     expect(screen.getByRole('tooltip')).toBeInTheDocument()
     expect(trigger).toHaveAttribute('aria-describedby')
 
@@ -80,11 +81,32 @@ describe('Tooltip', () => {
       </div>
     )
 
-    fireEvent.mouseEnter(screen.getByRole('button', { name: 'Trigger' }))
+    fireEvent.mouseOver(screen.getByRole('button', { name: 'Trigger' }))
 
     const tooltip = screen.getByRole('tooltip')
 
     expect(document.body).toContainElement(tooltip)
     expect(screen.getByTestId('wrapper')).not.toContainElement(tooltip)
+  })
+
+  test('preserves a forwarded ref on the wrapped child', () => {
+    const Button = forwardRef<HTMLButtonElement, { children: string }>(
+      ({ children }, ref) => (
+        <button ref={ref} type="button">
+          {children}
+        </button>
+      )
+    )
+    Button.displayName = 'Button'
+
+    const ref = createRef<HTMLButtonElement>()
+
+    render(
+      <Tooltip content="Tooltip content">
+        <Button ref={ref}>Trigger</Button>
+      </Tooltip>
+    )
+
+    expect(ref.current).toBe(screen.getByRole('button', { name: 'Trigger' }))
   })
 })

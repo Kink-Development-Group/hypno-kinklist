@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, screen } from '@testing-library/dom'
+import { render } from '@testing-library/react'
 import { vi } from 'vitest'
 import { Selection } from '../types'
 import { useKinklist } from '../context/KinklistContext'
@@ -120,7 +121,11 @@ describe('Choice stable ID matching', () => {
 
     fireEvent.click(screen.getByRole('radio', { name: /favorite/i }))
 
-    expect(setSelection).toHaveBeenCalledWith([
+    const selectionUpdater = vi.mocked(setSelection).mock.calls[0][0] as (
+      currentSelection: Selection[]
+    ) => Selection[]
+
+    expect(selectionUpdater(selection)).toEqual([
       {
         ...selection[0],
         value: 'Favorite',
@@ -161,7 +166,11 @@ describe('Choice stable ID matching', () => {
 
     fireEvent.click(screen.getByRole('radio', { name: /favorite/i }))
 
-    expect(setSelection).toHaveBeenCalledWith([
+    const selectionUpdater = vi.mocked(setSelection).mock.calls[0][0] as (
+      currentSelection: Selection[]
+    ) => Selection[]
+
+    expect(selectionUpdater(selection)).toEqual([
       {
         ...selection[0],
         value: 'Favorite',

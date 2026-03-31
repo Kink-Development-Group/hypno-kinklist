@@ -11,15 +11,11 @@ afterEach(() => {
   cleanup()
 })
 
-// Mock window.alert for tests
-Object.defineProperty(window, 'alert', {
-  value: vi.fn(),
-})
+vi.stubGlobal('alert', vi.fn())
 
-// Mock window.matchMedia for tests
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn().mockImplementation((query) => ({
+vi.stubGlobal(
+  'matchMedia',
+  vi.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -28,5 +24,5 @@ Object.defineProperty(window, 'matchMedia', {
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
-  })),
-})
+  }))
+)

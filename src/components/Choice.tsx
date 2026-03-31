@@ -72,36 +72,7 @@ const Choice: React.FC<ChoiceProps> = ({
 
   const handleClick = useCallback(
     (levelName: string) => {
-      // Get stable IDs for consistent matching across languages
-      const stableIds = getStableIdsFromOriginal(
-        enhancedKinks,
-        categoryName,
-        kinkName,
-        field
-      )
-
-      // Find existing selection item or create a new one
-      const existingIndex = selection.findIndex(matchesSelection)
-
-      let updatedSelection: Selection[]
-
-      if (existingIndex >= 0) {
-        // Update existing selection - preserve or populate stable IDs
-        updatedSelection = selection.map((item, index) => {
-          if (index === existingIndex) {
-            return {
-              ...item,
-              value: levelName,
-              categoryId: item.categoryId ?? stableIds.categoryId,
-              kinkId: item.kinkId ?? stableIds.kinkId,
-              fieldId: item.fieldId ?? stableIds.fieldId,
-            }
-          }
-          return item
-        })
-      } else {
-        // Create new selection item if it doesn't exist
-        // Generate stable IDs for new items
+      setSelection((prevSelection) => {
         const stableIds = getStableIdsFromOriginal(
           enhancedKinks,
           categoryName,
@@ -109,27 +80,41 @@ const Choice: React.FC<ChoiceProps> = ({
           field
         )
 
+        const existingIndex = prevSelection.findIndex(matchesSelection)
+
+        if (existingIndex >= 0) {
+          return prevSelection.map((item, index) => {
+            if (index === existingIndex) {
+              return {
+                ...item,
+                value: levelName,
+                categoryId: item.categoryId ?? stableIds.categoryId,
+                kinkId: item.kinkId ?? stableIds.kinkId,
+                fieldId: item.fieldId ?? stableIds.fieldId,
+              }
+            }
+            return item
+          })
+        }
+
         const newItem: Selection = {
           category: categoryName,
           kink: kinkName,
           field: field,
           value: levelName,
           showField,
-          // Set stable IDs for new items
           categoryId: stableIds.categoryId,
           kinkId: stableIds.kinkId,
           fieldId: stableIds.fieldId,
         }
-        updatedSelection = [...selection, newItem]
-      }
 
-      setSelection(updatedSelection)
+        return [...prevSelection, newItem]
+      })
     },
     [
       categoryName,
       kinkName,
       field,
-      selection,
       setSelection,
       enhancedKinks,
       matchesSelection,

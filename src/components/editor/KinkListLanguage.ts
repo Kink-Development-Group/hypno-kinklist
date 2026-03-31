@@ -1,4 +1,6 @@
 // Kein globales monaco importieren! Das Monaco-Objekt muss immer als Argument übergeben werden.
+import type { Monaco } from '@monaco-editor/react'
+import type * as MonacoEditor from 'monaco-editor'
 
 export interface KinkListToken {
   type: 'category' | 'subcategory' | 'kink' | 'description' | 'comment' | 'meta'
@@ -141,8 +143,9 @@ export const kinkListDarkTheme = {
 
 let isLanguageRegistered = false
 let themesRegistered = false
+type Marker = MonacoEditor.editor.IMarkerData
 
-export const registerKinkListLanguage = (monaco) => {
+export const registerKinkListLanguage = (monaco: Monaco): string => {
   const languageId = 'kinklist'
   if (isLanguageRegistered) {
     if (import.meta.env.DEV) {
@@ -240,7 +243,7 @@ export const registerKinkListLanguage = (monaco) => {
   }
 }
 
-export const registerKinkListThemes = (monaco) => {
+export const registerKinkListThemes = (monaco: Monaco): void => {
   if (themesRegistered) {
     return
   }
@@ -255,9 +258,12 @@ export const registerKinkListThemes = (monaco) => {
 }
 
 // Die Validierungsfunktion benötigt jetzt das Monaco-Objekt als Argument!
-export const validateKinkListSyntax = (monaco, text) => {
+export const validateKinkListSyntax = (
+  monaco: Monaco,
+  text: string
+): Marker[] => {
   const lines = text.split('\n')
-  const markers: any[] = []
+  const markers: Marker[] = []
 
   let currentCategory = ''
   let hasAnyContent = false

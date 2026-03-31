@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, screen } from '@testing-library/dom'
+import { render } from '@testing-library/react'
 import { vi } from 'vitest'
 import { Selection } from '../types'
 import { useKinklist } from '../context/KinklistContext'
@@ -163,7 +164,11 @@ describe('KinkRow comment selection matching', () => {
       fieldId: 'field-1',
     }
 
-    expect(setSelection).toHaveBeenCalledWith([...selection, newSelection])
+    const selectionUpdater = vi.mocked(setSelection).mock.calls[0][0] as (
+      currentSelection: Selection[]
+    ) => Selection[]
+
+    expect(selectionUpdater(selection)).toEqual([...selection, newSelection])
     expect(setSelectedKink).toHaveBeenCalledWith(newSelection)
     expect(setIsCommentOverlayOpen).toHaveBeenCalledWith(true)
   })

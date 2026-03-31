@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import {
@@ -25,6 +25,28 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
   const [showDropzone, setShowDropzone] = useState(false)
   const [importText, setImportText] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const clearImportTimers = useCallback(() => {
+    if (successTimeoutRef.current) {
+      clearTimeout(successTimeoutRef.current)
+      successTimeoutRef.current = null
+    }
+
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current)
+      closeTimeoutRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!open) {
+      clearImportTimers()
+    }
+
+    return clearImportTimers
+  }, [clearImportTimers, open])
 
   const handleImport = () => {
     if (fileInputRef.current) {
@@ -92,9 +114,13 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
             setOriginalKinksText(newKinksText)
 
             setIsSuccess(true)
-            setTimeout(() => setIsSuccess(false), 3000)
+            clearImportTimers()
+            successTimeoutRef.current = setTimeout(
+              () => setIsSuccess(false),
+              3000
+            )
             // Schließe Modal nach erfolgreichem Import
-            setTimeout(() => onClose(), 1000)
+            closeTimeoutRef.current = setTimeout(() => onClose(), 1000)
           } else {
             setError(t('import.errors.invalidFormat'))
           }
@@ -117,7 +143,15 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
         setIsLoading(false)
       }
     },
-    [setKinks, setLevels, setSelection, setOriginalKinksText, onClose, t]
+    [
+      clearImportTimers,
+      setKinks,
+      setLevels,
+      setSelection,
+      setOriginalKinksText,
+      onClose,
+      t,
+    ]
   )
 
   const handleDrop = useCallback(

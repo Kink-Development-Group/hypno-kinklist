@@ -8,7 +8,7 @@ import React, {
 } from 'react'
 import { useTranslation } from 'react-i18next'
 import EditorToolbar from './EditorToolbar'
-import { formatKinkListText, validateKinkListText } from './EditorUtils'
+import { formatKinkListText } from './EditorUtils'
 import MonacoKinkListEditor, {
   MonacoKinkListEditorRef,
 } from './MonacoKinkListEditor'
@@ -66,6 +66,8 @@ const AdvancedKinkListEditor = forwardRef<
         setValue: (newValue: string) => setValue(newValue),
         format: () => {
           if (editorRef.current) {
+            editorRef.current.formatCode()
+          } else {
             const formatted = formatKinkListText(value)
             setValue(formatted)
             onChange?.(formatted)
@@ -94,27 +96,24 @@ const AdvancedKinkListEditor = forwardRef<
       (newValue: string) => {
         setValue(newValue)
 
-        // Validierung durchführen
-        if (showValidation) {
-          const validation = validateKinkListText(newValue)
-          setValidationErrors(validation.errors)
-          setValidationWarnings(validation.warnings)
-        }
-
         // Callback aufrufen
         if (onChange) {
           onChange(newValue)
         }
       },
-      [onChange, showValidation]
+      [onChange]
     )
 
     // Formatierung durchführen
     const handleFormat = useCallback(() => {
-      const formatted = formatKinkListText(value)
-      setValue(formatted)
-      if (onChange) {
-        onChange(formatted)
+      if (editorRef.current) {
+        editorRef.current.formatCode()
+      } else {
+        const formatted = formatKinkListText(value)
+        setValue(formatted)
+        if (onChange) {
+          onChange(formatted)
+        }
       }
     }, [onChange, value])
 

@@ -2,6 +2,7 @@ import React, {
   cloneElement,
   ReactElement,
   ReactNode,
+  Ref,
   useCallback,
   useEffect,
   useId,
@@ -49,21 +50,35 @@ const Tooltip: React.FC<TooltipProps> = ({
   }>()
   const timeoutRef = useRef<number | null>(null)
   const childProps = children.props
+  const childRef = childProps.ref as Ref<HTMLElement> | undefined
   const describedBy = [childProps['aria-describedby'], show ? tooltipId : null]
     .filter(Boolean)
     .join(' ')
 
-  const showTooltip = useCallback(() => {
-    if (timeoutRef.current) window.clearTimeout(timeoutRef.current)
-    if (!triggerRef.current) return
-    const rect = triggerRef.current.getBoundingClientRect()
-    setTooltipPos(calculateTooltipPosition(rect))
-    if (delay > 0) {
-      timeoutRef.current = window.setTimeout(() => setShow(true), delay)
-    } else {
-      setShow(true)
+  const assignRef = <T,>(ref: Ref<T> | undefined, value: T | null) => {
+    if (typeof ref === 'function') {
+      ref(value)
+    } else if (ref && 'current' in ref) {
+      ref.current = value
     }
-  }, [delay])
+  }
+
+  const showTooltip = useCallback(
+    (element?: HTMLElement | null) => {
+      if (timeoutRef.current) window.clearTimeout(timeoutRef.current)
+      const triggerElement = element ?? triggerRef.current
+      if (!triggerElement) return
+      triggerRef.current = triggerElement
+      const rect = triggerElement.getBoundingClientRect()
+      setTooltipPos(calculateTooltipPosition(rect))
+      if (delay > 0) {
+        timeoutRef.current = window.setTimeout(() => setShow(true), delay)
+      } else {
+        setShow(true)
+      }
+    },
+    [delay]
+  )
 
   const hideTooltip = useCallback(() => {
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current)
@@ -73,20 +88,9 @@ const Tooltip: React.FC<TooltipProps> = ({
   const setTriggerRef = useCallback(
     (element: HTMLElement | null) => {
       triggerRef.current = element
-
-      const childRef = childProps.ref
-
-      if (typeof childRef === 'function') {
-        childRef(element)
-        return
-      }
-
-      if (childRef) {
-        ;(childRef as React.MutableRefObject<HTMLElement | null>).current =
-          element
-      }
+      assignRef(childRef, element)
     },
-    [childProps]
+    [childRef]
   )
 
   useEffect(() => {
@@ -152,11 +156,11 @@ const Tooltip: React.FC<TooltipProps> = ({
   const trigger = cloneElement(children, {
     ref: setTriggerRef,
     onMouseEnter: (e: React.MouseEvent<HTMLElement>) => {
-      showTooltip()
+      showTooltip(e.currentTarget)
       childProps.onMouseEnter?.(e)
     },
     onFocus: (e: React.FocusEvent<HTMLElement>) => {
-      showTooltip()
+      showTooltip(e.currentTarget)
       childProps.onFocus?.(e)
     },
     onMouseLeave: (e: React.MouseEvent<HTMLElement>) => {
