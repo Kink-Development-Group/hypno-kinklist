@@ -9,6 +9,30 @@ ENVIRONMENT=${1:-dev}
 echo "🧪 Testing pipeline for $ENVIRONMENT environment..."
 echo "=========================================="
 
+# Determine package manager commands based on available lockfiles
+if [ -f "bun.lock" ] && command -v bun >/dev/null 2>&1; then
+    INSTALL_CMD="bun install --frozen-lockfile"
+    TEST_CMD="bun run test --run"
+    BUILD_CMD="bun run build"
+    PACKAGE_MANAGER_NAME="bun"
+elif [ -f "bun.lock" ]; then
+    INSTALL_CMD="npm install --legacy-peer-deps"
+    TEST_CMD="npm test -- --run"
+    BUILD_CMD="npm run build"
+    PACKAGE_MANAGER_NAME="npm"
+    echo "⚠️  bun.lock found but bun is not installed; falling back to npm for local simulation."
+elif [ -f "package-lock.json" ]; then
+    INSTALL_CMD="npm ci"
+    TEST_CMD="npm test -- --run"
+    BUILD_CMD="npm run build"
+    PACKAGE_MANAGER_NAME="npm"
+else
+    INSTALL_CMD="npm install --legacy-peer-deps"
+    TEST_CMD="npm test -- --run"
+    BUILD_CMD="npm run build"
+    PACKAGE_MANAGER_NAME="npm"
+fi
+
 # Test 1: Node.js Setup
 echo ""
 echo "1️⃣ Testing Node.js setup..."
@@ -32,7 +56,7 @@ echo "2️⃣ Testing dependencies..."
 if [ -f "package.json" ]; then
     echo "✅ package.json found"
     echo "📦 Installing dependencies..."
-    npm ci
+    $INSTALL_CMD
     echo "✅ Dependencies installed"
 else
     echo "❌ package.json not found!"
@@ -42,7 +66,7 @@ fi
 # Test 3: Tests
 echo ""
 echo "3️⃣ Running tests..."
-npm test -- --run
+$TEST_CMD
 if [ $? -eq 0 ]; then
     echo "✅ All tests passed"
 else
@@ -53,7 +77,7 @@ fi
 # Test 4: Build
 echo ""
 echo "4️⃣ Testing build..."
-npm run build
+$BUILD_CMD
 if [ $? -eq 0 ]; then
     echo "✅ Build successful"
 else
@@ -128,7 +152,7 @@ echo "✅ All steps passed for $ENVIRONMENT environment"
 echo ""
 echo "📋 Summary:"
 echo "  • Node.js version: $(node --version)"
-echo "  • npm version: $(npm --version)"
+echo "  • Package manager: $PACKAGE_MANAGER_NAME"
 echo "  • Tests: PASSED"
 echo "  • Build: SUCCESSFUL"
 echo "  • Environment: $ENVIRONMENT"

@@ -1,9 +1,24 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { act, createRef, forwardRef } from 'react'
-import { afterEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { calculateTooltipPosition } from '../utils/tooltipPosition'
 import Tooltip from './Tooltip'
 
+vi.mock('../utils/tooltipPosition', () => ({
+  calculateTooltipPosition: vi.fn(),
+}))
+
 describe('Tooltip', () => {
+  beforeEach(() => {
+    vi.mocked(calculateTooltipPosition).mockReturnValue({
+      top: 10,
+      left: 20,
+      width: 100,
+      height: 20,
+      arrowLeft: 25,
+    })
+  })
+
   afterEach(() => {
     vi.useRealTimers()
   })
@@ -107,5 +122,27 @@ describe('Tooltip', () => {
     )
 
     expect(ref.current).toBe(screen.getByRole('button', { name: 'Trigger' }))
+  })
+
+  test('uses an arrow position of 0 when provided', () => {
+    vi.mocked(calculateTooltipPosition).mockReturnValue({
+      top: 10,
+      left: 20,
+      width: 100,
+      height: 20,
+      arrowLeft: 0,
+    })
+
+    render(
+      <Tooltip content="Tooltip content">
+        <button type="button">Trigger</button>
+      </Tooltip>
+    )
+
+    fireEvent.mouseOver(screen.getByRole('button', { name: 'Trigger' }))
+
+    const tooltip = screen.getByRole('tooltip')
+
+    expect(tooltip).toHaveStyle('--arrow-left: 0px')
   })
 })

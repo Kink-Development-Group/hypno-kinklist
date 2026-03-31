@@ -16,7 +16,6 @@ interface TooltipProps {
   content: ReactNode
   children: ReactElement<TooltipChildProps>
   className?: string
-  preferredPosition?: 'right' | 'left'
   delay?: number
   // Weitere Props nach Bedarf
 }
@@ -97,6 +96,18 @@ const Tooltip: React.FC<TooltipProps> = ({
     setShow(false)
   }, [])
 
+  const getArrowLeft = useCallback(() => {
+    if (tooltipPos?.arrowLeft != null) {
+      return `${tooltipPos.arrowLeft}px`
+    }
+
+    if (tooltipPos?.width != null) {
+      return `${tooltipPos.width / 2}px`
+    }
+
+    return '50%'
+  }, [tooltipPos?.arrowLeft, tooltipPos?.width])
+
   const setTriggerRef = useCallback(
     (element: HTMLElement | null) => {
       triggerRef.current = element
@@ -148,11 +159,7 @@ const Tooltip: React.FC<TooltipProps> = ({
                 top: tooltipPos.top,
                 left: tooltipPos.left,
                 zIndex: 99999,
-                '--arrow-left': tooltipPos.arrowLeft
-                  ? `${tooltipPos.arrowLeft}px`
-                  : tooltipPos.width
-                    ? `${tooltipPos.width / 2}px`
-                    : '50%',
+                '--arrow-left': getArrowLeft(),
               } as React.CSSProperties
             }
             tabIndex={-1}

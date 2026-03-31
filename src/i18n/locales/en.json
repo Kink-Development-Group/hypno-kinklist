@@ -92,6 +92,7 @@
       "title": "Insertable Blocks",
       "all": "All",
       "search": "Search blocks...",
+      "selectCategory": "Select block category",
       "select": "Select block",
       "preview": "Preview",
       "empty": "No blocks found.",

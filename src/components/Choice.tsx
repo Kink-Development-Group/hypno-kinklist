@@ -1,4 +1,4 @@
-import React, { KeyboardEvent, memo, useCallback } from 'react'
+import React, { KeyboardEvent, memo, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
 import { Selection } from '../types'
@@ -22,11 +22,10 @@ const Choice: React.FC<ChoiceProps> = ({
   const { t } = useTranslation()
 
   // Get stable IDs for consistent matching across languages
-  const stableIds = getStableIdsFromOriginal(
-    enhancedKinks,
-    categoryName,
-    kinkName,
-    field
+  const stableIds = useMemo(
+    () =>
+      getStableIdsFromOriginal(enhancedKinks, categoryName, kinkName, field),
+    [categoryName, enhancedKinks, field, kinkName]
   )
   const hasStableIds =
     stableIds.categoryId !== undefined &&
@@ -75,13 +74,6 @@ const Choice: React.FC<ChoiceProps> = ({
   const handleClick = useCallback(
     (levelName: string) => {
       setSelection((prevSelection) => {
-        const stableIds = getStableIdsFromOriginal(
-          enhancedKinks,
-          categoryName,
-          kinkName,
-          field
-        )
-
         const existingIndex = prevSelection.findIndex(matchesSelection)
 
         if (existingIndex >= 0) {
@@ -118,9 +110,9 @@ const Choice: React.FC<ChoiceProps> = ({
       kinkName,
       field,
       setSelection,
-      enhancedKinks,
       matchesSelection,
       showField,
+      stableIds,
     ]
   )
 

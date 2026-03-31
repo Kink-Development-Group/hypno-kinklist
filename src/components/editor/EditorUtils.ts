@@ -28,6 +28,10 @@ export const getHelpText = (): string => {
   return i18n.t('editor.content.helpText')
 }
 
+const getActiveTemplateLanguage = (): string => {
+  return (i18n.resolvedLanguage ?? i18n.language ?? 'en').split('-')[0]
+}
+
 // Snippets basierend auf dem Default-Template
 export const getSnippets = (): EditorSnippet[] => {
   return [
@@ -253,7 +257,9 @@ export const validateKinkListText = (
 }
 
 // Funktion zum Abrufen des Standard-Templates
-export const getDefaultTemplate = (language: string = 'en'): string => {
+export const getDefaultTemplate = (
+  language: string = getActiveTemplateLanguage()
+): string => {
   return getKinkTemplate(language)
 }
 

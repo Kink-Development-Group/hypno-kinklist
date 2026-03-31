@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { KinklistProvider } from '../context/KinklistContext'
 import { getDefaultKinklistTemplate } from '../utils/defaultTemplate'
 
@@ -9,6 +10,7 @@ interface I18nKinklistProviderProps {
 const I18nKinklistProvider: React.FC<I18nKinklistProviderProps> = ({
   children,
 }) => {
+  const { t } = useTranslation()
   const [template, setTemplate] = useState<string>('')
   const [loading, setLoading] = useState(true)
 
@@ -30,7 +32,7 @@ const I18nKinklistProvider: React.FC<I18nKinklistProviderProps> = ({
   }, [])
 
   if (loading) {
-    return <div>Loading...</div>
+    return <div>{t('loading.template')}</div>
   }
 
   return (

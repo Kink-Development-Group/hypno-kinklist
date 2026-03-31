@@ -98,7 +98,7 @@ const BlockPicker: React.FC<BlockPickerProps> = ({
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            aria-label={t('editor.snippets.selectCategory')}
+            aria-label={t('editor.blocks.selectCategory')}
           >
             {categoryOptions.map((category) => (
               <option key={category.value} value={category.value}>
