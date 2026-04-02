@@ -51,6 +51,20 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
     const monacoRef = useRef<Monaco | null>(null)
     const isInitializedRef = useRef(false)
+    const registrationDisposablesRef = useRef<monaco.IDisposable[]>([])
+    const editorDisposablesRef = useRef<monaco.IDisposable[]>([])
+
+    const disposeEditorDisposables = useCallback(() => {
+      editorDisposablesRef.current.forEach((disposable) => disposable.dispose())
+      editorDisposablesRef.current = []
+    }, [])
+
+    const disposeRegistrationDisposables = useCallback(() => {
+      registrationDisposablesRef.current.forEach((disposable) =>
+        disposable.dispose()
+      )
+      registrationDisposablesRef.current = []
+    }, [])
 
     // Expose methods to parent component
     useImperativeHandle(ref, () => ({
@@ -166,55 +180,60 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
           }
 
           // Register completion provider for snippets
-          monaco.languages.registerCompletionItemProvider(languageId, {
-            provideCompletionItems: (_model, position) => {
-              const range = {
-                startLineNumber: position.lineNumber,
-                endLineNumber: position.lineNumber,
-                startColumn: 1,
-                endColumn: position.column,
-              }
+          registrationDisposablesRef.current.push(
+            monaco.languages.registerCompletionItemProvider(languageId, {
+              provideCompletionItems: (_model, position) => {
+                const range = {
+                  startLineNumber: position.lineNumber,
+                  endLineNumber: position.lineNumber,
+                  startColumn: 1,
+                  endColumn: position.column,
+                }
 
-              const suggestions = getSnippets().map((snippet, index) => ({
-                label: snippet.label,
-                kind: monaco.languages.CompletionItemKind.Snippet,
-                insertText: snippet.insertText,
-                insertTextRules:
-                  monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-                range,
-                detail: snippet.detail,
-                documentation: snippet.documentation,
-                sortText: `z_${index.toString().padStart(3, '0')}`,
-              }))
+                const suggestions = getSnippets().map((snippet, index) => ({
+                  label: snippet.label,
+                  kind: monaco.languages.CompletionItemKind.Snippet,
+                  insertText: snippet.insertText,
+                  insertTextRules:
+                    monaco.languages.CompletionItemInsertTextRule
+                      .InsertAsSnippet,
+                  range,
+                  detail: snippet.detail,
+                  documentation: snippet.documentation,
+                  sortText: `z_${index.toString().padStart(3, '0')}`,
+                }))
 
-              return { suggestions }
-            },
-          })
+                return { suggestions }
+              },
+            })
+          )
 
           // Register code action provider for formatting
-          monaco.languages.registerCodeActionProvider(languageId, {
-            provideCodeActions: (model) => {
-              const actions: monaco.languages.CodeAction[] = [
-                {
-                  title: 'Kink-Liste formatieren',
-                  kind: 'source.fixAll',
-                  edit: {
-                    edits: [
-                      {
-                        resource: model.uri,
-                        versionId: model.getVersionId(),
-                        textEdit: {
-                          range: model.getFullModelRange(),
-                          text: formatKinkListText(model.getValue()),
+          registrationDisposablesRef.current.push(
+            monaco.languages.registerCodeActionProvider(languageId, {
+              provideCodeActions: (model) => {
+                const actions: monaco.languages.CodeAction[] = [
+                  {
+                    title: 'Kink-Liste formatieren',
+                    kind: 'source.fixAll',
+                    edit: {
+                      edits: [
+                        {
+                          resource: model.uri,
+                          versionId: model.getVersionId(),
+                          textEdit: {
+                            range: model.getFullModelRange(),
+                            text: formatKinkListText(model.getValue()),
+                          },
                         },
-                      },
-                    ],
+                      ],
+                    },
                   },
-                },
-              ]
-              return { actions, dispose: () => {} }
-            },
-          })
+                ]
+                return { actions, dispose: () => {} }
+              },
+            })
+          )
 
           isInitializedRef.current = true
         }
@@ -249,6 +268,7 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
     const handleMount: OnMount = useCallback(
       (editor, monaco) => {
         editorRef.current = editor
+        disposeEditorDisposables()
 
         // Get the model and ensure language is set
         const model = editor.getModel()
@@ -292,30 +312,35 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
         })
 
         if (import.meta.env.DEV) {
-          monaco.languages.registerHoverProvider(KINK_LIST_LANGUAGE_ID, {
-            provideHover: (model, position) => {
-              const line = model.getLineContent(position.lineNumber)
-              const tokens = monaco.editor.tokenize(line, KINK_LIST_LANGUAGE_ID)
+          editorDisposablesRef.current.push(
+            monaco.languages.registerHoverProvider(KINK_LIST_LANGUAGE_ID, {
+              provideHover: (model, position) => {
+                const line = model.getLineContent(position.lineNumber)
+                const tokens = monaco.editor.tokenize(
+                  line,
+                  KINK_LIST_LANGUAGE_ID
+                )
 
-              return {
-                range: new monaco.Range(
-                  position.lineNumber,
-                  1,
-                  position.lineNumber,
-                  line.length + 1
-                ),
-                contents: [
-                  { value: `**Line:** ${line}` },
-                  {
-                    value: `**Position:** ${position.lineNumber}:${position.column}`,
-                  },
-                  {
-                    value: `**Tokens:** ${JSON.stringify(tokens[0] || [], null, 2)}`,
-                  },
-                ],
-              }
-            },
-          })
+                return {
+                  range: new monaco.Range(
+                    position.lineNumber,
+                    1,
+                    position.lineNumber,
+                    line.length + 1
+                  ),
+                  contents: [
+                    { value: `**Line:** ${line}` },
+                    {
+                      value: `**Position:** ${position.lineNumber}:${position.column}`,
+                    },
+                    {
+                      value: `**Tokens:** ${JSON.stringify(tokens[0] || [], null, 2)}`,
+                    },
+                  ],
+                }
+              },
+            })
+          )
         }
 
         // Add keyboard shortcuts
@@ -336,13 +361,25 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
         )
 
         // Validate on content change
-        editor.onDidChangeModelContent(() => {
-          validateContent()
-        }) // Focus the editor
+        editorDisposablesRef.current.push(
+          editor.onDidChangeModelContent(() => {
+            validateContent()
+          })
+        )
+
+        // Focus the editor
         editor.focus()
       },
-      [validateContent, onChange, getTheme]
+      [disposeEditorDisposables, validateContent, onChange, getTheme]
     )
+
+    useEffect(() => {
+      return () => {
+        disposeEditorDisposables()
+        disposeRegistrationDisposables()
+        isInitializedRef.current = false
+      }
+    }, [disposeEditorDisposables, disposeRegistrationDisposables])
 
     // Update validation when value changes externally
     useEffect(() => {

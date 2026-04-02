@@ -96,9 +96,11 @@ const CommentOverlay: React.FC = () => {
 
   // Handle keyboard shortcuts
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isCommentOverlayOpen) return
+    if (!isCommentOverlayOpen) {
+      return
+    }
 
+    const handleKeyDown = (e: KeyboardEvent) => {
       // Escape key to close
       if (e.key === 'Escape') {
         handleClose()

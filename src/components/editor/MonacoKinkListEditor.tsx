@@ -2,6 +2,7 @@ import { Editor, Monaco } from '@monaco-editor/react'
 import type * as monaco from 'monaco-editor'
 import {
   forwardRef,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -57,8 +58,65 @@ const MonacoKinkListEditor = forwardRef<
   ) => {
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
     const monacoRef = useRef<Monaco | null>(null)
+    const contentChangeDisposableRef = useRef<monaco.IDisposable | null>(null)
+    const onValidationCompleteRef = useRef(onValidationComplete)
     const [isReady, setIsReady] = useState(false)
     const languageId = 'kinklist'
+
+    useEffect(() => {
+      onValidationCompleteRef.current = onValidationComplete
+    }, [onValidationComplete])
+
+    const validateContent = useCallback(() => {
+      if (!editorRef.current || !monacoRef.current) return
+
+      const monaco = monacoRef.current
+      const editor = editorRef.current
+      const model = editor.getModel()
+
+      if (!model) return
+
+      // Perform validation
+      const markers = validateKinkListSyntax(monaco, model.getValue())
+
+      // Set markers
+      monaco.editor.setModelMarkers(model, 'kinklist', markers)
+
+      // Extract errors and warnings
+      const errors: string[] = []
+      const warnings: string[] = []
+
+      markers.forEach((marker) => {
+        const message = `Zeile ${marker.startLineNumber}: ${marker.message}`
+        if (marker.severity === monaco.MarkerSeverity.Error) {
+          errors.push(message)
+        } else if (marker.severity === monaco.MarkerSeverity.Warning) {
+          warnings.push(message)
+        }
+      })
+
+      // Call callback
+      if (onValidationCompleteRef.current) {
+        onValidationCompleteRef.current(errors, warnings)
+      }
+    }, [])
+
+    const attachContentChangeListener = useCallback(() => {
+      const editor = editorRef.current
+
+      if (!editor) {
+        return
+      }
+
+      contentChangeDisposableRef.current?.dispose()
+      contentChangeDisposableRef.current = editor.onDidChangeModelContent(
+        () => {
+          if (showValidation) {
+            validateContent()
+          }
+        }
+      )
+    }, [showValidation, validateContent])
 
     // Editor initialisieren
     const handleEditorDidMount = (
@@ -124,51 +182,9 @@ const MonacoKinkListEditor = forwardRef<
       // Fokus auf den Editor setzen
       editor.focus()
 
-      // Validation nach Änderungen
-      editor.onDidChangeModelContent(() => {
-        if (showValidation) {
-          validateContent()
-        }
-      })
-
-      // Initiale Validierung
+      // Initial validation
       if (showValidation) {
         validateContent()
-      }
-    }
-
-    // Validiert den Editor-Inhalt
-    const validateContent = () => {
-      if (!editorRef.current || !monacoRef.current) return
-
-      const monaco = monacoRef.current
-      const editor = editorRef.current
-      const model = editor.getModel()
-
-      if (!model) return
-
-      // Validierung durchführen
-      const markers = validateKinkListSyntax(monaco, model.getValue())
-
-      // Marker setzen
-      monaco.editor.setModelMarkers(model, 'kinklist', markers)
-
-      // Errors und Warnings extrahieren
-      const errors: string[] = []
-      const warnings: string[] = []
-
-      markers.forEach((marker) => {
-        const message = `Zeile ${marker.startLineNumber}: ${marker.message}`
-        if (marker.severity === monaco.MarkerSeverity.Error) {
-          errors.push(message)
-        } else if (marker.severity === monaco.MarkerSeverity.Warning) {
-          warnings.push(message)
-        }
-      })
-
-      // Callback aufrufen
-      if (onValidationComplete) {
-        onValidationComplete(errors, warnings)
       }
     }
 
@@ -287,6 +303,19 @@ const MonacoKinkListEditor = forwardRef<
         )
       }
     }, [theme, isReady])
+
+    useEffect(() => {
+      if (isReady) {
+        attachContentChangeListener()
+      }
+    }, [attachContentChangeListener, isReady])
+
+    useEffect(() => {
+      return () => {
+        contentChangeDisposableRef.current?.dispose()
+        contentChangeDisposableRef.current = null
+      }
+    }, [])
 
     return (
       <div className="monaco-kinklist-editor">

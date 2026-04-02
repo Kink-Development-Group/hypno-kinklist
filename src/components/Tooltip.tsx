@@ -62,6 +62,8 @@ const Tooltip: React.FC<TooltipProps> = ({
   }
 
   const childRef = extractChildRef(children)
+  const isCustomComponentWithoutRef =
+    typeof children.type !== 'string' && !childRef
   const describedBy = [childProps['aria-describedby'], show ? tooltipId : null]
     .filter(Boolean)
     .join(' ')
@@ -174,12 +176,18 @@ const Tooltip: React.FC<TooltipProps> = ({
 
   // Das Trigger-Element mit Tooltip-Events wrappen
   const trigger = cloneElement(children, {
-    ref: setTriggerRef,
+    ...(!isCustomComponentWithoutRef ? { ref: setTriggerRef } : {}),
     onMouseEnter: (e: React.MouseEvent<HTMLElement>) => {
+      if (isCustomComponentWithoutRef) {
+        setTriggerRef(e.currentTarget)
+      }
       showTooltip(e.currentTarget)
       childProps.onMouseEnter?.(e)
     },
     onFocus: (e: React.FocusEvent<HTMLElement>) => {
+      if (isCustomComponentWithoutRef) {
+        setTriggerRef(e.currentTarget)
+      }
       showTooltip(e.currentTarget)
       childProps.onFocus?.(e)
     },
