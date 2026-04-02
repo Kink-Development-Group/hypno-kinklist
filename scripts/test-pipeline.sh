@@ -70,24 +70,20 @@ fi
 # Test 3: Tests
 echo ""
 echo "3️⃣ Running tests..."
-$TEST_CMD
-if [ $? -eq 0 ]; then
-    echo "✅ All tests passed"
-else
+if ! $TEST_CMD; then
     echo "❌ Tests failed!"
     exit 1
 fi
+echo "✅ All tests passed"
 
 # Test 4: Build
 echo ""
 echo "4️⃣ Testing build..."
-$BUILD_CMD
-if [ $? -eq 0 ]; then
-    echo "✅ Build successful"
-else
+if ! $BUILD_CMD; then
     echo "❌ Build failed!"
     exit 1
 fi
+echo "✅ Build successful"
 
 # Test 5: Build validation
 echo ""

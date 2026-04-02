@@ -12,11 +12,13 @@ const validExportData: ExportData = {
   },
   levels: {
     yes: {
+      key: 'yes',
       name: 'Yes',
       color: '#00ff00',
       class: 'yes',
     },
     maybe: {
+      key: 'maybe',
       name: 'Maybe',
       color: '#ffff00',
       class: 'maybe',
@@ -165,11 +167,13 @@ describe('importUtils', () => {
       ...validExportData,
       levels: {
         Favorite: {
+          key: 'favorite-key',
           name: 'Favorite',
           color: '#00ff00',
           class: 'favorite',
         },
         Maybe: {
+          key: 'maybe-key',
           name: 'Maybe',
           color: '#ffff00',
           class: 'maybe',
@@ -203,5 +207,20 @@ describe('importUtils', () => {
         showField: false,
       },
     ])
+
+    expect(converted.levels).toEqual({
+      Favorite: {
+        key: 'favorite-key',
+        name: 'Favorite',
+        color: '#00ff00',
+        class: 'favorite',
+      },
+      Maybe: {
+        key: 'maybe-key',
+        name: 'Maybe',
+        color: '#ffff00',
+        class: 'maybe',
+      },
+    })
   })
 })

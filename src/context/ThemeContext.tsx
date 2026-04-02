@@ -46,6 +46,17 @@ const persistTheme = (theme: ThemeType): void => {
   }
 }
 
+const getPrefersDarkMediaQuery = (): MediaQueryList | null => {
+  if (
+    typeof window === 'undefined' ||
+    typeof window.matchMedia !== 'function'
+  ) {
+    return null
+  }
+
+  return window.matchMedia('(prefers-color-scheme: dark)')
+}
+
 interface ThemeContextType {
   theme: ThemeType
   toggleTheme: () => void
@@ -77,7 +88,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Überwachen der Systemeinstellungen für Farbschema-Präferenzen
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const mediaQuery = getPrefersDarkMediaQuery()
+
+    if (!mediaQuery) {
+      return
+    }
 
     const handleChange = () => {
       if (!getStoredTheme()) {

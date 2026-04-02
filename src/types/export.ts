@@ -9,6 +9,7 @@ export interface ExportData {
   }
   levels: {
     [key: string]: {
+      key?: string
       name: string
       color: string
       class: string

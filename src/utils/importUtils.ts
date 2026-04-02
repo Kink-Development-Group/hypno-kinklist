@@ -15,7 +15,7 @@ export const convertFromExportData = (
   const levels: LevelsData = {}
   Object.entries(exportData.levels).forEach(([levelName, levelData]) => {
     levels[levelName] = {
-      key: levelData.class, // Use class as key since it's stable
+      key: levelData.key || levelData.class,
       name: levelData.name,
       color: levelData.color,
       class: levelData.class,
@@ -90,6 +90,7 @@ export const validateExportData = (data: any): data is ExportData => {
     if (
       !level ||
       typeof level !== 'object' ||
+      ('key' in (level as any) && typeof (level as any).key !== 'string') ||
       typeof (level as any).name !== 'string' ||
       typeof (level as any).color !== 'string' ||
       typeof (level as any).class !== 'string'

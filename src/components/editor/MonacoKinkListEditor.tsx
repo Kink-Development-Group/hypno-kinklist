@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
 } from 'react'
@@ -63,6 +64,29 @@ const MonacoKinkListEditor = forwardRef<
     const onValidationCompleteRef = useRef(onValidationComplete)
     const [isReady, setIsReady] = useState(false)
     const languageId = 'kinklist'
+    const editorOptions = useMemo(
+      () => ({
+        accessibilitySupport: 'auto' as const,
+        minimap: { enabled: showMinimap },
+        lineNumbers: showLineNumbers ? ('on' as const) : ('off' as const),
+        readOnly: readOnly,
+        domReadOnly: readOnly,
+        wordWrap: 'on' as const,
+        automaticLayout: true,
+        scrollBeyondLastLine: false,
+        fontSize: 14,
+        tabSize: 2,
+        renderLineHighlight: 'all' as const,
+        folding: true,
+        foldingStrategy: 'indentation' as const,
+        suggest: {
+          snippetsPreventQuickSuggestions: false,
+          showKeywords: true,
+          showSnippets: true,
+        },
+      }),
+      [readOnly, showLineNumbers, showMinimap]
+    )
 
     useEffect(() => {
       onValidationCompleteRef.current = onValidationComplete
@@ -155,27 +179,6 @@ const MonacoKinkListEditor = forwardRef<
       } catch (error) {
         console.error('Error setting up Monaco editor:', error)
       }
-
-      // Configure editor options; visual placeholder rendering is handled externally
-      editor.updateOptions({
-        minimap: { enabled: showMinimap },
-        lineNumbers: showLineNumbers ? 'on' : 'off',
-        readOnly: readOnly,
-        domReadOnly: readOnly,
-        wordWrap: 'on',
-        automaticLayout: true,
-        scrollBeyondLastLine: false,
-        fontSize: 14,
-        tabSize: 2,
-        renderLineHighlight: 'all',
-        folding: true,
-        foldingStrategy: 'indentation',
-        suggest: {
-          snippetsPreventQuickSuggestions: false,
-          showKeywords: true,
-          showSnippets: true,
-        },
-      })
 
       // Editor is ready
       setIsReady(true)
@@ -331,26 +334,7 @@ const MonacoKinkListEditor = forwardRef<
           value={value}
           onChange={(newValue) => onChange(newValue || '')}
           onMount={handleEditorDidMount}
-          options={{
-            accessibilitySupport: 'auto',
-            minimap: { enabled: showMinimap },
-            lineNumbers: showLineNumbers ? 'on' : 'off',
-            readOnly: readOnly,
-            domReadOnly: readOnly,
-            wordWrap: 'on',
-            automaticLayout: true,
-            scrollBeyondLastLine: false,
-            fontSize: 14,
-            tabSize: 2,
-            renderLineHighlight: 'all',
-            folding: true,
-            foldingStrategy: 'indentation',
-            suggest: {
-              snippetsPreventQuickSuggestions: false,
-              showKeywords: true,
-              showSnippets: true,
-            },
-          }}
+          options={editorOptions}
         />
       </div>
     )

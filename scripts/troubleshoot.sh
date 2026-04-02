@@ -92,9 +92,13 @@ if command -v npm >/dev/null 2>&1; then
     
     if [ -f "./package.json" ]; then
         echo "🏗️ Attempting test build..."
-        npm run build 2>&1 | head -20
-        
-        if [ $? -eq 0 ]; then
+        build_log=$(mktemp)
+        npm run build >"$build_log" 2>&1
+        build_exit_code=$?
+        head -20 "$build_log"
+        rm -f "$build_log"
+
+        if [ $build_exit_code -eq 0 ]; then
             echo "✅ Build completed successfully"
         else
             echo "❌ Build failed"
