@@ -69,4 +69,22 @@ describe('getDefaultKinklistTemplate', () => {
       error
     )
   })
+
+  test('falls back and warns when the template request returns a non-ok response', async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: false,
+      status: 404,
+      statusText: 'Not Found',
+    } as Response)
+
+    await expect(getDefaultKinklistTemplate()).resolves.toBe(
+      '# fallback template'
+    )
+    expect(debugWarn).toHaveBeenCalledWith(
+      'Failed to load default template from server, falling back to built-in template:',
+      expect.objectContaining({
+        message: 'Failed to load default template: 404 Not Found',
+      })
+    )
+  })
 })

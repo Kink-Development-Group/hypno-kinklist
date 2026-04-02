@@ -109,10 +109,10 @@ echo "🌿 Environment: $ENVIRONMENT"
 
 if [ "$ENVIRONMENT" = "prod" ]; then
     echo "🎯 Target: Production deployment"
-    TARGET_DIR="${SFTP_REMOTE_DIR_PROD:-/var/www/html/kinklist}"
+    TARGET_DIR="${FTP_REMOTE_DIR_PROD:-${SFTP_REMOTE_DIR_PROD:-/var/www/html/kinklist}}"
 elif [ "$ENVIRONMENT" = "dev" ]; then
     echo "🎯 Target: Development deployment"
-    TARGET_DIR="${SFTP_REMOTE_DIR_DEV:-/var/www/html/kinklist-dev}"
+    TARGET_DIR="${FTP_REMOTE_DIR_DEV:-${SFTP_REMOTE_DIR_DEV:-/var/www/html/kinklist-dev}}"
 else
     echo "❌ Invalid environment: $ENVIRONMENT"
     exit 1

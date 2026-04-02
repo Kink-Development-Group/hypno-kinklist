@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import MonacoKinkListEditor from './MonacoKinkListEditor'
+import i18n from '../../i18n'
 
 let mockEditor: Record<string, unknown>
 let mockMonaco: Record<string, unknown>
@@ -82,6 +83,7 @@ describe('MonacoKinkListEditor listeners and validation', () => {
   })
 
   test('validates markers and reports errors and warnings', () => {
+    void i18n.changeLanguage('en')
     validateKinkListSyntaxMock.mockReturnValue([
       { startLineNumber: 1, message: 'Error', severity: 8 },
       { startLineNumber: 2, message: 'Warning', severity: 4 },
@@ -98,8 +100,8 @@ describe('MonacoKinkListEditor listeners and validation', () => {
 
     expect((mockMonaco as any).editor.setModelMarkers).toHaveBeenCalled()
     expect(onValidationComplete).toHaveBeenCalledWith(
-      ['Zeile 1: Error'],
-      ['Zeile 2: Warning']
+      ['Line 1: Error'],
+      ['Line 2: Warning']
     )
   })
 

@@ -12,13 +12,11 @@ const validExportData: ExportData = {
   },
   levels: {
     yes: {
-      key: 'yes',
       name: 'Yes',
       color: '#00ff00',
       class: 'yes',
     },
     maybe: {
-      key: 'maybe',
       name: 'Maybe',
       color: '#ffff00',
       class: 'maybe',
@@ -167,13 +165,11 @@ describe('importUtils', () => {
       ...validExportData,
       levels: {
         Favorite: {
-          key: 'favorite-key',
           name: 'Favorite',
           color: '#00ff00',
           class: 'favorite',
         },
         Maybe: {
-          key: 'maybe-key',
           name: 'Maybe',
           color: '#ffff00',
           class: 'maybe',
@@ -210,17 +206,59 @@ describe('importUtils', () => {
 
     expect(converted.levels).toEqual({
       Favorite: {
-        key: 'favorite-key',
+        key: 'Favorite',
         name: 'Favorite',
         color: '#00ff00',
         class: 'favorite',
       },
       Maybe: {
-        key: 'maybe-key',
+        key: 'Maybe',
         name: 'Maybe',
         color: '#ffff00',
         class: 'maybe',
       },
     })
+  })
+
+  test('convertFromExportData still matches legacy inner level keys during import', () => {
+    const legacyExportData = {
+      ...validExportData,
+      levels: {
+        Favorite: {
+          key: 'favorite-key',
+          name: 'Favorite',
+          color: '#00ff00',
+          class: 'favorite',
+        },
+      },
+      categories: [
+        {
+          name: 'Category A',
+          fields: ['Self'],
+          kinks: [
+            {
+              name: 'Kink A',
+              selections: {
+                Self: { level: 'favorite-key' },
+              },
+            },
+          ],
+        },
+      ],
+    }
+
+    const converted = convertFromExportData(legacyExportData as ExportData)
+
+    expect(converted.selection).toEqual([
+      {
+        category: 'Category A',
+        kink: 'Kink A',
+        field: 'Self',
+        value: 'Favorite',
+        comment: undefined,
+        showField: false,
+      },
+    ])
+    expect(converted.levels.Favorite?.key).toBe('Favorite')
   })
 })

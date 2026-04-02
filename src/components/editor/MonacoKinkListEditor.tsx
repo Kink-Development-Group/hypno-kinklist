@@ -15,6 +15,7 @@ import {
   registerKinkListThemes,
   validateKinkListSyntax,
 } from './KinkListLanguage'
+import i18n from '../../i18n'
 
 export interface MonacoKinkListEditorProps {
   value: string
@@ -38,6 +39,13 @@ export interface MonacoKinkListEditorRef {
   insertBlockAfterCursor: (block: string) => void
   goToLine: (lineNumber: number) => void
 }
+
+const formatValidationMessage = (lineNumber: number, message: string): string =>
+  i18n.t('editor.validation.lineMessage', {
+    lineNumber,
+    message,
+    defaultValue: 'Line {{lineNumber}}: {{message}}',
+  })
 
 const MonacoKinkListEditor = forwardRef<
   MonacoKinkListEditorRef,
@@ -89,7 +97,10 @@ const MonacoKinkListEditor = forwardRef<
       const warnings: string[] = []
 
       markers.forEach((marker) => {
-        const message = `Zeile ${marker.startLineNumber}: ${marker.message}`
+        const message = formatValidationMessage(
+          marker.startLineNumber,
+          marker.message
+        )
         if (marker.severity === monaco.MarkerSeverity.Error) {
           errors.push(message)
         } else if (marker.severity === monaco.MarkerSeverity.Warning) {

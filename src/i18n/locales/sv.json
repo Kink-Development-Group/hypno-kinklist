@@ -103,6 +103,7 @@
     "validation": {
       "errors": "Valideringsfel",
       "warnings": "Varningar",
+      "lineMessage": "Rad {{lineNumber}}: {{message}}",
       "moreItems": "fler objekt"
     },
     "errors": {

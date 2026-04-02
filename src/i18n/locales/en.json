@@ -103,6 +103,7 @@
     "validation": {
       "errors": "Validation Errors",
       "warnings": "Warnings",
+      "lineMessage": "Line {{lineNumber}}: {{message}}",
       "moreItems": "more items"
     },
     "errors": {

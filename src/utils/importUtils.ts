@@ -1,6 +1,19 @@
 import { KinksData, LevelsData, Selection } from '../types'
 import { ExportData } from '../types/export'
 
+const getLegacyLevelKey = (levelData: unknown): string | undefined => {
+  if (
+    levelData &&
+    typeof levelData === 'object' &&
+    'key' in levelData &&
+    typeof levelData.key === 'string'
+  ) {
+    return levelData.key
+  }
+
+  return undefined
+}
+
 /**
  * Konvertiert ExportData zurück in das interne Anwendungsformat
  */
@@ -15,7 +28,7 @@ export const convertFromExportData = (
   const levels: LevelsData = {}
   Object.entries(exportData.levels).forEach(([levelName, levelData]) => {
     levels[levelName] = {
-      key: levelData.key || levelData.class,
+      key: levelName,
       name: levelData.name,
       color: levelData.color,
       class: levelData.class,
@@ -45,7 +58,7 @@ export const convertFromExportData = (
           levelEntries.find(
             ([levelName, level]) =>
               levelName === sel.level ||
-              level.key === sel.level ||
+              getLegacyLevelKey(exportData.levels[levelName]) === sel.level ||
               level.class === sel.level
           )?.[0] ?? defaultLevel
 
@@ -87,14 +100,10 @@ export const validateExportData = (data: any): data is ExportData => {
   }
 
   for (const level of Object.values(data.levels)) {
-    const optionalKey = (level as any)?.key
-
     if (
       !level ||
       typeof level !== 'object' ||
-      ('key' in (level as any) &&
-        optionalKey !== undefined &&
-        typeof optionalKey !== 'string') ||
+      ('key' in (level as any) && typeof (level as any).key !== 'string') ||
       typeof (level as any).name !== 'string' ||
       typeof (level as any).color !== 'string' ||
       typeof (level as any).class !== 'string'

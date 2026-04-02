@@ -16,6 +16,7 @@ interface ImportModalProps {
 }
 
 const ALLOWED_FILE_TYPES = ['.json', '.xml', '.csv']
+const ACCEPTED_FILE_TYPES = ALLOWED_FILE_TYPES.join(',')
 
 const getFileExtensionInfo = (fileName: string) => {
   const rawExtension = fileName.includes('.')
@@ -64,7 +65,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
 
   const handleImport = () => {
     if (fileInputRef.current) {
-      fileInputRef.current.accept = '.json,.xml,.csv'
+      fileInputRef.current.accept = ACCEPTED_FILE_TYPES
       fileInputRef.current.click()
     }
   }
@@ -313,7 +314,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
       <input
         ref={fileInputRef}
         type="file"
-        accept=".json,.xml,.csv"
+        accept={ACCEPTED_FILE_TYPES}
         onChange={handleFileSelect}
         style={{ display: 'none' }}
         aria-label={t('import.accessibility.selectFile')}
