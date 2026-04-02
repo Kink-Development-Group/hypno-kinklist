@@ -30,9 +30,9 @@ const CommentOverlay: React.FC = () => {
       const updatedSelection = selection.map((item) => {
         // Use stable IDs for comparison if available, fallback to translated names
         const matchesStableIds =
-          selectedKink.categoryId &&
-          selectedKink.kinkId &&
-          selectedKink.fieldId &&
+          selectedKink.categoryId != null &&
+          selectedKink.kinkId != null &&
+          selectedKink.fieldId != null &&
           item.categoryId === selectedKink.categoryId &&
           item.kinkId === selectedKink.kinkId &&
           item.fieldId === selectedKink.fieldId

@@ -313,71 +313,6 @@
   .export-container {
     margin-bottom: 8px;
   }
-}
-
-// Zusätzliche Sicherheit für sehr kleine Bildschirme
-@media (max-width: 320px) {
-  body {
-    overflow-x: hidden;
-  }
-
-  .action-buttons-container {
-    padding: 0 3px;
-    gap: 6px;
-  }
-
-  #Export {
-    font-size: 12px;
-    padding: 0 12px;
-    height: 36px;
-    min-width: auto;
-  }
-
-  .start-button {
-    font-size: 12px;
-    padding: 4px 12px;
-    height: 36px;
-  }
-
-  #URL {
-    font-size: 10px;
-    padding: 5px 8px;
-  }
-
-  .export-container {
-    margin-bottom: 6px;
-  }
-
-  .container {
-    padding: 0 5px;
-    max-width: 100%;
-    overflow-x: hidden;
-  }
-
-  // Ultra-kompakte Tabellendarstellung
-  table {
-    font-size: 10px;
-  }
-
-  table th,
-  table td {
-    padding: 3px 1px;
-  }
-
-  table th.choicesCol {
-    width: 50px;
-    min-width: 45px;
-    max-width: 50px;
-  }
-}
-
-// Extra small devices (landscape phones, less than 480px)
-// HINWEIS:
-// Dieser zweite @media (max-width: 479px)-Block ergänzt bewusst den früheren
-// Abschnitt weiter oben in der Datei mit zusätzlichen Header-/Control-Anpassungen.
-// Bitte neue <480px-Regeln möglichst in einem der beiden bestehenden Blöcke
-// thematisch einordnen, damit die Reihenfolge und Überschreibungen nachvollziehbar bleiben.
-@media (max-width: 479px) {
   .header-controls {
     margin-bottom: 12px;
 
@@ -440,6 +375,62 @@
       background-color: var(--input-bg-color);
       color: var(--text-color);
     }
+  }
+}
+
+// Zusätzliche Sicherheit für sehr kleine Bildschirme
+@media (max-width: 320px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .action-buttons-container {
+    padding: 0 3px;
+    gap: 6px;
+  }
+
+  #Export {
+    font-size: 12px;
+    padding: 0 12px;
+    height: 36px;
+    min-width: auto;
+  }
+
+  .start-button {
+    font-size: 12px;
+    padding: 4px 12px;
+    height: 36px;
+  }
+
+  #URL {
+    font-size: 10px;
+    padding: 5px 8px;
+  }
+
+  .export-container {
+    margin-bottom: 6px;
+  }
+
+  .container {
+    padding: 0 5px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  // Ultra-kompakte Tabellendarstellung
+  table {
+    font-size: 10px;
+  }
+
+  table th,
+  table td {
+    padding: 3px 1px;
+  }
+
+  table th.choicesCol {
+    width: 50px;
+    min-width: 45px;
+    max-width: 50px;
   }
 }
 
