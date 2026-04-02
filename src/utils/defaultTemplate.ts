@@ -25,10 +25,10 @@ export const loadDefaultKinklistFromServer = async (): Promise<string> => {
     throw new Error('Not running in browser environment')
   }
 
-  const defaultTemplateUrl = new URL(
-    'defaultList/kinks.klist',
-    `${window.location.origin}${import.meta.env.BASE_URL}`
-  )
+  const basePath = import.meta.env.BASE_URL || '/'
+  const normalizedBasePath = basePath.endsWith('/') ? basePath : `${basePath}/`
+  const baseUrl = new URL(normalizedBasePath, window.location.origin)
+  const defaultTemplateUrl = new URL('defaultList/kinks.klist', baseUrl)
 
   const response = await fetch(defaultTemplateUrl)
   if (!response.ok) {

@@ -1,5 +1,5 @@
-import Editor, { BeforeMount, OnMount } from '@monaco-editor/react'
-import * as monaco from 'monaco-editor'
+import Editor, { BeforeMount, Monaco, OnMount } from '@monaco-editor/react'
+import type * as monaco from 'monaco-editor'
 import {
   forwardRef,
   useCallback,
@@ -49,6 +49,7 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
     ref
   ) => {
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
+    const monacoRef = useRef<Monaco | null>(null)
     const isInitializedRef = useRef(false)
 
     // Expose methods to parent component
@@ -89,15 +90,19 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
         return ''
       },
       validate: () => {
-        if (editorRef.current) {
-          const model = editorRef.current.getModel()
+        const editor = editorRef.current
+        const monacoInstance = monacoRef.current
+
+        if (editor && monacoInstance) {
+          const model = editor.getModel()
           if (model) {
-            const markers = monaco.editor.getModelMarkers({
+            const markers = monacoInstance.editor.getModelMarkers({
               resource: model.uri,
             })
             const errors = markers
               .filter(
-                (marker) => marker.severity === monaco.MarkerSeverity.Error
+                (marker) =>
+                  marker.severity === monacoInstance.MarkerSeverity.Error
               )
               .map(
                 (marker) => `Zeile ${marker.startLineNumber}: ${marker.message}`
@@ -113,12 +118,20 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
       },
     })) // Validate content and report errors
     const validateContent = useCallback(() => {
-      if (editorRef.current && onValidationChange) {
-        const model = editorRef.current.getModel()
+      const editor = editorRef.current
+      const monacoInstance = monacoRef.current
+
+      if (editor && monacoInstance && onValidationChange) {
+        const model = editor.getModel()
         if (model) {
-          const markers = monaco.editor.getModelMarkers({ resource: model.uri })
+          const markers = monacoInstance.editor.getModelMarkers({
+            resource: model.uri,
+          })
           const errors = markers
-            .filter((marker) => marker.severity === monaco.MarkerSeverity.Error)
+            .filter(
+              (marker) =>
+                marker.severity === monacoInstance.MarkerSeverity.Error
+            )
             .map(
               (marker) => `Zeile ${marker.startLineNumber}: ${marker.message}`
             )
@@ -131,6 +144,8 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
     // Before editor mount - register language and themes
     const handleBeforeMount: BeforeMount = useCallback(
       (monaco) => {
+        monacoRef.current = monaco
+
         if (!isInitializedRef.current) {
           // Register the kinklist language
           const languageId = registerKinkListLanguage(monaco)

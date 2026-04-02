@@ -14,10 +14,6 @@ const Legend: React.FC = () => {
           const translatedLevel = t(`legend.${level.key}`, {
             defaultValue: levelKey,
           })
-          const displayLevel =
-            translatedLevel === `legend.${level.key}`
-              ? levelKey
-              : translatedLevel
 
           return (
             <div className="legend-item" key={levelKey}>
@@ -25,7 +21,7 @@ const Legend: React.FC = () => {
                 data-color={level.color}
                 className={`choice ${level.class}`}
               />
-              <span className="legend-text">{displayLevel}</span>
+              <span className="legend-text">{translatedLevel}</span>
             </div>
           )
         })}

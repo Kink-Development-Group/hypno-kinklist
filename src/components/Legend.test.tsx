@@ -34,9 +34,7 @@ describe('Legend Component', () => {
       const defaultValue =
         typeof options === 'string' ? options : optionObject?.defaultValue
 
-      return resolvedKey === 'legend.favorite'
-        ? resolvedKey
-        : (defaultValue ?? String(resolvedKey))
+      return defaultValue ?? String(resolvedKey)
     })
 
     render(

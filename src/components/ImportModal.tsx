@@ -217,7 +217,6 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
         onDrop={handleDrop}
       >
         <div className="modal-content import-modal">
-          {' '}
           <h2>{t('import.heading')}</h2>
           {/* Dropzone Overlay */}
           {showDropzone && (
@@ -228,7 +227,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
               </div>
             </div>
           )}
-          <p className="import-subtitle">{t('import.subtitle')}</p>{' '}
+          <p className="import-subtitle">{t('import.subtitle')}</p>
           <div className="import-methods">
             <div className="import-method">
               <h3>{t('import.methods.file.title')}</h3>
@@ -261,7 +260,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
                 {t('import.methods.text.button')}
               </button>
             </div>
-          </div>{' '}
+          </div>
           <div className="import-info">
             <h3>{t('import.supportedFormats')}</h3>
             <ul>
@@ -294,7 +293,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
         style={{ display: 'none' }}
         aria-label={t('import.accessibility.selectFile')}
       />
-      {error && <ErrorModal message={error} onClose={handleCloseError} />}{' '}
+      {error && <ErrorModal message={error} onClose={handleCloseError} />}
       {isSuccess && (
         <div className="overlay visible">
           <div className="modal-content success-modal">
@@ -310,7 +309,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
             </div>
           </div>
         </div>
-      )}{' '}
+      )}
       {isLoading && (
         <div className="overlay visible">
           <div className="modal-content loading-modal">
