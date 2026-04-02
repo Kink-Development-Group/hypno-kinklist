@@ -82,8 +82,8 @@ describe('MonacoKinkListEditor listeners and validation', () => {
     }
   })
 
-  test('validates markers and reports errors and warnings', () => {
-    void i18n.changeLanguage('en')
+  test('validates markers and reports errors and warnings', async () => {
+    await i18n.changeLanguage('en')
     validateKinkListSyntaxMock.mockReturnValue([
       { startLineNumber: 1, message: 'Error', severity: 8 },
       { startLineNumber: 2, message: 'Warning', severity: 4 },

@@ -145,4 +145,14 @@ describe('Tooltip', () => {
 
     expect(tooltip).toHaveStyle('--arrow-left: 0px')
   })
+
+  test('does not add a tab stop to non-focusable children by default', () => {
+    render(
+      <Tooltip content="Tooltip content">
+        <span>Trigger</span>
+      </Tooltip>
+    )
+
+    expect(screen.getByText('Trigger')).not.toHaveAttribute('tabindex')
+  })
 })

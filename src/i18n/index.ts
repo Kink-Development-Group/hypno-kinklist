@@ -51,7 +51,7 @@ const hasAccessibleLocalStorage = (): boolean => {
 
 const canUseLocalStorage = hasAccessibleLocalStorage()
 
-i18n
+void i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
@@ -81,8 +81,9 @@ i18n
       caches: canUseLocalStorage ? ['localStorage'] : [],
     },
   })
-
-syncDocumentLanguage()
-i18n.on('languageChanged', syncDocumentLanguage)
+  .then(() => {
+    syncDocumentLanguage()
+    i18n.on('languageChanged', syncDocumentLanguage)
+  })
 
 export default i18n

@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import KinkListEditor from './KinkListEditor'
+import { registerKinkListLanguage } from './KinkListLanguage'
 
 let mockEditor: Record<string, unknown>
 let mockMonaco: Record<string, unknown>
@@ -120,5 +121,22 @@ describe('KinkListEditor disposables', () => {
     expect(hoverProviderDisposables[1].dispose).toHaveBeenCalledTimes(1)
     expect(completionProviderDisposable.dispose).toHaveBeenCalledTimes(1)
     expect(codeActionProviderDisposable.dispose).toHaveBeenCalledTimes(1)
+  })
+
+  test('uses the registered language id consistently for providers and the model', () => {
+    vi.mocked(registerKinkListLanguage).mockReturnValue('custom-kinklist')
+
+    render(<KinkListEditor value="first" onChange={vi.fn()} />)
+
+    expect(
+      (mockMonaco as any).languages.registerCompletionItemProvider
+    ).toHaveBeenCalledWith('custom-kinklist', expect.any(Object))
+    expect(
+      (mockMonaco as any).languages.registerCodeActionProvider
+    ).toHaveBeenCalledWith('custom-kinklist', expect.any(Object))
+    expect((mockMonaco as any).editor.setModelLanguage).toHaveBeenCalledWith(
+      { uri: 'model://kinklist' },
+      'custom-kinklist'
+    )
   })
 })

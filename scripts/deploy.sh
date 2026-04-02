@@ -7,6 +7,13 @@ set -e
 
 ENVIRONMENT=${1:-dev}
 BUILD_DIR="./dist"
+CURRENT_BRANCH="unknown"
+CURRENT_COMMIT="unknown"
+
+if command -v git >/dev/null 2>&1; then
+    CURRENT_BRANCH="$(git branch --show-current 2>/dev/null || echo 'unknown')"
+    CURRENT_COMMIT="$(git rev-parse HEAD 2>/dev/null || echo 'unknown')"
+fi
 
 echo "🚀 Starting deployment to $ENVIRONMENT environment..."
 
@@ -44,8 +51,8 @@ echo "{
   \"deployment\": {
     \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",
     \"environment\": \"$ENVIRONMENT\",
-    \"branch\": \"${GITHUB_REF_NAME:-$(git branch --show-current)}\",
-    \"commit\": \"${GITHUB_SHA:-$(git rev-parse HEAD)}\",
+    \"branch\": \"${GITHUB_REF_NAME:-$CURRENT_BRANCH}\",
+    \"commit\": \"${GITHUB_SHA:-$CURRENT_COMMIT}\",
     \"build_dir\": \"$BUILD_DIR\",
     \"target_dir\": \"$TARGET_DIR\"
   }

@@ -203,7 +203,7 @@ const Tooltip: React.FC<TooltipProps> = ({
       handleKeyDown(e)
       childProps.onKeyDown?.(e)
     },
-    tabIndex: childProps.tabIndex ?? 0,
+    tabIndex: childProps.tabIndex,
     'aria-describedby': describedBy || undefined,
   })
 

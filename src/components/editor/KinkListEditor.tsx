@@ -50,6 +50,7 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
   ) => {
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
     const monacoRef = useRef<Monaco | null>(null)
+    const languageIdRef = useRef(KINK_LIST_LANGUAGE_ID)
     const isInitializedRef = useRef(false)
     const registrationDisposablesRef = useRef<monaco.IDisposable[]>([])
     const editorDisposablesRef = useRef<monaco.IDisposable[]>([])
@@ -162,7 +163,7 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
 
         if (!isInitializedRef.current) {
           // Register the kinklist language
-          const languageId = registerKinkListLanguage(monaco)
+          languageIdRef.current = registerKinkListLanguage(monaco)
           registerKinkListThemes(monaco)
 
           // Force theme setting immediately after registration
@@ -181,36 +182,39 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
 
           // Register completion provider for snippets
           registrationDisposablesRef.current.push(
-            monaco.languages.registerCompletionItemProvider(languageId, {
-              provideCompletionItems: (_model, position) => {
-                const range = {
-                  startLineNumber: position.lineNumber,
-                  endLineNumber: position.lineNumber,
-                  startColumn: 1,
-                  endColumn: position.column,
-                }
+            monaco.languages.registerCompletionItemProvider(
+              languageIdRef.current,
+              {
+                provideCompletionItems: (_model, position) => {
+                  const range = {
+                    startLineNumber: position.lineNumber,
+                    endLineNumber: position.lineNumber,
+                    startColumn: 1,
+                    endColumn: position.column,
+                  }
 
-                const suggestions = getSnippets().map((snippet, index) => ({
-                  label: snippet.label,
-                  kind: monaco.languages.CompletionItemKind.Snippet,
-                  insertText: snippet.insertText,
-                  insertTextRules:
-                    monaco.languages.CompletionItemInsertTextRule
-                      .InsertAsSnippet,
-                  range,
-                  detail: snippet.detail,
-                  documentation: snippet.documentation,
-                  sortText: `z_${index.toString().padStart(3, '0')}`,
-                }))
+                  const suggestions = getSnippets().map((snippet, index) => ({
+                    label: snippet.label,
+                    kind: monaco.languages.CompletionItemKind.Snippet,
+                    insertText: snippet.insertText,
+                    insertTextRules:
+                      monaco.languages.CompletionItemInsertTextRule
+                        .InsertAsSnippet,
+                    range,
+                    detail: snippet.detail,
+                    documentation: snippet.documentation,
+                    sortText: `z_${index.toString().padStart(3, '0')}`,
+                  }))
 
-                return { suggestions }
-              },
-            })
+                  return { suggestions }
+                },
+              }
+            )
           )
 
           // Register code action provider for formatting
           registrationDisposablesRef.current.push(
-            monaco.languages.registerCodeActionProvider(languageId, {
+            monaco.languages.registerCodeActionProvider(languageIdRef.current, {
               provideCodeActions: (model) => {
                 const actions: monaco.languages.CodeAction[] = [
                   {
@@ -273,7 +277,7 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
         // Get the model and ensure language is set
         const model = editor.getModel()
         if (model) {
-          monaco.editor.setModelLanguage(model, KINK_LIST_LANGUAGE_ID)
+          monaco.editor.setModelLanguage(model, languageIdRef.current)
 
           // Set theme AFTER setting the language
           monaco.editor.setTheme(getTheme())
@@ -313,12 +317,12 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
 
         if (import.meta.env.DEV) {
           editorDisposablesRef.current.push(
-            monaco.languages.registerHoverProvider(KINK_LIST_LANGUAGE_ID, {
+            monaco.languages.registerHoverProvider(languageIdRef.current, {
               provideHover: (model, position) => {
                 const line = model.getLineContent(position.lineNumber)
                 const tokens = monaco.editor.tokenize(
                   line,
-                  KINK_LIST_LANGUAGE_ID
+                  languageIdRef.current
                 )
 
                 return {
