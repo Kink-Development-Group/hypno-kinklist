@@ -46,7 +46,6 @@ const MonacoKinkListEditor = forwardRef<
       value,
       onChange,
       height = 400,
-      placeholder = 'Geben Sie Ihren Kinklist-Code hier ein...',
       readOnly = false,
       theme = 'auto',
       showLineNumbers = true,
@@ -98,30 +97,28 @@ const MonacoKinkListEditor = forwardRef<
         console.error('Error setting up Monaco editor:', error)
       }
 
-      // Platzhalter einrichten
-      if (placeholder && !value) {
-        editor.updateOptions({
-          minimap: { enabled: showMinimap },
-          lineNumbers: showLineNumbers ? 'on' : 'off',
-          readOnly: readOnly,
-          domReadOnly: readOnly,
-          wordWrap: 'on',
-          automaticLayout: true,
-          scrollBeyondLastLine: false,
-          fontSize: 14,
-          tabSize: 2,
-          renderLineHighlight: 'all',
-          folding: true,
-          foldingStrategy: 'indentation',
-          suggest: {
-            snippetsPreventQuickSuggestions: false,
-            showKeywords: true,
-            showSnippets: true,
-          },
-        })
-      }
+      // Configure editor options; visual placeholder rendering is handled externally
+      editor.updateOptions({
+        minimap: { enabled: showMinimap },
+        lineNumbers: showLineNumbers ? 'on' : 'off',
+        readOnly: readOnly,
+        domReadOnly: readOnly,
+        wordWrap: 'on',
+        automaticLayout: true,
+        scrollBeyondLastLine: false,
+        fontSize: 14,
+        tabSize: 2,
+        renderLineHighlight: 'all',
+        folding: true,
+        foldingStrategy: 'indentation',
+        suggest: {
+          snippetsPreventQuickSuggestions: false,
+          showKeywords: true,
+          showSnippets: true,
+        },
+      })
 
-      // Editor ist bereit
+      // Editor is ready
       setIsReady(true)
 
       // Fokus auf den Editor setzen

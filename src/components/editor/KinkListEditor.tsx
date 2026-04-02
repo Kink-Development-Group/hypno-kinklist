@@ -351,6 +351,11 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
 
     return (
       <div className="kink-list-editor">
+        {placeholder && !value && (
+          <div className="kink-list-editor-placeholder" aria-hidden="true">
+            {placeholder}
+          </div>
+        )}
         <Editor
           height={height}
           language={KINK_LIST_LANGUAGE_ID}
@@ -361,7 +366,6 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
           theme={getTheme()}
           options={{
             readOnly,
-            placeholder,
             scrollbar: {
               vertical: 'auto',
               horizontal: 'auto',

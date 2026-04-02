@@ -46,6 +46,62 @@ describe('CommentOverlay stable ID matching', () => {
     vi.clearAllMocks()
   })
 
+  test('backfills stable IDs when saving a translated-name match', () => {
+    const setSelection = vi.fn()
+    const setIsCommentOverlayOpen = vi.fn()
+    const setSelectedKink = vi.fn()
+
+    const selection: Selection[] = [
+      {
+        category: 'Translated Category',
+        kink: 'Translated Kink',
+        field: 'Translated Field',
+        value: 'Favorite',
+        showField: true,
+      },
+    ]
+
+    mockUseKinklist.mockReturnValue(
+      createMockKinklistContext({
+        selection,
+        setSelection,
+        isCommentOverlayOpen: true,
+        setIsCommentOverlayOpen,
+        selectedKink: {
+          category: 'Translated Category',
+          kink: 'Translated Kink',
+          field: 'Translated Field',
+          value: 'Favorite',
+          showField: true,
+          comment: '',
+          categoryId: 'cat-1',
+          kinkId: 'kink-1',
+          fieldId: 'field-1',
+        },
+        setSelectedKink,
+      })
+    )
+
+    render(<CommentOverlay />)
+
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: 'Updated comment' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /save/i }))
+
+    expect(setSelection).toHaveBeenCalledWith([
+      {
+        ...selection[0],
+        comment: 'Updated comment',
+        categoryId: 'cat-1',
+        kinkId: 'kink-1',
+        fieldId: 'field-1',
+      },
+    ])
+    expect(setIsCommentOverlayOpen).toHaveBeenCalledWith(false)
+    expect(setSelectedKink).toHaveBeenCalledWith(null)
+  })
+
   test('saves against empty-string stable IDs even when translated names differ', () => {
     const setSelection = vi.fn()
     const setIsCommentOverlayOpen = vi.fn()

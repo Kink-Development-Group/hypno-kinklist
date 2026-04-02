@@ -43,7 +43,24 @@ const CommentOverlay: React.FC = () => {
           item.field === selectedKink.field
 
         if (matchesStableIds || matchesTranslatedNames) {
-          return { ...item, comment: comment.trim() || undefined }
+          const updatedItem = {
+            ...item,
+            comment: comment.trim() || undefined,
+          }
+
+          if (
+            !matchesStableIds &&
+            matchesTranslatedNames &&
+            selectedKink.categoryId != null &&
+            selectedKink.kinkId != null &&
+            selectedKink.fieldId != null
+          ) {
+            updatedItem.categoryId = selectedKink.categoryId
+            updatedItem.kinkId = selectedKink.kinkId
+            updatedItem.fieldId = selectedKink.fieldId
+          }
+
+          return updatedItem
         }
         return item
       })
