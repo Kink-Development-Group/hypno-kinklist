@@ -9,7 +9,7 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import ReactDOM from 'react-dom'
+import { createPortal } from 'react-dom'
 import { calculateTooltipPosition } from '../utils/tooltipPosition'
 
 interface TooltipProps {
@@ -149,7 +149,7 @@ const Tooltip: React.FC<TooltipProps> = ({
   // Tooltip-Node als Portal
   const tooltipNode =
     show && tooltipPos
-      ? ReactDOM.createPortal(
+      ? createPortal(
           <div
             id={tooltipId}
             role="tooltip"

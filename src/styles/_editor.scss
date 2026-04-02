@@ -9,6 +9,10 @@
   background: var(--background-color);
 }
 
+.monaco-kinklist-editor {
+  position: relative;
+}
+
 .kink-list-editor-placeholder {
   position: absolute;
   top: 12px;

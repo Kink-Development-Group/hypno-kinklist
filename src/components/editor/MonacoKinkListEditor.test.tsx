@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import MonacoKinkListEditor from './MonacoKinkListEditor'
 
@@ -146,5 +146,29 @@ describe('MonacoKinkListEditor listeners and validation', () => {
     )
 
     expect(onValidationComplete).not.toHaveBeenCalled()
+  })
+
+  test('renders a placeholder overlay only when the editor is empty', () => {
+    validateKinkListSyntaxMock.mockReturnValue([])
+
+    const { rerender } = render(
+      <MonacoKinkListEditor
+        value=""
+        onChange={vi.fn()}
+        placeholder="Add content"
+      />
+    )
+
+    expect(screen.getByText('Add content')).toBeInTheDocument()
+
+    rerender(
+      <MonacoKinkListEditor
+        value="Filled"
+        onChange={vi.fn()}
+        placeholder="Add content"
+      />
+    )
+
+    expect(screen.queryByText('Add content')).not.toBeInTheDocument()
   })
 })

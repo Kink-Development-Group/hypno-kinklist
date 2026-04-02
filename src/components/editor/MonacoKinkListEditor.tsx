@@ -47,6 +47,7 @@ const MonacoKinkListEditor = forwardRef<
       value,
       onChange,
       height = 400,
+      placeholder,
       readOnly = false,
       theme = 'auto',
       showLineNumbers = true,
@@ -319,6 +320,11 @@ const MonacoKinkListEditor = forwardRef<
 
     return (
       <div className="monaco-kinklist-editor">
+        {placeholder && !value && (
+          <div className="kink-list-editor-placeholder" aria-hidden="true">
+            {placeholder}
+          </div>
+        )}
         <Editor
           height={height}
           defaultLanguage={languageId}

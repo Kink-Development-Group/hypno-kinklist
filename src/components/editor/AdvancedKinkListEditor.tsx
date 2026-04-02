@@ -25,6 +25,7 @@ interface AdvancedKinkListEditorProps {
   onChange?: (value: string) => void
   onSave?: (value: string) => void
   height?: string | number
+  isActive?: boolean
   readOnly?: boolean
   theme?: 'light' | 'dark' | 'auto'
   placeholder?: string
@@ -41,6 +42,7 @@ const AdvancedKinkListEditor = forwardRef<
       onChange,
       onSave,
       height = 500,
+      isActive = true,
       readOnly = false,
       theme = 'auto',
       placeholder,
@@ -137,11 +139,15 @@ const AdvancedKinkListEditor = forwardRef<
 
     // Keydown-Event-Listener hinzufügen/entfernen
     useEffect(() => {
+      if (!isActive) {
+        return
+      }
+
       document.addEventListener('keydown', handleKeyDown)
       return () => {
         document.removeEventListener('keydown', handleKeyDown)
       }
-    }, [handleKeyDown])
+    }, [handleKeyDown, isActive])
 
     return (
       <div className="advanced-kinklist-editor">

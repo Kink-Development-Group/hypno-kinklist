@@ -191,6 +191,7 @@ const EditOverlay: React.FC = () => {
           initialValue={kinksText}
           onChange={setKinksText}
           height="400px"
+          isActive={isEditOverlayOpen}
           placeholder={t('editor.placeholder')}
           theme={theme}
           showValidation={true}
