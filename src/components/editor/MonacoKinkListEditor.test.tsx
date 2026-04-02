@@ -231,7 +231,7 @@ describe('MonacoKinkListEditor listeners and validation', () => {
     expect(mockEditor.setValue).not.toHaveBeenCalled()
   })
 
-  test('falls back to the light theme when matchMedia is unavailable', () => {
+  test('uses light theme when matchMedia is unavailable in auto theme mode', () => {
     const originalMatchMedia = window.matchMedia
 
     Object.defineProperty(window, 'matchMedia', {
