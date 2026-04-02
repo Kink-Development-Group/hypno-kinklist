@@ -20,7 +20,7 @@ const syncDocumentLanguage = (language?: string): void => {
   }
 
   document.documentElement.lang = normalizeLanguageCode(
-    language ?? i18n.resolvedLanguage ?? i18n.language
+    language ?? i18n?.resolvedLanguage ?? i18n?.language
   )
 }
 
