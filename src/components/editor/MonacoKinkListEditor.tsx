@@ -64,29 +64,6 @@ const MonacoKinkListEditor = forwardRef<
     const onValidationCompleteRef = useRef(onValidationComplete)
     const [isReady, setIsReady] = useState(false)
     const languageId = 'kinklist'
-    const editorOptions = useMemo(
-      () => ({
-        accessibilitySupport: 'auto' as const,
-        minimap: { enabled: showMinimap },
-        lineNumbers: showLineNumbers ? ('on' as const) : ('off' as const),
-        readOnly: readOnly,
-        domReadOnly: readOnly,
-        wordWrap: 'on' as const,
-        automaticLayout: true,
-        scrollBeyondLastLine: false,
-        fontSize: 14,
-        tabSize: 2,
-        renderLineHighlight: 'all' as const,
-        folding: true,
-        foldingStrategy: 'indentation' as const,
-        suggest: {
-          snippetsPreventQuickSuggestions: false,
-          showKeywords: true,
-          showSnippets: true,
-        },
-      }),
-      [readOnly, showLineNumbers, showMinimap]
-    )
 
     useEffect(() => {
       onValidationCompleteRef.current = onValidationComplete
@@ -320,6 +297,30 @@ const MonacoKinkListEditor = forwardRef<
         contentChangeDisposableRef.current = null
       }
     }, [])
+
+    const editorOptions = useMemo(
+      () => ({
+        accessibilitySupport: 'auto' as const,
+        minimap: { enabled: showMinimap },
+        lineNumbers: showLineNumbers ? ('on' as const) : ('off' as const),
+        readOnly: readOnly,
+        domReadOnly: readOnly,
+        wordWrap: 'on' as const,
+        automaticLayout: true,
+        scrollBeyondLastLine: false,
+        fontSize: 14,
+        tabSize: 2,
+        renderLineHighlight: 'all' as const,
+        folding: true,
+        foldingStrategy: 'indentation' as const,
+        suggest: {
+          snippetsPreventQuickSuggestions: false,
+          showKeywords: true,
+          showSnippets: true,
+        },
+      }),
+      [readOnly, showLineNumbers, showMinimap]
+    )
 
     return (
       <div className="monaco-kinklist-editor">
