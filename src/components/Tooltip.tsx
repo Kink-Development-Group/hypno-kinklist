@@ -69,8 +69,9 @@ const Tooltip: React.FC<TooltipProps> = ({
   const assignRef = <T,>(ref: Ref<T> | undefined, value: T | null) => {
     if (typeof ref === 'function') {
       ref(value)
-    } else if (ref && 'current' in ref) {
-      ref.current = value
+    } else if (ref && typeof ref === 'object' && 'current' in ref) {
+      const mutableRef = ref as React.MutableRefObject<T | null>
+      mutableRef.current = value
     }
   }
 

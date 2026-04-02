@@ -16,6 +16,7 @@ const CommentOverlay: React.FC = () => {
   const [comment, setComment] = useState<string>('')
   const overlayRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const focusTimeoutRef = useRef<number | null>(null)
 
   // Close the overlay
   const handleClose = useCallback(() => {
@@ -63,9 +64,16 @@ const CommentOverlay: React.FC = () => {
   useEffect(() => {
     if (isCommentOverlayOpen && textareaRef.current) {
       // Small delay to ensure the overlay is fully rendered
-      setTimeout(() => {
+      focusTimeoutRef.current = window.setTimeout(() => {
         textareaRef.current?.focus()
       }, 100)
+    }
+
+    return () => {
+      if (focusTimeoutRef.current !== null) {
+        window.clearTimeout(focusTimeoutRef.current)
+        focusTimeoutRef.current = null
+      }
     }
   }, [isCommentOverlayOpen])
 

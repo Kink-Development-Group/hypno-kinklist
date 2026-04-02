@@ -224,48 +224,50 @@ const MonacoKinkListEditor = forwardRef<
         return ''
       },
       insertBlockAtCursor: (block: string) => {
-        if (editorRef.current) {
-          const position = editorRef.current.getPosition()
-          if (position) {
-            editorRef.current.executeEdits('', [
-              {
-                range: new monacoRef.current!.Range(
-                  position.lineNumber,
-                  position.column,
-                  position.lineNumber,
-                  position.column
-                ),
-                text: block,
-                forceMoveMarkers: true,
-              },
-            ])
-          }
-        }
+        const editor = editorRef.current
+        const monacoInstance = monacoRef.current
+        if (!editor || !monacoInstance) return
+
+        const position = editor.getPosition()
+        if (!position) return
+
+        editor.executeEdits('', [
+          {
+            range: new monacoInstance.Range(
+              position.lineNumber,
+              position.column,
+              position.lineNumber,
+              position.column
+            ),
+            text: block,
+            forceMoveMarkers: true,
+          },
+        ])
       },
       insertBlockAfterCursor: (block: string) => {
-        if (editorRef.current) {
-          const position = editorRef.current.getPosition()
-          if (position) {
-            const model = editorRef.current.getModel()
-            if (model) {
-              const lineContent = model.getLineContent(position.lineNumber)
-              const endOfLine = lineContent.length + 1 // +1 wegen spaltenbasierender Indizierung
+        const editor = editorRef.current
+        const monacoInstance = monacoRef.current
+        if (!editor || !monacoInstance) return
 
-              editorRef.current.executeEdits('', [
-                {
-                  range: new monacoRef.current!.Range(
-                    position.lineNumber,
-                    endOfLine,
-                    position.lineNumber,
-                    endOfLine
-                  ),
-                  text: '\n' + block,
-                  forceMoveMarkers: true,
-                },
-              ])
-            }
-          }
-        }
+        const position = editor.getPosition()
+        const model = editor.getModel()
+        if (!position || !model) return
+
+        const lineContent = model.getLineContent(position.lineNumber)
+        const endOfLine = lineContent.length + 1 // +1 wegen spaltenbasierender Indizierung
+
+        editor.executeEdits('', [
+          {
+            range: new monacoInstance.Range(
+              position.lineNumber,
+              endOfLine,
+              position.lineNumber,
+              endOfLine
+            ),
+            text: '\n' + block,
+            forceMoveMarkers: true,
+          },
+        ])
       },
       goToLine: (lineNumber: number) => {
         if (editorRef.current) {

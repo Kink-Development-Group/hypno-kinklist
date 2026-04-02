@@ -136,27 +136,20 @@ const KinkRow: React.FC<KinkRowProps> = ({
       <td id={kinkNameId} className="kink-name" role="cell">
         {kinkName}
         <div className="kink-actions">
-          {' '}
           {fields.map((field) => {
             const kinkSelection = selection.find((s) =>
               matchesSelection(s, field)
             )
 
-            const hasComment =
-              kinkSelection?.comment && kinkSelection.comment.trim().length > 0
+            const trimmedComment = kinkSelection?.comment?.trim()
 
-            return hasComment ? (
-              <Tooltip
-                key={`tooltip-${field}`}
-                content={kinkSelection.comment || ''}
-              >
+            return trimmedComment ? (
+              <Tooltip key={`tooltip-${field}`} content={trimmedComment}>
                 <button
                   key={`comment-${field}`}
                   className={`comment-button-base comment-button-small has-comment`}
                   data-has-comment="true"
-                  data-comment-length={
-                    kinkSelection.comment ? kinkSelection.comment.length : 0
-                  }
+                  data-comment-length={trimmedComment.length}
                   onClick={() => handleOpenComment(field)}
                   aria-label={t('comments.forField', {
                     kinkName,

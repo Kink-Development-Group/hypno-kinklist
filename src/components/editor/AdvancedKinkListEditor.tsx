@@ -147,9 +147,6 @@ const AdvancedKinkListEditor = forwardRef<
       <div className="advanced-kinklist-editor">
         <EditorToolbar
           editorRef={editorRef}
-          onInsertSnippet={(snippet) => {
-            handleChange(value + snippet)
-          }}
           showValidation={showValidation && validationErrors.length > 0}
           validationErrors={validationErrors}
           theme={theme}
