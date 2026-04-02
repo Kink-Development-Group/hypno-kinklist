@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { KinklistProvider } from '../context/KinklistContext'
 import { debugWarn } from '../utils'
+import { getEnhancedKinkTemplate } from '../utils/kinkTemplates'
 import { getDefaultKinklistTemplate } from '../utils/defaultTemplate'
 
 interface AsyncKinklistProviderProps {
@@ -38,7 +39,8 @@ const AsyncKinklistProvider: React.FC<AsyncKinklistProviderProps> = ({
           return
         }
 
-        debugWarn('Fehler beim Laden des Templates:', err)
+        debugWarn('Error loading template:', err)
+        setTemplate(getEnhancedKinkTemplate())
       } finally {
         if (isActive) {
           setIsLoading(false)
