@@ -192,10 +192,21 @@ describe('MonacoKinkListEditor listeners and validation', () => {
     render(<MonacoKinkListEditor value="content" onChange={vi.fn()} />)
 
     const initialValidationCalls = validateKinkListSyntaxMock.mock.calls.length
+    const contentChangeCallback =
+      onDidChangeModelContentCallbacks[
+        onDidChangeModelContentCallbacks.length - 1
+      ]
+
+    expect(contentChangeCallback).toBeDefined()
+    if (!contentChangeCallback) {
+      throw new Error(
+        'Expected Monaco content change callback to be registered'
+      )
+    }
 
     act(() => {
-      onDidChangeModelContentCallbacks[0]()
-      onDidChangeModelContentCallbacks[0]()
+      contentChangeCallback()
+      contentChangeCallback()
       vi.advanceTimersByTime(199)
     })
 

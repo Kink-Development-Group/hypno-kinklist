@@ -17,6 +17,8 @@ import {
 } from './KinkListLanguage'
 import i18n from '../../i18n'
 
+const VALIDATION_DEBOUNCE_MS = 200
+
 export interface MonacoKinkListEditorProps {
   value: string
   onChange: (value: string) => void
@@ -76,7 +78,9 @@ const MonacoKinkListEditor = forwardRef<
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
     const monacoRef = useRef<Monaco | null>(null)
     const contentChangeDisposableRef = useRef<monaco.IDisposable | null>(null)
-    const validationTimeoutRef = useRef<number | null>(null)
+    const validationTimeoutRef = useRef<ReturnType<
+      typeof globalThis.setTimeout
+    > | null>(null)
     const onValidationCompleteRef = useRef(onValidationComplete)
     const [isReady, setIsReady] = useState(false)
     const languageId = 'kinklist'
@@ -139,19 +143,19 @@ const MonacoKinkListEditor = forwardRef<
 
       contentChangeDisposableRef.current?.dispose()
       if (validationTimeoutRef.current) {
-        window.clearTimeout(validationTimeoutRef.current)
+        globalThis.clearTimeout(validationTimeoutRef.current)
         validationTimeoutRef.current = null
       }
       contentChangeDisposableRef.current = editor.onDidChangeModelContent(
         () => {
           if (showValidation) {
             if (validationTimeoutRef.current) {
-              window.clearTimeout(validationTimeoutRef.current)
+              globalThis.clearTimeout(validationTimeoutRef.current)
             }
-            validationTimeoutRef.current = window.setTimeout(() => {
+            validationTimeoutRef.current = globalThis.setTimeout(() => {
               validationTimeoutRef.current = null
               validateContent()
-            }, 200)
+            }, VALIDATION_DEBOUNCE_MS)
           }
         }
       )
@@ -328,7 +332,7 @@ const MonacoKinkListEditor = forwardRef<
         contentChangeDisposableRef.current?.dispose()
         contentChangeDisposableRef.current = null
         if (validationTimeoutRef.current) {
-          window.clearTimeout(validationTimeoutRef.current)
+          globalThis.clearTimeout(validationTimeoutRef.current)
           validationTimeoutRef.current = null
         }
       }
