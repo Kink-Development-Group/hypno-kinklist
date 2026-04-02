@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Deployment script for neo-kinklist
+# Deployment script for FTPS uploads
 # Usage: ./scripts/deploy.sh [dev|prod]
 
 set -e
@@ -26,10 +26,10 @@ echo "✅ Build artifacts validated"
 
 # Set target directory based on environment
 if [ "$ENVIRONMENT" = "prod" ]; then
-    TARGET_DIR="${SFTP_REMOTE_DIR_PROD:-/var/www/html/kinklist_hypno}"
+    TARGET_DIR="${FTP_REMOTE_DIR_PROD:-/var/www/html/kinklist_hypno}"
     echo "📦 Deploying to production: $TARGET_DIR"
 elif [ "$ENVIRONMENT" = "dev" ]; then
-    TARGET_DIR="${SFTP_REMOTE_DIR_DEV:-/var/www/html/kinklist_hypno_dev}"
+    TARGET_DIR="${FTP_REMOTE_DIR_DEV:-/var/www/html/kinklist_hypno_dev}"
     echo "📦 Deploying to development: $TARGET_DIR"
 else
     echo "❌ Invalid environment. Use 'dev' or 'prod'"
@@ -52,4 +52,4 @@ echo "{
 }" > "$BUILD_DIR/deployment-info.json"
 
 echo "✅ Deployment manifest created"
-echo "✅ Ready for SFTP deployment"
+echo "✅ Ready for FTPS deployment"

@@ -146,7 +146,6 @@ const KinkRow: React.FC<KinkRowProps> = ({
             return trimmedComment ? (
               <Tooltip key={`tooltip-${field}`} content={trimmedComment}>
                 <button
-                  key={`comment-${field}`}
                   className={`comment-button-base comment-button-small has-comment`}
                   data-has-comment="true"
                   data-comment-length={trimmedComment.length}

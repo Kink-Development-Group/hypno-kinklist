@@ -6,6 +6,24 @@ import deTranslation from './locales/de.json'
 import enTranslation from './locales/en.json'
 import svTranslation from './locales/sv.json'
 
+const normalizeLanguageCode = (language?: string): string => {
+  const normalizedLanguage = language?.split('-')[0]
+
+  return normalizedLanguage && ['en', 'de', 'sv'].includes(normalizedLanguage)
+    ? normalizedLanguage
+    : 'en'
+}
+
+const syncDocumentLanguage = (language?: string): void => {
+  if (typeof document === 'undefined') {
+    return
+  }
+
+  document.documentElement.lang = normalizeLanguageCode(
+    language ?? i18n.resolvedLanguage ?? i18n.language
+  )
+}
+
 const hasAccessibleLocalStorage = (): boolean => {
   if (typeof window === 'undefined') {
     return false
@@ -63,5 +81,8 @@ i18n
       caches: canUseLocalStorage ? ['localStorage'] : [],
     },
   })
+
+syncDocumentLanguage()
+i18n.on('languageChanged', syncDocumentLanguage)
 
 export default i18n
