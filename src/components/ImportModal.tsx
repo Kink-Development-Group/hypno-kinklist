@@ -15,6 +15,20 @@ interface ImportModalProps {
   onClose: () => void
 }
 
+const ALLOWED_FILE_TYPES = ['.json', '.xml', '.csv']
+
+const getFileExtensionInfo = (fileName: string) => {
+  const rawExtension = fileName.includes('.')
+    ? (fileName.split('.').pop()?.toLowerCase() ?? '')
+    : ''
+  const extension = rawExtension ? `.${rawExtension}` : ''
+
+  return {
+    extension,
+    displayExtension: extension || '(no extension)',
+  }
+}
+
 const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
   const { t } = useTranslation()
   const { setKinks, setLevels, setSelection, setOriginalKinksText } =
@@ -164,14 +178,13 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
       if (files.length === 0) return
 
       const file = files[0]
-      const allowedTypes = ['.json', '.xml', '.csv']
-      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase()
+      const { extension, displayExtension } = getFileExtensionInfo(file.name)
 
-      if (!allowedTypes.includes(fileExtension)) {
+      if (!ALLOWED_FILE_TYPES.includes(extension)) {
         setError(
           t('import.errors.unsupportedFileType', {
-            extension: fileExtension,
-            allowed: allowedTypes.join(', '),
+            extension: displayExtension,
+            allowed: ALLOWED_FILE_TYPES.join(', '),
           })
         )
         return
@@ -188,12 +201,24 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
       const file = event.target.files?.[0]
       if (!file) return
 
+      const { extension, displayExtension } = getFileExtensionInfo(file.name)
+      if (!ALLOWED_FILE_TYPES.includes(extension)) {
+        setError(
+          t('import.errors.unsupportedFileType', {
+            extension: displayExtension,
+            allowed: ALLOWED_FILE_TYPES.join(', '),
+          })
+        )
+        event.target.value = ''
+        return
+      }
+
       const text = await file.text()
       await processImportText(text, file.name)
 
       event.target.value = ''
     },
-    [processImportText]
+    [processImportText, t]
   )
 
   const handleTextImport = useCallback(async () => {

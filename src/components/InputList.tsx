@@ -98,7 +98,7 @@ const InputList: React.FC = () => {
               return (
                 <KinkCategory
                   key={catName}
-                  name={cat.name}
+                  name={catName}
                   fields={cat.fields}
                   kinks={cat.kinks}
                   descriptions={cat.descriptions}

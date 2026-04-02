@@ -69,11 +69,6 @@ const MonacoKinkListEditor = forwardRef<
       editorRef.current = editor
       monacoRef.current = monaco
 
-      // In Entwicklungsmodus: Reset flags to allow re-registration
-      if (import.meta.env.DEV) {
-        // Reset flags are handled internally by registerKinkListLanguage
-      }
-
       // Sprache und Themes registrieren
       try {
         registerKinkListLanguage(monaco)

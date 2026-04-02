@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -o pipefail
+
 # Troubleshooting script for CI/CD issues
 # Usage: ./scripts/troubleshoot.sh
 
