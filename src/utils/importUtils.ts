@@ -100,10 +100,13 @@ export const validateExportData = (data: any): data is ExportData => {
   }
 
   for (const level of Object.values(data.levels)) {
+    const hasLegacyKey = 'key' in (level as any)
+    const legacyLevelKey = getLegacyLevelKey(level)
+
     if (
       !level ||
       typeof level !== 'object' ||
-      ('key' in (level as any) && typeof (level as any).key !== 'string') ||
+      (hasLegacyKey && legacyLevelKey === undefined) ||
       typeof (level as any).name !== 'string' ||
       typeof (level as any).color !== 'string' ||
       typeof (level as any).class !== 'string'
