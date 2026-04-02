@@ -18,6 +18,7 @@ import {
 import i18n from '../../i18n'
 
 const VALIDATION_DEBOUNCE_MS = 200
+const initializedMonacoInstances = new WeakSet<object>()
 
 export interface MonacoKinkListEditorProps {
   value: string
@@ -171,8 +172,11 @@ const MonacoKinkListEditor = forwardRef<
 
       // Sprache und Themes registrieren
       try {
-        registerKinkListLanguage(monaco)
-        registerKinkListThemes(monaco)
+        if (!initializedMonacoInstances.has(monaco as object)) {
+          registerKinkListLanguage(monaco)
+          registerKinkListThemes(monaco)
+          initializedMonacoInstances.add(monaco as object)
+        }
 
         // Theme anwenden
         const isDark =

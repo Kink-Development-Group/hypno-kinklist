@@ -71,18 +71,27 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
       registrationDisposablesRef.current = []
     }, [])
 
+    const formatEditorValue = useCallback(() => {
+      const currentValue = editorRef.current?.getValue()
+
+      if (currentValue === undefined) {
+        return
+      }
+
+      const formatted = formatKinkListText(currentValue)
+
+      if (formatted !== currentValue) {
+        onChange(formatted)
+      }
+    }, [onChange])
+
     // Expose methods to parent component
     useImperativeHandle(ref, () => ({
       focus: () => {
         editorRef.current?.focus()
       },
       formatCode: () => {
-        if (editorRef.current) {
-          const currentValue = editorRef.current.getValue()
-          const formatted = formatKinkListText(currentValue)
-          editorRef.current.setValue(formatted)
-          onChange(formatted)
-        }
+        formatEditorValue()
       },
       insertSnippet: (snippet: string) => {
         if (editorRef.current) {
@@ -358,14 +367,7 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
 
         editor.addCommand(
           monaco.KeyMod.Alt | monaco.KeyMod.Shift | monaco.KeyCode.KeyF,
-          () => {
-            if (editorRef.current) {
-              const currentValue = editorRef.current.getValue()
-              const formatted = formatKinkListText(currentValue)
-              editorRef.current.setValue(formatted)
-              onChange(formatted)
-            }
-          }
+          formatEditorValue
         )
 
         // Validate on content change
@@ -378,7 +380,7 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
         // Focus the editor
         editor.focus()
       },
-      [disposeEditorDisposables, validateContent, onChange, getTheme]
+      [disposeEditorDisposables, validateContent, formatEditorValue, getTheme]
     )
 
     useEffect(() => {

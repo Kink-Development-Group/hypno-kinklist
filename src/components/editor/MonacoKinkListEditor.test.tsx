@@ -4,6 +4,10 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import MonacoKinkListEditor from './MonacoKinkListEditor'
 import type { MonacoKinkListEditorRef } from './MonacoKinkListEditor'
 import i18n from '../../i18n'
+import {
+  registerKinkListLanguage,
+  registerKinkListThemes,
+} from './KinkListLanguage'
 
 let mockEditor: Record<string, unknown>
 let mockMonaco: Record<string, unknown>
@@ -49,6 +53,8 @@ describe('MonacoKinkListEditor listeners and validation', () => {
     onDidChangeModelContentCallbacks = []
     validateKinkListSyntaxMock.mockReset()
     validateKinkListSyntaxMock.mockReturnValue([])
+    vi.mocked(registerKinkListLanguage).mockClear()
+    vi.mocked(registerKinkListThemes).mockClear()
 
     const model = {
       getValue: vi.fn(() => 'content'),
@@ -264,5 +270,18 @@ describe('MonacoKinkListEditor listeners and validation', () => {
         value: originalMatchMedia,
       })
     }
+  })
+
+  test('registers language and themes only once across remounts', () => {
+    const { unmount } = render(
+      <MonacoKinkListEditor value="content" onChange={vi.fn()} />
+    )
+
+    unmount()
+
+    render(<MonacoKinkListEditor value="content" onChange={vi.fn()} />)
+
+    expect(vi.mocked(registerKinkListLanguage)).toHaveBeenCalledTimes(1)
+    expect(vi.mocked(registerKinkListThemes)).toHaveBeenCalledTimes(1)
   })
 })

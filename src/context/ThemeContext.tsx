@@ -57,6 +57,31 @@ const getPrefersDarkMediaQuery = (): MediaQueryList | null => {
   return window.matchMedia('(prefers-color-scheme: dark)')
 }
 
+const subscribeToMediaQueryChange = (
+  mediaQuery: MediaQueryList,
+  handler: () => void
+): (() => void) | undefined => {
+  if (typeof mediaQuery.addEventListener === 'function') {
+    mediaQuery.addEventListener('change', handler)
+    return () => {
+      if (typeof mediaQuery.removeEventListener === 'function') {
+        mediaQuery.removeEventListener('change', handler)
+      }
+    }
+  }
+
+  if (typeof mediaQuery.addListener === 'function') {
+    mediaQuery.addListener(handler)
+    return () => {
+      if (typeof mediaQuery.removeListener === 'function') {
+        mediaQuery.removeListener(handler)
+      }
+    }
+  }
+
+  return undefined
+}
+
 interface ThemeContextType {
   theme: ThemeType
   toggleTheme: () => void
@@ -106,8 +131,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     // Listener für Änderungen
-    mediaQuery.addEventListener('change', handleChange)
-    return () => mediaQuery.removeEventListener('change', handleChange)
+    return subscribeToMediaQueryChange(mediaQuery, handleChange)
   }, [])
 
   return (

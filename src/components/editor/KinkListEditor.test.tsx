@@ -1,6 +1,8 @@
 import { render } from '@testing-library/react'
+import { act, createRef } from 'react'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import KinkListEditor from './KinkListEditor'
+import type { KinkListEditorRef } from './KinkListEditor'
 import { registerKinkListLanguage } from './KinkListLanguage'
 
 let mockEditor: Record<string, unknown>
@@ -166,5 +168,22 @@ describe('KinkListEditor disposables', () => {
         value: originalMatchMedia,
       })
     }
+  })
+
+  test('formats through onChange without directly setting the editor value', () => {
+    const onChange = vi.fn()
+    const ref = createRef<KinkListEditorRef>()
+    const getValueMock = mockEditor.getValue as ReturnType<typeof vi.fn>
+
+    getValueMock.mockReturnValue('  # Cat')
+
+    render(<KinkListEditor ref={ref} value="  # Cat" onChange={onChange} />)
+
+    act(() => {
+      ref.current?.formatCode()
+    })
+
+    expect(onChange).toHaveBeenCalledWith('# Cat')
+    expect(mockEditor.setValue).not.toHaveBeenCalled()
   })
 })
