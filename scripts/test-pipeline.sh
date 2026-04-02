@@ -20,11 +20,9 @@ if has_bun_lockfile && command -v bun >/dev/null 2>&1; then
     BUILD_CMD="bun run build"
     PACKAGE_MANAGER_NAME="bun"
 elif has_bun_lockfile; then
-    INSTALL_CMD="npm install --legacy-peer-deps"
-    TEST_CMD="npm test -- --run"
-    BUILD_CMD="npm run build"
-    PACKAGE_MANAGER_NAME="npm"
-    echo "⚠️  Bun lockfile found but bun is not installed; falling back to npm for local simulation."
+    echo "❌ Bun lockfile (bun.lock or bun.lockb) found, but 'bun' is not installed."
+    echo "   Please either install Bun to match the lockfile, or remove the Bun lockfile and use an npm lockfile instead."
+    exit 1
 elif [ -f "package-lock.json" ]; then
     INSTALL_CMD="npm ci"
     TEST_CMD="npm test -- --run"

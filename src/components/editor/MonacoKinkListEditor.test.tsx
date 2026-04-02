@@ -1,6 +1,8 @@
 import { render, screen } from '@testing-library/react'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { act, createRef } from 'react'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import MonacoKinkListEditor from './MonacoKinkListEditor'
+import type { MonacoKinkListEditorRef } from './MonacoKinkListEditor'
 import i18n from '../../i18n'
 
 let mockEditor: Record<string, unknown>
@@ -8,6 +10,7 @@ let mockMonaco: Record<string, unknown>
 let onDidChangeModelContentDisposables: Array<{
   dispose: ReturnType<typeof vi.fn>
 }>
+let onDidChangeModelContentCallbacks: Array<() => void>
 
 vi.mock('@monaco-editor/react', async () => {
   const React = await import('react')
@@ -43,7 +46,9 @@ vi.mock('./KinkListLanguage', () => ({
 describe('MonacoKinkListEditor listeners and validation', () => {
   beforeEach(() => {
     onDidChangeModelContentDisposables = []
+    onDidChangeModelContentCallbacks = []
     validateKinkListSyntaxMock.mockReset()
+    validateKinkListSyntaxMock.mockReturnValue([])
 
     const model = {
       getValue: vi.fn(() => 'content'),
@@ -68,9 +73,11 @@ describe('MonacoKinkListEditor listeners and validation', () => {
       getValue: vi.fn(() => 'content'),
       getModel: vi.fn(() => model),
       setModel: vi.fn(),
+      setValue: vi.fn(),
       updateOptions: vi.fn(),
-      onDidChangeModelContent: vi.fn(() => {
+      onDidChangeModelContent: vi.fn((callback: () => void) => {
         const disposable = { dispose: vi.fn() }
+        onDidChangeModelContentCallbacks.push(callback)
         onDidChangeModelContentDisposables.push(disposable)
         return disposable
       }),
@@ -80,6 +87,10 @@ describe('MonacoKinkListEditor listeners and validation', () => {
       revealLineInCenter: vi.fn(),
       setPosition: vi.fn(),
     }
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   test('validates markers and reports errors and warnings', async () => {
@@ -172,5 +183,76 @@ describe('MonacoKinkListEditor listeners and validation', () => {
     )
 
     expect(screen.queryByText('Add content')).not.toBeInTheDocument()
+  })
+
+  test('debounces validation on content changes', () => {
+    vi.useFakeTimers()
+    validateKinkListSyntaxMock.mockReturnValue([])
+
+    render(<MonacoKinkListEditor value="content" onChange={vi.fn()} />)
+
+    const initialValidationCalls = validateKinkListSyntaxMock.mock.calls.length
+
+    act(() => {
+      onDidChangeModelContentCallbacks[0]()
+      onDidChangeModelContentCallbacks[0]()
+      vi.advanceTimersByTime(199)
+    })
+
+    expect(validateKinkListSyntaxMock).toHaveBeenCalledTimes(
+      initialValidationCalls
+    )
+
+    act(() => {
+      vi.advanceTimersByTime(1)
+    })
+
+    expect(validateKinkListSyntaxMock).toHaveBeenCalledTimes(
+      initialValidationCalls + 1
+    )
+  })
+
+  test('formats through onChange without directly setting the editor value', () => {
+    const onChange = vi.fn()
+    const ref = createRef<MonacoKinkListEditorRef>()
+
+    ;(mockEditor.getValue as ReturnType<typeof vi.fn>).mockReturnValue(
+      '  # Cat'
+    )
+
+    render(
+      <MonacoKinkListEditor ref={ref} value="  # Cat" onChange={onChange} />
+    )
+
+    act(() => {
+      ref.current?.formatCode()
+    })
+
+    expect(onChange).toHaveBeenCalledWith('# Cat')
+    expect(mockEditor.setValue).not.toHaveBeenCalled()
+  })
+
+  test('falls back to the light theme when matchMedia is unavailable', () => {
+    const originalMatchMedia = window.matchMedia
+
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      value: undefined,
+    })
+
+    try {
+      render(
+        <MonacoKinkListEditor value="content" onChange={vi.fn()} theme="auto" />
+      )
+
+      expect((mockMonaco as any).editor.setTheme).toHaveBeenCalledWith(
+        'kink-list-light'
+      )
+    } finally {
+      Object.defineProperty(window, 'matchMedia', {
+        configurable: true,
+        value: originalMatchMedia,
+      })
+    }
   })
 })

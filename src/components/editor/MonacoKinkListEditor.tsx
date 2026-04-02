@@ -76,6 +76,7 @@ const MonacoKinkListEditor = forwardRef<
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
     const monacoRef = useRef<Monaco | null>(null)
     const contentChangeDisposableRef = useRef<monaco.IDisposable | null>(null)
+    const validationTimeoutRef = useRef<number | null>(null)
     const onValidationCompleteRef = useRef(onValidationComplete)
     const [isReady, setIsReady] = useState(false)
     const languageId = 'kinklist'
@@ -83,6 +84,14 @@ const MonacoKinkListEditor = forwardRef<
     useEffect(() => {
       onValidationCompleteRef.current = onValidationComplete
     }, [onValidationComplete])
+
+    const prefersDarkTheme = useCallback(() => {
+      return (
+        typeof window !== 'undefined' &&
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches
+      )
+    }, [])
 
     const validateContent = useCallback(() => {
       if (!editorRef.current || !monacoRef.current) return
@@ -129,10 +138,20 @@ const MonacoKinkListEditor = forwardRef<
       }
 
       contentChangeDisposableRef.current?.dispose()
+      if (validationTimeoutRef.current) {
+        window.clearTimeout(validationTimeoutRef.current)
+        validationTimeoutRef.current = null
+      }
       contentChangeDisposableRef.current = editor.onDidChangeModelContent(
         () => {
           if (showValidation) {
-            validateContent()
+            if (validationTimeoutRef.current) {
+              window.clearTimeout(validationTimeoutRef.current)
+            }
+            validationTimeoutRef.current = window.setTimeout(() => {
+              validationTimeoutRef.current = null
+              validateContent()
+            }, 200)
           }
         }
       )
@@ -153,9 +172,7 @@ const MonacoKinkListEditor = forwardRef<
 
         // Theme anwenden
         const isDark =
-          theme === 'dark' ||
-          (theme === 'auto' &&
-            window.matchMedia('(prefers-color-scheme: dark)').matches)
+          theme === 'dark' || (theme === 'auto' && prefersDarkTheme())
 
         const themeName = isDark ? 'kink-list-dark' : 'kink-list-light'
         monaco.editor.setTheme(themeName)
@@ -198,9 +215,8 @@ const MonacoKinkListEditor = forwardRef<
         if (editorRef.current) {
           const currentValue = editorRef.current.getValue()
           const formatted = formatKinkListText(currentValue)
-          onChange(formatted)
           if (formatted !== currentValue) {
-            editorRef.current.setValue(formatted)
+            onChange(formatted)
           }
         }
       },
@@ -293,15 +309,13 @@ const MonacoKinkListEditor = forwardRef<
     useEffect(() => {
       if (monacoRef.current && isReady) {
         const isDark =
-          theme === 'dark' ||
-          (theme === 'auto' &&
-            window.matchMedia('(prefers-color-scheme: dark)').matches)
+          theme === 'dark' || (theme === 'auto' && prefersDarkTheme())
 
         monacoRef.current.editor.setTheme(
           isDark ? 'kink-list-dark' : 'kink-list-light'
         )
       }
-    }, [theme, isReady])
+    }, [theme, isReady, prefersDarkTheme])
 
     useEffect(() => {
       if (isReady) {
@@ -313,6 +327,10 @@ const MonacoKinkListEditor = forwardRef<
       return () => {
         contentChangeDisposableRef.current?.dispose()
         contentChangeDisposableRef.current = null
+        if (validationTimeoutRef.current) {
+          window.clearTimeout(validationTimeoutRef.current)
+          validationTimeoutRef.current = null
+        }
       }
     }, [])
 
