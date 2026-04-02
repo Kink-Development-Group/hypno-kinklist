@@ -5,6 +5,7 @@ import { registerKinkListLanguage } from './KinkListLanguage'
 
 let mockEditor: Record<string, unknown>
 let mockMonaco: Record<string, unknown>
+let latestEditorProps: Record<string, unknown> | null
 let completionProviderDisposable: { dispose: ReturnType<typeof vi.fn> }
 let codeActionProviderDisposable: { dispose: ReturnType<typeof vi.fn> }
 let hoverProviderDisposables: Array<{ dispose: ReturnType<typeof vi.fn> }>
@@ -14,6 +15,8 @@ vi.mock('@monaco-editor/react', async () => {
   const React = await import('react')
 
   const MockEditor = (props: Record<string, unknown>) => {
+    latestEditorProps = props
+
     React.useEffect(() => {
       ;(props.beforeMount as ((monaco: unknown) => void) | undefined)?.(
         mockMonaco
@@ -41,6 +44,7 @@ vi.mock('./KinkListLanguage', () => ({
 
 describe('KinkListEditor disposables', () => {
   beforeEach(() => {
+    latestEditorProps = null
     hoverProviderDisposables = []
     contentChangeDisposables = []
 
@@ -138,5 +142,29 @@ describe('KinkListEditor disposables', () => {
       { uri: 'model://kinklist' },
       'custom-kinklist'
     )
+    expect(latestEditorProps?.language).toBe('custom-kinklist')
+  })
+
+  test('uses the light theme when matchMedia is unavailable in auto mode', () => {
+    const originalMatchMedia = window.matchMedia
+
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      value: undefined,
+    })
+
+    try {
+      render(<KinkListEditor value="first" onChange={vi.fn()} theme="auto" />)
+
+      expect((mockMonaco as any).editor.setTheme).toHaveBeenCalledWith(
+        'kink-list-light'
+      )
+      expect(latestEditorProps?.theme).toBe('kink-list-light')
+    } finally {
+      Object.defineProperty(window, 'matchMedia', {
+        configurable: true,
+        value: originalMatchMedia,
+      })
+    }
   })
 })

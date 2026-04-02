@@ -6,6 +6,7 @@ import {
   useEffect,
   useImperativeHandle,
   useRef,
+  useState,
 } from 'react'
 import { formatKinkListText, getSnippets } from './EditorUtils'
 import {
@@ -51,6 +52,9 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
     const monacoRef = useRef<Monaco | null>(null)
     const languageIdRef = useRef(KINK_LIST_LANGUAGE_ID)
+    const [registeredLanguageId, setRegisteredLanguageId] = useState(
+      KINK_LIST_LANGUAGE_ID
+    )
     const isInitializedRef = useRef(false)
     const registrationDisposablesRef = useRef<monaco.IDisposable[]>([])
     const editorDisposablesRef = useRef<monaco.IDisposable[]>([])
@@ -156,6 +160,29 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
       }
     }, [onValidationChange])
 
+    const getTheme = useCallback(() => {
+      if (theme === 'dark') {
+        return KINK_LIST_DARK_THEME
+      }
+
+      if (theme === 'light') {
+        return KINK_LIST_LIGHT_THEME
+      }
+
+      if (
+        typeof window === 'undefined' ||
+        typeof window.matchMedia !== 'function'
+      ) {
+        return KINK_LIST_LIGHT_THEME
+      }
+
+      const prefersDark = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches
+
+      return prefersDark ? KINK_LIST_DARK_THEME : KINK_LIST_LIGHT_THEME
+    }, [theme])
+
     // Before editor mount - register language and themes
     const handleBeforeMount: BeforeMount = useCallback(
       (monaco) => {
@@ -163,22 +190,12 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
 
         if (!isInitializedRef.current) {
           // Register the kinklist language
-          languageIdRef.current = registerKinkListLanguage(monaco)
+          const languageId = registerKinkListLanguage(monaco)
+          languageIdRef.current = languageId
+          setRegisteredLanguageId(languageId)
           registerKinkListThemes(monaco)
 
-          // Force theme setting immediately after registration
-          const currentTheme =
-            theme === 'dark' ? KINK_LIST_DARK_THEME : KINK_LIST_LIGHT_THEME
-          if (theme === 'auto') {
-            const prefersDark = window.matchMedia(
-              '(prefers-color-scheme: dark)'
-            ).matches
-            monaco.editor.setTheme(
-              prefersDark ? KINK_LIST_DARK_THEME : KINK_LIST_LIGHT_THEME
-            )
-          } else {
-            monaco.editor.setTheme(currentTheme)
-          }
+          monaco.editor.setTheme(getTheme())
 
           // Register completion provider for snippets
           registrationDisposablesRef.current.push(
@@ -242,7 +259,7 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
           isInitializedRef.current = true
         }
       },
-      [theme]
+      [getTheme]
     )
 
     // Handle value changes
@@ -254,19 +271,6 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
       },
       [onChange]
     )
-
-    // Determine theme based on system preference if auto
-    const getTheme = useCallback(() => {
-      if (theme !== 'auto') {
-        return theme === 'dark' ? KINK_LIST_DARK_THEME : KINK_LIST_LIGHT_THEME
-      }
-
-      // Auto-detect system theme
-      const prefersDark = window.matchMedia(
-        '(prefers-color-scheme: dark)'
-      ).matches
-      return prefersDark ? KINK_LIST_DARK_THEME : KINK_LIST_LIGHT_THEME
-    }, [theme])
 
     // After editor mount - configure editor
     const handleMount: OnMount = useCallback(
@@ -399,7 +403,7 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
         )}
         <Editor
           height={height}
-          language={KINK_LIST_LANGUAGE_ID}
+          language={registeredLanguageId}
           value={value}
           onChange={handleChange}
           beforeMount={handleBeforeMount}
