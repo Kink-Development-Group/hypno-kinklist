@@ -87,12 +87,14 @@ export const validateExportData = (data: any): data is ExportData => {
   }
 
   for (const level of Object.values(data.levels)) {
+    const optionalKey = (level as any)?.key
+
     if (
       !level ||
       typeof level !== 'object' ||
       ('key' in (level as any) &&
-        (level as any).key !== undefined &&
-        typeof (level as any).key !== 'string') ||
+        optionalKey !== undefined &&
+        typeof optionalKey !== 'string') ||
       typeof (level as any).name !== 'string' ||
       typeof (level as any).color !== 'string' ||
       typeof (level as any).class !== 'string'
