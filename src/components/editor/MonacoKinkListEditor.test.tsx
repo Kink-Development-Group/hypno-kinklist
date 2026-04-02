@@ -215,10 +215,9 @@ describe('MonacoKinkListEditor listeners and validation', () => {
   test('formats through onChange without directly setting the editor value', () => {
     const onChange = vi.fn()
     const ref = createRef<MonacoKinkListEditorRef>()
+    const getValueMock = mockEditor.getValue as ReturnType<typeof vi.fn>
 
-    ;(mockEditor.getValue as ReturnType<typeof vi.fn>).mockReturnValue(
-      '  # Cat'
-    )
+    getValueMock.mockReturnValue('  # Cat')
 
     render(
       <MonacoKinkListEditor ref={ref} value="  # Cat" onChange={onChange} />
