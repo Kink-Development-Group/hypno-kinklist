@@ -1,6 +1,11 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
+import { Selection } from '../types'
+
+const hasUsableStableIds = (
+  ids: Partial<Pick<Selection, 'categoryId' | 'kinkId' | 'fieldId'>>
+) => Boolean(ids.categoryId) && Boolean(ids.kinkId) && Boolean(ids.fieldId)
 
 const CommentOverlay: React.FC = () => {
   const { t } = useTranslation()
@@ -30,9 +35,7 @@ const CommentOverlay: React.FC = () => {
       const updatedSelection = selection.map((item) => {
         // Use stable IDs for comparison if available, fallback to translated names
         const matchesStableIds =
-          selectedKink.categoryId != null &&
-          selectedKink.kinkId != null &&
-          selectedKink.fieldId != null &&
+          hasUsableStableIds(selectedKink) &&
           item.categoryId === selectedKink.categoryId &&
           item.kinkId === selectedKink.kinkId &&
           item.fieldId === selectedKink.fieldId
@@ -51,9 +54,7 @@ const CommentOverlay: React.FC = () => {
           if (
             !matchesStableIds &&
             matchesTranslatedNames &&
-            selectedKink.categoryId != null &&
-            selectedKink.kinkId != null &&
-            selectedKink.fieldId != null
+            hasUsableStableIds(selectedKink)
           ) {
             updatedItem.categoryId = selectedKink.categoryId
             updatedItem.kinkId = selectedKink.kinkId

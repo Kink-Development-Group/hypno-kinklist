@@ -8,6 +8,10 @@ import { getStableIdsFromOriginal } from '../utils/multilingualTemplates'
 import Choice from './Choice'
 import Tooltip from './Tooltip'
 
+const hasUsableStableIds = (
+  ids: Partial<Pick<Selection, 'categoryId' | 'kinkId' | 'fieldId'>>
+) => Boolean(ids.categoryId) && Boolean(ids.kinkId) && Boolean(ids.fieldId)
+
 interface KinkRowProps {
   categoryName: string
   kinkName: string
@@ -53,14 +57,8 @@ const KinkRow: React.FC<KinkRowProps> = ({
   const matchesSelection = useCallback(
     (item: Selection, field: string) => {
       const stableIds = stableIdsByField[field] ?? {}
-      const hasStableIds =
-        stableIds.categoryId !== undefined &&
-        stableIds.kinkId !== undefined &&
-        stableIds.fieldId !== undefined
-      const hasSelectionIds =
-        item.categoryId !== undefined &&
-        item.kinkId !== undefined &&
-        item.fieldId !== undefined
+      const hasStableIds = hasUsableStableIds(stableIds)
+      const hasSelectionIds = hasUsableStableIds(item)
 
       if (hasStableIds && hasSelectionIds) {
         return (

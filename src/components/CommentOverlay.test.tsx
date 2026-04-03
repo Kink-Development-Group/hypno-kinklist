@@ -102,7 +102,7 @@ describe('CommentOverlay stable ID matching', () => {
     expect(setSelectedKink).toHaveBeenCalledWith(null)
   })
 
-  test('saves against empty-string stable IDs even when translated names differ', () => {
+  test('does not treat empty-string stable IDs as a unique stable-ID match', () => {
     const setSelection = vi.fn()
     const setIsCommentOverlayOpen = vi.fn()
     const setSelectedKink = vi.fn()
@@ -112,6 +112,16 @@ describe('CommentOverlay stable ID matching', () => {
         category: 'Original Category',
         kink: 'Original Kink',
         field: 'Original Field',
+        value: 'Favorite',
+        showField: true,
+        categoryId: '',
+        kinkId: '',
+        fieldId: '',
+      },
+      {
+        category: 'Original Category 2',
+        kink: 'Original Kink 2',
+        field: 'Original Field 2',
         value: 'Favorite',
         showField: true,
         categoryId: '',
@@ -148,12 +158,7 @@ describe('CommentOverlay stable ID matching', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: /save/i }))
 
-    expect(setSelection).toHaveBeenCalledWith([
-      {
-        ...selection[0],
-        comment: 'Updated comment',
-      },
-    ])
+    expect(setSelection).toHaveBeenCalledWith(selection)
     expect(setIsCommentOverlayOpen).toHaveBeenCalledWith(false)
     expect(setSelectedKink).toHaveBeenCalledWith(null)
   })

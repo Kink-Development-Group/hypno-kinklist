@@ -232,6 +232,66 @@ describe('KinkRow comment selection matching', () => {
     expect(setIsCommentOverlayOpen).toHaveBeenCalledWith(true)
   })
 
+  test('falls back to translated-name matching when stable IDs are empty strings', () => {
+    const setSelection = vi.fn()
+    const setSelectedKink = vi.fn()
+    const setIsCommentOverlayOpen = vi.fn()
+    const fallbackSelection: Selection = {
+      category: 'Category',
+      kink: 'Kink',
+      field: 'Field',
+      value: 'NotEntered',
+      showField: false,
+      categoryId: '',
+      kinkId: '',
+      fieldId: '',
+    }
+    const selection: Selection[] = [
+      {
+        category: 'Other Category',
+        kink: 'Other Kink',
+        field: 'Other Field',
+        value: 'NotEntered',
+        showField: false,
+        categoryId: '',
+        kinkId: '',
+        fieldId: '',
+      },
+      fallbackSelection,
+    ]
+
+    mockGetStableIdsFromOriginal.mockReturnValue({
+      categoryId: '',
+      kinkId: '',
+      fieldId: '',
+    })
+
+    mockUseKinklist.mockReturnValue(
+      createMockKinklistContext({
+        selection,
+        setSelection,
+        levels,
+        setIsCommentOverlayOpen,
+        setSelectedKink,
+        enhancedKinks: {},
+      })
+    )
+
+    render(
+      <table>
+        <tbody>
+          <KinkRow categoryName="Category" kinkName="Kink" fields={['Field']} />
+        </tbody>
+      </table>
+    )
+
+    fireEvent.click(screen.getByRole('button'))
+
+    expect(setSelection).not.toHaveBeenCalled()
+    expect(setSelectedKink).toHaveBeenCalledWith(fallbackSelection)
+    expect(setIsCommentOverlayOpen).toHaveBeenCalledWith(true)
+  })
+
   test('creates a new selection with the semantic notEntered default when levels are reordered', () => {
     const setSelection = vi.fn()
     const setSelectedKink = vi.fn()

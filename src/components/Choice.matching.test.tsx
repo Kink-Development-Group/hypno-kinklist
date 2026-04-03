@@ -180,6 +180,73 @@ describe('Choice stable ID matching', () => {
     ])
   })
 
+  test('falls back to name matching when stable IDs are empty strings', () => {
+    const setSelection = vi.fn()
+    const selection: Selection[] = [
+      {
+        category: 'Category',
+        kink: 'Kink',
+        field: 'Field',
+        value: 'NotEntered',
+        showField: false,
+        categoryId: '',
+        kinkId: '',
+        fieldId: '',
+      },
+      {
+        category: 'Translated Category',
+        kink: 'Translated Kink',
+        field: 'Translated Field',
+        value: 'NotEntered',
+        showField: false,
+        categoryId: 'other-cat',
+        kinkId: 'other-kink',
+        fieldId: 'other-field',
+      },
+    ]
+
+    mockGetStableIdsFromOriginal.mockReturnValue({
+      categoryId: '',
+      kinkId: '',
+      fieldId: '',
+    })
+
+    mockUseKinklist.mockReturnValue(
+      createMockKinklistContext({
+        levels,
+        selection,
+        setSelection,
+        enhancedKinks: {},
+      })
+    )
+
+    render(
+      <Choice
+        field="Field"
+        categoryName="Category"
+        kinkName="Kink"
+        showField={false}
+      />
+    )
+
+    fireEvent.click(screen.getByRole('radio', { name: /favorite/i }))
+
+    const selectionUpdater = vi.mocked(setSelection).mock.calls[0][0] as (
+      currentSelection: Selection[]
+    ) => Selection[]
+
+    expect(selectionUpdater(selection)).toEqual([
+      {
+        ...selection[0],
+        value: 'Favorite',
+        categoryId: '',
+        kinkId: '',
+        fieldId: '',
+      },
+      selection[1],
+    ])
+  })
+
   test('defaults to the semantic notEntered level when level order differs', () => {
     const reorderedLevels = {
       Favorite: levels.Favorite,

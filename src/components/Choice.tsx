@@ -5,6 +5,10 @@ import { Selection } from '../types'
 import { getDefaultLevelKey } from '../utils/levels'
 import { getStableIdsFromOriginal } from '../utils/multilingualTemplates'
 
+const hasUsableStableIds = (
+  ids: Partial<Pick<Selection, 'categoryId' | 'kinkId' | 'fieldId'>>
+) => Boolean(ids.categoryId) && Boolean(ids.kinkId) && Boolean(ids.fieldId)
+
 interface ChoiceProps {
   field: string
   categoryName: string
@@ -27,17 +31,11 @@ const Choice: React.FC<ChoiceProps> = ({
       getStableIdsFromOriginal(enhancedKinks, categoryName, kinkName, field),
     [categoryName, enhancedKinks, field, kinkName]
   )
-  const hasStableIds =
-    stableIds.categoryId !== undefined &&
-    stableIds.kinkId !== undefined &&
-    stableIds.fieldId !== undefined
+  const hasStableIds = hasUsableStableIds(stableIds)
 
   const matchesSelection = useCallback(
     (item: Selection) => {
-      const hasSelectionIds =
-        item.categoryId !== undefined &&
-        item.kinkId !== undefined &&
-        item.fieldId !== undefined
+      const hasSelectionIds = hasUsableStableIds(item)
 
       if (hasStableIds && hasSelectionIds) {
         return (
