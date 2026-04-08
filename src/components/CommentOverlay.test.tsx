@@ -152,6 +152,9 @@ describe('CommentOverlay stable ID matching', () => {
       {
         ...selection[0],
         comment: 'Updated comment',
+        categoryId: 'existing-cat',
+        kinkId: 'existing-kink',
+        fieldId: 'existing-field',
       },
     ])
     expect(setIsCommentOverlayOpen).toHaveBeenCalledWith(false)
