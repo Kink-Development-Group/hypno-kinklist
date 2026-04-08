@@ -94,16 +94,17 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
 
       try {
         const { extension } = getFileExtensionInfo(filename)
+        const normalizedExtension = extension.replace(/^\./, '')
         let result
 
-        switch (extension) {
-          case '.json':
+        switch (normalizedExtension) {
+          case 'json':
             result = importFromJSON(text)
             break
-          case '.xml':
+          case 'xml':
             result = importFromXML(text)
             break
-          case '.csv':
+          case 'csv':
             result = importFromCSV(text)
             break
           default:
