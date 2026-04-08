@@ -1,49 +1,264 @@
-import { KinksData, LevelsData, Selection } from "../types";
+import i18n from '../i18n'
+import type { KinksData, LevelsData, Selection } from '../types'
+import type { EnhancedKinksData } from './multilingualTemplates'
+import {
+  getStableIdsFromOriginal,
+  parseEnhancedKinksText,
+  resolveEnhancedKinksData,
+  resolveMultilingualContent,
+} from './multilingualTemplates'
 
 export const strToClass = (str: string): string => {
-  let className = "";
-  str = str.toLowerCase();
-  const validChars = "abcdefghijklmnopqrstuvwxyz";
-  let newWord = false;
+  let className = ''
+  str = str.toLowerCase()
+  const validChars = 'abcdefghijklmnopqrstuvwxyz'
+  let newWord = false
 
   for (let i = 0; i < str.length; i++) {
-    const chr = str[i];
+    const chr = str[i]
     if (validChars.indexOf(chr) >= 0) {
       if (newWord) {
-        className += chr.toUpperCase();
+        className += chr.toUpperCase()
       } else {
-        className += chr;
+        className += chr
       }
-      newWord = false;
+      newWord = false
     } else {
-      newWord = true;
+      newWord = true
     }
   }
 
-  return className;
-};
+  return className
+}
+
+// New function to generate unique category keys
+export const generateUniqueCategoryKey = (
+  categoryName: string,
+  existingKeys: Set<string>
+): string => {
+  const baseKey = strToClass(categoryName)
+  let uniqueKey = baseKey
+  let counter = 1
+
+  while (existingKeys.has(uniqueKey)) {
+    uniqueKey = `${baseKey}${counter}`
+    counter++
+  }
+
+  return uniqueKey
+}
+
+const isDebugLoggingEnabled = (): boolean => {
+  return Boolean(
+    import.meta.env.DEV && import.meta.env.VITE_DEBUG_KINKLIST === 'true'
+  )
+}
+
+const writeDebugLog = (
+  method: 'log' | 'warn',
+  ...args: readonly unknown[]
+): void => {
+  if (!isDebugLoggingEnabled()) {
+    return
+  }
+
+  if (method === 'warn') {
+    console.warn(...args)
+    return
+  }
+
+  console.log(...args)
+}
+
+export const debugLog = (...args: readonly unknown[]): void => {
+  writeDebugLog('log', ...args)
+}
+
+export const debugWarn = (...args: readonly unknown[]): void => {
+  writeDebugLog('warn', ...args)
+}
+
+export const reportError = (message: string, error?: unknown): void => {
+  if (typeof error === 'undefined') {
+    console.error(message)
+    return
+  }
+
+  console.error(message, error)
+}
+
+export interface KinklistDraft {
+  version: 1
+  originalKinksText: string
+  selection: Selection[]
+  savedAt: string
+}
+
+type StorageLike = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>
+
+class SafeLocalStorageAdapter {
+  private getStorage(): StorageLike | null {
+    if (typeof window === 'undefined') {
+      return null
+    }
+
+    try {
+      const storage = window.localStorage
+
+      if (
+        storage &&
+        typeof storage.getItem === 'function' &&
+        typeof storage.setItem === 'function' &&
+        typeof storage.removeItem === 'function'
+      ) {
+        return storage
+      }
+    } catch {
+      return null
+    }
+
+    return null
+  }
+
+  getItem(key: string): string | null {
+    try {
+      return this.getStorage()?.getItem(key) ?? null
+    } catch {
+      return null
+    }
+  }
+
+  setItem(key: string, value: string): void {
+    try {
+      this.getStorage()?.setItem(key, value)
+    } catch {
+      // Ignore storage access issues in private mode, tests or locked-down browsers.
+    }
+  }
+
+  removeItem(key: string): void {
+    try {
+      this.getStorage()?.removeItem(key)
+    } catch {
+      // Ignore storage access issues in private mode, tests or locked-down browsers.
+    }
+  }
+}
+
+const DRAFT_STORAGE_KEY = 'hypno-kinklist:draft'
+const DRAFT_VERSION = 1 as const
+
+const isStoredSelection = (value: unknown): value is Selection => {
+  if (!value || typeof value !== 'object') {
+    return false
+  }
+
+  const candidate = value as Partial<Selection>
+
+  return (
+    typeof candidate.category === 'string' &&
+    typeof candidate.kink === 'string' &&
+    typeof candidate.field === 'string' &&
+    typeof candidate.value === 'string' &&
+    typeof candidate.showField === 'boolean' &&
+    (typeof candidate.comment === 'undefined' ||
+      typeof candidate.comment === 'string') &&
+    (typeof candidate.categoryId === 'undefined' ||
+      typeof candidate.categoryId === 'string') &&
+    (typeof candidate.kinkId === 'undefined' ||
+      typeof candidate.kinkId === 'string') &&
+    (typeof candidate.fieldId === 'undefined' ||
+      typeof candidate.fieldId === 'string')
+  )
+}
+
+const isKinklistDraft = (value: unknown): value is KinklistDraft => {
+  if (!value || typeof value !== 'object') {
+    return false
+  }
+
+  const candidate = value as Partial<KinklistDraft>
+
+  return (
+    candidate.version === DRAFT_VERSION &&
+    typeof candidate.originalKinksText === 'string' &&
+    typeof candidate.savedAt === 'string' &&
+    Array.isArray(candidate.selection) &&
+    candidate.selection.every(isStoredSelection)
+  )
+}
+
+class KinklistDraftStore {
+  constructor(
+    private readonly storageKey: string = DRAFT_STORAGE_KEY,
+    private readonly storage: StorageLike = new SafeLocalStorageAdapter()
+  ) {}
+
+  load(): KinklistDraft | null {
+    const rawValue = this.storage.getItem(this.storageKey)
+
+    if (!rawValue) {
+      return null
+    }
+
+    try {
+      const parsedValue = JSON.parse(rawValue) as unknown
+      return isKinklistDraft(parsedValue) ? parsedValue : null
+    } catch {
+      return null
+    }
+  }
+
+  save(originalKinksText: string, selection: Selection[]): KinklistDraft {
+    const draft: KinklistDraft = {
+      version: DRAFT_VERSION,
+      originalKinksText,
+      selection,
+      savedAt: new Date().toISOString(),
+    }
+
+    this.storage.setItem(this.storageKey, JSON.stringify(draft))
+
+    return draft
+  }
+
+  clear(): void {
+    this.storage.removeItem(this.storageKey)
+  }
+
+  resolveInitialTemplate(defaultTemplate: string, hasHash: boolean): string {
+    if (hasHash) {
+      return defaultTemplate
+    }
+
+    return this.load()?.originalKinksText ?? defaultTemplate
+  }
+}
+
+export const kinklistDraftStore = new KinklistDraftStore()
 
 export const log = (val: number, base: number): number => {
-  return Math.log(val) / Math.log(base);
-};
+  return Math.log(val) / Math.log(base)
+}
 
 export const parseKinksText = (
   text: string,
-  errorHandler: (msg: string) => void = (msg) => window.alert(msg),
+  _errorHandler: (msg: string) => void = (msg) => window.alert(msg)
 ): KinksData | null => {
-  const newKinks: KinksData = {};
-  const lines = text.replace(/\r/g, "").split("\n");
+  const newKinks: KinksData = {}
+  const lines = text.replace(/\r/g, '').split('\n')
+  const existingKeys = new Set<string>()
 
   let cat: (Partial<KinksData[string]> & { descriptions?: string[] }) | null =
-    null;
-  let catName: string | null = null;
-  let lastKinkIdx: number | null = null;
+    null
+  let catName: string | null = null
+  let lastKinkIdx: number | null = null
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    if (!line.length) continue;
+    const line = lines[i]
+    if (!line.length) continue
 
-    if (line[0] === "#") {
+    if (line[0] === '#') {
       if (
         catName &&
         cat &&
@@ -52,38 +267,41 @@ export const parseKinksText = (
         Array.isArray(cat.kinks) &&
         cat.kinks.length > 0
       ) {
-        newKinks[catName] = { ...cat, name: catName } as KinksData[string];
+        // Generate unique key for the category
+        const uniqueKey = generateUniqueCategoryKey(catName, existingKeys)
+        existingKeys.add(uniqueKey)
+        newKinks[uniqueKey] = { ...cat, name: catName } as KinksData[string]
       }
-      catName = line.substring(1).trim();
-      cat = { kinks: [], descriptions: [] };
-      lastKinkIdx = null;
+      catName = line.substring(1).trim()
+      cat = { kinks: [], descriptions: [] }
+      lastKinkIdx = null
     }
 
-    if (!catName) continue;
+    if (!catName) continue
 
-    if (line[0] === "(") {
+    if (line[0] === '(') {
       if (cat) {
         cat.fields = line
           .substring(1, line.length - 1)
           .trim()
-          .split(",")
-          .map((field) => field.trim());
+          .split(',')
+          .map((field) => field.trim())
       }
-    } else if (line[0] === "*") {
-      const kink = line.substring(1).trim();
+    } else if (line[0] === '*') {
+      const kink = line.substring(1).trim()
       if (cat && Array.isArray(cat.kinks) && Array.isArray(cat.descriptions)) {
-        cat.kinks.push(kink);
-        cat.descriptions.push(""); // Platzhalter für Beschreibung
-        lastKinkIdx = cat.kinks.length - 1;
+        cat.kinks.push(kink)
+        cat.descriptions.push('') // Platzhalter für Beschreibung
+        lastKinkIdx = cat.kinks.length - 1
       }
     } else if (
-      line[0] === "?" &&
+      line[0] === '?' &&
       cat &&
       Array.isArray(cat.descriptions) &&
       lastKinkIdx !== null
     ) {
       // Beschreibung für den letzten Kink
-      cat.descriptions[lastKinkIdx] = line.substring(1).trim();
+      cat.descriptions[lastKinkIdx] = line.substring(1).trim()
     }
   }
 
@@ -95,256 +313,526 @@ export const parseKinksText = (
     Array.isArray(cat.kinks) &&
     cat.kinks.length > 0
   ) {
-    newKinks[catName] = { ...cat, name: catName } as KinksData[string];
+    // Generate unique key for the final category
+    const uniqueKey = generateUniqueCategoryKey(catName, existingKeys)
+    existingKeys.add(uniqueKey)
+    newKinks[uniqueKey] = { ...cat, name: catName } as KinksData[string]
   }
 
-  return newKinks;
-};
+  return newKinks
+}
 
 export const kinksToText = (kinks: KinksData): string => {
-  let kinksText = "";
-  const kinkCats = Object.keys(kinks);
+  let kinksText = ''
+  const kinkCats = Object.keys(kinks)
 
   for (let i = 0; i < kinkCats.length; i++) {
-    const catName = kinkCats[i];
-    const catFields = kinks[catName].fields;
-    const catKinks = kinks[catName].kinks;
-    const catDescriptions = kinks[catName].descriptions || [];
+    const catName = kinkCats[i]
+    const catFields = kinks[catName].fields
+    const catKinks = kinks[catName].kinks
+    const catDescriptions = kinks[catName].descriptions || []
 
-    kinksText += "#" + catName + "\r\n";
-    kinksText += "(" + catFields.join(", ") + ")\r\n";
+    kinksText += '#' + catName + '\r\n'
+    kinksText += '(' + catFields.join(', ') + ')\r\n'
 
     for (let j = 0; j < catKinks.length; j++) {
-      kinksText += "* " + catKinks[j] + "\r\n";
+      kinksText += '* ' + catKinks[j] + '\r\n'
       if (catDescriptions[j] && catDescriptions[j].trim().length > 0) {
-        kinksText += "? " + catDescriptions[j].trim() + "\r\n";
+        kinksText += '? ' + catDescriptions[j].trim() + '\r\n'
       }
     }
 
-    kinksText += "\r\n";
+    kinksText += '\r\n'
   }
 
-  return kinksText;
-};
+  return kinksText
+}
 
 // Helper functions for URL hash encoding/decoding
 const hashChars =
-  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.=+*^!@";
+  'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.=+*^!@'
 
 const maxPow = (base: number, maxVal: number): number => {
-  let maxPow = 1;
+  let maxPow = 1
   for (let pow = 1; Math.pow(base, pow) <= maxVal; pow++) {
-    maxPow = pow;
+    maxPow = pow
   }
-  return maxPow;
-};
+  return maxPow
+}
 
 const prefix = (input: string, len: number, char: string): string => {
-  let result = input;
+  let result = input
   while (result.length < len) {
-    result = char + result;
+    result = char + result
   }
-  return result;
-};
+  return result
+}
 
 export const encode = (base: number, input: number[]): string => {
-  const hashBase = hashChars.length;
-  const outputPow = maxPow(hashBase, Number.MAX_SAFE_INTEGER);
-  const inputPow = maxPow(base, Math.pow(hashBase, outputPow));
+  const hashBase = hashChars.length
+  const outputPow = maxPow(hashBase, Number.MAX_SAFE_INTEGER)
+  const inputPow = maxPow(base, Math.pow(hashBase, outputPow))
 
-  let output = "";
-  const numChunks = Math.ceil(input.length / inputPow);
-  let inputIndex = 0;
+  let output = ''
+  const numChunks = Math.ceil(input.length / inputPow)
+  let inputIndex = 0
 
   for (let chunkId = 0; chunkId < numChunks; chunkId++) {
-    let inputIntValue = 0;
+    let inputIntValue = 0
     for (let pow = 0; pow < inputPow; pow++) {
-      const inputVal = input[inputIndex++];
-      if (typeof inputVal === "undefined") break;
-      const val = inputVal * Math.pow(base, pow);
-      inputIntValue += val;
+      const inputVal = input[inputIndex++]
+      if (typeof inputVal === 'undefined') break
+      const val = inputVal * Math.pow(base, pow)
+      inputIntValue += val
     }
 
-    let outputCharValue = "";
+    let outputCharValue = ''
     while (inputIntValue > 0) {
-      const maxPow = Math.floor(log(inputIntValue, hashBase));
-      const powVal = Math.pow(hashBase, maxPow);
-      const charInt = Math.floor(inputIntValue / powVal);
-      const subtract = charInt * powVal;
-      const char = hashChars[charInt];
-      outputCharValue += char;
-      inputIntValue -= subtract;
+      const maxPow = Math.floor(log(inputIntValue, hashBase))
+      const powVal = Math.pow(hashBase, maxPow)
+      const charInt = Math.floor(inputIntValue / powVal)
+      const subtract = charInt * powVal
+      const char = hashChars[charInt]
+      outputCharValue += char
+      inputIntValue -= subtract
     }
 
-    const chunk = prefix(outputCharValue, outputPow, hashChars[0]);
-    output += chunk;
+    const chunk = prefix(outputCharValue, outputPow, hashChars[0])
+    output += chunk
   }
 
-  return output;
-};
+  return output
+}
 
 export const decode = (base: number, output: string): number[] => {
-  const hashBase = hashChars.length;
-  const outputPow = maxPow(hashBase, Number.MAX_SAFE_INTEGER);
+  const hashBase = hashChars.length
+  const outputPow = maxPow(hashBase, Number.MAX_SAFE_INTEGER)
 
-  const values: number[] = [];
-  const numChunks = Math.max(output.length / outputPow);
+  const values: number[] = []
+  const numChunks = Math.max(output.length / outputPow)
 
   for (let i = 0; i < numChunks; i++) {
-    const chunk = output.substring(i * outputPow, (i + 1) * outputPow);
-    const chunkValues = decodeChunk(base, chunk);
+    const chunk = output.substring(i * outputPow, (i + 1) * outputPow)
+    const chunkValues = decodeChunk(base, chunk)
 
     for (let j = 0; j < chunkValues.length; j++) {
-      values.push(chunkValues[j]);
+      values.push(chunkValues[j])
     }
   }
 
-  return values;
-};
+  return values
+}
 
 const decodeChunk = (base: number, chunk: string): number[] => {
-  const hashBase = hashChars.length;
-  const outputPow = maxPow(hashBase, Number.MAX_SAFE_INTEGER);
-  const inputPow = maxPow(base, Math.pow(hashBase, outputPow));
+  const hashBase = hashChars.length
+  const outputPow = maxPow(hashBase, Number.MAX_SAFE_INTEGER)
+  const inputPow = maxPow(base, Math.pow(hashBase, outputPow))
 
-  let chunkInt = 0;
+  let chunkInt = 0
   for (let i = 0; i < chunk.length; i++) {
-    const char = chunk[i];
-    const charInt = hashChars.indexOf(char);
-    const pow = chunk.length - 1 - i;
-    const intVal = Math.pow(hashBase, pow) * charInt;
-    chunkInt += intVal;
+    const char = chunk[i]
+    const charInt = hashChars.indexOf(char)
+    const pow = chunk.length - 1 - i
+    const intVal = Math.pow(hashBase, pow) * charInt
+    chunkInt += intVal
   }
 
-  const output: number[] = [];
+  const output: number[] = []
   for (let pow = inputPow - 1; pow >= 0; pow--) {
-    const posBase = Math.floor(Math.pow(base, pow));
-    const posVal = Math.floor(chunkInt / posBase);
-    const subtract = posBase * posVal;
-    output.push(posVal);
-    chunkInt -= subtract;
+    const posBase = Math.floor(Math.pow(base, pow))
+    const posVal = Math.floor(chunkInt / posBase)
+    const subtract = posBase * posVal
+    output.push(posVal)
+    chunkInt -= subtract
   }
 
-  output.reverse();
-  return output;
-};
+  output.reverse()
+  return output
+}
 
 export const updateHash = (
   selection: Selection[],
-  levels: LevelsData,
+  levels: LevelsData
 ): string => {
-  const hashValues: number[] = [];
-  const comments: string[] = [];
-  let hasComments = false;
-
-  // Erfasse alle Auswahloptionen und Kommentare
-  selection.forEach((item) => {
-    // Finde den Level-Index
-    const levelNames = Object.keys(levels);
-    const levelIndex = levelNames.indexOf(item.value);
-    hashValues.push(levelIndex >= 0 ? levelIndex : 0);
-
-    // Sammle Kommentare, leere Strings für Einträge ohne Kommentar
-    const itemComment = item.comment?.trim() || "";
-    comments.push(itemComment);
-
-    // Prüfe, ob es mindestens einen nicht-leeren Kommentar gibt
-    if (itemComment !== "") {
-      hasComments = true;
-    }
-  });
-
-  // Generiere den Hash für die Auswahlen
-  let hash = encode(Object.keys(levels).length, hashValues);
-
-  // Füge die Kommentare zum Hash hinzu, wenn welche vorhanden sind
-  if (hasComments) {
-    // Kodiere die Kommentare mit URL-sicherer Base64
-    try {
-      const commentsJson = JSON.stringify(comments);
-      // Verwende encodeURIComponent, um Sonderzeichen für URLs sicher zu machen
-      const encodedComments = btoa(encodeURIComponent(commentsJson));
-      hash += "|" + encodedComments;
-    } catch (error) {
-      console.error("Fehler beim Kodieren der Kommentare:", error);
-    }
+  if (selection.length === 0) {
+    return ''
   }
 
-  window.location.hash = hash;
-  return hash;
-};
+  // Only store non-default selections to keep hash compact
+  const selectionData: {
+    [stableId: string]: {
+      level: number
+      comment?: string
+    }
+  } = {}
+  const levelNames = Object.keys(levels)
+
+  selection.forEach((item) => {
+    // Generate stable key - use the same format as the hash
+    let stableKey: string
+    if (item.categoryId && item.kinkId && item.fieldId) {
+      // For enhanced kinks, use the format: categoryId-kinkId-fieldId
+      stableKey = `${item.categoryId}-${item.kinkId}-${item.fieldId}`
+    } else {
+      // For standard kinks, use the format: category-kink-field
+      stableKey = `${item.category}-${item.kink}-${item.field}`
+    }
+
+    const levelIndex = levelNames.indexOf(item.value)
+    const finalIndex = levelIndex >= 0 ? levelIndex : 0
+    const hasComment = item.comment && item.comment.trim().length > 0
+
+    // Only store if it's not the default level or has a comment
+    if (finalIndex !== 0 || hasComment) {
+      const data: { level: number; comment?: string } = { level: finalIndex }
+      if (hasComment) {
+        data.comment = item.comment!.trim()
+      }
+      selectionData[stableKey] = data
+    }
+  })
+
+  // Create a JSON representation for non-default selections
+  const compactData = JSON.stringify(selectionData)
+
+  // Encode using base64 to make it URL-safe
+  const hash = btoa(encodeURIComponent(compactData))
+
+  window.location.hash = hash
+  return hash
+}
 
 export const parseHash = (
   levels: LevelsData,
   kinks: KinksData,
+  enhancedKinks?: EnhancedKinksData | null,
+  existingSelection?: Selection[]
 ): Selection[] | null => {
-  const fullHash = window.location.hash.substring(1);
-  if (fullHash.length < 10) return null;
+  const fullHash = window.location.hash.substring(1)
 
+  if (fullHash.length < 10) {
+    return null
+  }
+
+  // First try the new ID-based format
+  try {
+    // Decode the new ID-based hash format
+    const decodedData = decodeURIComponent(atob(fullHash))
+
+    const selectionData = JSON.parse(decodedData) as {
+      [stableId: string]: { level: number; comment?: string } | number
+    }
+
+    // Use getAllKinksEnhanced to get the current kink structure, but preserve existing selection
+    const allKinks = getAllKinksEnhanced(
+      kinks,
+      levels,
+      enhancedKinks,
+      existingSelection || []
+    )
+
+    const updatedSelection: Selection[] = []
+
+    // Map the stored selections back to the current kink structure
+    const levelNames = Object.keys(levels)
+
+    allKinks.forEach((kink) => {
+      // For hash parsing, we need to match the hash format which uses numeric indices
+      // The hash contains keys like "basics-kink-0-field-0"
+      // So we need to find the kink and field indices in the current structure
+
+      let stableKey: string
+
+      if (enhancedKinks) {
+        // For enhanced kinks, find the category by matching the resolved name
+        // First try exact key match, then try resolved name match
+        let categoryKey = Object.keys(enhancedKinks).find(
+          (key) => key === kink.category
+        )
+
+        if (!categoryKey) {
+          categoryKey = Object.keys(enhancedKinks).find((key) => {
+            const category = enhancedKinks[key]
+            const allLanguages = i18n.options.supportedLngs || [
+              'en',
+              'de',
+              'sv',
+            ]
+            return allLanguages.some((lang) => {
+              const resolvedName = resolveMultilingualContent(
+                category.name,
+                lang
+              )
+              return resolvedName === kink.category
+            })
+          })
+        }
+
+        // Additional fallback: try to find by the strToClass version of the category name
+        if (!categoryKey) {
+          const strToClassCategory = strToClass(kink.category)
+          categoryKey = Object.keys(enhancedKinks).find(
+            (key) => key === strToClassCategory
+          )
+        }
+
+        if (categoryKey) {
+          const category = enhancedKinks[categoryKey]
+
+          // Find field index by checking all languages
+          const fieldIndex = category.fields.findIndex((field) => {
+            const allLanguages = ['en', 'de', 'sv']
+            return allLanguages.some((lang) => {
+              const resolvedField = resolveMultilingualContent(field, lang)
+              return resolvedField === kink.field
+            })
+          })
+
+          // Find kink index by checking all languages
+          const kinkIndex = category.kinks.findIndex((kinkItem) => {
+            const allLanguages = ['en', 'de', 'sv']
+            return allLanguages.some((lang) => {
+              const resolvedKink = resolveMultilingualContent(kinkItem, lang)
+              return resolvedKink === kink.kink
+            })
+          })
+
+          if (fieldIndex >= 0 && kinkIndex >= 0) {
+            stableKey = `${categoryKey}-kink-${kinkIndex}-field-${fieldIndex}`
+          } else {
+            stableKey = `${kink.category}-${kink.kink}-${kink.field}`
+          }
+        } else {
+          stableKey = `${kink.category}-${kink.kink}-${kink.field}`
+        }
+      } else {
+        // For standard kinks, use the current format
+        stableKey = `${kink.category}-${kink.kink}-${kink.field}`
+      }
+
+      // Check if we have a stored value for this kink
+      const storedData = selectionData[stableKey]
+      let value = levelNames[0] // Default value
+      let comment: string | undefined = undefined
+
+      if (storedData !== undefined) {
+        // Handle both old format (number) and new format (object)
+        if (typeof storedData === 'number') {
+          // Old format: just the level index
+          if (storedData < levelNames.length) {
+            value = levelNames[storedData]
+          }
+        } else {
+          // New format: object with level and comment
+          if (storedData.level < levelNames.length) {
+            value = levelNames[storedData.level]
+          }
+          comment = storedData.comment
+        }
+
+        updatedSelection.push({
+          category: kink.category,
+          kink: kink.kink,
+          field: kink.field,
+          value,
+          showField: kink.showField,
+          comment,
+          categoryId: kink.categoryId,
+          kinkId: kink.kinkId,
+          fieldId: kink.fieldId,
+        })
+      } else {
+        // Try all possible key formats for enhanced kinks
+        if (enhancedKinks && kink.categoryId && kink.kinkId && kink.fieldId) {
+          const alternativeStableKey = `${kink.categoryId}-${kink.kinkId}-${kink.fieldId}`
+          const categoryIdStableKey = `${kink.categoryId}-kink-${kink.kinkId.replace('kink-', '')}-field-${kink.fieldId.replace('field-', '')}`
+
+          const alternativeData =
+            selectionData[alternativeStableKey] ||
+            selectionData[categoryIdStableKey]
+
+          if (alternativeData) {
+            // Handle both old format (number) and new format (object)
+            if (typeof alternativeData === 'number') {
+              if (alternativeData < levelNames.length) {
+                value = levelNames[alternativeData]
+              }
+            } else {
+              if (alternativeData.level < levelNames.length) {
+                value = levelNames[alternativeData.level]
+              }
+              comment = alternativeData.comment
+            }
+
+            updatedSelection.push({
+              category: kink.category,
+              kink: kink.kink,
+              field: kink.field,
+              value,
+              showField: kink.showField,
+              comment,
+              categoryId: kink.categoryId,
+              kinkId: kink.kinkId,
+              fieldId: kink.fieldId,
+            })
+          } else {
+            // Add with default value
+            updatedSelection.push({
+              category: kink.category,
+              kink: kink.kink,
+              field: kink.field,
+              value,
+              showField: kink.showField,
+              comment,
+              categoryId: kink.categoryId,
+              kinkId: kink.kinkId,
+              fieldId: kink.fieldId,
+            })
+          }
+        } else {
+          // Add with default value
+          updatedSelection.push({
+            category: kink.category,
+            kink: kink.kink,
+            field: kink.field,
+            value,
+            showField: kink.showField,
+            comment,
+            categoryId: kink.categoryId,
+            kinkId: kink.kinkId,
+            fieldId: kink.fieldId,
+          })
+        }
+      }
+    })
+
+    return updatedSelection
+  } catch {
+    // Fallback to old format if new format fails
+    return parseHashLegacy(
+      levels,
+      kinks,
+      enhancedKinks,
+      fullHash,
+      existingSelection
+    )
+  }
+}
+
+// Legacy hash parsing function for backward compatibility
+function parseHashLegacy(
+  levels: LevelsData,
+  kinks: KinksData,
+  enhancedKinks: EnhancedKinksData | null | undefined,
+  fullHash: string,
+  existingSelection?: Selection[]
+): Selection[] | null {
   // Trenne die Kommentare von den Auswahlen
-  const parts = fullHash.split("|");
-  const hash = parts[0];
-  let comments: string[] = [];
+  const parts = fullHash.split('|')
+  const hash = parts[0]
+  let comments: string[] = []
 
   // Dekodiere die Kommentare, falls vorhanden
   if (parts.length > 1) {
     try {
-      const decodedComments = decodeURIComponent(atob(parts[1]));
-      comments = JSON.parse(decodedComments);
-    } catch (e) {
-      console.error("Fehler beim Dekodieren der Kommentare:", e);
-      comments = [];
+      const decodedComments = decodeURIComponent(atob(parts[1]))
+      comments = JSON.parse(decodedComments)
+    } catch {
+      comments = []
     }
   }
 
-  const levelCount = Object.keys(levels).length;
-  const levelValues = decode(levelCount, hash);
+  const levelCount = Object.keys(levels).length
 
-  // Konvertiere Level-Werte (Indizes) in vollständige Selection-Objekte
-  const allKinks = getAllKinks(kinks, levels);
-  const updatedSelection: Selection[] = [];
+  const levelValues = decode(levelCount, hash)
 
-  for (let i = 0; i < Math.min(levelValues.length, allKinks.length); i++) {
-    const levelIndex = levelValues[i];
-    const levelNames = Object.keys(levels);
-    const levelName = levelNames[levelIndex] || levelNames[0];
+  // Use getAllKinksEnhanced to ensure proper stable ID handling, but preserve existing selection
+  const allKinks = getAllKinksEnhanced(
+    kinks,
+    levels,
+    enhancedKinks,
+    existingSelection || []
+  )
+
+  const updatedSelection: Selection[] = []
+
+  // IMPORTANT: Only process up to the minimum of available values and kinks
+  const maxItems = Math.min(levelValues.length, allKinks.length)
+
+  for (let i = 0; i < maxItems; i++) {
+    const levelIndex = levelValues[i]
+    const levelNames = Object.keys(levels)
+    const levelName = levelNames[levelIndex] || levelNames[0]
+    const baseSelection = allKinks[i]
 
     updatedSelection.push({
-      ...allKinks[i],
+      ...baseSelection,
       value: levelName,
       comment: comments[i] || undefined,
-    });
+      categoryId: baseSelection.categoryId,
+      kinkId: baseSelection.kinkId,
+      fieldId: baseSelection.fieldId,
+    })
   }
 
-  return updatedSelection;
-};
+  // If there are more kinks than hash values, add them with default values
+  if (allKinks.length > levelValues.length) {
+    for (let i = levelValues.length; i < allKinks.length; i++) {
+      const baseSelection = allKinks[i]
+      updatedSelection.push({
+        ...baseSelection,
+        value: Object.keys(levels)[0],
+        comment: undefined,
+        categoryId: baseSelection.categoryId,
+        kinkId: baseSelection.kinkId,
+        fieldId: baseSelection.fieldId,
+      })
+    }
+  }
+  return updatedSelection
+}
 
 export const getAllKinks = (
   kinks: KinksData,
   levels: LevelsData,
-  existingSelection: Selection[] = [],
+  existingSelection: Selection[] = []
 ): Selection[] => {
-  const list: Selection[] = [];
-  const selectionMap = new Map<string, string>();
+  const list: Selection[] = []
+  const selectionMap = new Map<string, { value: string; comment?: string }>()
 
-  // Create a map of existing selections for fast lookup
+  // Create a map of existing selections using stable IDs when available, fallback to names
   existingSelection.forEach((item) => {
-    const key = `${item.category}-${item.kink}-${item.field}`;
-    selectionMap.set(key, item.value);
-  });
+    const stableKey =
+      item.categoryId && item.kinkId && item.fieldId
+        ? `${item.categoryId}-${item.kinkId}-${item.fieldId}`
+        : `${item.category}-${item.kink}-${item.field}`
+    selectionMap.set(stableKey, { value: item.value, comment: item.comment })
+  })
 
-  const categories = Object.keys(kinks);
+  const categories = Object.keys(kinks)
   for (let i = 0; i < categories.length; i++) {
-    const category = categories[i];
-    const fields = kinks[category].fields;
-    const kinkArr = kinks[category].kinks;
+    const category = categories[i]
+    // Use the category key directly as the stable categoryId
+    // This ensures the categoryId never changes with language
+    const categoryId = category
+
+    const fields = kinks[category].fields
+    const kinkArr = kinks[category].kinks
 
     for (let j = 0; j < fields.length; j++) {
-      const field = fields[j];
+      const field = fields[j]
+      const fieldId = strToClass(field) // Use normalized field name as stable ID
       for (let k = 0; k < kinkArr.length; k++) {
-        const kink = kinkArr[k];
-        const key = `${category}-${kink}-${field}`;
-        const value = selectionMap.get(key) || Object.keys(levels)[0];
+        const kink = kinkArr[k]
+        const kinkId = strToClass(kink) // Use normalized kink name as stable ID
+
+        // Try stable key first, then fallback to current names
+        const stableKey = `${categoryId}-${kinkId}-${fieldId}`
+        const fallbackKey = `${category}-${kink}-${field}`
+
+        const existingData =
+          selectionMap.get(stableKey) || selectionMap.get(fallbackKey)
+        const value = existingData?.value || Object.keys(levels)[0]
 
         const obj: Selection = {
           category,
@@ -352,147 +840,328 @@ export const getAllKinks = (
           field,
           value,
           showField: fields.length >= 2,
-        };
+          comment: existingData?.comment,
+          // Add stable IDs for future language switches
+          categoryId,
+          kinkId,
+          fieldId,
+        }
 
-        list.push(obj);
+        list.push(obj)
       }
     }
   }
 
-  return list;
-};
+  return list
+}
+
+// Enhanced version of getAllKinks that supports stable IDs for multilingual content
+export const getAllKinksEnhanced = (
+  kinks: KinksData,
+  levels: LevelsData,
+  enhancedKinks: EnhancedKinksData | null = null,
+  existingSelection: Selection[] = []
+): Selection[] => {
+  const list: Selection[] = []
+  const selectionMap = new Map<string, { value: string; comment?: string }>()
+
+  // Create a map of existing selections using stable IDs when available, fallback to names
+  existingSelection.forEach((item) => {
+    const stableKey =
+      item.categoryId && item.kinkId && item.fieldId
+        ? `${item.categoryId}-${item.kinkId}-${item.fieldId}`
+        : `${item.category}-${item.kink}-${item.field}`
+
+    selectionMap.set(stableKey, { value: item.value, comment: item.comment })
+  })
+
+  // Process categories from kinks (resolved data)
+  const categories = Object.keys(kinks)
+  for (let i = 0; i < categories.length; i++) {
+    const category = categories[i]
+    const fields = kinks[category].fields
+    const kinkArr = kinks[category].kinks
+
+    for (let j = 0; j < fields.length; j++) {
+      const field = fields[j]
+
+      for (let k = 0; k < kinkArr.length; k++) {
+        const kink = kinkArr[k]
+
+        // Generate stable IDs using original/language-independent data
+        const stableIds = getStableIdsFromOriginal(
+          enhancedKinks,
+          category,
+          kink,
+          field
+        )
+
+        // Try stable key first, then fallback to current names
+        const stableKey = `${stableIds.categoryId}-${stableIds.kinkId}-${stableIds.fieldId}`
+        const fallbackKey = `${category}-${kink}-${field}`
+
+        const existingData =
+          selectionMap.get(stableKey) || selectionMap.get(fallbackKey)
+        const value = existingData?.value || Object.keys(levels)[0]
+
+        const obj: Selection = {
+          category,
+          kink,
+          field,
+          value,
+          showField: fields.length >= 2,
+          comment: existingData?.comment,
+          // Use language-independent stable IDs
+          categoryId: stableIds.categoryId,
+          kinkId: stableIds.kinkId,
+          fieldId: stableIds.fieldId,
+        }
+
+        list.push(obj)
+      }
+    }
+  }
+
+  // Process categories from enhancedKinks that are not in kinks
+  if (enhancedKinks) {
+    const enhancedCategories = Object.keys(enhancedKinks)
+    for (const categoryKey of enhancedCategories) {
+      const category = enhancedKinks[categoryKey]
+
+      // Check if this category is already processed from kinks
+      const resolvedCategoryName = resolveMultilingualContent(
+        category.name,
+        i18n.language || 'en'
+      )
+      const alreadyProcessed = categories.some(
+        (cat) => cat === resolvedCategoryName
+      )
+
+      if (!alreadyProcessed) {
+        // Process this category from enhancedKinks
+        for (let j = 0; j < category.fields.length; j++) {
+          const field = category.fields[j]
+          const resolvedField = resolveMultilingualContent(
+            field,
+            i18n.language || 'en'
+          )
+
+          for (let k = 0; k < category.kinks.length; k++) {
+            const kink = category.kinks[k]
+            const resolvedKink = resolveMultilingualContent(
+              kink,
+              i18n.language || 'en'
+            )
+
+            // Generate stable IDs using original/language-independent data
+            const stableIds = getStableIdsFromOriginal(
+              enhancedKinks,
+              resolvedCategoryName,
+              resolvedKink,
+              resolvedField
+            )
+
+            // Try stable key first, then fallback to current names
+            const stableKey = `${stableIds.categoryId}-${stableIds.kinkId}-${stableIds.fieldId}`
+            const fallbackKey = `${resolvedCategoryName}-${resolvedKink}-${resolvedField}`
+
+            const existingData =
+              selectionMap.get(stableKey) || selectionMap.get(fallbackKey)
+            const value = existingData?.value || Object.keys(levels)[0]
+
+            const obj: Selection = {
+              category: resolvedCategoryName,
+              kink: resolvedKink,
+              field: resolvedField,
+              value,
+              showField: category.fields.length >= 2,
+              comment: existingData?.comment,
+              // Use language-independent stable IDs
+              categoryId: stableIds.categoryId,
+              kinkId: stableIds.kinkId,
+              fieldId: stableIds.fieldId,
+            }
+
+            list.push(obj)
+          }
+        }
+      }
+    }
+  }
+
+  return list
+}
 
 // Download image function
+// Die Version wird im Dateinamen ergänzt, um Nachvollziehbarkeit zu gewährleisten
+import { getAppVersion } from './version'
 export const downloadImage = (
   canvas: HTMLCanvasElement,
-  username: string,
+  username: string
 ): void => {
   try {
-    const filename = `kinklist_${username ? username.replace(/[^a-z0-9]/gi, "_").toLowerCase() : "export"}_${new Date().toISOString().slice(0, 10)}.png`;
+    const version = getAppVersion()
+    const filename = `kinklist_${username ? username.replace(/[^a-z0-9]/gi, '_').toLowerCase() : i18n.t('export.canvas.defaultFilename')}_v${version}_${new Date().toISOString().slice(0, 10)}.png`
 
     // Create a temporary link element to trigger the download
-    const link = document.createElement("a");
-    link.download = filename;
-    link.href = canvas.toDataURL("image/png");
-    document.body.appendChild(link);
-    link.click();
+    const link = document.createElement('a')
+    link.download = filename
+    link.href = canvas.toDataURL('image/png')
+    document.body.appendChild(link)
+    link.click()
 
     // Clean up
     setTimeout(() => {
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(link.href);
-    }, 100);
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(link.href)
+    }, 100)
   } catch (error) {
-    console.error("Error downloading image:", error);
-    throw error;
+    console.error(i18n.t('export.canvas.downloadError'), error)
+    throw error
   }
-};
+}
 
 // Canvas drawing functions
 export const setupCanvas = (
   width: number,
   height: number,
   username: string,
-  levels: LevelsData,
+  _levels: LevelsData
 ): HTMLCanvasElement => {
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
 
-  const context = canvas.getContext("2d")!;
+  const context = canvas.getContext('2d')!
   // Klarer, neutraler Hintergrund
-  context.fillStyle = "#ffffff";
-  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.fillStyle = '#ffffff'
+  context.fillRect(0, 0, canvas.width, canvas.height)
 
   // Subtile Randlinie für bessere Abgrenzung
-  context.strokeStyle = "#e0e0e0";
-  context.lineWidth = 1;
-  context.strokeRect(0, 0, canvas.width, canvas.height);
+  context.strokeStyle = '#e0e0e0'
+  context.lineWidth = 1
+  context.strokeRect(0, 0, canvas.width, canvas.height)
 
   // Eleganter Header
-  context.font = "bold 16px Arial, sans-serif";
-  context.fillStyle = "#333333";
-  context.fillText("Kinklist " + username, 12, 28);
+  context.font = 'bold 16px Arial, sans-serif'
+  context.fillStyle = '#333333'
+  context.fillText(i18n.t('export.canvas.title', { username }), 12, 28)
 
   // Dezente Header-Trennlinie
-  context.beginPath();
-  context.moveTo(10, 36);
-  context.lineTo(Math.min(width - 20, 350), 36);
-  context.strokeStyle = "#cccccc";
-  context.lineWidth = 1;
-  context.stroke();
+  context.beginPath()
+  context.moveTo(10, 36)
+  context.lineTo(Math.min(width - 20, 350), 36)
+  context.strokeStyle = '#cccccc'
+  context.lineWidth = 1
+  context.stroke()
 
-  return canvas;
-};
+  return canvas
+}
 
 export const drawLegend = (
   context: CanvasRenderingContext2D,
-  levels: LevelsData,
+  levels: LevelsData
 ): void => {
   // Diese Funktion wird nicht mehr verwendet, da die Legende direkt in Export.tsx gezeichnet wird
-  context.font = "12px Arial";
-  context.fillStyle = "#555555";
+  context.font = '12px Arial'
+  context.fillStyle = '#555555'
 
-  const levelNames = Object.keys(levels);
-  const x = context.canvas.width - 15 - 120 * levelNames.length;
+  const levelNames = Object.keys(levels)
+  const x = context.canvas.width - 15 - 120 * levelNames.length
 
   for (let i = 0; i < levelNames.length; i++) {
-    context.beginPath();
-    context.arc(x + 120 * i, 17, 8, 0, 2 * Math.PI, false);
-    context.fillStyle = levels[levelNames[i]].color;
-    context.fill();
-    context.strokeStyle = "rgba(0, 0, 0, 0.5)";
-    context.lineWidth = 1;
-    context.stroke();
+    context.beginPath()
+    context.arc(x + 120 * i, 17, 8, 0, 2 * Math.PI, false)
+    context.fillStyle = levels[levelNames[i]].color
+    context.fill()
+    context.strokeStyle = 'rgba(0, 0, 0, 0.5)'
+    context.lineWidth = 1
+    context.stroke()
 
-    context.fillStyle = "#000000";
-    context.fillText(levelNames[i], x + 15 + i * 120, 22);
+    context.fillStyle = '#000000'
+    context.fillText(levelNames[i], x + 15 + i * 120, 22)
   }
-};
+}
 
 // Drawing call handlers
 export const drawCallHandlers = {
   simpleTitle: (context: CanvasRenderingContext2D, drawCall: any): void => {
-    context.fillStyle = "#000000";
-    context.font = "bold 18px Arial";
-    context.fillText(drawCall.data, drawCall.x, drawCall.y + 5);
+    context.fillStyle = '#000000'
+    context.font = 'bold 18px Arial'
+    context.fillText(drawCall.data, drawCall.x, drawCall.y + 5)
   },
 
   titleSubtitle: (context: CanvasRenderingContext2D, drawCall: any): void => {
-    context.fillStyle = "#000000";
-    context.font = "bold 18px Arial";
-    context.fillText(drawCall.data.category, drawCall.x, drawCall.y + 5);
+    context.fillStyle = '#000000'
+    context.font = 'bold 18px Arial'
+    context.fillText(drawCall.data.category, drawCall.x, drawCall.y + 5)
 
-    const fieldsStr = drawCall.data.fields.join(", ");
-    context.font = "italic 12px Arial";
-    context.fillText(fieldsStr, drawCall.x, drawCall.y + 20);
+    const fieldsStr = drawCall.data.fields.join(', ')
+    context.font = 'italic 12px Arial'
+    context.fillText(fieldsStr, drawCall.x, drawCall.y + 20)
   },
 
   kinkRow: (context: CanvasRenderingContext2D, drawCall: any): void => {
-    context.fillStyle = "#000000";
-    context.font = "12px Arial";
+    context.fillStyle = '#000000'
+    context.font = '12px Arial'
 
-    const x = drawCall.x + 5 + drawCall.data.choices.length * 20;
-    const y = drawCall.y - 6;
-    context.fillText(drawCall.data.text, x, y);
+    const x = drawCall.x + 5 + drawCall.data.choices.length * 20
+    const y = drawCall.y - 6
+    context.fillText(drawCall.data.text, x, y)
 
     // Circles
     for (let i = 0; i < drawCall.data.choices.length; i++) {
-      const choice = drawCall.data.choices[i];
-      const color = drawCall.data.colors[choice];
+      const choice = drawCall.data.choices[i]
+      const color = drawCall.data.colors[choice]
 
-      const x = 10 + drawCall.x + i * 20;
-      const y = drawCall.y - 10;
+      const x = 10 + drawCall.x + i * 20
+      const y = drawCall.y - 10
 
-      context.beginPath();
-      context.arc(x, y, 8, 0, 2 * Math.PI, false);
-      context.fillStyle = color;
-      context.fill();
-      context.strokeStyle = "rgba(0, 0, 0, 0.5)";
-      context.lineWidth = 1;
-      context.stroke();
+      context.beginPath()
+      context.arc(x, y, 8, 0, 2 * Math.PI, false)
+      context.fillStyle = color
+      context.fill()
+      context.strokeStyle = 'rgba(0, 0, 0, 0.5)'
+      context.lineWidth = 1
+      context.stroke()
     }
   },
-};
+}
 
 // Diese Funktionen wurden durch React-State-basierte Implementierungen ersetzt
+
+// Enhanced parser wrapper that automatically detects and handles multilingual templates
+export const parseKinksTextEnhanced = (
+  text: string,
+  errorHandler: (msg: string) => void = (msg) => window.alert(msg)
+): KinksData | null => {
+  // Check if the text contains multilingual syntax
+  const hasMultilingualSyntax = /^\+\s*\[[A-Z]{2}\]/.test(
+    text.split('\n').find((line) => line.trim()) || ''
+  )
+
+  if (hasMultilingualSyntax) {
+    // Use enhanced parser for multilingual templates
+    try {
+      const enhancedKinks = parseEnhancedKinksText(text, errorHandler)
+      if (enhancedKinks) {
+        // Resolve to current language and return as standard KinksData
+        return resolveEnhancedKinksData(enhancedKinks, i18n.language)
+      }
+    } catch (error) {
+      debugWarn(
+        'Enhanced parsing failed, falling back to standard parser:',
+        error
+      )
+    }
+  }
+
+  // Fall back to standard parser
+  return parseKinksText(text, errorHandler)
+}
+
+// Helper function to detect if text contains multilingual syntax
+export const hasMultilingualContent = (text: string): boolean => {
+  const lines = text.split('\n')
+  return lines.some((line) => /^\+\s*\[[A-Z]{2}\]\s*/.test(line.trim()))
+}

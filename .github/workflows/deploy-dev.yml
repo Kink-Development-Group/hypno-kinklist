@@ -1,0 +1,87 @@
+name: Build and Deploy Development
+
+on:
+  push:
+    branches:
+      - dev
+
+concurrency:
+  group: deploy-dev-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy-dev:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    environment: Dev
+    env:
+      FTP_USER_DEV: ${{ secrets.FTP_USER_DEV }}
+      FTP_PASS_DEV: ${{ secrets.FTP_PASS_DEV }}
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.11
+
+      - name: Verify secrets are available
+        shell: bash
+        run: |
+          if [ -z "$FTP_USER_DEV" ] || [ -z "$FTP_PASS_DEV" ] || [ -z "$FTP_HOST" ]; then
+            echo "❌ Missing required secrets!"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Check formatting
+        run: bun run format:check
+
+      - name: Run linting
+        run: bun run lint
+
+      - name: Run tests
+        run: bun run test --run
+
+      - name: Build project
+        run: bun run build
+
+      - name: Install lftp
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lftp
+
+      - name: Deploy via FTPS (Development)
+        shell: bash
+        run: |
+          echo "🔄 Attempting FTPS deployment to development with lftp..."
+          cat > deploy_ftps.lftp << EOF
+          set ftp:ssl-auth TLS
+          set ftp:ssl-allow yes
+          set ftp:ssl-protect-data true
+          set ftp:ssl-protect-list true
+          set ssl:verify-certificate yes
+          set ftp:passive-mode yes
+          set net:timeout 60
+          set net:max-retries 3
+          set cmd:fail-exit yes
+          open -u "$FTP_USER_DEV","$FTP_PASS_DEV" ftp://$FTP_HOST:21
+          set cmd:fail-exit no
+          mkdir kinklist_hypno_dev
+          set cmd:fail-exit yes
+          cd kinklist_hypno_dev
+          mirror -R --delete --verbose ./dist/ .
+          bye
+          EOF
+          lftp -f deploy_ftps.lftp
+
+      - name: Deployment result
+        run: |
+          echo "🚀 Deployment erfolgreich via FTPS (Development)!"
+          echo "📁 Deployed to: kinklist_hypno_dev"
+          echo "🌍 Environment: development"

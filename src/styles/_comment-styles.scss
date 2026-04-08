@@ -1,0 +1,187 @@
+// Aktionssymbole in der Kink-Spalte
+.kink-actions {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap; // Erlaubt Umbruch bei vielen Kommentarbuttons
+  gap: 6px; // Etwas kleinerer Abstand
+  margin-left: 10px;
+  visibility: visible; // Erzwingt Sichtbarkeit
+
+  // Stelle sicher, dass alle Icons die gleiche Höhe haben
+  > * {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px; // Konsistente Höhe für alle Icons
+    min-height: 20px; // Verhindert Schrumpfung
+  }
+
+  // Spezielle Ausrichtung für Tooltip-Container
+  .kink-tooltip {
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
+    margin-left: 0; // Entferne den Standard-Margin
+  }
+}
+
+// Gemeinsame Basisklasse für Kommentar-Buttons
+.comment-button-base {
+  font-size: 16px;
+  padding: 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 1;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color);
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  min-height: 22px;
+  border-radius: 50%;
+  position: relative;
+  z-index: 2;
+
+  .comment-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+    color: inherit;
+    width: 16px;
+    height: 16px;
+    svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+      transition: fill 0.2s ease;
+    }
+  }
+
+  &:hover,
+  &:focus {
+    background-color: transparent !important;
+    outline: none !important;
+    border: none !important;
+    color: var(--text-color);
+    .comment-icon {
+      color: var(--text-color);
+      svg {
+        fill: var(--text-color);
+      }
+    }
+  }
+
+  &:active {
+    background-color: transparent !important;
+    color: var(--button-text-color);
+    transform: scale(0.95);
+    .comment-icon {
+      color: var(--button-text-color);
+      svg {
+        fill: var(--button-text-color);
+      }
+    }
+  }
+
+  &.has-comment {
+    background-color: transparent;
+    color: var(--button-bg-color);
+    .comment-icon {
+      color: var(--button-bg-color);
+      svg {
+        fill: var(--button-bg-color);
+      }
+    }
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  [data-theme='dark'] & {
+    &:hover,
+    &:focus {
+      color: var(--button-text-color);
+      .comment-icon {
+        color: var(--button-text-color);
+        svg {
+          fill: var(--button-text-color);
+        }
+      }
+    }
+  }
+}
+
+// Alte Klassen auf die Basisklasse umleiten
+.comment-button-small {
+  @extend .comment-button-base;
+  margin-left: 8px;
+  top: 0;
+  box-shadow: none;
+}
+
+// Spezieller Stil für den Kommentar-Button im Input-Modal
+.modal-comment-button {
+  @extend .comment-button-base;
+  position: relative;
+  margin-left: 10px;
+  top: -2px;
+  padding: 3px 7px;
+  opacity: 0.8; // Immer sichtbar, aber dezent
+  width: 20px; // Feste Breite für konsistente Ausrichtung
+  height: 20px; // Feste Höhe für konsistente Ausrichtung
+  min-width: 20px; // Verhindert Schrumpfung
+  min-height: 20px; // Verhindert Schrumpfung
+  box-shadow: none;
+
+  &.has-comment {
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+    opacity: 1;
+
+    .comment-icon {
+      color: var(--button-text-color);
+    }
+  }
+}
+
+// Spezielle Stile für Kommentar-Tooltips in Modals
+.kink-tooltip-portal.comment-tooltip {
+  // Höherer z-index für Modals
+  z-index: 999999;
+
+  // Angepasste Positionierung für Modal-Kontext
+  position: fixed;
+
+  // Bessere Sichtbarkeit in Modal-Overlays
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.25),
+    0 2px 8px rgba(0, 0, 0, 0.15);
+
+  // Stärkere Umrandung für bessere Sichtbarkeit
+  border: 2px solid var(--button-bg-color);
+
+  // Responsive Anpassungen für Modals
+  @media (max-width: 768px) {
+    max-width: 280px;
+    min-width: 200px;
+  }
+}
+
+// Tooltip-Icon Ausrichtung anpassen
+.kink-tooltip .kink-tooltip-icon {
+  width: 20px; // Gleiche Breite wie Kommentar-Icons
+  height: 20px; // Gleiche Höhe wie Kommentar-Icons
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+}

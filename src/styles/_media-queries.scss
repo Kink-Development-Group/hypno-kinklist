@@ -1,0 +1,501 @@
+// Media Queries für die Responsive-Anpassungen
+// Größere Bildschirme
+@media (min-width: 1700px) {
+  .legend-container {
+    margin-top: 10px;
+    margin-bottom: 20px;
+  }
+
+  .legend {
+    max-width: 80%;
+    padding: 15px;
+  }
+
+  .action-buttons-container {
+    margin-top: 25px;
+  }
+
+  h1 {
+    margin-bottom: 10px;
+  }
+}
+
+// Mittlere Größen
+@media (max-width: 1699px) and (min-width: 800px) {
+  .legend-container {
+    margin-top: 10px;
+    margin-bottom: 20px;
+  }
+
+  .legend {
+    padding: 10px 15px;
+  }
+
+  .action-buttons-container {
+    margin-top: 20px;
+  }
+}
+
+// Tablets - Enhanced header support
+@media (max-width: 799px) and (min-width: 600px) {
+  .header-controls {
+    margin-bottom: 18px;
+
+    h1 {
+      font-size: clamp(20px, 4vw, 24px);
+
+      .version-display {
+        font-size: 0.55em;
+        margin-left: 6px;
+      }
+    }
+  }
+
+  .header-actions {
+    gap: 8px;
+  }
+
+  #Edit {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+
+  #ThemeToggle {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    font-size: 20px;
+  }
+
+  .language-toggle {
+    min-width: 46px;
+    height: 42px;
+    padding: 0 32px 0 10px;
+    font-size: 13px;
+    border-radius: 12px;
+
+    // Match header glassmorphism design for tablets
+    background-color: rgba(255, 255, 255, 0.15);
+    color: var(--header-text-color);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+
+    &:active {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  .legend-container {
+    margin-top: 5px;
+    margin-bottom: 15px;
+  }
+
+  .legend {
+    padding: 8px 10px;
+  }
+
+  .action-buttons-container {
+    margin-top: 15px;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .export-container {
+    margin-bottom: 15px;
+    width: 100%;
+    max-width: 460px;
+  }
+
+  #Export {
+    width: 100%;
+  }
+
+  .start-button {
+    width: 100%;
+    max-width: 460px;
+  }
+}
+
+// Mobilgeräte - Enhanced header support
+@media (max-width: 599px) {
+  body {
+    font-size: 14px;
+    overflow-x: hidden; // Verhindert horizontales Scrollen der gesamten Seite
+  }
+
+  .header-controls {
+    margin-bottom: 16px;
+
+    h1 {
+      font-size: clamp(16px, 5vw, 20px);
+
+      .version-display {
+        font-size: 0.5em;
+        margin-left: 4px;
+      }
+    }
+  }
+
+  .header-actions {
+    gap: 6px;
+  }
+
+  #Edit {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+
+  #ThemeToggle {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    font-size: 18px;
+  }
+
+  .language-toggle {
+    min-width: 40px;
+    height: 40px;
+    padding: 0 28px 0 8px;
+    font-size: 12px;
+    border-radius: 10px;
+
+    // Match header glassmorphism design on mobile
+    background-color: rgba(255, 255, 255, 0.15);
+    color: var(--header-text-color);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+
+    &:active {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    option {
+      padding: 10px 12px;
+      font-size: 14px;
+      line-height: 1.4;
+      // Keep solid colors for options readability
+      background-color: var(--input-bg-color);
+      color: var(--text-color);
+    }
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  table {
+    width: 100%;
+    min-width: 100%; // Verhindert, dass Tabellen zu breit werden
+    font-size: 13px;
+    table-layout: auto; // Ermöglicht responsive Spalten
+  }
+
+  table th,
+  table td {
+    padding: 6px 4px; // Reduziertes Padding für mobile
+  }
+
+  // Spezielle Anpassungen für choice columns
+  table th.choicesCol {
+    width: 70px !important;
+    min-width: 60px !important;
+    max-width: 70px !important;
+    padding: 6px 2px !important;
+  }
+
+  .legend-container {
+    margin-top: 5px;
+    margin-bottom: 15px;
+  }
+
+  .legend {
+    padding: 8px 10px;
+  }
+
+  .action-buttons-container {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    padding: 0 10px;
+    gap: 10px;
+  }
+
+  .export-container {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  #ExportWrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  #URL {
+    width: 100%;
+    max-width: 100%;
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  #Export {
+    width: 100%;
+    padding: 0 20px;
+    font-size: 14px;
+    min-width: auto;
+    height: 42px;
+  }
+
+  .start-button {
+    width: 100%;
+    max-width: 100%;
+    padding: 8px 20px;
+    font-size: 14px;
+    height: 42px;
+  }
+}
+
+// Sehr kleine Mobilgeräte (unter 480px)
+@media (max-width: 479px) {
+  body {
+    overflow-x: hidden; // Verhindert horizontales Scrollen
+  }
+
+  .container {
+    padding: 0 8px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  // Tabellen für sehr kleine Bildschirme optimieren
+  table {
+    font-size: 11px;
+  }
+
+  table th,
+  table td {
+    padding: 4px 2px;
+  }
+
+  table th.choicesCol {
+    width: 60px !important;
+    min-width: 50px !important;
+    max-width: 60px !important;
+    padding: 4px 1px !important;
+  }
+
+  .action-buttons-container {
+    padding: 0 5px;
+    gap: 8px;
+  }
+
+  #Export {
+    font-size: 13px;
+    padding: 0 15px;
+    height: 38px;
+  }
+
+  .start-button {
+    font-size: 13px;
+    padding: 6px 15px;
+    height: 38px;
+  }
+
+  #URL {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  .export-container {
+    margin-bottom: 8px;
+  }
+  .header-controls {
+    margin-bottom: 12px;
+
+    h1 {
+      font-size: clamp(14px, 6vw, 18px);
+
+      .version-display {
+        font-size: 0.45em;
+        margin-left: 3px;
+      }
+    }
+  }
+
+  .header-actions {
+    gap: 4px;
+  }
+
+  #Edit {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background-size: 18px 18px;
+  }
+
+  #ThemeToggle {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+
+  .language-toggle {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 24px 0 6px;
+    font-size: 11px;
+    border-radius: 8px;
+
+    // Match header glassmorphism design for very small screens
+    background-color: rgba(255, 255, 255, 0.15);
+    color: var(--header-text-color);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+
+    &:hover,
+    &:focus {
+      background-color: rgba(255, 255, 255, 0.25);
+    }
+
+    &:active {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    option {
+      padding: 8px 10px;
+      font-size: 13px;
+      font-weight: 500;
+      // Keep solid colors for options readability
+      background-color: var(--input-bg-color);
+      color: var(--text-color);
+    }
+  }
+}
+
+// Zusätzliche Sicherheit für sehr kleine Bildschirme
+@media (max-width: 320px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .action-buttons-container {
+    padding: 0 3px;
+    gap: 6px;
+  }
+
+  #Export {
+    font-size: 12px;
+    padding: 0 12px;
+    height: 36px;
+    min-width: auto;
+  }
+
+  .start-button {
+    font-size: 12px;
+    padding: 4px 12px;
+    height: 36px;
+  }
+
+  #URL {
+    font-size: 10px;
+    padding: 5px 8px;
+  }
+
+  .export-container {
+    margin-bottom: 6px;
+  }
+
+  .container {
+    padding: 0 5px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  // Ultra-kompakte Tabellendarstellung
+  table {
+    font-size: 10px;
+  }
+
+  table th,
+  table td {
+    padding: 3px 1px;
+  }
+
+  table th.choicesCol {
+    width: 50px;
+    min-width: 45px;
+    max-width: 50px;
+  }
+}
+
+// Medienabfragen für optimierte Tabellenansicht bei mehreren Auswahlmöglichkeiten
+@media (max-width: 1200px) {
+  // Für Bildschirme bis 1200px Breite
+  table {
+    th.choicesCol {
+      width: 110px;
+      min-width: 100px;
+      max-width: 110px;
+      padding: 10px 8px;
+    }
+
+    .choices {
+      min-width: 90px;
+      max-width: 110px;
+      gap: 3px;
+    }
+
+    td.kink-name {
+      min-width: 140px;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  // Für Tablets und kleinere Bildschirme
+  table {
+    th.choicesCol {
+      width: 90px;
+      min-width: 80px;
+      max-width: 90px;
+      padding: 8px 6px;
+      font-size: 13px;
+    }
+
+    .choices {
+      min-width: 70px;
+      max-width: 90px;
+      gap: 2px;
+    }
+
+    .choice {
+      width: 14px;
+      height: 14px;
+      min-width: 14px;
+      min-height: 14px;
+    }
+
+    td.kink-name {
+      min-width: 120px;
+    }
+
+    .kink-actions {
+      gap: 4px;
+      margin-left: 8px;
+      display: inline-flex; // Erzwingt die Anzeige
+      visibility: visible; // Erzwingt die Sichtbarkeit
+    }
+
+    .comment-button-small {
+      font-size: 14px; // Angepasste Schriftgröße für mobile Geräte
+      display: inline-block; // Erzwingt die Anzeige
+      visibility: visible; // Erzwingt die Sichtbarkeit
+    }
+  }
+}

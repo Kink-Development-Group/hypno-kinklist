@@ -1,0 +1,504 @@
+import Editor, { BeforeMount, Monaco, OnMount } from '@monaco-editor/react'
+import type * as monaco from 'monaco-editor'
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react'
+import { formatKinkListText, getSnippets } from './EditorUtils'
+import {
+  registerKinkListLanguage,
+  registerKinkListThemes,
+  validateKinkListSyntax,
+} from './KinkListLanguage'
+import i18n from '../../i18n'
+
+const KINK_LIST_LANGUAGE_ID = 'kinklist'
+const KINK_LIST_LIGHT_THEME = 'kink-list-light'
+const KINK_LIST_DARK_THEME = 'kink-list-dark'
+const VALIDATION_DEBOUNCE_MS = 200
+
+const formatValidationMessage = (
+  lineNumber: number,
+  message: string
+): string => {
+  if (!i18n.exists('editor.validation.lineMessage')) {
+    const fallbackLabelByLanguage: Record<string, string> = {
+      de: 'Zeile',
+      en: 'Line',
+      sv: 'Rad',
+    }
+    const baseLanguage = (i18n.resolvedLanguage ?? i18n.language ?? 'en').split(
+      '-'
+    )[0]
+    const fallbackLabel =
+      fallbackLabelByLanguage[baseLanguage] ?? fallbackLabelByLanguage.en
+
+    return `${fallbackLabel} ${lineNumber}: ${message}`
+  }
+
+  return i18n.t('editor.validation.lineMessage', {
+    lineNumber,
+    message,
+  })
+}
+
+export interface KinkListEditorProps {
+  value: string
+  onChange: (value: string) => void
+  onValidationChange?: (isValid: boolean, errors: string[]) => void
+  height?: string
+  placeholder?: string
+  readOnly?: boolean
+  theme?: 'light' | 'dark' | 'auto'
+}
+
+export interface KinkListEditorRef {
+  focus: () => void
+  formatCode: () => void
+  insertSnippet: (snippet: string) => void
+  getSelection: () => string
+  validate: () => { isValid: boolean; errors: string[] }
+}
+
+const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
+  (
+    {
+      value,
+      onChange,
+      onValidationChange,
+      height = '400px',
+      placeholder,
+      readOnly = false,
+      theme = 'auto',
+    },
+    ref
+  ) => {
+    const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
+    const monacoRef = useRef<Monaco | null>(null)
+    const languageIdRef = useRef(KINK_LIST_LANGUAGE_ID)
+    const [registeredLanguageId, setRegisteredLanguageId] = useState(
+      KINK_LIST_LANGUAGE_ID
+    )
+    const isInitializedRef = useRef(false)
+    const registrationDisposablesRef = useRef<monaco.IDisposable[]>([])
+    const editorDisposablesRef = useRef<monaco.IDisposable[]>([])
+    const validationTimeoutRef = useRef<ReturnType<
+      typeof globalThis.setTimeout
+    > | null>(null)
+
+    const disposeEditorDisposables = useCallback(() => {
+      editorDisposablesRef.current.forEach((disposable) => disposable.dispose())
+      editorDisposablesRef.current = []
+    }, [])
+
+    const disposeRegistrationDisposables = useCallback(() => {
+      registrationDisposablesRef.current.forEach((disposable) =>
+        disposable.dispose()
+      )
+      registrationDisposablesRef.current = []
+    }, [])
+
+    const formatEditorValue = useCallback(() => {
+      const currentValue = editorRef.current?.getValue()
+
+      if (currentValue === undefined) {
+        return
+      }
+
+      const formatted = formatKinkListText(currentValue)
+
+      if (formatted !== currentValue) {
+        onChange(formatted)
+      }
+    }, [onChange])
+
+    const validateModel = useCallback(() => {
+      const editor = editorRef.current
+      const monacoInstance = monacoRef.current
+
+      if (!editor || !monacoInstance) {
+        return null
+      }
+
+      const model = editor.getModel()
+
+      if (!model) {
+        return null
+      }
+
+      const markers = validateKinkListSyntax(monacoInstance, model.getValue())
+      monacoInstance.editor.setModelMarkers(
+        model,
+        KINK_LIST_LANGUAGE_ID,
+        markers
+      )
+
+      return { markers, monacoInstance }
+    }, [])
+
+    const getMarkerErrors = useCallback(
+      (
+        markers: ReturnType<typeof validateKinkListSyntax>,
+        monacoInstance: Monaco
+      ) => {
+        return markers
+          .filter(
+            (marker) => marker.severity === monacoInstance.MarkerSeverity.Error
+          )
+          .map((marker) =>
+            formatValidationMessage(marker.startLineNumber, marker.message)
+          )
+      },
+      []
+    )
+
+    // Expose methods to parent component
+    useImperativeHandle(ref, () => ({
+      focus: () => {
+        editorRef.current?.focus()
+      },
+      formatCode: () => {
+        formatEditorValue()
+      },
+      insertSnippet: (snippet: string) => {
+        if (editorRef.current) {
+          const selection = editorRef.current.getSelection()
+          if (selection) {
+            editorRef.current.executeEdits('insert-snippet', [
+              {
+                range: selection,
+                text: snippet,
+                forceMoveMarkers: true,
+              },
+            ])
+          }
+        }
+      },
+      getSelection: () => {
+        if (editorRef.current) {
+          const selection = editorRef.current.getSelection()
+          const model = editorRef.current.getModel()
+          if (selection && model) {
+            return model.getValueInRange(selection)
+          }
+        }
+        return ''
+      },
+      validate: () => {
+        const validation = validateModel()
+
+        if (validation) {
+          const errors = getMarkerErrors(
+            validation.markers,
+            validation.monacoInstance
+          )
+
+          return {
+            isValid: errors.length === 0,
+            errors,
+          }
+        }
+        return { isValid: true, errors: [] }
+      },
+    })) // Validate content and report errors
+    const validateContent = useCallback(() => {
+      if (!onValidationChange) {
+        return
+      }
+
+      const validation = validateModel()
+
+      if (validation) {
+        const errors = getMarkerErrors(
+          validation.markers,
+          validation.monacoInstance
+        )
+
+        onValidationChange(errors.length === 0, errors)
+      }
+    }, [getMarkerErrors, onValidationChange, validateModel])
+
+    const scheduleValidation = useCallback(() => {
+      if (validationTimeoutRef.current) {
+        globalThis.clearTimeout(validationTimeoutRef.current)
+      }
+
+      validationTimeoutRef.current = globalThis.setTimeout(() => {
+        validationTimeoutRef.current = null
+        validateContent()
+      }, VALIDATION_DEBOUNCE_MS)
+    }, [validateContent])
+
+    const getTheme = useCallback(() => {
+      if (theme === 'dark') {
+        return KINK_LIST_DARK_THEME
+      }
+
+      if (theme === 'light') {
+        return KINK_LIST_LIGHT_THEME
+      }
+
+      if (
+        typeof window === 'undefined' ||
+        typeof window.matchMedia !== 'function'
+      ) {
+        return KINK_LIST_LIGHT_THEME
+      }
+
+      const prefersDark = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches
+
+      return prefersDark ? KINK_LIST_DARK_THEME : KINK_LIST_LIGHT_THEME
+    }, [theme])
+
+    // Before editor mount - register language and themes
+    const handleBeforeMount: BeforeMount = useCallback(
+      (monaco) => {
+        monacoRef.current = monaco
+
+        if (!isInitializedRef.current) {
+          // Register the kinklist language
+          const languageId = registerKinkListLanguage(monaco)
+          languageIdRef.current = languageId
+          setRegisteredLanguageId(languageId)
+          registerKinkListThemes(monaco)
+
+          monaco.editor.setTheme(getTheme())
+
+          // Register completion provider for snippets
+          registrationDisposablesRef.current.push(
+            monaco.languages.registerCompletionItemProvider(
+              languageIdRef.current,
+              {
+                provideCompletionItems: (_model, position) => {
+                  const range = {
+                    startLineNumber: position.lineNumber,
+                    endLineNumber: position.lineNumber,
+                    startColumn: 1,
+                    endColumn: position.column,
+                  }
+
+                  const suggestions = getSnippets().map((snippet, index) => ({
+                    label: snippet.label,
+                    kind: monaco.languages.CompletionItemKind.Snippet,
+                    insertText: snippet.insertText,
+                    insertTextRules:
+                      monaco.languages.CompletionItemInsertTextRule
+                        .InsertAsSnippet,
+                    range,
+                    detail: snippet.detail,
+                    documentation: snippet.documentation,
+                    sortText: `z_${index.toString().padStart(3, '0')}`,
+                  }))
+
+                  return { suggestions }
+                },
+              }
+            )
+          )
+
+          // Register code action provider for formatting
+          registrationDisposablesRef.current.push(
+            monaco.languages.registerCodeActionProvider(languageIdRef.current, {
+              provideCodeActions: (model) => {
+                const actions: monaco.languages.CodeAction[] = [
+                  {
+                    title: 'Kink-Liste formatieren',
+                    kind: 'source.fixAll',
+                    edit: {
+                      edits: [
+                        {
+                          resource: model.uri,
+                          versionId: model.getVersionId(),
+                          textEdit: {
+                            range: model.getFullModelRange(),
+                            text: formatKinkListText(model.getValue()),
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ]
+                return { actions, dispose: () => {} }
+              },
+            })
+          )
+
+          isInitializedRef.current = true
+        }
+      },
+      [getTheme]
+    )
+
+    // Handle value changes
+    const handleChange = useCallback(
+      (value: string | undefined) => {
+        if (value !== undefined) {
+          onChange(value)
+        }
+      },
+      [onChange]
+    )
+
+    // After editor mount - configure editor
+    const handleMount: OnMount = useCallback(
+      (editor, monaco) => {
+        editorRef.current = editor
+        disposeEditorDisposables()
+
+        // Get the model and ensure language is set
+        const model = editor.getModel()
+        if (model) {
+          monaco.editor.setModelLanguage(model, languageIdRef.current)
+
+          // Set theme AFTER setting the language
+          monaco.editor.setTheme(getTheme())
+        }
+
+        // Configure editor options
+        editor.updateOptions({
+          minimap: { enabled: false },
+          lineNumbers: 'on',
+          glyphMargin: true,
+          folding: true,
+          lineDecorationsWidth: 10,
+          lineNumbersMinChars: 3,
+          scrollBeyondLastLine: false,
+          automaticLayout: true,
+          wordWrap: 'on',
+          wrappingIndent: 'indent',
+          formatOnPaste: true,
+          formatOnType: true,
+          acceptSuggestionOnCommitCharacter: true,
+          acceptSuggestionOnEnter: 'on',
+          quickSuggestions: {
+            other: true,
+            comments: false,
+            strings: false,
+          },
+          suggestOnTriggerCharacters: true,
+          tabCompletion: 'on',
+          parameterHints: { enabled: true },
+          autoIndent: 'full',
+          // Enable token hover to debug highlighting
+          hover: {
+            enabled: true,
+            delay: 100,
+          },
+        })
+
+        if (import.meta.env.DEV) {
+          editorDisposablesRef.current.push(
+            monaco.languages.registerHoverProvider(languageIdRef.current, {
+              provideHover: (model, position) => {
+                const line = model.getLineContent(position.lineNumber)
+                const tokens = monaco.editor.tokenize(
+                  line,
+                  languageIdRef.current
+                )
+
+                return {
+                  range: new monaco.Range(
+                    position.lineNumber,
+                    1,
+                    position.lineNumber,
+                    line.length + 1
+                  ),
+                  contents: [
+                    { value: `**Line:** ${line}` },
+                    {
+                      value: `**Position:** ${position.lineNumber}:${position.column}`,
+                    },
+                    {
+                      value: `**Tokens:** ${JSON.stringify(tokens[0] || [], null, 2)}`,
+                    },
+                  ],
+                }
+              },
+            })
+          )
+        }
+
+        // Add keyboard shortcuts
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK, () => {
+          editor.trigger('keyboard', 'editor.action.triggerSuggest', {})
+        })
+
+        editor.addCommand(
+          monaco.KeyMod.Alt | monaco.KeyMod.Shift | monaco.KeyCode.KeyF,
+          formatEditorValue
+        )
+
+        // Validate on content change
+        editorDisposablesRef.current.push(
+          editor.onDidChangeModelContent(() => {
+            scheduleValidation()
+          })
+        )
+
+        // Focus the editor
+        editor.focus()
+      },
+      [
+        disposeEditorDisposables,
+        scheduleValidation,
+        formatEditorValue,
+        getTheme,
+      ]
+    )
+
+    useEffect(() => {
+      return () => {
+        disposeEditorDisposables()
+        disposeRegistrationDisposables()
+        if (validationTimeoutRef.current) {
+          globalThis.clearTimeout(validationTimeoutRef.current)
+          validationTimeoutRef.current = null
+        }
+        isInitializedRef.current = false
+      }
+    }, [disposeEditorDisposables, disposeRegistrationDisposables])
+
+    // Update validation when value changes externally
+    useEffect(() => {
+      validateContent()
+    }, [value, validateContent])
+
+    return (
+      <div className="kink-list-editor">
+        {placeholder && !value && (
+          <div className="kink-list-editor-placeholder" aria-hidden="true">
+            {placeholder}
+          </div>
+        )}
+        <Editor
+          height={height}
+          language={registeredLanguageId}
+          value={value}
+          onChange={handleChange}
+          beforeMount={handleBeforeMount}
+          onMount={handleMount}
+          theme={getTheme()}
+          options={{
+            readOnly,
+            scrollbar: {
+              vertical: 'auto',
+              horizontal: 'auto',
+              verticalScrollbarSize: 12,
+              horizontalScrollbarSize: 12,
+            },
+          }}
+        />
+      </div>
+    )
+  }
+)
+
+KinkListEditor.displayName = 'KinkListEditor'
+
+export default KinkListEditor

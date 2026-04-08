@@ -1,72 +1,152 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useState } from 'react'
 
-type ThemeType = "light" | "dark";
+type ThemeType = 'light' | 'dark'
 
-interface ThemeContextType {
-  theme: ThemeType;
-  toggleTheme: () => void;
+const getThemeStorage = (): Pick<Storage, 'getItem' | 'setItem'> | null => {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  let storage: Storage | null = null
+
+  try {
+    storage = window.localStorage
+  } catch {
+    return null
+  }
+
+  if (
+    storage &&
+    typeof storage.getItem === 'function' &&
+    typeof storage.setItem === 'function'
+  ) {
+    return storage
+  }
+
+  return null
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const getStoredTheme = (): ThemeType | null => {
+  try {
+    const savedTheme = getThemeStorage()?.getItem('theme')
+
+    return savedTheme === 'dark' || savedTheme === 'light'
+      ? (savedTheme as ThemeType)
+      : null
+  } catch {
+    return null
+  }
+}
+
+const persistTheme = (theme: ThemeType): void => {
+  try {
+    getThemeStorage()?.setItem('theme', theme)
+  } catch {
+    // Ignore storage access issues in tests/SSR/private mode.
+  }
+}
+
+const getPrefersDarkMediaQuery = (): MediaQueryList | null => {
+  if (
+    typeof window === 'undefined' ||
+    typeof window.matchMedia !== 'function'
+  ) {
+    return null
+  }
+
+  return window.matchMedia('(prefers-color-scheme: dark)')
+}
+
+const subscribeToMediaQueryChange = (
+  mediaQuery: MediaQueryList,
+  handler: () => void
+): (() => void) | undefined => {
+  if (typeof mediaQuery.addEventListener === 'function') {
+    mediaQuery.addEventListener('change', handler)
+    return () => {
+      if (typeof mediaQuery.removeEventListener === 'function') {
+        mediaQuery.removeEventListener('change', handler)
+      }
+    }
+  }
+
+  if (typeof mediaQuery.addListener === 'function') {
+    mediaQuery.addListener(handler)
+    return () => {
+      if (typeof mediaQuery.removeListener === 'function') {
+        mediaQuery.removeListener(handler)
+      }
+    }
+  }
+
+  return undefined
+}
+
+interface ThemeContextType {
+  theme: ThemeType
+  toggleTheme: () => void
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   // Lese gespeichertes Theme aus dem localStorage oder verwende 'light' als Fallback
   const [theme, setTheme] = useState<ThemeType>(() => {
-    const savedTheme = localStorage.getItem("theme");
-    return savedTheme === "dark" || savedTheme === "light"
-      ? (savedTheme as ThemeType)
-      : "light";
-  });
+    return getStoredTheme() ?? 'light'
+  })
 
   // Theme wechseln
   const toggleTheme = () => {
     setTheme((prevTheme) => {
-      const newTheme = prevTheme === "light" ? "dark" : "light";
-      localStorage.setItem("theme", newTheme);
-      return newTheme;
-    });
-  };
+      const newTheme = prevTheme === 'light' ? 'dark' : 'light'
+      persistTheme(newTheme)
+      return newTheme
+    })
+  }
 
   // Das Theme-Attribut im HTML-Element setzen
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-  }, [theme]);
+    document.documentElement.setAttribute('data-theme', theme)
+  }, [theme])
 
   // Überwachen der Systemeinstellungen für Farbschema-Präferenzen
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const mediaQuery = getPrefersDarkMediaQuery()
+
+    if (!mediaQuery) {
+      return
+    }
 
     const handleChange = () => {
-      if (!localStorage.getItem("theme")) {
-        setTheme(mediaQuery.matches ? "dark" : "light");
+      if (!getStoredTheme()) {
+        setTheme(mediaQuery.matches ? 'dark' : 'light')
       }
-    };
+    }
 
     // Initialisieren
-    if (!localStorage.getItem("theme")) {
-      handleChange();
+    if (!getStoredTheme()) {
+      handleChange()
     }
 
     // Listener für Änderungen
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
+    return subscribeToMediaQueryChange(mediaQuery, handleChange)
+  }, [])
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
-  );
-};
+  )
+}
 
 export const useTheme = (): ThemeContextType => {
-  const context = useContext(ThemeContext);
+  const context = useContext(ThemeContext)
   if (context === undefined) {
     throw new Error(
-      "useTheme muss innerhalb eines ThemeProviders verwendet werden",
-    );
+      'useTheme muss innerhalb eines ThemeProviders verwendet werden'
+    )
   }
-  return context;
-};
+  return context
+}
