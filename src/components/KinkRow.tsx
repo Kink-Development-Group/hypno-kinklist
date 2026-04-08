@@ -193,12 +193,12 @@ const KinkRow: React.FC<KinkRowProps> = ({
           })}
           {description && (
             <Tooltip key="description-tooltip" content={description}>
-              <span className="kink-tooltip">
-                <span
-                  className="kink-tooltip-icon"
-                  tabIndex={0}
-                  aria-label={t('comments.showDescription')}
-                >
+              <span
+                className="kink-tooltip"
+                tabIndex={0}
+                aria-label={t('comments.showDescription')}
+              >
+                <span className="kink-tooltip-icon" aria-hidden="true">
                   ?
                 </span>
               </span>

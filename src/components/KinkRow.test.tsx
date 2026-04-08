@@ -346,4 +346,40 @@ describe('KinkRow comment selection matching', () => {
     expect(setSelectedKink).toHaveBeenCalledWith(newSelection)
     expect(setIsCommentOverlayOpen).toHaveBeenCalledWith(true)
   })
+
+  test('renders the description tooltip trigger as the focusable tooltip child', () => {
+    mockUseKinklist.mockReturnValue(
+      createMockKinklistContext({
+        selection: [],
+        setSelection: vi.fn(),
+        levels,
+        setIsCommentOverlayOpen: vi.fn(),
+        setSelectedKink: vi.fn(),
+        enhancedKinks: null,
+      })
+    )
+
+    render(
+      <table>
+        <tbody>
+          <KinkRow
+            categoryName="Category"
+            kinkName="Kink"
+            fields={['Field']}
+            description="Description text"
+          />
+        </tbody>
+      </table>
+    )
+
+    const trigger = screen.getByLabelText(/show description/i)
+
+    expect(trigger).toHaveClass('kink-tooltip')
+    expect(trigger).toHaveAttribute('tabindex', '0')
+    expect(trigger.querySelector('.kink-tooltip-icon')).not.toBeNull()
+    expect(trigger.querySelector('.kink-tooltip-icon')).toHaveAttribute(
+      'aria-hidden',
+      'true'
+    )
+  })
 })

@@ -102,7 +102,7 @@ describe('CommentOverlay stable ID matching', () => {
     expect(setSelectedKink).toHaveBeenCalledWith(null)
   })
 
-  test('preserves existing non-empty stable IDs on translated-name save', () => {
+  test('preserves existing non-empty IDs while backfilling missing IDs on translated-name save', () => {
     const setSelection = vi.fn()
     const setIsCommentOverlayOpen = vi.fn()
     const setSelectedKink = vi.fn()
@@ -115,8 +115,8 @@ describe('CommentOverlay stable ID matching', () => {
         value: 'Favorite',
         showField: true,
         categoryId: 'existing-cat',
-        kinkId: 'existing-kink',
-        fieldId: 'existing-field',
+        kinkId: '',
+        fieldId: undefined,
       },
     ]
 
@@ -153,8 +153,8 @@ describe('CommentOverlay stable ID matching', () => {
         ...selection[0],
         comment: 'Updated comment',
         categoryId: 'existing-cat',
-        kinkId: 'existing-kink',
-        fieldId: 'existing-field',
+        kinkId: 'kink-1',
+        fieldId: 'field-1',
       },
     ])
     expect(setIsCommentOverlayOpen).toHaveBeenCalledWith(false)
@@ -205,6 +205,57 @@ describe('CommentOverlay stable ID matching', () => {
           categoryId: '',
           kinkId: '',
           fieldId: '',
+        },
+        setSelectedKink,
+      })
+    )
+
+    render(<CommentOverlay />)
+
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: 'Updated comment' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /save/i }))
+
+    expect(setSelection).toHaveBeenCalledWith(selection)
+    expect(setIsCommentOverlayOpen).toHaveBeenCalledWith(false)
+    expect(setSelectedKink).toHaveBeenCalledWith(null)
+  })
+
+  test('does not fall back to translated-name matching when both sides have different usable stable IDs', () => {
+    const setSelection = vi.fn()
+    const setIsCommentOverlayOpen = vi.fn()
+    const setSelectedKink = vi.fn()
+
+    const selection: Selection[] = [
+      {
+        category: 'Translated Category',
+        kink: 'Translated Kink',
+        field: 'Translated Field',
+        value: 'Favorite',
+        showField: true,
+        categoryId: 'other-cat',
+        kinkId: 'other-kink',
+        fieldId: 'other-field',
+      },
+    ]
+
+    mockUseKinklist.mockReturnValue(
+      createMockKinklistContext({
+        selection,
+        setSelection,
+        isCommentOverlayOpen: true,
+        setIsCommentOverlayOpen,
+        selectedKink: {
+          category: 'Translated Category',
+          kink: 'Translated Kink',
+          field: 'Translated Field',
+          value: 'Favorite',
+          showField: true,
+          comment: '',
+          categoryId: 'cat-1',
+          kinkId: 'kink-1',
+          fieldId: 'field-1',
         },
         setSelectedKink,
       })

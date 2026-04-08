@@ -30,13 +30,16 @@ const CommentOverlay: React.FC = () => {
     if (selectedKink) {
       const updatedSelection = selection.map((item) => {
         // Use stable IDs for comparison if available, fallback to translated names
+        const canUseStableIds =
+          hasUsableStableIds(selectedKink) && hasUsableStableIds(item)
         const matchesStableIds =
-          hasUsableStableIds(selectedKink) &&
+          canUseStableIds &&
           item.categoryId === selectedKink.categoryId &&
           item.kinkId === selectedKink.kinkId &&
           item.fieldId === selectedKink.fieldId
 
         const matchesTranslatedNames =
+          !canUseStableIds &&
           item.category === selectedKink.category &&
           item.kink === selectedKink.kink &&
           item.field === selectedKink.field
