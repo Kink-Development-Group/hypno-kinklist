@@ -144,6 +144,13 @@ const MonacoKinkListEditor = forwardRef<
       }
 
       if (!showValidation) {
+        const model = editor.getModel()
+        if (model && monacoRef.current) {
+          monacoRef.current.editor.setModelMarkers(model, 'kinklist', [])
+        }
+        if (onValidationCompleteRef.current) {
+          onValidationCompleteRef.current([], [])
+        }
         return
       }
 

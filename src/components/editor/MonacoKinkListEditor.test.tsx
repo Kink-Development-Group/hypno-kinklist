@@ -125,9 +125,15 @@ describe('MonacoKinkListEditor listeners and validation', () => {
 
   test('reattaches and disposes content listeners when validation mode changes', () => {
     validateKinkListSyntaxMock.mockReturnValue([])
+    const onValidationComplete = vi.fn()
 
     const { rerender, unmount } = render(
-      <MonacoKinkListEditor value="content" onChange={vi.fn()} showValidation />
+      <MonacoKinkListEditor
+        value="content"
+        onChange={vi.fn()}
+        showValidation
+        onValidationComplete={onValidationComplete}
+      />
     )
 
     expect(onDidChangeModelContentDisposables).toHaveLength(1)
@@ -137,6 +143,7 @@ describe('MonacoKinkListEditor listeners and validation', () => {
         value="content"
         onChange={vi.fn()}
         showValidation={false}
+        onValidationComplete={onValidationComplete}
       />
     )
 
@@ -144,6 +151,12 @@ describe('MonacoKinkListEditor listeners and validation', () => {
       1
     )
     expect(onDidChangeModelContentDisposables).toHaveLength(1)
+    expect((mockMonaco as any).editor.setModelMarkers).toHaveBeenLastCalledWith(
+      expect.anything(),
+      'kinklist',
+      []
+    )
+    expect(onValidationComplete).toHaveBeenLastCalledWith([], [])
 
     unmount()
 
@@ -226,11 +239,14 @@ describe('MonacoKinkListEditor listeners and validation', () => {
   })
 
   test('does not attach a content listener when validation is disabled', () => {
+    const onValidationComplete = vi.fn()
+
     render(
       <MonacoKinkListEditor
         value="content"
         onChange={vi.fn()}
         showValidation={false}
+        onValidationComplete={onValidationComplete}
       />
     )
 
@@ -238,6 +254,12 @@ describe('MonacoKinkListEditor listeners and validation', () => {
     expect(
       mockEditor.onDidChangeModelContent as ReturnType<typeof vi.fn>
     ).not.toHaveBeenCalled()
+    expect((mockMonaco as any).editor.setModelMarkers).toHaveBeenLastCalledWith(
+      expect.anything(),
+      'kinklist',
+      []
+    )
+    expect(onValidationComplete).toHaveBeenLastCalledWith([], [])
   })
 
   test('disposes only models created by the editor on unmount', () => {

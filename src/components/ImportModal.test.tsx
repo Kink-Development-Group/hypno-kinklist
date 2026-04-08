@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { vi } from 'vitest'
+import i18n from '../i18n'
 import ImportModal from './ImportModal'
 
 const mockSetKinks = vi.fn()
@@ -36,10 +37,13 @@ describe('ImportModal file validation', () => {
       },
     })
 
+    const expectedError = i18n.t('import.errors.unsupportedFileType', {
+      extension: '(no extension)',
+      allowed: '.json, .xml, .csv',
+    })
+
     await waitFor(() => {
-      expect(screen.getByRole('alertdialog')).toHaveTextContent(
-        'Unsupported file type: (no extension). Allowed: .json, .xml, .csv'
-      )
+      expect(screen.getByRole('alertdialog')).toHaveTextContent(expectedError)
     })
 
     expect(mockSetKinks).not.toHaveBeenCalled()
