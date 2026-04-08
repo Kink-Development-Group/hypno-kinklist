@@ -93,17 +93,17 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
       setError(null)
 
       try {
-        const extension = filename.split('.').pop()?.toLowerCase() || ''
+        const { extension } = getFileExtensionInfo(filename)
         let result
 
         switch (extension) {
-          case 'json':
+          case '.json':
             result = importFromJSON(text)
             break
-          case 'xml':
+          case '.xml':
             result = importFromXML(text)
             break
-          case 'csv':
+          case '.csv':
             result = importFromCSV(text)
             break
           default:

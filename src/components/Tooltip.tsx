@@ -80,7 +80,10 @@ const Tooltip: React.FC<TooltipProps> = ({
 
   const showTooltip = useCallback(
     (element?: HTMLElement | null) => {
-      if (timeoutRef.current) window.clearTimeout(timeoutRef.current)
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current)
+        timeoutRef.current = null
+      }
       const triggerElement = element ?? triggerRef.current
       if (!triggerElement) return
       triggerRef.current = triggerElement
@@ -96,7 +99,10 @@ const Tooltip: React.FC<TooltipProps> = ({
   )
 
   const hideTooltip = useCallback(() => {
-    if (timeoutRef.current) window.clearTimeout(timeoutRef.current)
+    if (timeoutRef.current) {
+      window.clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
     setShow(false)
   }, [])
 
@@ -124,6 +130,7 @@ const Tooltip: React.FC<TooltipProps> = ({
     return () => {
       if (timeoutRef.current) {
         window.clearTimeout(timeoutRef.current)
+        timeoutRef.current = null
       }
     }
   }, [])
