@@ -180,6 +180,56 @@ describe('Choice stable ID matching', () => {
     ])
   })
 
+  test('backfills empty-string stable IDs when updating a name-matched selection', () => {
+    const setSelection = vi.fn()
+    const selection: Selection[] = [
+      {
+        category: 'Category',
+        kink: 'Kink',
+        field: 'Field',
+        value: 'NotEntered',
+        showField: false,
+        categoryId: '',
+        kinkId: '',
+        fieldId: '',
+      },
+    ]
+
+    mockUseKinklist.mockReturnValue(
+      createMockKinklistContext({
+        levels,
+        selection,
+        setSelection,
+        enhancedKinks: {},
+      })
+    )
+
+    render(
+      <Choice
+        field="Field"
+        categoryName="Category"
+        kinkName="Kink"
+        showField={false}
+      />
+    )
+
+    fireEvent.click(screen.getByRole('radio', { name: /favorite/i }))
+
+    const selectionUpdater = vi.mocked(setSelection).mock.calls[0][0] as (
+      currentSelection: Selection[]
+    ) => Selection[]
+
+    expect(selectionUpdater(selection)).toEqual([
+      {
+        ...selection[0],
+        value: 'Favorite',
+        categoryId: 'cat-1',
+        kinkId: 'kink-1',
+        fieldId: 'field-1',
+      },
+    ])
+  })
+
   test('falls back to name matching when stable IDs are empty strings', () => {
     const setSelection = vi.fn()
     const selection: Selection[] = [

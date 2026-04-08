@@ -9,6 +9,11 @@ const hasUsableStableIds = (
   ids: Partial<Pick<Selection, 'categoryId' | 'kinkId' | 'fieldId'>>
 ) => Boolean(ids.categoryId) && Boolean(ids.kinkId) && Boolean(ids.fieldId)
 
+const backfillStableId = (
+  existingId: Selection['categoryId'],
+  stableId: Selection['categoryId']
+) => existingId || stableId
+
 interface ChoiceProps {
   field: string
   categoryName: string
@@ -80,9 +85,12 @@ const Choice: React.FC<ChoiceProps> = ({
               return {
                 ...item,
                 value: levelName,
-                categoryId: item.categoryId ?? stableIds.categoryId,
-                kinkId: item.kinkId ?? stableIds.kinkId,
-                fieldId: item.fieldId ?? stableIds.fieldId,
+                categoryId: backfillStableId(
+                  item.categoryId,
+                  stableIds.categoryId
+                ),
+                kinkId: backfillStableId(item.kinkId, stableIds.kinkId),
+                fieldId: backfillStableId(item.fieldId, stableIds.fieldId),
               }
             }
             return item
