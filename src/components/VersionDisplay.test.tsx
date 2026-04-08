@@ -33,7 +33,7 @@ describe('VersionDisplay', () => {
 
     const trigger = screen.getByText('v1.2.3')
 
-    expect(trigger).toHaveAttribute('tabindex', '0')
+    expect(trigger).toHaveProperty('tabIndex', 0)
 
     fireEvent.focusIn(trigger)
 
