@@ -32,9 +32,9 @@ describe('LanguageToggle', () => {
       'sv',
     ])
     expect(options.map((option) => option.textContent)).toEqual([
-      i18n.t('language.en', { defaultValue: 'ENGLISH' }),
-      i18n.t('language.de', { defaultValue: 'DE' }),
-      i18n.t('language.sv', { defaultValue: 'SV' }),
+      i18n.t('language.en', { defaultValue: 'English' }),
+      i18n.t('language.de', { defaultValue: 'Deutsch' }),
+      i18n.t('language.sv', { defaultValue: 'Svenska' }),
     ])
   })
 
