@@ -262,6 +262,54 @@ describe('MonacoKinkListEditor listeners and validation', () => {
     expect(onValidationComplete).toHaveBeenLastCalledWith([], [])
   })
 
+  test('revalidates immediately when validation is re-enabled', () => {
+    validateKinkListSyntaxMock.mockReturnValue([
+      { startLineNumber: 3, message: 'Missing field', severity: 8 },
+    ])
+    const onValidationComplete = vi.fn()
+
+    const { rerender } = render(
+      <MonacoKinkListEditor
+        value="content"
+        onChange={vi.fn()}
+        showValidation={false}
+        onValidationComplete={onValidationComplete}
+      />
+    )
+
+    validateKinkListSyntaxMock.mockClear()
+    ;(
+      (mockMonaco as any).editor.setModelMarkers as ReturnType<typeof vi.fn>
+    ).mockClear()
+    onValidationComplete.mockClear()
+
+    rerender(
+      <MonacoKinkListEditor
+        value="content"
+        onChange={vi.fn()}
+        showValidation
+        onValidationComplete={onValidationComplete}
+      />
+    )
+
+    expect(validateKinkListSyntaxMock).toHaveBeenCalled()
+    expect((mockMonaco as any).editor.setModelMarkers).toHaveBeenLastCalledWith(
+      expect.anything(),
+      'kinklist',
+      expect.arrayContaining([
+        expect.objectContaining({
+          startLineNumber: 3,
+          message: 'Missing field',
+          severity: 8,
+        }),
+      ])
+    )
+    expect(onValidationComplete).toHaveBeenLastCalledWith(
+      ['Line 3: Missing field'],
+      []
+    )
+  })
+
   test('disposes only models created by the editor on unmount', () => {
     const createdModel = {
       getValue: vi.fn(() => 'content'),

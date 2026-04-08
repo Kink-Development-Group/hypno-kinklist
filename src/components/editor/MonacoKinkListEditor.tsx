@@ -77,6 +77,7 @@ const MonacoKinkListEditor = forwardRef<
       typeof globalThis.setTimeout
     > | null>(null)
     const onValidationCompleteRef = useRef(onValidationComplete)
+    const previousShowValidationRef = useRef(showValidation)
     const [isReady, setIsReady] = useState(false)
     const languageId = 'kinklist'
 
@@ -151,6 +152,7 @@ const MonacoKinkListEditor = forwardRef<
         if (onValidationCompleteRef.current) {
           onValidationCompleteRef.current([], [])
         }
+        previousShowValidationRef.current = false
         return
       }
 
@@ -165,6 +167,11 @@ const MonacoKinkListEditor = forwardRef<
           }, VALIDATION_DEBOUNCE_MS)
         }
       )
+
+      if (!previousShowValidationRef.current) {
+        validateContent()
+      }
+      previousShowValidationRef.current = true
     }, [showValidation, validateContent])
 
     // Editor initialisieren
