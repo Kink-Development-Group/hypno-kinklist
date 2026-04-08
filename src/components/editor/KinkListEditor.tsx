@@ -25,14 +25,14 @@ const formatValidationMessage = (
   lineNumber: number,
   message: string
 ): string => {
-  const translatedMessage = i18n.t('editor.validation.lineMessage', {
+  if (!i18n.exists('editor.validation.lineMessage')) {
+    return `Line ${lineNumber}: ${message}`
+  }
+
+  return i18n.t('editor.validation.lineMessage', {
     lineNumber,
     message,
   })
-
-  return translatedMessage === 'editor.validation.lineMessage'
-    ? `Line ${lineNumber}: ${message}`
-    : translatedMessage
 }
 
 export interface KinkListEditorProps {
