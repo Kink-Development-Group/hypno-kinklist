@@ -58,6 +58,7 @@ describe('MonacoKinkListEditor listeners and validation', () => {
 
     const model = {
       getValue: vi.fn(() => 'content'),
+      dispose: vi.fn(),
     }
 
     mockMonaco = {
@@ -227,6 +228,28 @@ describe('MonacoKinkListEditor listeners and validation', () => {
     expect(validateKinkListSyntaxMock).toHaveBeenCalledTimes(
       initialValidationCalls + 1
     )
+  })
+
+  test('disposes only models created by the editor on unmount', () => {
+    const createdModel = {
+      getValue: vi.fn(() => 'content'),
+      dispose: vi.fn(),
+    }
+    const createModelMock = (mockMonaco as any).editor
+      .createModel as ReturnType<typeof vi.fn>
+
+    ;(mockEditor.getModel as ReturnType<typeof vi.fn>).mockReturnValue(null)
+    createModelMock.mockReturnValue(createdModel)
+
+    const { unmount } = render(
+      <MonacoKinkListEditor value="content" onChange={vi.fn()} />
+    )
+
+    expect(mockEditor.setModel).toHaveBeenCalledWith(createdModel)
+
+    unmount()
+
+    expect(createdModel.dispose).toHaveBeenCalledTimes(1)
   })
 
   test('formats through onChange without directly setting the editor value', () => {

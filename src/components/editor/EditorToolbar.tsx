@@ -235,11 +235,20 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
             {t('editor.validation.errors')} ({validationErrors.length})
           </div>
           <ul className="validation-errors">
-            {validationErrors.map((error, index) => (
-              <li key={index} className="validation-error">
-                {error}
-              </li>
-            ))}
+            {validationErrors.map((error, index) => {
+              const errorOccurrence = validationErrors
+                .slice(0, index)
+                .filter((previousError) => previousError === error).length
+
+              return (
+                <li
+                  key={`${error}-${errorOccurrence}`}
+                  className="validation-error"
+                >
+                  {error}
+                </li>
+              )
+            })}
           </ul>
         </div>
       )}

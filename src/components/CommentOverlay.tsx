@@ -1,16 +1,7 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useKinklist } from '../context/KinklistContext'
-import { Selection } from '../types'
-
-const hasUsableStableIds = (
-  ids: Partial<Pick<Selection, 'categoryId' | 'kinkId' | 'fieldId'>>
-) => Boolean(ids.categoryId) && Boolean(ids.kinkId) && Boolean(ids.fieldId)
-
-const backfillStableId = (
-  existingId: Selection['categoryId'],
-  stableId: Selection['categoryId']
-) => (existingId === undefined || existingId === '' ? stableId : existingId)
+import { backfillStableId, hasUsableStableIds } from '../utils/stableIds'
 
 const CommentOverlay: React.FC = () => {
   const { t } = useTranslation()

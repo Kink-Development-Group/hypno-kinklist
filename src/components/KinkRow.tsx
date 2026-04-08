@@ -5,12 +5,9 @@ import { Selection } from '../types'
 import { strToClass } from '../utils'
 import { getDefaultLevelKey } from '../utils/levels'
 import { getStableIdsFromOriginal } from '../utils/multilingualTemplates'
+import { hasUsableStableIds } from '../utils/stableIds'
 import Choice from './Choice'
 import Tooltip from './Tooltip'
-
-const hasUsableStableIds = (
-  ids: Partial<Pick<Selection, 'categoryId' | 'kinkId' | 'fieldId'>>
-) => Boolean(ids.categoryId) && Boolean(ids.kinkId) && Boolean(ids.fieldId)
 
 interface KinkRowProps {
   categoryName: string

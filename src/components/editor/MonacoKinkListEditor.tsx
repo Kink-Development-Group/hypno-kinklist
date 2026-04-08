@@ -79,6 +79,7 @@ const MonacoKinkListEditor = forwardRef<
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null)
     const monacoRef = useRef<Monaco | null>(null)
     const contentChangeDisposableRef = useRef<monaco.IDisposable | null>(null)
+    const ownedModelRef = useRef<monaco.editor.ITextModel | null>(null)
     const validationTimeoutRef = useRef<ReturnType<
       typeof globalThis.setTimeout
     > | null>(null)
@@ -191,9 +192,11 @@ const MonacoKinkListEditor = forwardRef<
           // Falls kein Model existiert: neues Model erzeugen
           const value = editor.getValue()
           model = monaco.editor.createModel(value, languageId)
+          ownedModelRef.current = model
           editor.setModel(model)
         } else {
           // Vorhandenes Model wiederverwenden und Sprache setzen
+          ownedModelRef.current = null
           monaco.editor.setModelLanguage(model, languageId)
         }
       } catch (error) {
@@ -339,6 +342,8 @@ const MonacoKinkListEditor = forwardRef<
           globalThis.clearTimeout(validationTimeoutRef.current)
           validationTimeoutRef.current = null
         }
+        ownedModelRef.current?.dispose()
+        ownedModelRef.current = null
       }
     }, [])
 

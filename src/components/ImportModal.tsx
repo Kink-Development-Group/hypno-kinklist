@@ -79,7 +79,10 @@ const ImportModal: React.FC<ImportModalProps> = ({ open, onClose }) => {
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+    const relatedTarget =
+      e.relatedTarget instanceof Node ? e.relatedTarget : null
+
+    if (!e.currentTarget.contains(relatedTarget)) {
       setShowDropzone(false)
     }
   }, [])
