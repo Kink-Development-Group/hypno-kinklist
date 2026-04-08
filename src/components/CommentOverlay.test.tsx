@@ -46,7 +46,7 @@ describe('CommentOverlay stable ID matching', () => {
     vi.clearAllMocks()
   })
 
-  test('backfills stable IDs when saving a translated-name match', () => {
+  test('uses the latest selection state when saving a translated-name match', () => {
     const setSelection = vi.fn()
     const setIsCommentOverlayOpen = vi.fn()
     const setSelectedKink = vi.fn()
@@ -56,6 +56,16 @@ describe('CommentOverlay stable ID matching', () => {
         category: 'Translated Category',
         kink: 'Translated Kink',
         field: 'Translated Field',
+        value: 'Favorite',
+        showField: true,
+      },
+    ]
+    const latestSelection: Selection[] = [
+      ...selection,
+      {
+        category: 'Other Category',
+        kink: 'Other Kink',
+        field: 'Other Field',
         value: 'Favorite',
         showField: true,
       },
@@ -89,7 +99,11 @@ describe('CommentOverlay stable ID matching', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: /save/i }))
 
-    expect(setSelection).toHaveBeenCalledWith([
+    const selectionUpdater = vi.mocked(setSelection).mock.calls[0][0] as (
+      currentSelection: Selection[]
+    ) => Selection[]
+
+    expect(selectionUpdater(latestSelection)).toEqual([
       {
         ...selection[0],
         comment: 'Updated comment',
@@ -97,6 +111,7 @@ describe('CommentOverlay stable ID matching', () => {
         kinkId: 'kink-1',
         fieldId: 'field-1',
       },
+      latestSelection[1],
     ])
     expect(setIsCommentOverlayOpen).toHaveBeenCalledWith(false)
     expect(setSelectedKink).toHaveBeenCalledWith(null)
@@ -148,7 +163,11 @@ describe('CommentOverlay stable ID matching', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: /save/i }))
 
-    expect(setSelection).toHaveBeenCalledWith([
+    const selectionUpdater = vi.mocked(setSelection).mock.calls[0][0] as (
+      currentSelection: Selection[]
+    ) => Selection[]
+
+    expect(selectionUpdater(selection)).toEqual([
       {
         ...selection[0],
         comment: 'Updated comment',
@@ -217,7 +236,11 @@ describe('CommentOverlay stable ID matching', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: /save/i }))
 
-    expect(setSelection).toHaveBeenCalledWith(selection)
+    const selectionUpdater = vi.mocked(setSelection).mock.calls[0][0] as (
+      currentSelection: Selection[]
+    ) => Selection[]
+
+    expect(selectionUpdater(selection)).toEqual(selection)
     expect(setIsCommentOverlayOpen).toHaveBeenCalledWith(false)
     expect(setSelectedKink).toHaveBeenCalledWith(null)
   })
@@ -268,7 +291,11 @@ describe('CommentOverlay stable ID matching', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: /save/i }))
 
-    expect(setSelection).toHaveBeenCalledWith(selection)
+    const selectionUpdater = vi.mocked(setSelection).mock.calls[0][0] as (
+      currentSelection: Selection[]
+    ) => Selection[]
+
+    expect(selectionUpdater(selection)).toEqual(selection)
     expect(setIsCommentOverlayOpen).toHaveBeenCalledWith(false)
     expect(setSelectedKink).toHaveBeenCalledWith(null)
   })

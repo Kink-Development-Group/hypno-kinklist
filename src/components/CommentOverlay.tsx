@@ -6,7 +6,6 @@ import { backfillStableId, hasUsableStableIds } from '../utils/stableIds'
 const CommentOverlay: React.FC = () => {
   const { t } = useTranslation()
   const {
-    selection,
     setSelection,
     isCommentOverlayOpen,
     setIsCommentOverlayOpen,
@@ -28,56 +27,56 @@ const CommentOverlay: React.FC = () => {
   // Save comment
   const handleSave = useCallback(() => {
     if (selectedKink) {
-      const updatedSelection = selection.map((item) => {
-        // Use stable IDs for comparison if available, fallback to translated names
-        const canUseStableIds =
-          hasUsableStableIds(selectedKink) && hasUsableStableIds(item)
-        const matchesStableIds =
-          canUseStableIds &&
-          item.categoryId === selectedKink.categoryId &&
-          item.kinkId === selectedKink.kinkId &&
-          item.fieldId === selectedKink.fieldId
+      setSelection((prevSelection) =>
+        prevSelection.map((item) => {
+          // Use stable IDs for comparison if available, fallback to translated names
+          const canUseStableIds =
+            hasUsableStableIds(selectedKink) && hasUsableStableIds(item)
+          const matchesStableIds =
+            canUseStableIds &&
+            item.categoryId === selectedKink.categoryId &&
+            item.kinkId === selectedKink.kinkId &&
+            item.fieldId === selectedKink.fieldId
 
-        const matchesTranslatedNames =
-          !canUseStableIds &&
-          item.category === selectedKink.category &&
-          item.kink === selectedKink.kink &&
-          item.field === selectedKink.field
+          const matchesTranslatedNames =
+            !canUseStableIds &&
+            item.category === selectedKink.category &&
+            item.kink === selectedKink.kink &&
+            item.field === selectedKink.field
 
-        if (matchesStableIds || matchesTranslatedNames) {
-          const updatedItem = {
-            ...item,
-            comment: comment.trim() || undefined,
+          if (matchesStableIds || matchesTranslatedNames) {
+            const updatedItem = {
+              ...item,
+              comment: comment.trim() || undefined,
+            }
+
+            if (
+              !matchesStableIds &&
+              matchesTranslatedNames &&
+              hasUsableStableIds(selectedKink)
+            ) {
+              updatedItem.categoryId = backfillStableId(
+                item.categoryId,
+                selectedKink.categoryId
+              )
+              updatedItem.kinkId = backfillStableId(
+                item.kinkId,
+                selectedKink.kinkId
+              )
+              updatedItem.fieldId = backfillStableId(
+                item.fieldId,
+                selectedKink.fieldId
+              )
+            }
+
+            return updatedItem
           }
-
-          if (
-            !matchesStableIds &&
-            matchesTranslatedNames &&
-            hasUsableStableIds(selectedKink)
-          ) {
-            updatedItem.categoryId = backfillStableId(
-              item.categoryId,
-              selectedKink.categoryId
-            )
-            updatedItem.kinkId = backfillStableId(
-              item.kinkId,
-              selectedKink.kinkId
-            )
-            updatedItem.fieldId = backfillStableId(
-              item.fieldId,
-              selectedKink.fieldId
-            )
-          }
-
-          return updatedItem
-        }
-        return item
-      })
-
-      setSelection(updatedSelection)
+          return item
+        })
+      )
       handleClose()
     }
-  }, [selectedKink, selection, setSelection, comment, handleClose])
+  }, [selectedKink, setSelection, comment, handleClose])
 
   // Initialize comment when selectedKink changes
   useEffect(() => {

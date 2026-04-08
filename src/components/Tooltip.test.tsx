@@ -155,4 +155,16 @@ describe('Tooltip', () => {
 
     expect(screen.getByText('Trigger')).not.toHaveAttribute('tabindex')
   })
+
+  test('applies the explicit header variant styling when requested', () => {
+    render(
+      <Tooltip content="Tooltip content" variant="header">
+        <button type="button">Trigger</button>
+      </Tooltip>
+    )
+
+    fireEvent.mouseOver(screen.getByRole('button', { name: 'Trigger' }))
+
+    expect(screen.getByRole('tooltip')).toHaveClass('header-tooltip')
+  })
 })

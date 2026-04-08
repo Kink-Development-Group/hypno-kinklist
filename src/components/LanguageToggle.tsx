@@ -16,7 +16,7 @@ const LanguageToggle: React.FC = () => {
   }
 
   return (
-    <Tooltip content={t('language.select')}>
+    <Tooltip content={t('language.select')} variant="header">
       <select
         className="language-toggle"
         value={currentLanguage}

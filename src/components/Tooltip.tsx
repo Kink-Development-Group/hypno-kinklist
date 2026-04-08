@@ -17,7 +17,7 @@ interface TooltipProps {
   children: ReactElement<TooltipChildProps>
   className?: string
   delay?: number
-  // Weitere Props nach Bedarf
+  variant?: 'default' | 'header'
 }
 
 interface TooltipChildProps {
@@ -36,6 +36,7 @@ const Tooltip: React.FC<TooltipProps> = ({
   children,
   className = '',
   delay = 0,
+  variant = 'default',
 }) => {
   const triggerRef = useRef<HTMLElement | null>(null)
   const tooltipId = useId()
@@ -135,17 +136,6 @@ const Tooltip: React.FC<TooltipProps> = ({
     }
   }
 
-  // Prüfe, ob es sich um ein Header-Element handelt
-  const isHeaderElement = useCallback(() => {
-    if (!triggerRef.current) return false
-    const element = triggerRef.current
-    return (
-      element.id === 'ThemeToggle' ||
-      element.classList.contains('language-toggle') ||
-      element.closest('.header-actions') !== null
-    )
-  }, [])
-
   // Tooltip-Node als Portal
   const tooltipNode =
     show && tooltipPos
@@ -154,7 +144,7 @@ const Tooltip: React.FC<TooltipProps> = ({
             id={tooltipId}
             role="tooltip"
             className={`kink-tooltip-text kink-tooltip-portal ${
-              isHeaderElement() ? 'header-tooltip' : ''
+              variant === 'header' ? 'header-tooltip' : ''
             } ${className}`}
             style={
               {

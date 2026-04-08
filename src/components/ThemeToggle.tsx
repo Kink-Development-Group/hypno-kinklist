@@ -12,7 +12,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, toggleTheme }) => {
   const tooltipText =
     theme === 'light' ? t('theme.toggleDark') : t('theme.toggleLight')
   return (
-    <Tooltip content={tooltipText}>
+    <Tooltip content={tooltipText} variant="header">
       <button
         type="button"
         id="ThemeToggle"
