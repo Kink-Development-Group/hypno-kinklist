@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { vi } from 'vitest'
+import i18n from '../i18n'
 import { Selection } from '../types'
 import { useKinklist } from '../context/KinklistContext'
 import { getStableIdsFromOriginal } from '../utils/multilingualTemplates'
@@ -372,7 +373,7 @@ describe('KinkRow comment selection matching', () => {
       </table>
     )
 
-    const trigger = screen.getByLabelText(/show description/i)
+    const trigger = screen.getByLabelText(i18n.t('comments.showDescription'))
 
     expect(trigger).toHaveClass('kink-tooltip')
     expect(trigger).toHaveAttribute('tabindex', '0')

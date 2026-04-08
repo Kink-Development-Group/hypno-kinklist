@@ -43,19 +43,12 @@ export interface MonacoKinkListEditorRef {
   goToLine: (lineNumber: number) => void
 }
 
-const formatValidationMessage = (
-  lineNumber: number,
-  message: string
-): string => {
-  const translatedMessage = i18n.t('editor.validation.lineMessage', {
+const formatValidationMessage = (lineNumber: number, message: string): string =>
+  i18n.t('editor.validation.lineMessage', {
     lineNumber,
     message,
+    defaultValue: `Line ${lineNumber}: ${message}`,
   })
-
-  return translatedMessage === 'editor.validation.lineMessage'
-    ? `Line ${lineNumber}: ${message}`
-    : translatedMessage
-}
 
 const MonacoKinkListEditor = forwardRef<
   MonacoKinkListEditorRef,
@@ -144,21 +137,25 @@ const MonacoKinkListEditor = forwardRef<
       }
 
       contentChangeDisposableRef.current?.dispose()
+      contentChangeDisposableRef.current = null
       if (validationTimeoutRef.current) {
         globalThis.clearTimeout(validationTimeoutRef.current)
         validationTimeoutRef.current = null
       }
+
+      if (!showValidation) {
+        return
+      }
+
       contentChangeDisposableRef.current = editor.onDidChangeModelContent(
         () => {
-          if (showValidation) {
-            if (validationTimeoutRef.current) {
-              globalThis.clearTimeout(validationTimeoutRef.current)
-            }
-            validationTimeoutRef.current = globalThis.setTimeout(() => {
-              validationTimeoutRef.current = null
-              validateContent()
-            }, VALIDATION_DEBOUNCE_MS)
+          if (validationTimeoutRef.current) {
+            globalThis.clearTimeout(validationTimeoutRef.current)
           }
+          validationTimeoutRef.current = globalThis.setTimeout(() => {
+            validationTimeoutRef.current = null
+            validateContent()
+          }, VALIDATION_DEBOUNCE_MS)
         }
       )
     }, [showValidation, validateContent])

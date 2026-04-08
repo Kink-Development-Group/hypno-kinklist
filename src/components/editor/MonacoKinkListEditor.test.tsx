@@ -143,11 +143,11 @@ describe('MonacoKinkListEditor listeners and validation', () => {
     expect(onDidChangeModelContentDisposables[0].dispose).toHaveBeenCalledTimes(
       1
     )
-    expect(onDidChangeModelContentDisposables).toHaveLength(2)
+    expect(onDidChangeModelContentDisposables).toHaveLength(1)
 
     unmount()
 
-    expect(onDidChangeModelContentDisposables[1].dispose).toHaveBeenCalledTimes(
+    expect(onDidChangeModelContentDisposables[0].dispose).toHaveBeenCalledTimes(
       1
     )
   })
@@ -205,15 +205,10 @@ describe('MonacoKinkListEditor listeners and validation', () => {
       ]
 
     expect(contentChangeCallback).toBeDefined()
-    if (!contentChangeCallback) {
-      throw new Error(
-        'Expected Monaco content change callback to be registered'
-      )
-    }
 
     act(() => {
-      contentChangeCallback()
-      contentChangeCallback()
+      contentChangeCallback?.()
+      contentChangeCallback?.()
       vi.advanceTimersByTime(199)
     })
 
@@ -228,6 +223,21 @@ describe('MonacoKinkListEditor listeners and validation', () => {
     expect(validateKinkListSyntaxMock).toHaveBeenCalledTimes(
       initialValidationCalls + 1
     )
+  })
+
+  test('does not attach a content listener when validation is disabled', () => {
+    render(
+      <MonacoKinkListEditor
+        value="content"
+        onChange={vi.fn()}
+        showValidation={false}
+      />
+    )
+
+    expect(onDidChangeModelContentDisposables).toHaveLength(0)
+    expect(
+      mockEditor.onDidChangeModelContent as ReturnType<typeof vi.fn>
+    ).not.toHaveBeenCalled()
   })
 
   test('disposes only models created by the editor on unmount', () => {
