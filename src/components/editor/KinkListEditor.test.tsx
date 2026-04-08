@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react'
 import { act, createRef } from 'react'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import i18n from '../../i18n'
 import KinkListEditor from './KinkListEditor'
 import type { KinkListEditorRef } from './KinkListEditor'
 import {
@@ -15,6 +16,7 @@ let completionProviderDisposable: { dispose: ReturnType<typeof vi.fn> }
 let codeActionProviderDisposable: { dispose: ReturnType<typeof vi.fn> }
 let hoverProviderDisposables: Array<{ dispose: ReturnType<typeof vi.fn> }>
 let contentChangeDisposables: Array<{ dispose: ReturnType<typeof vi.fn> }>
+let contentChangeCallbacks: Array<() => void>
 
 vi.mock('@monaco-editor/react', async () => {
   const React = await import('react')
@@ -53,6 +55,7 @@ describe('KinkListEditor disposables', () => {
     latestEditorProps = null
     hoverProviderDisposables = []
     contentChangeDisposables = []
+    contentChangeCallbacks = []
 
     completionProviderDisposable = { dispose: vi.fn() }
     codeActionProviderDisposable = { dispose: vi.fn() }
@@ -110,12 +113,17 @@ describe('KinkListEditor disposables', () => {
       focus: vi.fn(),
       getValue: vi.fn(() => ''),
       setValue: vi.fn(),
-      onDidChangeModelContent: vi.fn(() => {
+      onDidChangeModelContent: vi.fn((callback: () => void) => {
         const disposable = { dispose: vi.fn() }
+        contentChangeCallbacks.push(callback)
         contentChangeDisposables.push(disposable)
         return disposable
       }),
     }
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   test('disposes editor listeners on remount and all disposables on unmount', () => {
@@ -234,7 +242,10 @@ describe('KinkListEditor disposables', () => {
       ]
     )
     expect(onValidationChange).toHaveBeenCalledWith(false, [
-      'Zeile 2: Kategorie muss einen Namen haben',
+      i18n.t('editor.validation.lineMessage', {
+        lineNumber: 2,
+        message: 'Kategorie muss einen Namen haben',
+      }),
     ])
   })
 
@@ -256,7 +267,53 @@ describe('KinkListEditor disposables', () => {
 
     expect(ref.current?.validate()).toEqual({
       isValid: false,
-      errors: ['Zeile 3: Kink-Eintrag muss einen Namen haben'],
+      errors: [
+        i18n.t('editor.validation.lineMessage', {
+          lineNumber: 3,
+          message: 'Kink-Eintrag muss einen Namen haben',
+        }),
+      ],
     })
+  })
+
+  test('debounces validation on content changes', () => {
+    vi.useFakeTimers()
+    vi.mocked(validateKinkListSyntax).mockReturnValue([])
+
+    render(
+      <KinkListEditor
+        value="content"
+        onChange={vi.fn()}
+        onValidationChange={vi.fn()}
+      />
+    )
+
+    const initialValidationCalls = vi.mocked(validateKinkListSyntax).mock.calls
+      .length
+    const contentChangeCallback =
+      contentChangeCallbacks[contentChangeCallbacks.length - 1]
+
+    expect(contentChangeCallback).toBeDefined()
+    if (!contentChangeCallback) {
+      throw new Error(
+        'Expected Monaco content change callback to be registered'
+      )
+    }
+
+    act(() => {
+      contentChangeCallback()
+      contentChangeCallback()
+      vi.advanceTimersByTime(199)
+    })
+
+    expect(validateKinkListSyntax).toHaveBeenCalledTimes(initialValidationCalls)
+
+    act(() => {
+      vi.advanceTimersByTime(1)
+    })
+
+    expect(validateKinkListSyntax).toHaveBeenCalledTimes(
+      initialValidationCalls + 1
+    )
   })
 })

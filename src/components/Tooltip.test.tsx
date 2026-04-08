@@ -49,22 +49,26 @@ describe('Tooltip', () => {
     vi.useFakeTimers()
     const clearTimeoutSpy = vi.spyOn(window, 'clearTimeout')
 
-    render(
-      <Tooltip content="Tooltip content" delay={100}>
-        <button type="button">Trigger</button>
-      </Tooltip>
-    )
+    try {
+      render(
+        <Tooltip content="Tooltip content" delay={100}>
+          <button type="button">Trigger</button>
+        </Tooltip>
+      )
 
-    const trigger = screen.getByRole('button', { name: 'Trigger' })
-    fireEvent.focusIn(trigger)
+      const trigger = screen.getByRole('button', { name: 'Trigger' })
+      fireEvent.focusIn(trigger)
 
-    act(() => {
-      vi.advanceTimersByTime(100)
-    })
+      act(() => {
+        vi.advanceTimersByTime(100)
+      })
 
-    fireEvent.focusOut(trigger)
+      fireEvent.focusOut(trigger)
 
-    expect(clearTimeoutSpy).not.toHaveBeenCalled()
+      expect(clearTimeoutSpy).not.toHaveBeenCalled()
+    } finally {
+      clearTimeoutSpy.mockRestore()
+    }
   })
 
   test('closes on blur and mouseleave', () => {

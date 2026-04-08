@@ -14,10 +14,26 @@ import {
   registerKinkListThemes,
   validateKinkListSyntax,
 } from './KinkListLanguage'
+import i18n from '../../i18n'
 
 const KINK_LIST_LANGUAGE_ID = 'kinklist'
 const KINK_LIST_LIGHT_THEME = 'kink-list-light'
 const KINK_LIST_DARK_THEME = 'kink-list-dark'
+const VALIDATION_DEBOUNCE_MS = 200
+
+const formatValidationMessage = (
+  lineNumber: number,
+  message: string
+): string => {
+  const translatedMessage = i18n.t('editor.validation.lineMessage', {
+    lineNumber,
+    message,
+  })
+
+  return translatedMessage === 'editor.validation.lineMessage'
+    ? `Line ${lineNumber}: ${message}`
+    : translatedMessage
+}
 
 export interface KinkListEditorProps {
   value: string
@@ -59,6 +75,9 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
     const isInitializedRef = useRef(false)
     const registrationDisposablesRef = useRef<monaco.IDisposable[]>([])
     const editorDisposablesRef = useRef<monaco.IDisposable[]>([])
+    const validationTimeoutRef = useRef<ReturnType<
+      typeof globalThis.setTimeout
+    > | null>(null)
 
     const disposeEditorDisposables = useCallback(() => {
       editorDisposablesRef.current.forEach((disposable) => disposable.dispose())
@@ -119,7 +138,9 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
           .filter(
             (marker) => marker.severity === monacoInstance.MarkerSeverity.Error
           )
-          .map((marker) => `Zeile ${marker.startLineNumber}: ${marker.message}`)
+          .map((marker) =>
+            formatValidationMessage(marker.startLineNumber, marker.message)
+          )
       },
       []
     )
@@ -189,6 +210,17 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
         onValidationChange(errors.length === 0, errors)
       }
     }, [getMarkerErrors, onValidationChange, validateModel])
+
+    const scheduleValidation = useCallback(() => {
+      if (validationTimeoutRef.current) {
+        globalThis.clearTimeout(validationTimeoutRef.current)
+      }
+
+      validationTimeoutRef.current = globalThis.setTimeout(() => {
+        validationTimeoutRef.current = null
+        validateContent()
+      }, VALIDATION_DEBOUNCE_MS)
+    }, [validateContent])
 
     const getTheme = useCallback(() => {
       if (theme === 'dark') {
@@ -394,20 +426,29 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
         // Validate on content change
         editorDisposablesRef.current.push(
           editor.onDidChangeModelContent(() => {
-            validateContent()
+            scheduleValidation()
           })
         )
 
         // Focus the editor
         editor.focus()
       },
-      [disposeEditorDisposables, validateContent, formatEditorValue, getTheme]
+      [
+        disposeEditorDisposables,
+        scheduleValidation,
+        formatEditorValue,
+        getTheme,
+      ]
     )
 
     useEffect(() => {
       return () => {
         disposeEditorDisposables()
         disposeRegistrationDisposables()
+        if (validationTimeoutRef.current) {
+          globalThis.clearTimeout(validationTimeoutRef.current)
+          validationTimeoutRef.current = null
+        }
         isInitializedRef.current = false
       }
     }, [disposeEditorDisposables, disposeRegistrationDisposables])
