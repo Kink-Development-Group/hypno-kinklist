@@ -3,7 +3,10 @@ import { act, createRef } from 'react'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import KinkListEditor from './KinkListEditor'
 import type { KinkListEditorRef } from './KinkListEditor'
-import { registerKinkListLanguage } from './KinkListLanguage'
+import {
+  registerKinkListLanguage,
+  validateKinkListSyntax,
+} from './KinkListLanguage'
 
 let mockEditor: Record<string, unknown>
 let mockMonaco: Record<string, unknown>
@@ -42,6 +45,7 @@ vi.mock('@monaco-editor/react', async () => {
 vi.mock('./KinkListLanguage', () => ({
   registerKinkListLanguage: vi.fn(() => 'kinklist'),
   registerKinkListThemes: vi.fn(),
+  validateKinkListSyntax: vi.fn(() => []),
 }))
 
 describe('KinkListEditor disposables', () => {
@@ -52,6 +56,11 @@ describe('KinkListEditor disposables', () => {
 
     completionProviderDisposable = { dispose: vi.fn() }
     codeActionProviderDisposable = { dispose: vi.fn() }
+
+    const model = {
+      uri: 'model://kinklist',
+      getValue: vi.fn(() => ''),
+    }
 
     mockMonaco = {
       languages: {
@@ -68,7 +77,11 @@ describe('KinkListEditor disposables', () => {
       editor: {
         setTheme: vi.fn(),
         setModelLanguage: vi.fn(),
+        setModelMarkers: vi.fn(),
         tokenize: vi.fn(() => [[]]),
+      },
+      MarkerSeverity: {
+        Error: 8,
       },
       KeyMod: {
         CtrlCmd: 1,
@@ -90,7 +103,7 @@ describe('KinkListEditor disposables', () => {
     }
 
     mockEditor = {
-      getModel: vi.fn(() => ({ uri: 'model://kinklist' })),
+      getModel: vi.fn(() => model),
       updateOptions: vi.fn(),
       addCommand: vi.fn(),
       trigger: vi.fn(),
@@ -141,7 +154,7 @@ describe('KinkListEditor disposables', () => {
       (mockMonaco as any).languages.registerCodeActionProvider
     ).toHaveBeenCalledWith('custom-kinklist', expect.any(Object))
     expect((mockMonaco as any).editor.setModelLanguage).toHaveBeenCalledWith(
-      { uri: 'model://kinklist' },
+      expect.objectContaining({ uri: 'model://kinklist' }),
       'custom-kinklist'
     )
     expect(latestEditorProps?.language).toBe('custom-kinklist')
@@ -185,5 +198,65 @@ describe('KinkListEditor disposables', () => {
 
     expect(onChange).toHaveBeenCalledWith('# Cat')
     expect(mockEditor.setValue).not.toHaveBeenCalled()
+  })
+
+  test('sets Monaco markers and reports validation errors', () => {
+    vi.mocked(validateKinkListSyntax).mockReturnValue([
+      {
+        severity: 8,
+        message: 'Kategorie muss einen Namen haben',
+        startLineNumber: 2,
+        startColumn: 1,
+        endLineNumber: 2,
+        endColumn: 2,
+      },
+    ] as ReturnType<typeof validateKinkListSyntax>)
+
+    const onValidationChange = vi.fn()
+
+    render(
+      <KinkListEditor
+        value="#\n#"
+        onChange={vi.fn()}
+        onValidationChange={onValidationChange}
+      />
+    )
+
+    expect(vi.mocked(validateKinkListSyntax)).toHaveBeenCalled()
+    expect((mockMonaco as any).editor.setModelMarkers).toHaveBeenCalledWith(
+      expect.objectContaining({ uri: 'model://kinklist' }),
+      'kinklist',
+      [
+        expect.objectContaining({
+          message: 'Kategorie muss einen Namen haben',
+          startLineNumber: 2,
+        }),
+      ]
+    )
+    expect(onValidationChange).toHaveBeenCalledWith(false, [
+      'Zeile 2: Kategorie muss einen Namen haben',
+    ])
+  })
+
+  test('imperative validate uses current validator markers', () => {
+    vi.mocked(validateKinkListSyntax).mockReturnValue([
+      {
+        severity: 8,
+        message: 'Kink-Eintrag muss einen Namen haben',
+        startLineNumber: 3,
+        startColumn: 1,
+        endLineNumber: 3,
+        endColumn: 2,
+      },
+    ] as ReturnType<typeof validateKinkListSyntax>)
+
+    const ref = createRef<KinkListEditorRef>()
+
+    render(<KinkListEditor ref={ref} value="# Cat\n()\n*" onChange={vi.fn()} />)
+
+    expect(ref.current?.validate()).toEqual({
+      isValid: false,
+      errors: ['Zeile 3: Kink-Eintrag muss einen Namen haben'],
+    })
   })
 })

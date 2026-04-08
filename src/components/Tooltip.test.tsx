@@ -45,6 +45,28 @@ describe('Tooltip', () => {
     expect(trigger).toHaveAttribute('aria-describedby')
   })
 
+  test('does not clear an already-fired delay timer on hide', () => {
+    vi.useFakeTimers()
+    const clearTimeoutSpy = vi.spyOn(window, 'clearTimeout')
+
+    render(
+      <Tooltip content="Tooltip content" delay={100}>
+        <button type="button">Trigger</button>
+      </Tooltip>
+    )
+
+    const trigger = screen.getByRole('button', { name: 'Trigger' })
+    fireEvent.focusIn(trigger)
+
+    act(() => {
+      vi.advanceTimersByTime(100)
+    })
+
+    fireEvent.focusOut(trigger)
+
+    expect(clearTimeoutSpy).not.toHaveBeenCalled()
+  })
+
   test('closes on blur and mouseleave', () => {
     render(
       <Tooltip content="Tooltip content">

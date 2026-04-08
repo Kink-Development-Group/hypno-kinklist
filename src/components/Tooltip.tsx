@@ -90,7 +90,10 @@ const Tooltip: React.FC<TooltipProps> = ({
       const rect = triggerElement.getBoundingClientRect()
       setTooltipPos(calculateTooltipPosition(rect))
       if (delay > 0) {
-        timeoutRef.current = window.setTimeout(() => setShow(true), delay)
+        timeoutRef.current = window.setTimeout(() => {
+          timeoutRef.current = null
+          setShow(true)
+        }, delay)
       } else {
         setShow(true)
       }

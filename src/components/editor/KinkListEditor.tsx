@@ -12,6 +12,7 @@ import { formatKinkListText, getSnippets } from './EditorUtils'
 import {
   registerKinkListLanguage,
   registerKinkListThemes,
+  validateKinkListSyntax,
 } from './KinkListLanguage'
 
 const KINK_LIST_LANGUAGE_ID = 'kinklist'
@@ -85,6 +86,44 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
       }
     }, [onChange])
 
+    const validateModel = useCallback(() => {
+      const editor = editorRef.current
+      const monacoInstance = monacoRef.current
+
+      if (!editor || !monacoInstance) {
+        return null
+      }
+
+      const model = editor.getModel()
+
+      if (!model) {
+        return null
+      }
+
+      const markers = validateKinkListSyntax(monacoInstance, model.getValue())
+      monacoInstance.editor.setModelMarkers(
+        model,
+        KINK_LIST_LANGUAGE_ID,
+        markers
+      )
+
+      return { markers, monacoInstance }
+    }, [])
+
+    const getMarkerErrors = useCallback(
+      (
+        markers: ReturnType<typeof validateKinkListSyntax>,
+        monacoInstance: Monaco
+      ) => {
+        return markers
+          .filter(
+            (marker) => marker.severity === monacoInstance.MarkerSeverity.Error
+          )
+          .map((marker) => `Zeile ${marker.startLineNumber}: ${marker.message}`)
+      },
+      []
+    )
+
     // Expose methods to parent component
     useImperativeHandle(ref, () => ({
       focus: () => {
@@ -118,56 +157,38 @@ const KinkListEditor = forwardRef<KinkListEditorRef, KinkListEditorProps>(
         return ''
       },
       validate: () => {
-        const editor = editorRef.current
-        const monacoInstance = monacoRef.current
+        const validation = validateModel()
 
-        if (editor && monacoInstance) {
-          const model = editor.getModel()
-          if (model) {
-            const markers = monacoInstance.editor.getModelMarkers({
-              resource: model.uri,
-            })
-            const errors = markers
-              .filter(
-                (marker) =>
-                  marker.severity === monacoInstance.MarkerSeverity.Error
-              )
-              .map(
-                (marker) => `Zeile ${marker.startLineNumber}: ${marker.message}`
-              )
+        if (validation) {
+          const errors = getMarkerErrors(
+            validation.markers,
+            validation.monacoInstance
+          )
 
-            return {
-              isValid: errors.length === 0,
-              errors,
-            }
+          return {
+            isValid: errors.length === 0,
+            errors,
           }
         }
         return { isValid: true, errors: [] }
       },
     })) // Validate content and report errors
     const validateContent = useCallback(() => {
-      const editor = editorRef.current
-      const monacoInstance = monacoRef.current
-
-      if (editor && monacoInstance && onValidationChange) {
-        const model = editor.getModel()
-        if (model) {
-          const markers = monacoInstance.editor.getModelMarkers({
-            resource: model.uri,
-          })
-          const errors = markers
-            .filter(
-              (marker) =>
-                marker.severity === monacoInstance.MarkerSeverity.Error
-            )
-            .map(
-              (marker) => `Zeile ${marker.startLineNumber}: ${marker.message}`
-            )
-
-          onValidationChange(errors.length === 0, errors)
-        }
+      if (!onValidationChange) {
+        return
       }
-    }, [onValidationChange])
+
+      const validation = validateModel()
+
+      if (validation) {
+        const errors = getMarkerErrors(
+          validation.markers,
+          validation.monacoInstance
+        )
+
+        onValidationChange(errors.length === 0, errors)
+      }
+    }, [getMarkerErrors, onValidationChange, validateModel])
 
     const getTheme = useCallback(() => {
       if (theme === 'dark') {
