@@ -26,7 +26,18 @@ const formatValidationMessage = (
   message: string
 ): string => {
   if (!i18n.exists('editor.validation.lineMessage')) {
-    return `Line ${lineNumber}: ${message}`
+    const fallbackLabelByLanguage: Record<string, string> = {
+      de: 'Zeile',
+      en: 'Line',
+      sv: 'Rad',
+    }
+    const baseLanguage = (i18n.resolvedLanguage ?? i18n.language ?? 'en').split(
+      '-'
+    )[0]
+    const fallbackLabel =
+      fallbackLabelByLanguage[baseLanguage] ?? fallbackLabelByLanguage.en
+
+    return `${fallbackLabel} ${lineNumber}: ${message}`
   }
 
   return i18n.t('editor.validation.lineMessage', {

@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react'
 import { act, createRef } from 'react'
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 import i18n from '../../i18n'
 import KinkListEditor from './KinkListEditor'
 import type { KinkListEditorRef } from './KinkListEditor'
@@ -120,10 +120,6 @@ describe('KinkListEditor disposables', () => {
         return disposable
       }),
     }
-  })
-
-  afterEach(() => {
-    vi.useRealTimers()
   })
 
   test('disposes editor listeners on remount and all disposables on unmount', () => {
@@ -280,35 +276,41 @@ describe('KinkListEditor disposables', () => {
     vi.useFakeTimers()
     vi.mocked(validateKinkListSyntax).mockReturnValue([])
 
-    render(
-      <KinkListEditor
-        value="content"
-        onChange={vi.fn()}
-        onValidationChange={vi.fn()}
-      />
-    )
+    try {
+      render(
+        <KinkListEditor
+          value="content"
+          onChange={vi.fn()}
+          onValidationChange={vi.fn()}
+        />
+      )
 
-    const initialValidationCalls = vi.mocked(validateKinkListSyntax).mock.calls
-      .length
-    const contentChangeCallback =
-      contentChangeCallbacks[contentChangeCallbacks.length - 1]
+      const initialValidationCalls = vi.mocked(validateKinkListSyntax).mock
+        .calls.length
+      const contentChangeCallback =
+        contentChangeCallbacks[contentChangeCallbacks.length - 1]
 
-    expect(contentChangeCallback).toBeDefined()
+      expect(contentChangeCallback).toBeDefined()
 
-    act(() => {
-      contentChangeCallback?.()
-      contentChangeCallback?.()
-      vi.advanceTimersByTime(199)
-    })
+      act(() => {
+        contentChangeCallback?.()
+        contentChangeCallback?.()
+        vi.advanceTimersByTime(199)
+      })
 
-    expect(validateKinkListSyntax).toHaveBeenCalledTimes(initialValidationCalls)
+      expect(validateKinkListSyntax).toHaveBeenCalledTimes(
+        initialValidationCalls
+      )
 
-    act(() => {
-      vi.advanceTimersByTime(1)
-    })
+      act(() => {
+        vi.advanceTimersByTime(1)
+      })
 
-    expect(validateKinkListSyntax).toHaveBeenCalledTimes(
-      initialValidationCalls + 1
-    )
+      expect(validateKinkListSyntax).toHaveBeenCalledTimes(
+        initialValidationCalls + 1
+      )
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })
