@@ -12,7 +12,7 @@ const hasUsableStableIds = (
 const backfillStableId = (
   existingId: Selection['categoryId'],
   stableId: Selection['categoryId']
-) => existingId || stableId
+) => (existingId === undefined || existingId === '' ? stableId : existingId)
 
 interface ChoiceProps {
   field: string
