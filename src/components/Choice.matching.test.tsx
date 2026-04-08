@@ -328,4 +328,52 @@ describe('Choice stable ID matching', () => {
     expect(notEnteredButton).toHaveAttribute('tabindex', '0')
     expect(favoriteButton).toHaveAttribute('aria-checked', 'false')
   })
+
+  test('falls back safely when stable ID lookup returns undefined', () => {
+    const setSelection = vi.fn()
+    const selection: Selection[] = [
+      {
+        category: 'Category',
+        kink: 'Kink',
+        field: 'Field',
+        value: 'NotEntered',
+        showField: false,
+      },
+    ]
+
+    mockGetStableIdsFromOriginal.mockImplementation(
+      () => undefined as unknown as ReturnType<typeof getStableIdsFromOriginal>
+    )
+
+    mockUseKinklist.mockReturnValue(
+      createMockKinklistContext({
+        levels,
+        selection,
+        setSelection,
+        enhancedKinks: {},
+      })
+    )
+
+    render(
+      <Choice
+        field="Field"
+        categoryName="Category"
+        kinkName="Kink"
+        showField={false}
+      />
+    )
+
+    fireEvent.click(screen.getByRole('radio', { name: /favorite/i }))
+
+    const selectionUpdater = vi.mocked(setSelection).mock.calls[0][0] as (
+      currentSelection: Selection[]
+    ) => Selection[]
+
+    expect(selectionUpdater(selection)).toEqual([
+      {
+        ...selection[0],
+        value: 'Favorite',
+      },
+    ])
+  })
 })

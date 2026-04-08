@@ -382,4 +382,35 @@ describe('KinkRow comment selection matching', () => {
       'true'
     )
   })
+
+  test('uses trimmed comment metadata consistently for whitespace-only comments', () => {
+    mockUseKinklist.mockReturnValue(
+      createMockKinklistContext({
+        selection: [
+          {
+            category: 'Category',
+            kink: 'Kink',
+            field: 'Field',
+            value: 'NotEntered',
+            showField: false,
+            comment: '   ',
+          },
+        ],
+        enhancedKinks: null,
+      })
+    )
+
+    render(
+      <table>
+        <tbody>
+          <KinkRow categoryName="Category" kinkName="Kink" fields={['Field']} />
+        </tbody>
+      </table>
+    )
+
+    const commentButton = screen.getByRole('button')
+
+    expect(commentButton).toHaveAttribute('data-has-comment', 'false')
+    expect(commentButton).toHaveAttribute('data-comment-length', '0')
+  })
 })

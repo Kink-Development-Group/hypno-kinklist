@@ -136,14 +136,15 @@ const KinkRow: React.FC<KinkRowProps> = ({
               matchesSelection(s, field)
             )
 
-            const trimmedComment = kinkSelection?.comment?.trim()
+            const normalizedComment = kinkSelection?.comment?.trim() ?? ''
+            const hasComment = normalizedComment.length > 0
 
-            return trimmedComment ? (
-              <Tooltip key={`tooltip-${field}`} content={trimmedComment}>
+            return hasComment ? (
+              <Tooltip key={`tooltip-${field}`} content={normalizedComment}>
                 <button
                   className={`comment-button-base comment-button-small has-comment`}
                   data-has-comment="true"
-                  data-comment-length={trimmedComment.length}
+                  data-comment-length={normalizedComment.length}
                   onClick={() => handleOpenComment(field)}
                   aria-label={t('comments.forField', {
                     kinkName,
@@ -169,7 +170,7 @@ const KinkRow: React.FC<KinkRowProps> = ({
                 key={`comment-${field}`}
                 className="comment-button-base comment-button-small"
                 data-has-comment="false"
-                data-comment-length={kinkSelection?.comment?.length || 0}
+                data-comment-length={normalizedComment.length}
                 onClick={() => handleOpenComment(field)}
                 aria-label={t('comments.forField', {
                   kinkName,

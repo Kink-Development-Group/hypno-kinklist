@@ -25,7 +25,8 @@ const Choice: React.FC<ChoiceProps> = ({
   // Get stable IDs for consistent matching across languages
   const stableIds = useMemo(
     () =>
-      getStableIdsFromOriginal(enhancedKinks, categoryName, kinkName, field),
+      getStableIdsFromOriginal(enhancedKinks, categoryName, kinkName, field) ??
+      {},
     [categoryName, enhancedKinks, field, kinkName]
   )
   const hasStableIds = hasUsableStableIds(stableIds)

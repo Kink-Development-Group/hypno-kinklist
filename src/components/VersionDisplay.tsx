@@ -8,7 +8,13 @@ const VersionDisplay: React.FC = () => {
   const version = getAppVersion()
   return (
     <Tooltip content={t('app.version')}>
-      <span className="version-display">v{version}</span>
+      <span
+        className="version-display"
+        tabIndex={0}
+        aria-label={t('app.version')}
+      >
+        v{version}
+      </span>
     </Tooltip>
   )
 }
