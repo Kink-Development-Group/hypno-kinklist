@@ -294,15 +294,10 @@ describe('KinkListEditor disposables', () => {
       contentChangeCallbacks[contentChangeCallbacks.length - 1]
 
     expect(contentChangeCallback).toBeDefined()
-    if (!contentChangeCallback) {
-      throw new Error(
-        'Expected Monaco content change callback to be registered'
-      )
-    }
 
     act(() => {
-      contentChangeCallback()
-      contentChangeCallback()
+      contentChangeCallback?.()
+      contentChangeCallback?.()
       vi.advanceTimersByTime(199)
     })
 
