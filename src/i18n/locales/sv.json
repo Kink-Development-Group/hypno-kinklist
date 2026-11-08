@@ -464,5 +464,8 @@
   "utils": {
     "commentEncodeError": "Fel vid kodning av kommentarer:",
     "commentDecodeError": "Fel vid avkodning av kommentarer:"
+  },
+  "keys": {
+    "ctrl": "Ctrl"
   }
 }

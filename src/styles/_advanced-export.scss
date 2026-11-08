@@ -58,9 +58,9 @@
       }
     }
 
-    &:focus {
-      outline: none;
-      box-shadow: 0 0 0 2px rgba(73, 128, 174, 0.3);
+    &:focus-visible {
+      outline: 2px solid var(--button-bg-color);
+      outline-offset: 2px;
     }
 
     &:disabled {
@@ -97,12 +97,15 @@
 /* Responsive Design */
 @media (max-width: 600px) {
   .export-button-container {
-    flex-direction: column;
+    width: 100%;
+    flex-wrap: nowrap;
+    gap: 12px;
+    padding: 12px 10px;
 
     .export-action-button,
     .import-action-button {
-      width: 100%;
-      min-width: unset;
+      flex: 1;
+      min-width: 0;
     }
   }
 }

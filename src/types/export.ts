@@ -41,14 +41,7 @@ export interface ExportOptions {
 }
 
 export type ExportFormat =
-  | 'PNG'
-  | 'PDF'
-  | 'JPEG'
-  | 'WebP'
-  | 'SVG'
-  | 'JSON'
-  | 'XML'
-  | 'CSV'
+  'PNG' | 'PDF' | 'JPEG' | 'WebP' | 'SVG' | 'JSON' | 'XML' | 'CSV'
 
 export type ExportMode = 'quick' | 'advanced'
 

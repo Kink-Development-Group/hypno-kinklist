@@ -158,7 +158,7 @@ const EditOverlay: React.FC = () => {
       }
 
       // Ctrl+Enter to accept changes
-      if (e.key === 'Enter' && e.ctrlKey) {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
         handleAccept()
       }
     },

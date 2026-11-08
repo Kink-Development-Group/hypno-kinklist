@@ -464,5 +464,8 @@
   "utils": {
     "commentEncodeError": "Error encoding comments:",
     "commentDecodeError": "Error decoding comments:"
+  },
+  "keys": {
+    "ctrl": "Ctrl"
   }
 }

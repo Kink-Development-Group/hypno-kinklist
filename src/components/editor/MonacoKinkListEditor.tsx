@@ -10,6 +10,7 @@ import {
   useState,
 } from 'react'
 import { formatKinkListText } from './EditorUtils'
+import './monacoSetup'
 import {
   registerKinkListLanguage,
   registerKinkListThemes,
