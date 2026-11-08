@@ -57,8 +57,7 @@ const Tooltip: React.FC<TooltipProps> = ({
     return (
       (element.props.ref as Ref<HTMLElement> | undefined) ??
       ((element as ReactElement & { ref?: Ref<HTMLElement> }).ref as
-        | Ref<HTMLElement>
-        | undefined)
+        Ref<HTMLElement> | undefined)
     )
   }
 

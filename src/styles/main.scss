@@ -865,10 +865,18 @@ table {
   }
 
   @media (max-width: 480px) {
-    justify-content: flex-start;
-    overflow-x: auto;
-    flex-wrap: nowrap;
+    justify-content: center;
+    flex-wrap: wrap;
     padding: 8px;
+
+    .legend-title {
+      width: 100%;
+      margin-bottom: 4px;
+    }
+
+    .legend-item {
+      margin: 3px 6px;
+    }
 
     &::-webkit-scrollbar {
       height: 4px;
@@ -2047,5 +2055,30 @@ html {
     .footer-link {
       margin: 0;
     }
+  }
+}
+
+// Visible keyboard focus for interactive elements (overrides older outline: none rules)
+button,
+a,
+select,
+input,
+textarea:not(.inputarea),
+[role='button'],
+[tabindex]:not([tabindex='-1']):not(.monaco-editor *) {
+  &:focus-visible {
+    outline: 2px solid var(--button-bg-color) !important;
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

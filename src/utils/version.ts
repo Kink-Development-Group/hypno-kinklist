@@ -1,9 +1,5 @@
-// Version direkt aus package.json importieren (funktioniert mit Vite, nicht mit Create React App)
-// Achtung: Der Importpfad kann je nach Build-Tool variieren
-// Bei Vite: "resolve.alias" in vite.config.ts ggf. anpassen
-import pkg from '../../package.json'
-
-export const APP_VERSION = pkg.version as string
+// Injected at build time from package.json (see vite.config.ts)
+export const APP_VERSION: string = __APP_VERSION__
 
 export function getAppVersion(): string {
   return APP_VERSION

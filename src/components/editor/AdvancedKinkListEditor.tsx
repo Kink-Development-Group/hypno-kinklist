@@ -122,8 +122,8 @@ const AdvancedKinkListEditor = forwardRef<
     // Tastaturkürzel für Speichern und andere Aktionen
     const handleKeyDown = useCallback(
       (e: KeyboardEvent) => {
-        // Strg+Enter zum Speichern
-        if (e.ctrlKey && e.key === 'Enter' && onSave) {
+        // Ctrl/Cmd+Enter saves
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && onSave) {
           e.preventDefault()
           onSave(value)
         }

@@ -218,8 +218,8 @@ const CommentOverlay: React.FC = () => {
 
         <div className="comment-shortcuts">
           <small>
-            <kbd>Esc</kbd> {t('comments.toClose')} • <kbd>Strg</kbd>+
-            <kbd>Enter</kbd> {t('comments.toSave')}
+            <kbd>Esc</kbd> {t('comments.toClose')} • <kbd>{t('keys.ctrl')}</kbd>
+            +<kbd>Enter</kbd> {t('comments.toSave')}
           </small>
         </div>
       </div>
