@@ -37,19 +37,25 @@ Export supports the app's image and document/data flows, including formats used 
 
 ## Live
 
-The app is published at **https://kinklist.hypno-kink.org** via GitHub Pages.
-Every push to `main` runs formatting, lint, tests and build, and then deploys
-`dist/` automatically (`.github/workflows/deploy.yml`).
+The app is published at **https://kinklist.hypno-kink.org**.
 
-### One-time hosting setup
+Deployment runs through GitHub Actions and FTPS:
 
-1. **GitHub:** _Settings → Pages → Build and deployment → Source:_ **GitHub Actions**.
-2. **DNS** (at the provider for `hypno-kink.org`): add a record
-   `kinklist  CNAME  kink-development-group.github.io.`
-3. **GitHub:** _Settings → Pages → Custom domain:_ `kinklist.hypno-kink.org`, wait
-   for the DNS check, then enable **Enforce HTTPS**.
+| Branch | Workflow                            | Server folder        |
+| ------ | ----------------------------------- | -------------------- |
+| `main` | `.github/workflows/deploy-prod.yml` | `kinklist_hypno`     |
+| `dev`  | `.github/workflows/deploy-dev.yml`  | `kinklist_hypno_dev` |
 
-The custom domain is also stored in `public/CNAME`, so it survives every deploy.
+Each run checks formatting, lint, tests and build (`bun run check`) and then
+mirrors `dist/` to the server. Both workflows can also be started manually
+(_Actions → Run workflow_).
+
+Required secrets (repository environments `Prod` / `Dev`): `FTP_HOST`,
+`FTP_USER_PROD`, `FTP_PASS_PROD`, `FTP_USER_DEV`, `FTP_PASS_DEV`.
+
+For the domain to work, the subdomain `kinklist.hypno-kink.org` must point to
+the `kinklist_hypno` folder in the hosting panel (document root), with DNS for
+`kinklist` pointing to the web server and a TLS certificate issued for it.
 
 ## Development
 
