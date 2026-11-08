@@ -37,7 +37,7 @@ Export supports the app's image and document/data flows, including formats used 
 
 ## Live
 
-The app is published at **https://kink.hypno-kink.org** via GitHub Pages.
+The app is published at **https://kinklist.hypno-kink.org** via GitHub Pages.
 Every push to `main` runs formatting, lint, tests and build, and then deploys
 `dist/` automatically (`.github/workflows/deploy.yml`).
 
@@ -45,8 +45,8 @@ Every push to `main` runs formatting, lint, tests and build, and then deploys
 
 1. **GitHub:** _Settings → Pages → Build and deployment → Source:_ **GitHub Actions**.
 2. **DNS** (at the provider for `hypno-kink.org`): add a record
-   `kink  CNAME  kink-development-group.github.io.`
-3. **GitHub:** _Settings → Pages → Custom domain:_ `kink.hypno-kink.org`, wait
+   `kinklist  CNAME  kink-development-group.github.io.`
+3. **GitHub:** _Settings → Pages → Custom domain:_ `kinklist.hypno-kink.org`, wait
    for the DNS check, then enable **Enforce HTTPS**.
 
 The custom domain is also stored in `public/CNAME`, so it survives every deploy.

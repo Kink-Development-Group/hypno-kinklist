@@ -1,6 +1,6 @@
 name: Deploy to GitHub Pages
 
-# Publishes the app to https://kink.hypno-kink.org on every push to main.
+# Publishes the app to https://kinklist.hypno-kink.org on every push to main.
 on:
   push:
     branches:
