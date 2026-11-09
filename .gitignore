@@ -37,5 +37,4 @@ dist-ssr
 *.sln
 *.sw?
 
-tsconfig.node.tsbuildinfo
-tsconfig.tsbuildinfo
+*.tsbuildinfo

@@ -35,56 +35,65 @@ Modern React/Vite rewrite of the classic kinklist workflow with multilingual tem
 
 Export supports the app's image and document/data flows, including formats used by the advanced export modal. Import supports the structured formats implemented in the app (`JSON`, `XML`, `CSV`).
 
+## Live
+
+The app is published at **https://kinklist.hypno-kink.org**.
+
+Deployment runs through GitHub Actions and FTPS:
+
+| Branch | Workflow                            | Server folder        |
+| ------ | ----------------------------------- | -------------------- |
+| `main` | `.github/workflows/deploy-prod.yml` | `kinklist_hypno`     |
+| `dev`  | `.github/workflows/deploy-dev.yml`  | `kinklist_hypno_dev` |
+
+Each run checks formatting, lint, tests and build (`bun run check`) and then
+mirrors `dist/` to the server. Both workflows can also be started manually
+(_Actions → Run workflow_).
+
+Required secrets (repository environments `Prod` / `Dev`): `FTP_HOST`,
+`FTP_USER_PROD`, `FTP_PASS_PROD`, `FTP_USER_DEV`, `FTP_PASS_DEV`.
+
+For the domain to work, the subdomain `kinklist.hypno-kink.org` must point to
+the `kinklist_hypno` folder in the hosting panel (document root), with DNS for
+`kinklist` pointing to the web server and a TLS certificate issued for it.
+
 ## Development
 
 ### Prerequisites
 
-- Node.js 20+ recommended
-- npm works out of the box
-- Bun can also be used (`packageManager` is set to `bun@1.3.11`)
+- [Bun](https://bun.sh) (version pinned in `package.json` / `mise.toml`)
+- Node.js 20+ (used by some tooling)
 
-### Install
-
-```bash
-npm install
-```
-
-### Start the dev server
+### Install and run
 
 ```bash
-npm run dev
+bun install
+bun run dev
 ```
-
-The workspace also exposes `npm start`, which points to the same Vite dev server.
 
 ### Quality checks
 
 ```bash
-npm run test -- --run
-npm run lint
-npm run build
+bun run check   # format check + lint + tests + production build
 ```
 
 ## Available scripts
 
-- `npm run dev` - start Vite in development mode
-- `npm start` - alias for the dev server
-- `npm run build` - type-check and build the production bundle
-- `npm run preview` - preview the production build locally
-- `npm run test` - run Vitest
-- `npm run test:ui` - open the Vitest UI
-- `npm run test:coverage` - run tests with coverage
-- `npm run lint` - run ESLint + Prettier checks
-- `npm run lint:fix` - apply automatic lint fixes
-- `npm run format` - format source files with Prettier
-- `npm run format:check` - verify formatting without changing files
+- `bun run dev` / `bun start` - start the Vite dev server
+- `bun run build` - type-check and build the production bundle into `dist/`
+- `bun run preview` - serve the production build locally
+- `bun run test` - run Vitest (`--run` for a single pass)
+- `bun run test:coverage` - run tests with coverage
+- `bun run lint` / `bun run lint:fix` - ESLint + Prettier checks
+- `bun run format` / `bun run format:check` - format or verify formatting
+- `bun run check` - everything CI runs before a deploy
 
 ## Project structure
 
 - `src/App.tsx` - app shell, providers and lazy-loaded overlays
 - `src/context/KinklistContext.tsx` - central kinklist state, hash sync and local draft persistence
 - `src/components/` - UI building blocks, overlays, import/export dialogs and editor integration
-- `src/components/editor/` - advanced template editor and Monaco/Codemirror helpers
+- `src/components/editor/` - advanced template editor and Monaco helpers (Monaco is bundled locally, no CDN)
 - `src/utils/` - parsing, hash encoding, export helpers, template loading and browser persistence utilities
 - `src/i18n/` - translation resources and i18next setup
 - `public/defaultList/kinks.klist` - public default template loaded at runtime
@@ -102,17 +111,9 @@ The parser supports these primary prefixes:
 
 If the loaded default template does not contain multilingual content, the app automatically switches to the built-in enhanced template.
 
-## Recent implementation updates
-
-- added local draft persistence with safe restore semantics
-- replaced generic `alert()`-based error reporting with a reusable app-level modal flow
-- split heavy overlays and modal dialogs into lazy-loaded chunks
-- cleaned up noisy debug logging in the main runtime paths
-- refreshed test setup to initialize i18n consistently
-- rebuilt this README to match the current Vite-based architecture and feature set
-
 ## Notes
 
 - URL hash state remains the source of truth when a shared link is opened.
 - Local draft persistence is meant as a convenience feature for the same browser/device.
-- The production build may still show plugin timing hints from the bundler, but the heavy UI chunks are now split out of the initial load.
+- Heavy parts (editor, export/import dialogs, PDF export) are lazy-loaded and only downloaded when used.
+- Ratings never leave the browser: state lives in the URL hash and in `localStorage`; no external requests are made.

@@ -288,9 +288,9 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
 
       <div className="toolbar-shortcuts">
         <small>
-          {t('editor.shortcuts.description')} <kbd>Strg+K</kbd>{' '}
+          {t('editor.shortcuts.description')} <kbd>{t('keys.ctrl')}+Space</kbd>{' '}
           {t('editor.shortcuts.autocomplete')}, <kbd>Alt+Shift+F</kbd>{' '}
-          {t('editor.shortcuts.format')}, <kbd>Strg+Enter</kbd>{' '}
+          {t('editor.shortcuts.format')}, <kbd>{t('keys.ctrl')}+Enter</kbd>{' '}
           {t('editor.shortcuts.save')}, <kbd>Esc</kbd>{' '}
           {t('editor.shortcuts.close')}
         </small>

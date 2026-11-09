@@ -464,5 +464,8 @@
   "utils": {
     "commentEncodeError": "Fehler beim Kodieren der Kommentare:",
     "commentDecodeError": "Fehler beim Dekodieren der Kommentare:"
+  },
+  "keys": {
+    "ctrl": "Strg"
   }
 }

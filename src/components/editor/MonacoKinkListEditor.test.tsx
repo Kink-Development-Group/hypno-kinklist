@@ -16,13 +16,14 @@ let onDidChangeModelContentDisposables: Array<{
 }>
 let onDidChangeModelContentCallbacks: Array<() => void>
 
+vi.mock('./monacoSetup', () => ({}))
+
 vi.mock('@monaco-editor/react', async () => {
   const React = await import('react')
 
   const MockEditor = (props: Record<string, unknown>) => {
     const onMount = props.onMount as
-      | ((editor: unknown, monaco: unknown) => void)
-      | undefined
+      ((editor: unknown, monaco: unknown) => void) | undefined
 
     React.useEffect(() => {
       onMount?.(mockEditor, mockMonaco)
