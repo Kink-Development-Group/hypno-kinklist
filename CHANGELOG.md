@@ -4,6 +4,17 @@ All notable changes to this project are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.2.1] - 2026-11-12
+
+### Fixed
+
+- Deployment uploaded every build one folder too deep
+  (`kinklist_hypno/kinklist_hypno/`). The FTP accounts already start in
+  their web root, so the build is now uploaded straight into it. The
+  misplaced nested folder is removed on the next deploy, and
+  `.well-known/`, `.htaccess`, `.user.ini` and `cgi-bin/` on the server
+  are never deleted.
+
 ## [1.2.0] - 2026-11-09
 
 Live at https://kinklist.hypno-kink.org
@@ -52,4 +63,5 @@ Live at https://kinklist.hypno-kink.org
   `src/logo.svg`, Create React App leftovers and the manual FTP helper
   scripts in `scripts/`.
 
+[1.2.1]: https://github.com/Kink-Development-Group/hypno-kinklist/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/Kink-Development-Group/hypno-kinklist/compare/eedb000...v1.2.0
