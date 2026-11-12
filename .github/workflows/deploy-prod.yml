@@ -68,11 +68,15 @@ jobs:
           set net:max-retries 3
           set cmd:fail-exit yes
           open -u "$FTP_USER_PROD","$FTP_PASS_PROD" ftp://$FTP_HOST:21
-          set cmd:fail-exit no
-          mkdir kinklist_hypno
-          set cmd:fail-exit yes
-          cd kinklist_hypno
-          mirror -R --delete --verbose ./dist/ .
+          # The FTP account's login folder is already the web root (kinklist_hypno),
+          # so upload straight into it. Server-managed files are excluded so
+          # --delete never removes them.
+          mirror -R --delete --verbose \
+            --exclude-glob .well-known/ \
+            --exclude-glob .htaccess \
+            --exclude-glob .user.ini \
+            --exclude-glob cgi-bin/ \
+            ./dist/ .
           bye
           EOF
           lftp -f deploy_ftps.lftp
